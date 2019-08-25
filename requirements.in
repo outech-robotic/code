@@ -1,0 +1,12 @@
+uvloop # Faster async event loop.
+numpy
+structlog # Better logging.
+pygame # Display animation.
+
+mypy # Static typing for python.
+pylint # Lint the code.
+
+pytest # For testing.
+pytest-asyncio # Necessary to test async functions.
+
+
