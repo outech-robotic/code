@@ -8,5 +8,6 @@ pylint # Lint the code.
 
 pytest # For testing.
 pytest-asyncio # Necessary to test async functions.
+pytest-cov # For coverage report.
 
 
