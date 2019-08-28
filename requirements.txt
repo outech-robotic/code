@@ -32,4 +32,5 @@ typing-extensions==3.7.4  # via mypy
 uvloop==0.13.0
 wcwidth==0.1.7            # via pytest
 wrapt==1.11.2             # via astroid
+yapf==0.28.0
 zipp==0.5.2               # via importlib-metadata
