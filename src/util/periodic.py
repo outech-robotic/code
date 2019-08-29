@@ -19,10 +19,10 @@ class PeriodicCallbackParams:
     args: list  # Arguments of the functions to be passed.
 
 
-def _callback(loop, params: PeriodicCallbackParams, count: int = 1):
+def _cb(loop, params: PeriodicCallbackParams, count: int = 1):
     if not params.func(count, *params.args):
-        loop.call_at(params.start_time + count * params.interval, _callback,
-                     loop, params, count + 1)
+        loop.call_at(params.start_time + count * params.interval, _cb, loop,
+                     params, count + 1)
 
 
 def periodic_callback(func: Callable, interval: Second, *args):
@@ -36,4 +36,4 @@ def periodic_callback(func: Callable, interval: Second, *args):
         interval=interval,
         args=[*args],
     )
-    loop.call_soon(_callback, loop, params)
+    loop.call_soon(_cb, loop, params)
