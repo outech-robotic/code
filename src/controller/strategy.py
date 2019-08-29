@@ -17,7 +17,7 @@ class StrategyController:
     def __init__(self, motion_controller: MotionController):
         self.motion_controller = motion_controller
 
-    async def run(self):
+    async def run(self) -> None:
         """
         Run the strategy.
         """

@@ -10,7 +10,7 @@ class Vector2:
     """
     Vector in 2 dimensions.
     """
-    def __init__(self, vec_x, vec_y):
+    def __init__(self, vec_x: float, vec_y: float):
         self._v = numpy.array([vec_x, vec_y])
 
     @property
@@ -51,13 +51,13 @@ class Vector2:
     def __neg__(self):
         return self * (-1)
 
-    def dot(self, vec):
+    def dot(self, vec) -> float:
         """
         Return the dot product of 2 vectors.
         """
         return numpy.dot(self._v, _to_array(vec))
 
-    def norm(self):
+    def norm(self) -> float:
         """
         Return the norm2 of the vector.
         """

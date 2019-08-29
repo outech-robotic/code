@@ -43,7 +43,7 @@ class Simulation(MotionGateway):
         self.motion_handler = motion_handler
         self.distance_sensor_handler = distance_sensor_handler
 
-    def _feedback_loop(self, _):
+    def _feedback_loop(self, _) -> None:
         """
         Call the handlers of the robot to notify any change in the environment.
         """
@@ -103,7 +103,7 @@ class Simulation(MotionGateway):
 
         periodic_callback(func, 1 / FPS, self)
 
-    async def run(self):
+    async def run(self) -> None:
         """
         Run the simulation.
         """

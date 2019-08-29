@@ -16,7 +16,7 @@ class LocalizationRepository:
     odometry_position_drift: Vector2 = Vector2(0, 0)
     odometry_direction_drift: float = 0
 
-    def __init__(self):
+    def __init__(self) -> None:
         super()
         # The event needs the event loop to be set up when created.
         self.movement_done_event = asyncio.Event()

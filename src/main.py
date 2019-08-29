@@ -24,7 +24,7 @@ CONFIG = Configuration(
 )
 
 
-async def main():
+async def main() -> None:
     """
     Main function.
     """
