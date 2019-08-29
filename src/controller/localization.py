@@ -1,18 +1,18 @@
 """
 Localization controller module.
 """
-import math
 
 from src.entity.configuration import Configuration
 from src.entity.type import Radian, Millimeter, Direction
 from src.entity.vector import Vector2
 from src.repository.localization import LocalizationRepository
+from src.util import geometry
 
-DIRECTION_ANGLE = {
-    Direction.FORWARD: 0,
-    Direction.LEFT: -math.pi / 2,
-    Direction.BACKWARD: math.pi,
-    Direction.RIGHT: math.pi / 2,
+DIRECTION_FUNCTION = {
+    Direction.FORWARD: geometry.forward,
+    Direction.LEFT: geometry.left,
+    Direction.BACKWARD: geometry.backward,
+    Direction.RIGHT: geometry.right,
 }
 
 
@@ -41,12 +41,10 @@ class LocalizationController:
         """"
         Get the robot's direction.
         """
-        angle = self.localization_repository.odometry_direction
         drift = self.localization_repository.odometry_direction_drift
-        return Vector2(
-            math.cos(angle + drift + DIRECTION_ANGLE[direction]),
-            math.sin(angle + drift + DIRECTION_ANGLE[direction]),
-        )
+        angle = self.localization_repository.odometry_direction
+        get_direction_from_angle = DIRECTION_FUNCTION[direction]
+        return get_direction_from_angle(angle + drift)
 
     def get_position(self) -> Vector2:
         """"
