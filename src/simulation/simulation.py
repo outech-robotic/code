@@ -1,6 +1,7 @@
 """
 Simulation module.
 """
+import asyncio
 import math
 
 import structlog
@@ -43,7 +44,7 @@ class Simulation(MotionGateway):
         self.motion_handler = motion_handler
         self.distance_sensor_handler = distance_sensor_handler
 
-    def _feedback_loop(self, _) -> None:
+    def _feedback_loop(self) -> None:
         """
         Call the handlers of the robot to notify any change in the environment.
         """
@@ -107,4 +108,6 @@ class Simulation(MotionGateway):
         """
         Run the simulation.
         """
-        periodic_callback(self._feedback_loop, 1 / 10)
+        while True:
+            self._feedback_loop()
+            await asyncio.sleep(0.1)
