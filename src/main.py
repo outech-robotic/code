@@ -5,6 +5,7 @@ import asyncio
 
 import numpy
 import uvloop
+
 from src.controller.localization import LocalizationController
 from src.controller.map import MapController
 from src.controller.motion import MotionController
@@ -19,8 +20,10 @@ from src.simulation.animation import Animation
 from src.simulation.simulation import Simulation
 
 CONFIG = Configuration(
-    initial_position=Vector2(150, 100),
+    initial_position=Vector2(1500, 1000),
     initial_direction=0,
+    robot_width=330,
+    robot_length=330,
 )
 
 
@@ -62,7 +65,7 @@ async def main() -> None:
     animation = Animation(simulation, localization_controller, map_controller)
 
     strategy_controller = StrategyController(
-        motion_controller=motion_controller, )
+        motion_controller=motion_controller)
 
     loop = asyncio.get_event_loop()
 

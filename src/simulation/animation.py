@@ -18,7 +18,7 @@ from src.util.geometry import ray_segments_intersection, forward, backward, left
 MARGIN = 15
 
 WIDTH = 1000
-HEIGHT = WIDTH * 200 // 300
+HEIGHT = WIDTH * 2000 // 3000
 
 FPS = 60
 
@@ -38,14 +38,14 @@ def x(x_pos: float) -> int:  # Allow single character name. pylint: disable=inva
     """
     Map from Millimeters to pixels.
     """
-    return int(x_pos * WIDTH // 300)
+    return int(x_pos * WIDTH // 3000)
 
 
 def y(y_pos: float) -> int:  # Allow single character name. pylint: disable=invalid-name
     """
     Map from Millimeters to pixels.
     """
-    return int(y_pos * HEIGHT // 200)
+    return int(y_pos * HEIGHT // 2000)
 
 
 def pos(vec: Vector2) -> Tuple:
@@ -60,9 +60,6 @@ def size(vec: Vector2) -> Tuple:
     Map size from Millimeters to pixels.
     """
     return x(vec.x), y(vec.y)
-
-
-ROBOT_SIZE = size(Vector2(30, 30))
 
 
 def _should_quit() -> bool:
@@ -92,18 +89,21 @@ class Animation:
         self.map_controller = map_controller
 
         # ROBOT IMG: (real position of the robot)
-        self.robot_surface = py.Surface(ROBOT_SIZE)
+        robot_size = size(
+            Vector2(self.simulation.configuration.robot_length,
+                    self.simulation.configuration.robot_width))
+        self.robot_surface = py.Surface(robot_size)
         self.robot_surface.set_colorkey(BLACK)
         self.robot_surface.fill(DARK_GREEN)
 
         # SHADOW ROBOT IMG: (internal position calculated by the robot)
-        self.calculated_robot_surface = py.Surface(ROBOT_SIZE)
+        self.calculated_robot_surface = py.Surface(robot_size)
         self.calculated_robot_surface.set_colorkey(BLACK)
         self.calculated_robot_surface.fill(RED)
         self.calculated_robot_surface.set_alpha(150)
 
         # GRID CELL IMG: (Internal obstacle in the obstacle grid of the robot)
-        cell_size = size(Vector2(10, 10))
+        cell_size = size(Vector2(100, 100))
         self.cell_size = cell_size
         self.grid_cell = py.Surface(cell_size)
         self.grid_cell.set_alpha(128 / 2)
@@ -163,7 +163,7 @@ class Animation:
         for i in range(obstacle_grid.shape[0]):
             for j in range(obstacle_grid.shape[1]):
                 if obstacle_grid[i, j]:
-                    position = (x(i * 10), y(j * 10))
+                    position = (x(i * 100), y(j * 100))
                     screen.blit(self.grid_cell, position)
 
     def render(self):

@@ -52,9 +52,11 @@ def ray_segment_intersection(ray: Ray, segment: Segment
         return None, None  # Ray hit behind.
 
     intersection_point = origin + direction * v_x
-    v_y = numpy.dot(
-        intersection_point - start, intersection_point) / numpy.dot(
-            end - start, intersection_point)
+    divisor = numpy.dot(end - start, intersection_point)
+    if divisor == 0:
+        return None, None
+
+    v_y = numpy.dot(intersection_point - start, intersection_point) / divisor
     if v_y < 0 or v_y > 1:
         return None, None  # Ray did not hit segment.
 
@@ -97,21 +99,23 @@ def segment_segment_intersection(sgmt1: Segment,
     ray = Ray(origin=origin, direction=direction_normalized)
 
     pos, ray_dist = ray_segment_intersection(ray, sgmt1)
-    if distance is None:
+    if ray_dist is None:
         return None
 
+    print(ray_dist, distance)
     if ray_dist > distance:
         return None  # Too far away on the ray.
 
     return pos
 
 
-def does_segment_intersect(sgm1: Segment, segments: Iterable[Segment]) -> bool:
+def does_segment_intersect(sgmt1: Segment,
+                           segments: Iterable[Segment]) -> bool:
     """
     Check if a segment intersects with a set of other segments.
     """
     for sgmt2 in segments:
-        pos = segment_segment_intersection(sgm1, sgmt2)
+        pos = segment_segment_intersection(sgmt1, sgmt2)
         if pos is not None:
             return True
 

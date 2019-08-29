@@ -38,7 +38,7 @@ class NumpyMapRepository(MapRepository):
         self.width, self.height = self.map.shape
 
     def set_obstacle(self, position: Vector2, obstacle: bool) -> None:
-        grid_pos = position / 10
+        grid_pos = position / 100
         grid_pos = Vector2(round(grid_pos.x), round(grid_pos.y))
         grid_pos = Vector2(int(grid_pos.x), int(grid_pos.y))
         if not (0 <= grid_pos.x < self.width) or not (0 <= grid_pos.y <

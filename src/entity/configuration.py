@@ -14,3 +14,6 @@ class Configuration:
     """
     initial_position: Vector2
     initial_direction: Radian
+
+    robot_width: float
+    robot_length: float
