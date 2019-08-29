@@ -7,7 +7,8 @@ from src.entity.vector import Vector2
 from src.repository.map import NumpyMapRepository
 
 
-def test_set_obstacle_happy_path(numpy_map_repository: NumpyMapRepository):
+def test_set_obstacle_happy_path(numpy_map_repository: NumpyMapRepository
+                                 ) -> None:
     """
     Happy path.
     """
@@ -16,7 +17,7 @@ def test_set_obstacle_happy_path(numpy_map_repository: NumpyMapRepository):
 
 @mark.parametrize("pos", [(-10, 1), (1, -10), (100000, 1), (1, 100000)])
 def test_set_obstacle_out_of_bounds(numpy_map_repository: NumpyMapRepository,
-                                    pos: tuple):
+                                    pos: tuple) -> None:
     """
     Make sure
     :param numpy_map_repository:

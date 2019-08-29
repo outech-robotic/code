@@ -1,6 +1,8 @@
 """
 Vector entity.
 """
+from __future__ import annotations
+
 from math import sqrt
 
 import numpy
@@ -14,44 +16,47 @@ class Vector2:
         self._v = numpy.array([vec_x, vec_y])
 
     @property
-    def x(self):  # Allow single character property name. pylint: disable=invalid-name
+    def x(self) -> float:  # Allow single character property name. pylint: disable=invalid-name
         """
         Return the X component of the vector.
         """
         return self._v[0]
 
     @property
-    def y(self):  # Allow single character property name. pylint: disable=invalid-name
+    def y(self) -> float:  # Allow single character property name. pylint: disable=invalid-name
         """
         Return the Y component of the vector.
         """
         return self._v[1]
 
-    def __eq__(self, other):
-        return numpy.array_equal(self._v, _to_array(other))
+    def __hash__(self):
+        return hash((self.x, self.y))
 
-    def __add__(self, other):
+    def __eq__(self, other: object) -> bool:
+        return other.__class__ == self.__class__ and hash(self) == hash(other)
+
+    def __add__(self, other: Vector2) -> Vector2:
         return _from_array(self._v + _to_array(other))
 
-    def __sub__(self, other):
+    def __sub__(self, other: Vector2) -> Vector2:
         return _from_array(self._v - _to_array(other))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'[{self.x:.2f}, {self.y:.2f}]'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Vector2{self}'
 
-    def __mul__(self, scalar):
+    def __mul__(self, scalar: float) -> Vector2:
         return _from_array(self._v * scalar)
 
-    def __truediv__(self, scalar):
+    def __truediv__(self, scalar: float) -> Vector2:
         return self * (1 / scalar)
 
     def __neg__(self):
         return self * (-1)
 
-    def dot(self, vec) -> float:
+    def dot(self, vec: Vector2) -> float:
         """
         Return the dot product of 2 vectors.
         """

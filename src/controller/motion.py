@@ -18,7 +18,7 @@ class MotionController:
         self.motion_gateway = motion_gateway
         self.localization_controller = localization_controller
 
-    async def move_forward(self, distance: Millimeter):
+    async def move_forward(self, distance: Millimeter) -> None:
         """
         Move the robot forward.
         """
@@ -26,7 +26,7 @@ class MotionController:
         self.motion_gateway.move_forward(distance)
         await self.localization_controller.wait_for_stop_moving()
 
-    async def rotate(self, angle: Radian):
+    async def rotate(self, angle: Radian) -> None:
         """
         Rotate the robot.
         """
@@ -34,7 +34,7 @@ class MotionController:
         self.motion_gateway.rotate(angle)
         await self.localization_controller.wait_for_stop_moving()
 
-    async def move_to(self, _: Vector2):
+    async def move_to(self, _: Vector2) -> None:
         """
         Move the robot to a specific position.
         """

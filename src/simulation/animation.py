@@ -34,18 +34,18 @@ DARK_RED = (150, 0, 0)
 BACKGROUND_COLOR = GREY
 
 
-def x(x_pos: int):  # Allow single character name. pylint: disable=invalid-name
+def x(x_pos: float) -> int:  # Allow single character name. pylint: disable=invalid-name
     """
     Map from Millimeters to pixels.
     """
-    return x_pos * WIDTH // 300
+    return int(x_pos * WIDTH // 300)
 
 
-def y(y_pos: int):  # Allow single character name. pylint: disable=invalid-name
+def y(y_pos: float) -> int:  # Allow single character name. pylint: disable=invalid-name
     """
     Map from Millimeters to pixels.
     """
-    return y_pos * HEIGHT // 200
+    return int(y_pos * HEIGHT // 200)
 
 
 def pos(vec: Vector2) -> Tuple:

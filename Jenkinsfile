@@ -47,7 +47,7 @@ pipeline {
                 }
                 stage('mypy') {
                     steps {
-                        sh 'mypy --disallow-untyped-calls --ignore-missing-imports src'
+                        sh 'mypy --disallow-untyped-calls --ignore-missing-imports --disallow-incomplete-defs src'
                     }
                 }
             }

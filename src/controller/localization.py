@@ -29,7 +29,7 @@ class LocalizationController:
         self.localization_repository.odometry_direction = configuration.initial_direction
 
     def update_odometry_position(self, pos_x: Millimeter, pos_y: Millimeter,
-                                 angle: Radian):
+                                 angle: Radian) -> None:
         """
         Update the position received from odometry.
         """
