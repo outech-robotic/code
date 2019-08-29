@@ -83,6 +83,41 @@ def ray_segments_intersection(ray: Ray, segments: Iterable[Segment]
     return closest_point, closest_distance
 
 
+def segment_segment_intersection(sgmt1: Segment,
+                                 sgmt2: Segment) -> Optional[Vector2]:
+    """
+    Check if a segment intersect with another segment.
+    """
+    origin = sgmt2.start
+
+    direction = sgmt2.end - sgmt2.start
+    distance = direction.norm()
+
+    direction_normalized = direction / distance
+    ray = Ray(origin=origin, direction=direction_normalized)
+
+    pos, ray_dist = ray_segment_intersection(ray, sgmt1)
+    if distance is None:
+        return None
+
+    if ray_dist > distance:
+        return None  # Too far away on the ray.
+
+    return pos
+
+
+def does_segment_intersect(sgm1: Segment, segments: Iterable[Segment]) -> bool:
+    """
+    Check if a segment intersects with a set of other segments.
+    """
+    for sgmt2 in segments:
+        pos = segment_segment_intersection(sgm1, sgmt2)
+        if pos is not None:
+            return True
+
+    return False
+
+
 def forward(angle: Radian) -> Vector2:
     """
     Get the front direction relative to the orientation.

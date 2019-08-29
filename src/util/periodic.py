@@ -30,7 +30,7 @@ def _cb(loop: BaseEventLoop, params: PeriodicCallbackParams,
 def periodic_callback(func: Callable, interval: Second, *args: Any) -> None:
     """
     Call a function periodically with a good precision.
-    If you need to call a function periodically and do not care about few milliseconds of 
+    If you need to call a function periodically and do not care about few milliseconds of
     imprecision, please make a loop and call `asyncio.sleep()` instead.
     """
     loop = asyncio.get_event_loop()
