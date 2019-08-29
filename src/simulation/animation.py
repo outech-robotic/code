@@ -13,7 +13,7 @@ from src.controller.map import MapController
 from src.entity.geometry import Ray
 from src.entity.vector import Vector2
 from src.simulation.simulation import Simulation
-from src.util.geometry import ray_segments_intersection
+from src.util.geometry import ray_segments_intersection, forward, backward, left, right
 
 MARGIN = 15
 
@@ -122,10 +122,10 @@ class Animation:
 
     def _draw_laser_sensors(self, screen):
         directions = [
-            (self.simulation.forward, BLACK),
-            (self.simulation.backward, GREEN),
-            (self.simulation.right, RED),
-            (self.simulation.left, BLUE),
+            (forward(self.simulation.angle), BLACK),
+            (backward(self.simulation.angle), GREEN),
+            (right(self.simulation.angle), RED),
+            (left(self.simulation.angle), BLUE),
         ]
         for direction, color in directions:
             start = self.simulation.position

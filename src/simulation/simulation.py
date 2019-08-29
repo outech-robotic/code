@@ -12,7 +12,7 @@ from src.entity.vector import Vector2
 from src.gateway.motion import MotionGateway
 from src.handler.distance_sensor import DistanceSensorHandler
 from src.handler.motion import MotionHandler
-from src.util.geometry import ray_segments_intersection
+from src.util.geometry import ray_segments_intersection, forward, backward, right, left
 from src.util.periodic import periodic_callback
 
 LOGGER = structlog.get_logger()
@@ -50,22 +50,26 @@ class Simulation(MotionGateway):
         self.motion_handler.position_update(self.position.x, self.position.y,
                                             self.angle)
         _, dist = ray_segments_intersection(
-            Ray(origin=self.position, direction=self.forward), self.obstacles)
+            Ray(origin=self.position, direction=forward(self.angle)),
+            self.obstacles)
         if dist:
             self.distance_sensor_handler.distance_forward(dist)
 
         _, dist = ray_segments_intersection(
-            Ray(origin=self.position, direction=self.backward), self.obstacles)
+            Ray(origin=self.position, direction=backward(self.angle)),
+            self.obstacles)
         if dist:
             self.distance_sensor_handler.distance_backward(dist)
 
         _, dist = ray_segments_intersection(
-            Ray(origin=self.position, direction=self.right), self.obstacles)
+            Ray(origin=self.position, direction=right(self.angle)),
+            self.obstacles)
         if dist:
             self.distance_sensor_handler.distance_right(dist)
 
         _, dist = ray_segments_intersection(
-            Ray(origin=self.position, direction=self.left), self.obstacles)
+            Ray(origin=self.position, direction=left(self.angle)),
+            self.obstacles)
         if dist:
             self.distance_sensor_handler.distance_left(dist)
 
@@ -91,50 +95,13 @@ class Simulation(MotionGateway):
         LOGGER.info("simulation_move_forward", distance=distance)
 
         def func(frame, cls):
-            cls.position += self.forward * TRANSLATION_SPEED / FPS
+            cls.position += forward(self.angle) * TRANSLATION_SPEED / FPS
             done = frame >= distance / TRANSLATION_SPEED * FPS
             if done:
                 self.motion_handler.movement_done()
             return done
 
         periodic_callback(func, 1 / FPS, self)
-
-    @property
-    def forward(self) -> Vector2:
-        """
-        Get the front direction of the robot.
-        """
-        return Vector2(
-            math.cos(self.angle),
-            math.sin(self.angle),
-        )
-
-    @property
-    def backward(self) -> Vector2:
-        """
-        Get the back direction of the robot.
-        """
-        return -self.forward
-
-    @property
-    def right(self) -> Vector2:
-        """
-        Get the right direction of the robot.
-        """
-        return Vector2(
-            math.cos(self.angle + math.pi / 2),
-            math.sin(self.angle + math.pi / 2),
-        )
-
-    @property
-    def left(self) -> Vector2:
-        """
-        Get the left direction of the robot.
-        """
-        return Vector2(
-            math.cos(self.angle - math.pi / 2),
-            math.sin(self.angle - math.pi / 2),
-        )
 
     async def run(self):
         """
