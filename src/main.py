@@ -32,7 +32,7 @@ async def main() -> None:
     Main function.
     """
     map_repository = NumpyMapRepository(initial_map=numpy.zeros((300, 200),
-                                                                dtype=bool), )
+                                                                dtype=bool),)
     localization_repository = LocalizationRepository()
 
     localization_controller = LocalizationController(
@@ -46,10 +46,10 @@ async def main() -> None:
     )
 
     motion_handler = MotionHandler(
-        localization_controller=localization_controller, )
+        localization_controller=localization_controller,)
 
     distance_sensor_handler = DistanceSensorHandler(
-        map_controller=map_controller, )
+        map_controller=map_controller,)
 
     simulation = Simulation(
         configuration=CONFIG,

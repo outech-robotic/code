@@ -37,7 +37,7 @@ pipeline {
                 }
                 stage('ensure code is yapf formatted') {
                     steps {
-                        sh 'yapf -d -r src || (echo "!!!!!!!!!!! Please run yapf -i -r src/ on your code"; exit 1)'
+                        sh 'yapf -p -d -r src || (echo "!!!!!!!!!!! Please run yapf -i -r src/ on your code"; exit 1)'
                     }
                 }
                 stage('lint') {

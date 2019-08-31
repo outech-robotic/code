@@ -13,6 +13,7 @@ class MapRepository(ABC):
     """
     Hold the obstacle map.
     """
+
     @abstractmethod
     def set_obstacle(self, position: Vector2, obstacle: bool) -> None:
         """
@@ -26,6 +27,7 @@ class NumpyMapRepository(MapRepository):
     """
     Map implementation using numpy array.
     """
+
     def __init__(self, initial_map: numpy.array):
         self.map = initial_map
         self.width, self.height = self.map.shape

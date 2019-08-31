@@ -11,7 +11,7 @@ from src.entity.vector import Vector2
 
 
 def ray_segment_intersection(ray: Ray, segment: Segment
-                             ) -> Tuple[Optional[Vector2], Optional[float]]:
+                            ) -> Tuple[Optional[Vector2], Optional[float]]:
     """
     Get the intersection point between a ray and a segment. 
     More precisely, will find the intersection point between [a,b) and  ]c,d[ (thus a 0 length 
@@ -67,7 +67,7 @@ def ray_segment_intersection(ray: Ray, segment: Segment
 
 
 def ray_segments_intersection(ray: Ray, segments: Iterable[Segment]
-                              ) -> Tuple[Optional[Vector2], Optional[float]]:
+                             ) -> Tuple[Optional[Vector2], Optional[float]]:
     """
     Compute the intersection of a ray and a set of segments.
     """
@@ -111,8 +111,7 @@ def segment_segment_intersection(sgmt1: Segment,
     return pos
 
 
-def does_segment_intersect(sgmt1: Segment,
-                           segments: Iterable[Segment]) -> bool:
+def does_segment_intersect(sgmt1: Segment, segments: Iterable[Segment]) -> bool:
     """
     Check if a segment intersects with a set of other segments.
     """

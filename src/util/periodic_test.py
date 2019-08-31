@@ -55,6 +55,7 @@ async def test_periodic_callback_arguments_passed_to_callback():
     Check that the arguments provided in periodical_callback are passed to the callback.
     :return: 
     """
+
     def func_cb(_, arg_a, arg_b):
         assert arg_a == 42
         assert arg_b == "test"

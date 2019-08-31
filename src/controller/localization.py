@@ -20,6 +20,7 @@ class LocalizationController:
     """
     Localization controller.
     """
+
     def __init__(self, localization_repository: LocalizationRepository,
                  configuration: Configuration):
         self.localization_repository = localization_repository

@@ -13,6 +13,7 @@ class MotionController:
     """
     Motion controller.
     """
+
     def __init__(self, motion_gateway: MotionGateway,
                  localization_controller: LocalizationController):
         self.motion_gateway = motion_gateway

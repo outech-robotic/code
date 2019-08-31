@@ -82,6 +82,7 @@ class Animation:
     An animation is a representation of what is happening in a simulation versus what is happening
     according to the robot processing.
     """
+
     def __init__(self, simulation: Simulation,
                  localization_controller: LocalizationController,
                  map_controller: MapController):

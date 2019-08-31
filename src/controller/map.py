@@ -10,6 +10,7 @@ class MapController:
     """
     Keep track of the map state (for instance obstacles).
     """
+
     def __init__(
             self,
             map_repository: MapRepository,

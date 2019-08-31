@@ -10,6 +10,7 @@ class MotionGateway(ABC):
     """
     Motion gateway.
     """
+
     @abstractmethod
     def move_forward(self, distance: Millimeter) -> None:
         """
@@ -17,6 +18,7 @@ class MotionGateway(ABC):
 
         :param distance: distance in mm
         """
+
     @abstractmethod
     def rotate(self, angle: Radian) -> None:
         """

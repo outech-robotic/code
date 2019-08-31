@@ -8,7 +8,7 @@ from src.repository.map import NumpyMapRepository
 
 
 def test_set_obstacle_happy_path(numpy_map_repository: NumpyMapRepository
-                                 ) -> None:
+                                ) -> None:
     """
     Happy path.
     """

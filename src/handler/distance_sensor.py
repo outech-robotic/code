@@ -9,6 +9,7 @@ class DistanceSensorHandler:
     """
     Handle packets from the distance sensors.
     """
+
     def __init__(self, map_controller: MapController):
         self.map_controller = map_controller
 

@@ -9,8 +9,8 @@ class MotionHandler:
     """
     Motion handler.
     """
-    def __init__(self,
-                 localization_controller: LocalizationController) -> None:
+
+    def __init__(self, localization_controller: LocalizationController) -> None:
         self.localization_controller = localization_controller
 
     def position_update(self, pos_x: Millimeter, pos_y: Millimeter,

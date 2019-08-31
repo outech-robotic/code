@@ -14,6 +14,7 @@ class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
     """
+
     def __init__(self, motion_controller: MotionController):
         self.motion_controller = motion_controller
 

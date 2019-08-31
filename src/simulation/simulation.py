@@ -31,6 +31,7 @@ class Simulation(MotionGateway):
 
     A simulation emulates the input and the output of the robot.
     """
+
     def __init__(self, configuration: Configuration,
                  motion_handler: MotionHandler,
                  distance_sensor_handler: DistanceSensorHandler):

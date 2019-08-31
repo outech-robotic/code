@@ -8,7 +8,7 @@ lint:
 
 .PHONY: format
 format:
-	yapf -i -r src
+	yapf -i -p -r src
 
 .PHONY: mypy
 mypy:

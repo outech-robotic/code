@@ -13,6 +13,7 @@ class Vector2:
     """
     Vector in 2 dimensions.
     """
+
     def __init__(self, vec_x: float, vec_y: float):
         self._v = numpy.array([vec_x, vec_y])
 
