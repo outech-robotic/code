@@ -13,5 +13,6 @@ https://download.outech.fr/archi_robot.html
 This projects uses:
  * pylint
  * mypy
- * yapf
+ * yapf (run `make yapf` or use a plugin for your IDE)
 
+*Run `make jenkins` to check if your project pass the tests.*
