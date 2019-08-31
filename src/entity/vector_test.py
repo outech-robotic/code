@@ -85,3 +85,31 @@ def test_negation():
     vec = Vector2(42, -10)
 
     assert Vector2(-42, 10) == -vec
+
+
+def test_hash_same_object():
+    """
+    Test hash for the same objects.
+    """
+    assert hash(Vector2(1, 2)) == hash(Vector2(1, 2))
+
+
+def test_hash_different_objects():
+    """
+    Test hash for different objects.
+    """
+    assert hash(Vector2(2, 1)) != hash(Vector2(1, 2))
+
+
+def test_equal_different_classes():
+    """
+    Test equality with an object that is not a Vector, should return False.
+    """
+    assert Vector2(0, 0) != 0
+
+
+def test_dot():
+    """
+    Test dot product.
+    """
+    assert Vector2(1, 2).dot(Vector2(3, 4)) == 11
