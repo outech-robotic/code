@@ -1,39 +1,24 @@
-""""
-Geometry module.
 """
-
+Intersection module.
+"""
 import math
-from typing import Optional, Tuple, Iterable
+from typing import Tuple, Optional, Iterable
 
 import numpy
 
-from src.entity.geometry import Segment, Ray
-from src.entity.type import Radian
+from src.entity.geometry import Ray, Segment
 from src.entity.vector import Vector2
 
 
 def ray_segment_intersection(ray: Ray, segment: Segment
                              ) -> Tuple[Optional[Vector2], Optional[float]]:
     """
-    Get the intersection point between a ray and a segment. Returns None if they do not intersect
-    and the intersection coordinates and the distance from the origin of the ray instead.
+    Get the intersection point between a ray and a segment. 
+    More precisely, will find the intersection point between [a,b) and  ]c,d[ (thus a 0 length 
+    segment will never intersect).
 
-    Find intersection point:
-    origin + direction * x = start + (end - start) * y
-    origin ^ (end-start) + direction ^ (end-start) * x = start ^ (end-start)
-    direction ^ (end-start) * x = start ^ (end-start) - origin ^ (end-start)
-    direction ^ (end-start) * x = (start - origin) ^ (end-start)
-    A * x = B
-    x = B / A
-
-    Then...
-    intersection_point = origin + direction * x
-
-    To find Y:
-    intersection_point = start + (end - start) * y
-    intersection_point - start = (end - start) * y
-    (intersection_point - start) . intersection_point = (end - start) . intersection_point * y
-    y = (intersection_point - start) . intersection_point / (end - start) . intersection_point
+    Returns None if they do not intersect. 
+    Return the intersection coordinates and the distance from the origin of the ray otherwise.
     """
 
     origin = numpy.array([ray.origin.x, ray.origin.y])
@@ -41,6 +26,17 @@ def ray_segment_intersection(ray: Ray, segment: Segment
 
     start = numpy.array([segment.start.x, segment.start.y])
     end = numpy.array([segment.end.x, segment.end.y])
+
+    # Find intersection point:
+    # origin + direction * x = start + (end - start) * y
+    # origin ^ (end-start) + direction ^ (end-start) * x = start ^ (end-start)
+    # direction ^ (end-start) * x = start ^ (end-start) - origin ^ (end-start)
+    # direction ^ (end-start) * x = (start - origin) ^ (end-start)
+    # A * x = B
+    # x = B / A
+    segment_length2 = (end - start).dot(end - start)
+    if segment_length2 == 0:
+        return None, None  # Segment is 0 length, will never be hit by a ray.
 
     coef_a = numpy.cross(direction, (end - start))
     if coef_a == 0:
@@ -51,13 +47,20 @@ def ray_segment_intersection(ray: Ray, segment: Segment
     if v_x < 0:
         return None, None  # Ray hit behind.
 
+    # Then...
+    # intersection_point = origin + direction * x
     intersection_point = origin + direction * v_x
-    divisor = numpy.dot(end - start, intersection_point)
-    if divisor == 0:
-        return None, None
 
-    v_y = numpy.dot(intersection_point - start, intersection_point) / divisor
-    if v_y < 0 or v_y > 1:
+    # To find Y:
+    # intersection_point = start + (end - start) * y
+    # intersection_point - start = (end - start) * y
+    # (intersection_point - start) . (end - start) = (end - start) . (end - start) * y
+    # (intersection_point - start) . (end - start) = || end - start || ** 2 * y
+    # y = (intersection_point - start) . (end - start) / || end - start || ** 2
+    # y = (intersection_point - start) . (end - start) / || end - start || ** 2
+    coef_a = (intersection_point - start).dot(end - start)
+    v_y = coef_a / segment_length2
+    if v_y <= 0 or v_y >= 1:
         return None, None  # Ray did not hit segment.
 
     return Vector2(*intersection_point), v_x
@@ -93,7 +96,7 @@ def segment_segment_intersection(sgmt1: Segment,
     origin = sgmt2.start
 
     direction = sgmt2.end - sgmt2.start
-    distance = direction.norm()
+    distance = direction.euclidean_norm()
 
     direction_normalized = direction / distance
     ray = Ray(origin=origin, direction=direction_normalized)
@@ -102,7 +105,6 @@ def segment_segment_intersection(sgmt1: Segment,
     if ray_dist is None:
         return None
 
-    print(ray_dist, distance)
     if ray_dist > distance:
         return None  # Too far away on the ray.
 
@@ -120,37 +122,3 @@ def does_segment_intersect(sgmt1: Segment,
             return True
 
     return False
-
-
-def forward(angle: Radian) -> Vector2:
-    """
-    Get the front direction relative to the orientation.
-    """
-    return Vector2(
-        math.cos(angle),
-        math.sin(angle),
-    )
-
-
-def backward(angle: Radian) -> Vector2:
-    """
-    Get the back direction relative to the orientation.
-    """
-    return -forward(angle)
-
-
-def right(angle: Radian) -> Vector2:
-    """
-    Get the right direction relative to the orientation.
-    """
-    return Vector2(
-        math.cos(angle + math.pi / 2),
-        math.sin(angle + math.pi / 2),
-    )
-
-
-def left(angle: Radian) -> Vector2:
-    """
-    Get the left direction relative to the orientation.
-    """
-    return -right(angle)

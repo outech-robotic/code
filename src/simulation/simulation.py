@@ -14,8 +14,8 @@ from src.entity.vector import Vector2
 from src.gateway.motion import MotionGateway
 from src.handler.distance_sensor import DistanceSensorHandler
 from src.handler.motion import MotionHandler
-from src.util.geometry import ray_segments_intersection, forward, backward, right, left, \
-    does_segment_intersect
+from src.util.geometry.direction import forward, backward, right, left
+from src.util.geometry.intersection import ray_segments_intersection, does_segment_intersect
 from src.util.periodic import periodic_callback
 
 LOGGER = structlog.get_logger()

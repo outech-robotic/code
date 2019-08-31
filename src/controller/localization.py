@@ -6,13 +6,13 @@ from src.entity.configuration import Configuration
 from src.entity.type import Radian, Millimeter, Direction
 from src.entity.vector import Vector2
 from src.repository.localization import LocalizationRepository
-from src.util import geometry
+from src.util.geometry.direction import right, backward, left, forward
 
 DIRECTION_FUNCTION = {
-    Direction.FORWARD: geometry.forward,
-    Direction.LEFT: geometry.left,
-    Direction.BACKWARD: geometry.backward,
-    Direction.RIGHT: geometry.right,
+    Direction.FORWARD: forward,
+    Direction.LEFT: left,
+    Direction.BACKWARD: backward,
+    Direction.RIGHT: right,
 }
 
 

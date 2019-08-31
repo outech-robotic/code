@@ -57,7 +57,7 @@ def test_norm():
     Test norm.
     """
     vec = Vector2(1, 1)
-    assert vec.norm() == sqrt(2)
+    assert vec.euclidean_norm() == sqrt(2)
 
 
 def test_division():

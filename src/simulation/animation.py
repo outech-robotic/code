@@ -13,7 +13,8 @@ from src.controller.map import MapController
 from src.entity.geometry import Ray
 from src.entity.vector import Vector2
 from src.simulation.simulation import Simulation
-from src.util.geometry import ray_segments_intersection, forward, backward, left, right
+from src.util.geometry.direction import forward, backward, left, right
+from src.util.geometry.intersection import ray_segments_intersection
 
 MARGIN = 15
 

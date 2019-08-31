@@ -3,6 +3,7 @@ Vector entity.
 """
 from __future__ import annotations
 
+import sys
 from math import sqrt
 
 import numpy
@@ -33,7 +34,13 @@ class Vector2:
         return hash((self.x, self.y))
 
     def __eq__(self, other: object) -> bool:
-        return other.__class__ == self.__class__ and hash(self) == hash(other)
+        # Note: we cannot use hash(x) == hash(y) here because we need to compare float values that
+        # have a slight imprecision (sys.float_info.epsilon). hash would check that the two values
+        # are precisely identical.
+        if isinstance(other, Vector2):
+            return abs(self.x - other.x) < sys.float_info.epsilon and \
+                   abs(self.y - other.y) < sys.float_info.epsilon
+        return False
 
     def __add__(self, other: Vector2) -> Vector2:
         return _from_array(self._v + _to_array(other))
@@ -62,11 +69,17 @@ class Vector2:
         """
         return numpy.dot(self._v, _to_array(vec))
 
-    def norm(self) -> float:
+    def norm2(self) -> float:
+        """
+        Return the norm2 of the vector (euclidean norm squared).
+        """
+        return self.x**2 + self.y**2
+
+    def euclidean_norm(self) -> float:
         """
         Return the norm2 of the vector.
         """
-        return sqrt(self.x**2 + self.y**2)
+        return sqrt(self.norm2())
 
 
 def _to_array(vec: Vector2) -> numpy.ndarray:
