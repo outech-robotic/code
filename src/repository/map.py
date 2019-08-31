@@ -20,13 +20,6 @@ class MapRepository(ABC):
         :param position: position of the cell, in centimeters
         :param obstacle: True if there is an obstacle on this cell
         """
-    @abstractmethod
-    def get_obstacle(self, position: Vector2) -> bool:
-        """
-        Check if there is an obstacle on a cell.
-        :param position: position of the cell, in centimeters
-        :return: True if there is an obstacle on this cell
-        """
 
 
 class NumpyMapRepository(MapRepository):
@@ -46,6 +39,3 @@ class NumpyMapRepository(MapRepository):
             raise RuntimeError(f"out of bounds {position} => {grid_pos}")
 
         self.map[grid_pos.x, grid_pos.y] = obstacle
-
-    def get_obstacle(self, position: Vector2) -> bool:
-        raise NotImplementedError()
