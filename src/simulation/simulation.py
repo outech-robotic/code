@@ -48,7 +48,7 @@ class Simulation(MotionGateway):
         self.motion_handler = motion_handler
         self.distance_sensor_handler = distance_sensor_handler
 
-    def _is_in_valid_state(self) -> bool:
+    def is_in_valid_state(self) -> bool:
         """
         Check if all the elements in the simulation are in a valid state (i.e. the robot did not
         go into the wall).
@@ -113,7 +113,7 @@ class Simulation(MotionGateway):
 
         def func(frame, cls):
             cls.angle += ROTATION_SPEED / FPS * math.copysign(1, angle)
-            done = frame >= angle / ROTATION_SPEED * FPS
+            done = frame >= abs(angle / ROTATION_SPEED * FPS)
             if done:
                 self.motion_handler.movement_done()
             return done
@@ -127,8 +127,10 @@ class Simulation(MotionGateway):
         LOGGER.info("simulation_move_forward", distance=distance)
 
         def func(frame, cls):
-            cls.position += forward(self.angle) * TRANSLATION_SPEED / FPS
-            done = frame >= distance / TRANSLATION_SPEED * FPS
+            cls.position += forward(
+                self.angle) * TRANSLATION_SPEED / FPS * math.copysign(
+                    1, distance)
+            done = frame >= abs(distance / TRANSLATION_SPEED * FPS)
             if done:
                 self.motion_handler.movement_done()
             return done
@@ -142,7 +144,7 @@ class Simulation(MotionGateway):
         try:
             while True:
                 self._feedback_loop()
-                if not self._is_in_valid_state():
+                if not self.is_in_valid_state():
                     LOGGER.error("simulation_invalid_state")
                     return
                 await asyncio.sleep(0.1)
