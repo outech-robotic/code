@@ -52,8 +52,10 @@ def y(y_pos: float) -> int:  # Allow single character name. pylint: disable=inva
 def pos(vec: Vector2) -> Tuple:
     """
     Map position from Millimeters to pixels (also add a margin).
+    
+    The origin is on the bottom left corner. X is horizontal axis and Y is vertical.
     """
-    return x(vec.x) + MARGIN, y(vec.y) + MARGIN
+    return x(vec.x) + MARGIN, (HEIGHT - y(vec.y)) + MARGIN
 
 
 def size(vec: Vector2) -> Tuple:
@@ -138,7 +140,7 @@ class Animation:
 
     def _draw_robot(self, screen):
         new_image = py.transform.rotate(self.robot_surface,
-                                        -self.simulation.angle * 180 / math.pi)
+                                        self.simulation.angle * 180 / math.pi)
         rect = new_image.get_rect()
         robot_pos = self.simulation.position
         rect.center = pos(robot_pos)
@@ -149,7 +151,7 @@ class Animation:
         # angle = math.acos(dir.dot(Vector2(1, 0)))
         angle = self.localization_controller.localization_repository.odometry_direction
         new_image = py.transform.rotate(self.calculated_robot_surface,
-                                        -angle * 180 / math.pi)
+                                        angle * 180 / math.pi)
         rect = new_image.get_rect()
         robot_pos = self.localization_controller.get_position()
         rect.center = pos(robot_pos)
