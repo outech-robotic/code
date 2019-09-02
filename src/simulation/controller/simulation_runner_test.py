@@ -27,7 +27,7 @@ async def test_run_move_forward(simulation_runner, event_queue,
     start_pos = simulation_state_repository.robot_position
 
     task = asyncio.create_task(simulation_runner.run())
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.05)
     task.cancel()
 
     assert simulation_state_repository.robot_position == (
@@ -48,7 +48,7 @@ async def test_run_rotate(simulation_runner, event_queue,
     start_ang = simulation_state_repository.robot_angle
 
     task = asyncio.create_task(simulation_runner.run())
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.05)
     task.cancel()
 
     assert simulation_state_repository.robot_angle == start_ang + 20
@@ -64,7 +64,7 @@ async def test_run_movement_done(simulation_runner, event_queue,
         Event(tick=0, event=EventOrder(type=EventType.MOVEMENT_DONE)))
 
     task = asyncio.create_task(simulation_runner.run())
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.05)
     task.cancel()
 
     simulation_gateway.movement_done.assert_called_once()
@@ -98,7 +98,7 @@ async def test_run_notify(simulation_runner, simulation_state_repository):
 
     task = asyncio.create_task(simulation_runner.run())
     simulation_runner.subscribe(subscriber)
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.05)
     task.cancel()
 
     subscriber.assert_called_with(
