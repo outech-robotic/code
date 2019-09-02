@@ -6,10 +6,10 @@ from asyncio import BaseEventLoop
 from dataclasses import dataclass
 from typing import Callable, Any
 
-from src.entity.type import Second
+from src.robot.entity.type import Second
 
 
-@dataclass
+@dataclass(frozen=True)
 class PeriodicCallbackParams:
     """
     Hold the parameters for the periodic callback.

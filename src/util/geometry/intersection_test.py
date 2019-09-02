@@ -1,10 +1,12 @@
 """
 Test for geometry module.
 """
-from src.entity.geometry import Segment, Ray
-from src.entity.vector import Vector2
-from src.util.geometry.intersection import ray_segment_intersection, ray_segments_intersection, \
-    segment_segment_intersection, does_segment_intersect
+from src.robot.entity.geometry import Segment, Ray
+from src.robot.entity.vector import Vector2
+from src.util.geometry.intersection import (ray_segment_intersection,
+                                            ray_segments_intersection,
+                                            segment_segment_intersection,
+                                            does_segment_intersect)
 
 
 def test_ray_segment_intersection_colinear():

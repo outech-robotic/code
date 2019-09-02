@@ -6,8 +6,8 @@ from typing import Tuple, Optional, Iterable
 
 import numpy
 
-from src.entity.geometry import Ray, Segment
-from src.entity.vector import Vector2
+from src.robot.entity.geometry import Ray, Segment
+from src.robot.entity.vector import Vector2
 
 
 def ray_segment_intersection(ray: Ray, segment: Segment

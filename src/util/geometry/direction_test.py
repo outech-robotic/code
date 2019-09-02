@@ -3,7 +3,7 @@ Test the direction module.
 """
 import math
 
-from src.entity.vector import Vector2
+from src.robot.entity.vector import Vector2
 from src.util.geometry.direction import backward, forward, left, right
 
 SQRT2 = math.sqrt(2) / 2
