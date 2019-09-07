@@ -18,6 +18,7 @@ from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
+from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.simulation_controller import SimulationController
 from src.simulation.controller.simulation_runner import SimulationRunner
 from src.simulation.entity.event import EventQueue
@@ -79,20 +80,26 @@ async def main() -> None:  # pylint: disable=too-many-locals
     i.provide('simulation_state_repository', SimulationStateRepository())
 
     i.provide('animation', Animation)
+    i.provide('replay_saver', ReplaySaver)
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
     animation = i.get('animation')
+    replay_saver = i.get('replay_saver')
+
+    simulation_runner.subscribe(animation)
+    simulation_runner.subscribe(replay_saver)
 
     loop = asyncio.get_event_loop()
     simulation_task = loop.create_task(simulation_runner.run())
     strategy_task = loop.create_task(strategy_controller.run())
 
-    i.get('simulation_runner').subscribe(animation)
     await loop.run_in_executor(None, animation.render)
 
     strategy_task.cancel()
     simulation_task.cancel()
+
+    replay_saver.save_replay()
 
 
 if __name__ == '__main__':
