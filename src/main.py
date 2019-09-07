@@ -18,7 +18,7 @@ from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
-from src.simulation.controller.simulation import SimulationController
+from src.simulation.controller.simulation_controller import SimulationController
 from src.simulation.controller.simulation_runner import SimulationRunner
 from src.simulation.entity.event import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
