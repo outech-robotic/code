@@ -14,6 +14,7 @@ from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Ray
 from src.robot.entity.vector import Vector2
 from src.simulation.controller.simulation_runner import SimulationRunner
+from src.simulation.controller.simulation_subscriber import SimulationSubscriber
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.util.geometry.direction import forward, backward, left, right
 from src.util.geometry.intersection import ray_segments_intersection
@@ -81,7 +82,7 @@ def _should_quit() -> bool:
     return False
 
 
-class Animation:  # pylint: disable=too-many-instance-attributes
+class Animation(SimulationSubscriber):  # pylint: disable=too-many-instance-attributes
     """
     An animation is a representation of what is happening in a simulation versus what is happening
     according to the robot processing.
@@ -214,7 +215,7 @@ class Animation:  # pylint: disable=too-many-instance-attributes
 
         py.quit()
 
-    def on_tick(self, state):
+    def on_tick(self, state: dict) -> None:
         """
         Triggered when the simulation changes something.
         """

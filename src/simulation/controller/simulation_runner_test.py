@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.robot.entity.vector import Vector2
+from src.simulation.controller.simulation_subscriber import SimulationSubscriber
 from src.simulation.entity.event import Event, EventOrder, EventType
 from src.util.geometry.direction import forward
 
@@ -91,7 +92,7 @@ async def test_run_notify(simulation_runner, simulation_state_repository):
     """
     Test that the subscribers are notified.
     """
-    subscriber = MagicMock()
+    subscriber = MagicMock(spec=SimulationSubscriber)
 
     simulation_state_repository.robot_position = Vector2(12, 34)
     simulation_state_repository.robot_angle = 42
@@ -101,7 +102,7 @@ async def test_run_notify(simulation_runner, simulation_state_repository):
     await asyncio.sleep(0.05)
     task.cancel()
 
-    subscriber.assert_any_call({
+    subscriber.on_tick.assert_any_call({
         'tick': 1,
         'robot': {
             'position': (12, 34),

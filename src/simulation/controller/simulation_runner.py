@@ -2,8 +2,9 @@
 Simulation runner module.
 """
 import asyncio
-from typing import Callable, List
+from typing import List
 
+from src.simulation.controller.simulation_subscriber import SimulationSubscriber
 from src.simulation.entity.event import EventQueue, EventType, EventOrder
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
@@ -25,9 +26,9 @@ class SimulationRunner:
         self.state = simulation_state_repository
         self.simulation_gateway = simulation_gateway
         self.event_queue = event_queue
-        self.subscribers: List[Callable] = []
+        self.subscribers: List[SimulationSubscriber] = []
 
-    def subscribe(self, subscriber: Callable[[dict], None]) -> None:
+    def subscribe(self, subscriber: SimulationSubscriber) -> None:
         """
         Subscribe a function that will be called at every tick with the current simulation state. 
         """
@@ -91,4 +92,4 @@ class SimulationRunner:
             },
         }
         for sub in self.subscribers:
-            sub(state)
+            sub.on_tick(state)

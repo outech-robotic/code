@@ -80,15 +80,15 @@ async def main() -> None:  # pylint: disable=too-many-locals
 
     i.provide('animation', Animation)
 
-    loop = asyncio.get_event_loop()
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
     animation = i.get('animation')
 
+    loop = asyncio.get_event_loop()
     simulation_task = loop.create_task(simulation_runner.run())
     strategy_task = loop.create_task(strategy_controller.run())
 
-    i.get('simulation_runner').subscribe(animation.on_tick)
+    i.get('simulation_runner').subscribe(animation)
     await loop.run_in_executor(None, animation.render)
 
     strategy_task.cancel()
