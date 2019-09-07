@@ -13,8 +13,8 @@ from src.robot.controller.map import MapController
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Ray
 from src.robot.entity.vector import Vector2
-from src.simulation.controller.simulation_runner import SimulationRunner
-from src.simulation.controller.simulation_subscriber import SimulationSubscriber
+from src.simulation.controller.runner import SimulationRunner
+from src.simulation.controller.subscriber import SimulationSubscriber
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.util.geometry.direction import forward, backward, left, right
 from src.util.geometry.intersection import ray_segments_intersection

@@ -4,7 +4,7 @@ Simulation runner module.
 import asyncio
 from typing import List
 
-from src.simulation.controller.simulation_subscriber import SimulationSubscriber
+from src.simulation.controller.subscriber import SimulationSubscriber
 from src.simulation.entity.event import EventQueue, EventType, EventOrder
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway

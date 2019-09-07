@@ -7,8 +7,8 @@ from pytest import fixture
 
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.vector import Vector2
-from src.simulation.controller.simulation_controller import SimulationController
-from src.simulation.controller.simulation_runner import SimulationRunner
+from src.simulation.controller.controller import SimulationController
+from src.simulation.controller.runner import SimulationRunner
 from src.simulation.entity.event import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway

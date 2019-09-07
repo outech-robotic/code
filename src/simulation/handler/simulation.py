@@ -3,7 +3,7 @@ Simulation handler module.
 """
 from src.robot.entity.type import Radian, Millimeter
 from src.robot.gateway.motion import MotionGateway
-from src.simulation.controller.simulation_controller import SimulationController
+from src.simulation.controller.controller import SimulationController
 
 
 class SimulationHandler(MotionGateway):

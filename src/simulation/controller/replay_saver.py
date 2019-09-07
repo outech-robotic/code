@@ -11,7 +11,7 @@ from typing import List
 import requests
 import structlog
 
-from src.simulation.controller.simulation_subscriber import SimulationSubscriber
+from src.simulation.controller.subscriber import SimulationSubscriber
 
 LOGGER = structlog.get_logger()
 

@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.robot.entity.vector import Vector2
-from src.simulation.controller.simulation_subscriber import SimulationSubscriber
+from src.simulation.controller.subscriber import SimulationSubscriber
 from src.simulation.entity.event import Event, EventOrder, EventType
 from src.util.geometry.direction import forward
 

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from src.simulation.controller.simulation_controller import SimulationController
+from src.simulation.controller.controller import SimulationController
 from src.simulation.handler.simulation import SimulationHandler
 
 

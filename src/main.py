@@ -19,8 +19,8 @@ from src.robot.handler.motion import MotionHandler
 from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
 from src.simulation.controller.replay_saver import ReplaySaver
-from src.simulation.controller.simulation_controller import SimulationController
-from src.simulation.controller.simulation_runner import SimulationRunner
+from src.simulation.controller.controller import SimulationController
+from src.simulation.controller.runner import SimulationRunner
 from src.simulation.entity.event import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
