@@ -101,8 +101,10 @@ async def test_run_notify(simulation_runner, simulation_state_repository):
     await asyncio.sleep(0.05)
     task.cancel()
 
-    subscriber.assert_called_with(
-        {'robot': {
+    subscriber.assert_any_call({
+        'tick': 1,
+        'robot': {
             'position': (12, 34),
             'angle': 42
-        }})
+        }
+    })

@@ -84,6 +84,7 @@ class SimulationRunner:
         position = self.state.robot_position
         angle = self.state.robot_angle
         state = {
+            'tick': self.state.tick,
             'robot': {
                 'position': (position.x, position.y),
                 'angle': angle,
