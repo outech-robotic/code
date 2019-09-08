@@ -39,12 +39,11 @@ CONFIG = Configuration(
 )
 
 
-async def main() -> None:  # pylint: disable=too-many-locals
+def injector() -> Injector:
     """
-    Main function.
-    Wire all the components together.
+    Build the dependency injector.
     """
-    i = Injector()  # Dependency injector.
+    i = Injector()
     i.provide('http_client', HTTPClient)
     i.provide('web_browser_client', WebBrowserClient)
     i.provide('configuration', CONFIG)
@@ -88,6 +87,16 @@ async def main() -> None:  # pylint: disable=too-many-locals
     i.provide('simulation_state_repository', SimulationStateRepository())
 
     i.provide('replay_saver', ReplaySaver)
+
+    return i
+
+
+async def main() -> None:  # pylint: disable=too-many-locals
+    """
+    Main function.
+    Wire all the components together.
+    """
+    i = injector()  # Dependency injector.
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
