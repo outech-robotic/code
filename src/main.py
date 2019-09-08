@@ -18,6 +18,8 @@ from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
+from src.simulation.client.http import HTTPClient
+from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.controller import SimulationController
 from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.runner import SimulationRunner
@@ -43,6 +45,8 @@ async def main() -> None:  # pylint: disable=too-many-locals
     Wire all the components together.
     """
     i = Injector()  # Dependency injector.
+    i.provide('http_client', HTTPClient)
+    i.provide('web_browser_client', WebBrowserClient)
     i.provide('configuration', CONFIG)
 
     # Robot components:

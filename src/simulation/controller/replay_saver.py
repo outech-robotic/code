@@ -1,16 +1,15 @@
 """
 Replay saver module.
 """
-import io
 import json
-import webbrowser
 from dataclasses import dataclass, asdict
 from typing import List, Tuple
 
-import requests
 import structlog
 
 from src.robot.entity.configuration import Configuration
+from src.simulation.client.http import HTTPClient
+from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.subscriber import SimulationSubscriber
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 
@@ -58,12 +57,15 @@ class ReplaySaver(SimulationSubscriber):
     """
 
     def __init__(self, configuration: Configuration,
-                 simulation_configuration: SimulationConfiguration):
+                 simulation_configuration: SimulationConfiguration,
+                 http_client: HTTPClient, web_browser_client: WebBrowserClient):
         self.result = Replay(robot_size=(int(configuration.robot_length),
                                          int(configuration.robot_width)),
                              frames=[])
         self.configuration = configuration
         self.simulation_configuration = simulation_configuration
+        self.http_client = http_client
+        self.web_browser_client = web_browser_client
 
     def on_tick(self, state: dict) -> None:
         robot_pos = state['robot']['position']
@@ -87,12 +89,8 @@ class ReplaySaver(SimulationSubscriber):
         dump = json.dumps(res)
         LOGGER.info("saving_replay", size=len(dump))
 
-        file = io.StringIO(dump)
-        files = {'my_file': file}
-
-        resp = requests.post(REPLAY_API_URL, files=files)
-        replay_id = resp.json().get('id')
+        replay_id = self.http_client.post_file(REPLAY_API_URL, dump)['id']
 
         LOGGER.info("saved_replay", url=REPLAY_API_URL + replay_id)
-        webbrowser.open(REPLAY_VIEWER_URL + '?replay=' + REPLAY_API_URL +
-                        replay_id)
+        self.web_browser_client.open(REPLAY_VIEWER_URL + '?replay=' +
+                                     REPLAY_API_URL + replay_id)
