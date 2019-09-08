@@ -16,8 +16,8 @@ class SimulationConfiguration:
     Configuration for the simulation.
     """
     obstacles: List[Segment]
-
-    speed_factor: float = 1  # Speed factor, 1 will run the simulation twice as fast.
+    # Speed factor, 1 is normal speed, 2 will run the simulation twice as fast, INF is fastest.
+    speed_factor: float = 1
     tickrate: int = 30  # FPS.
     translation_speed: MillimeterPerSec = 250
     rotation_speed: RadianPerSec = math.pi / 2

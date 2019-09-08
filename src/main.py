@@ -2,11 +2,11 @@
 Main module.
 """
 import asyncio
+import math
 
 import numpy
 import uvloop
 
-from src.animation import Animation
 from src.robot.controller.localization import LocalizationController
 from src.robot.controller.map import MapController
 from src.robot.controller.motion import MotionController
@@ -18,8 +18,8 @@ from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
-from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.controller import SimulationController
+from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.runner import SimulationRunner
 from src.simulation.entity.event import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
@@ -64,14 +64,18 @@ async def main() -> None:  # pylint: disable=too-many-locals
     # Simulation components:
     i.provide(
         'simulation_configuration',
-        SimulationConfiguration(obstacles=[
-            Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
-            Segment(start=Vector2(0, 0), end=Vector2(CONFIG.field_shape[0], 0)),
-            Segment(start=Vector2(*CONFIG.field_shape),
-                    end=Vector2(0, CONFIG.field_shape[1])),
-            Segment(start=Vector2(*CONFIG.field_shape),
-                    end=Vector2(CONFIG.field_shape[0], 0)),
-        ]))
+        SimulationConfiguration(
+            speed_factor=math.inf,  # Run the simulation as fast as possible.
+            obstacles=[
+                Segment(start=Vector2(0, 0),
+                        end=Vector2(0, CONFIG.field_shape[1])),
+                Segment(start=Vector2(0, 0),
+                        end=Vector2(CONFIG.field_shape[0], 0)),
+                Segment(start=Vector2(*CONFIG.field_shape),
+                        end=Vector2(0, CONFIG.field_shape[1])),
+                Segment(start=Vector2(*CONFIG.field_shape),
+                        end=Vector2(CONFIG.field_shape[0], 0)),
+            ]))
     i.provide('event_queue', EventQueue())
     i.provide('simulation_handler', SimulationHandler)
     i.provide('simulation_controller', SimulationController)
@@ -79,24 +83,17 @@ async def main() -> None:  # pylint: disable=too-many-locals
     i.provide('motion_gateway', SimulationHandler)
     i.provide('simulation_state_repository', SimulationStateRepository())
 
-    i.provide('animation', Animation)
     i.provide('replay_saver', ReplaySaver)
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
-    animation = i.get('animation')
     replay_saver = i.get('replay_saver')
 
-    simulation_runner.subscribe(animation)
     simulation_runner.subscribe(replay_saver)
 
     loop = asyncio.get_event_loop()
     simulation_task = loop.create_task(simulation_runner.run())
-    strategy_task = loop.create_task(strategy_controller.run())
-
-    await loop.run_in_executor(None, animation.render)
-
-    strategy_task.cancel()
+    await strategy_controller.run()
     simulation_task.cancel()
 
     replay_saver.save_replay()

@@ -1,7 +1,6 @@
 uvloop # Faster async event loop.
 numpy
 structlog # Better logging.
-pygame # Display animation.
 
 mypy # Static typing for python.
 pylint # Lint the code.
