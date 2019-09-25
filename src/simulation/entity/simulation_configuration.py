@@ -13,7 +13,7 @@ from src.robot.entity.type import MillimeterPerSec, RadianPerSec
 @dataclass(frozen=True)
 class SimulationConfiguration:
     """
-    Configuration for the simulation.
+    InitialConfiguration for the simulation.
     """
     obstacles: List[Segment]
     # Speed factor, 1 is normal speed, 2 will run the simulation twice as fast, INF is fastest.

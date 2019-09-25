@@ -1,5 +1,5 @@
 """
-Configuration module.
+InitialConfiguration module.
 """
 from typing import Tuple
 

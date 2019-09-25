@@ -4,6 +4,7 @@ Simulation handler module.
 from src.robot.entity.type import Radian, Millimeter
 from src.robot.gateway.motion import MotionGateway
 from src.simulation.controller.controller import SimulationController
+from src.simulation.entity.state import RobotID
 
 
 class SimulationHandler(MotionGateway):
@@ -20,10 +21,10 @@ class SimulationHandler(MotionGateway):
         """
         Move the robot forward.
         """
-        self.simulation_controller.robot_move_forward(distance)
+        self.simulation_controller.robot_move_forward(distance, RobotID.RobotA)
 
     def rotate(self, angle: Radian) -> None:
         """
         Rotate the robot.
         """
-        self.simulation_controller.robot_rotate(angle)
+        self.simulation_controller.robot_rotate(angle, RobotID.RobotA)

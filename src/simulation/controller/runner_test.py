@@ -2,57 +2,83 @@
 Test for simulation runner.
 """
 import asyncio
-from unittest.mock import MagicMock
 
 import pytest
+from pytest import fixture
 
-from src.robot.entity.vector import Vector2
-from src.simulation.controller.subscriber import SimulationSubscriber
+from src.simulation.controller.runner import SimulationRunner
 from src.simulation.entity.event import Event, EventOrder, EventType
+from src.simulation.entity.state import RobotID
 from src.util.geometry.direction import forward
 
+MOVE_TEN_UNITS_PAYLOAD = {'distance': 10, 'robot_id': RobotID.RobotA}
+ROTATE_TEN_UNITS_PAYLOAD = {'angle': 10, 'robot_id': RobotID.RobotA}
+
+
+# pylint: disable=too-many-arguments
+@fixture(name='simulation_runner')
+def simulation_runner_factory(event_queue, simulation_gateway,
+                              simulation_configuration, configuration,
+                              robot_adapter, replay_saver):
+    """
+    Simulation runner.
+    """
+    return SimulationRunner(
+        event_queue=event_queue,
+        simulation_gateway=simulation_gateway,
+        configuration=configuration,
+        simulation_configuration=simulation_configuration,
+        robot_adapter=robot_adapter,
+        replay_saver=replay_saver,
+    )
+
 
 @pytest.mark.asyncio
-async def test_run_move_forward(simulation_runner, event_queue,
-                                simulation_state_repository):
+async def test_run_move_forward(simulation_runner, event_queue):
     """
     Test the move forward event.
     """
     event_queue.push(
-        Event(tick=0, event=EventOrder(type=EventType.MOVE_FORWARD,
-                                       payload=10)))
+        Event(tick=0,
+              event=EventOrder(type=EventType.MOVE_FORWARD,
+                               payload=MOVE_TEN_UNITS_PAYLOAD)))
     event_queue.push(
         Event(tick=10,
-              event=EventOrder(type=EventType.MOVE_FORWARD, payload=10)))
+              event=EventOrder(type=EventType.MOVE_FORWARD,
+                               payload=MOVE_TEN_UNITS_PAYLOAD)))
 
-    start_pos = simulation_state_repository.robot_position
+    robot = simulation_runner.state.robots[RobotID.RobotA]
+    start_pos = robot.position
 
     task = asyncio.create_task(simulation_runner.run())
     await asyncio.sleep(0.05)
     task.cancel()
 
-    assert simulation_state_repository.robot_position == (
-        start_pos + forward(simulation_state_repository.robot_angle) * 20)
+    assert robot.position == (start_pos + forward(robot.angle) * 20)
 
 
 @pytest.mark.asyncio
-async def test_run_rotate(simulation_runner, event_queue,
-                          simulation_state_repository):
+async def test_run_rotate(simulation_runner, event_queue):
     """
     Test the move forward event.
     """
     event_queue.push(
-        Event(tick=0, event=EventOrder(type=EventType.ROTATE, payload=10)))
+        Event(tick=0,
+              event=EventOrder(type=EventType.ROTATE,
+                               payload=ROTATE_TEN_UNITS_PAYLOAD)))
     event_queue.push(
-        Event(tick=10, event=EventOrder(type=EventType.ROTATE, payload=10)))
+        Event(tick=10,
+              event=EventOrder(type=EventType.ROTATE,
+                               payload=ROTATE_TEN_UNITS_PAYLOAD)))
 
-    start_ang = simulation_state_repository.robot_angle
+    robot = simulation_runner.state.robots[RobotID.RobotA]
+    start_ang = robot.angle
 
     task = asyncio.create_task(simulation_runner.run())
     await asyncio.sleep(0.05)
     task.cancel()
 
-    assert simulation_state_repository.robot_angle == start_ang + 20
+    assert robot.angle == start_ang + 20
 
 
 @pytest.mark.asyncio
@@ -85,27 +111,3 @@ async def test_run_incorrect_event_type(simulation_runner, event_queue):
             await asyncio.wait_for(simulation_runner.run(), timeout=1)
         except asyncio.TimeoutError:
             pass
-
-
-@pytest.mark.asyncio
-async def test_run_notify(simulation_runner, simulation_state_repository):
-    """
-    Test that the subscribers are notified.
-    """
-    subscriber = MagicMock(spec=SimulationSubscriber)
-
-    simulation_state_repository.robot_position = Vector2(12, 34)
-    simulation_state_repository.robot_angle = 42
-
-    task = asyncio.create_task(simulation_runner.run())
-    simulation_runner.subscribe(subscriber)
-    await asyncio.sleep(0.05)
-    task.cancel()
-
-    subscriber.on_tick.assert_any_call({
-        'tick': 1,
-        'robot': {
-            'position': (12, 34),
-            'angle': 42
-        }
-    })

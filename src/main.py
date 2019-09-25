@@ -23,12 +23,12 @@ from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.controller import SimulationController
 from src.simulation.controller.replay_saver import ReplaySaver
+from src.simulation.controller.robot_adapter import RobotAdapter
 from src.simulation.controller.runner import SimulationRunner
 from src.simulation.entity.event import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
-from src.simulation.repository.simulation_state import SimulationStateRepository
 from src.util.dependency_container import DependencyContainer
 
 CONFIG = Configuration(
@@ -87,8 +87,8 @@ def _provide_simulator(i: DependencyContainer) -> None:
     i.provide('simulation_handler', SimulationHandler)
     i.provide('simulation_controller', SimulationController)
     i.provide('simulation_runner', SimulationRunner)
+    i.provide('robot_adapter', RobotAdapter)
     i.provide('motion_gateway', SimulationHandler)
-    i.provide('simulation_state_repository', SimulationStateRepository())
 
     i.provide('http_client', HTTPClient)
     i.provide('web_browser_client', WebBrowserClient)

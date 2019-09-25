@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 from pytest import fixture
 
 from src.simulation.controller.controller import SimulationController
+from src.simulation.entity.state import RobotID
 from src.simulation.handler.simulation import SimulationHandler
 
 
@@ -24,7 +25,8 @@ def test_move_forward(simulation_controller):
     simulation_handler = SimulationHandler(
         simulation_controller=simulation_controller)
     simulation_handler.move_forward(10)
-    simulation_controller.robot_move_forward.assert_called_once_with(10)
+    simulation_controller.robot_move_forward.assert_called_once_with(
+        10, RobotID.RobotA)
 
 
 def test_rotate(simulation_controller):
@@ -34,4 +36,5 @@ def test_rotate(simulation_controller):
     simulation_handler = SimulationHandler(
         simulation_controller=simulation_controller)
     simulation_handler.rotate(10)
-    simulation_controller.robot_rotate.assert_called_once_with(10)
+    simulation_controller.robot_rotate.assert_called_once_with(
+        10, RobotID.RobotA)

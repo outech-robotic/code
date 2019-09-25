@@ -11,18 +11,6 @@ from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
-from src.simulation.repository.simulation_state import SimulationStateRepository
-
-
-@fixture(name='simulation_state_repository')
-def simulation_state_repository_stub():
-    """
-    Simulation state repository.
-    """
-    return SimulationStateRepository(
-        robot_position=Vector2(25, 25),
-        robot_angle=0,
-    )
 
 
 @fixture(name='simulation_configuration')
@@ -55,13 +43,12 @@ def motion_handler_mock():
 
 
 @fixture
-def simulation_gateway(simulation_state_repository, simulation_configuration,
-                       distance_sensor_handler, motion_handler):
+def simulation_gateway(simulation_configuration, distance_sensor_handler,
+                       motion_handler):
     """
     Simulation gateway.
     """
     return SimulationGateway(
-        simulation_state_repository=simulation_state_repository,
         simulation_configuration=simulation_configuration,
         distance_sensor_handler=distance_sensor_handler,
         motion_handler=motion_handler,
