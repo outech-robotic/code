@@ -5,6 +5,7 @@ import asyncio
 import math
 
 import numpy
+import structlog
 import uvloop
 
 from src.robot.controller.localization import LocalizationController
@@ -37,6 +38,8 @@ CONFIG = Configuration(
     robot_length=330,
     field_shape=(3000, 2000),
 )
+
+LOGGER = structlog.get_logger()
 
 
 def _provide_robot_components(i: DependencyContainer) -> None:
@@ -108,18 +111,20 @@ async def main() -> None:
     Launch the simulation and the robot.
     """
     i = _get_container()
-    loop = asyncio.get_event_loop()
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
     replay_saver = i.get('replay_saver')
 
-    simulation_runner.subscribe(replay_saver)
+    async def run_and_stop_simulation() -> None:
+        await strategy_controller.run()
+        LOGGER.info('Main algorithm stopped, stopping the simulation')
+        simulation_runner.stop()
 
-    # Launch simulation in the background.
-    simulation_task = loop.create_task(simulation_runner.run())
-    await strategy_controller.run()  # Run the robot main algorithm.
-    simulation_task.cancel()  # Stop the simulation.
+    await asyncio.gather(
+        run_and_stop_simulation(),
+        simulation_runner.run(),
+    )
 
     replay_saver.save_replay()
 
