@@ -9,10 +9,10 @@ import structlog
 LOGGER = structlog.get_logger()
 
 
-class Injector:
+class DependencyContainer:
     """
-    Injector is a class that resolves all the dependencies of the project (it basically does 
-    dependency injection).
+    DependencyContainer is a class that resolves all the dependencies of the project (it 
+    basically does dependency injection).
     
     Example: If you have a class `Foo`, that needs a class `Bar`:
     > class Bar:
@@ -23,8 +23,8 @@ class Injector:
     >         self.bar = bar
     >     [...]
         
-    You can inject it using the Injector:
-    > i = Injector()
+    You can inject it using the DependencyContainer:
+    > i = DependencyContainer()
     > i.provide('bar', Bar) # 'bar' is the argument name in Foo's constructor.
     > i.provide('foo', Foo)
     >

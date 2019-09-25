@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 import pytest
 
-from src.util.injector import Injector
+from src.util.dependency_container import DependencyContainer
 
 
 class DummyA:
@@ -52,7 +52,7 @@ def test_injector_happy_path():
     """
     Happy path.
     """
-    i = Injector()
+    i = DependencyContainer()
     i.provide('my_dep', DummyA)
     i.provide('my_array', [1, 2, 3])
     i.provide('my_other_dep', DummyB)
@@ -69,7 +69,7 @@ def test_injector_double_provide():
     """
     Should not be able to provide the same thing twice.
     """
-    i = Injector()
+    i = DependencyContainer()
     i.provide('test', DummyA)
     with pytest.raises(Exception):
         i.provide('test', DummyA)
@@ -79,7 +79,7 @@ def test_injector_abstract_class():
     """
     Should not be able to provide an abstract class.
     """
-    i = Injector()
+    i = DependencyContainer()
     with pytest.raises(Exception):
         i.provide('test', AbstractClass)
 
@@ -88,7 +88,7 @@ def test_injector_not_provided():
     """
     Should return None if not provided.
     """
-    i = Injector()
+    i = DependencyContainer()
     assert i.get('test') is None
 
 
@@ -96,7 +96,7 @@ def test_injector_missing_dependencies():
     """
     Should not be able to instantiate if a dependency is missing.
     """
-    i = Injector()
+    i = DependencyContainer()
     i.provide('test', DummyC)
     with pytest.raises(Exception):
         i.get('test')
@@ -106,7 +106,7 @@ def test_injector_manual_argument_in_constructor():
     """
     Should be able to manually pass arguments for the constructor.
     """
-    i = Injector()
+    i = DependencyContainer()
     i.provide('dummy_c', DummyC, my_other_dep=1, my_array=[42])
 
     dummy_c = i.get('dummy_c')

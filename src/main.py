@@ -28,7 +28,7 @@ from src.simulation.entity.simulation_configuration import SimulationConfigurati
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
 from src.simulation.repository.simulation_state import SimulationStateRepository
-from src.util.injector import Injector
+from src.util.dependency_container import DependencyContainer
 
 CONFIG = Configuration(
     initial_position=Vector2(1500, 1000),
@@ -39,16 +39,12 @@ CONFIG = Configuration(
 )
 
 
-def injector() -> Injector:
+def _provide_robot_components(i: DependencyContainer) -> None:
     """
-    Build the dependency injector.
+    Provide all the robot dependencies.
     """
-    i = Injector()
-    i.provide('http_client', HTTPClient)
-    i.provide('web_browser_client', WebBrowserClient)
     i.provide('configuration', CONFIG)
 
-    # Robot components:
     i.provide('motion_handler', MotionHandler)
     i.provide('distance_sensor_handler', DistanceSensorHandler)
 
@@ -64,7 +60,11 @@ def injector() -> Injector:
         'map_repository',
         NumpyMapRepository(initial_map=numpy.zeros((300, 200), dtype=bool)))
 
-    # Simulation components:
+
+def _provide_simulator(i: DependencyContainer) -> None:
+    """
+    Provide all the simulation dependencies.
+    """
     i.provide(
         'simulation_configuration',
         SimulationConfiguration(
@@ -80,23 +80,35 @@ def injector() -> Injector:
                         end=Vector2(CONFIG.field_shape[0], 0)),
             ]))
     i.provide('event_queue', EventQueue())
+
     i.provide('simulation_handler', SimulationHandler)
     i.provide('simulation_controller', SimulationController)
     i.provide('simulation_runner', SimulationRunner)
     i.provide('motion_gateway', SimulationHandler)
     i.provide('simulation_state_repository', SimulationStateRepository())
 
+    i.provide('http_client', HTTPClient)
+    i.provide('web_browser_client', WebBrowserClient)
     i.provide('replay_saver', ReplaySaver)
 
+
+def _get_container() -> DependencyContainer:
+    """
+    Build the dependency container.
+    """
+    i = DependencyContainer()
+    _provide_robot_components(i)
+    _provide_simulator(i)
     return i
 
 
-async def main() -> None:  # pylint: disable=too-many-locals
+async def main() -> None:
     """
     Main function.
-    Wire all the components together.
+    Launch the simulation and the robot.
     """
-    i = injector()  # Dependency injector.
+    i = _get_container()
+    loop = asyncio.get_event_loop()
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
@@ -104,14 +116,14 @@ async def main() -> None:  # pylint: disable=too-many-locals
 
     simulation_runner.subscribe(replay_saver)
 
-    loop = asyncio.get_event_loop()
+    # Launch simulation in the background.
     simulation_task = loop.create_task(simulation_runner.run())
-    await strategy_controller.run()
-    simulation_task.cancel()
+    await strategy_controller.run()  # Run the robot main algorithm.
+    simulation_task.cancel()  # Stop the simulation.
 
     replay_saver.save_replay()
 
 
 if __name__ == '__main__':
-    uvloop.install()
+    uvloop.install()  # Better event loop.
     asyncio.run(main())
