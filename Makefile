@@ -1,6 +1,8 @@
+.DEFAULT_GOAL := jenkins
+
 .PHONY: test
 test:
-	pytest src
+	pytest src -vv
 
 .PHONY: lint
 lint:
@@ -16,3 +18,4 @@ mypy:
 
 .PHONY: jenkins
 jenkins: test lint mypy format
+
