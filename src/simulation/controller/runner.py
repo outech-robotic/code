@@ -5,7 +5,8 @@ import asyncio
 
 from src.robot.entity.configuration import Configuration
 from src.simulation.controller.subscriber import SimulationSubscriber
-from src.simulation.entity.event import EventQueue, EventType, EventOrder
+from src.simulation.entity.event import EventType, EventOrder
+from src.simulation.controller.event_queue import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.state import State, Robot, RobotID
 from src.simulation.gateway.simulation import SimulationGateway
@@ -54,11 +55,11 @@ class SimulationRunner:
         """
         while self.running:
             current_tick = self.tick
-            events = self.event_queue.pop(current_tick)
+            events = self.event_queue.pop()
 
             # Process all the events.
             for event in events:
-                self._process_event(event.event)
+                self._process_event(event)
 
             # Send the feedback to the subscribers.
             self._notify_subscribers()

@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List, Dict
 
+from src.robot.entity.type import Radian, Millisecond
 from src.robot.entity.vector import Vector2
 
 
@@ -28,7 +29,7 @@ class Robot:
     A robot.
     """
     position: Vector2
-    angle: float
+    angle: Radian
 
     def clone(self) -> Robot:
         """
@@ -51,7 +52,7 @@ class Cup:
         """
         Clone this entity.
         """
-        return Cup(position=self.position,)
+        return Cup(position=self.position)
 
 
 @dataclass
@@ -59,7 +60,7 @@ class State:
     """
     Simulation state.
     """
-    time: float
+    time: Millisecond
     robots: Dict[RobotID, Robot]
     cups: List[Cup]
 

@@ -3,6 +3,7 @@ Localization repository module.
 """
 import asyncio
 
+from src.robot.entity.type import Radian
 from src.robot.entity.vector import Vector2
 
 
@@ -11,10 +12,10 @@ class LocalizationRepository:
     Localization repository.
     """
     odometry_position: Vector2 = Vector2(0, 0)
-    odometry_angle: float = 0
+    odometry_angle: Radian = 0
 
     odometry_position_drift: Vector2 = Vector2(0, 0)
-    odometry_angle_drift: float = 0
+    odometry_angle_drift: Radian = 0
 
     def __init__(self) -> None:
         super()

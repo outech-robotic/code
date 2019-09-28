@@ -3,7 +3,7 @@ Types.
 """
 from enum import Enum
 
-Second = float
+Millisecond = float
 Millimeter = float
 MillimeterPerSec = float
 Radian = float

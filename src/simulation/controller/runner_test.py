@@ -7,7 +7,7 @@ import pytest
 from pytest import fixture
 
 from src.simulation.controller.runner import SimulationRunner
-from src.simulation.entity.event import Event, EventOrder, EventType
+from src.simulation.entity.event import EventOrder, EventType
 from src.simulation.entity.state import RobotID
 from src.util.geometry.direction import forward
 
@@ -38,14 +38,12 @@ async def test_run_move_forward(simulation_runner, event_queue):
     """
     Test the move forward event.
     """
-    event_queue.push(
-        Event(tick=0,
-              event=EventOrder(type=EventType.MOVE_FORWARD,
-                               payload=MOVE_TEN_UNITS_PAYLOAD)))
-    event_queue.push(
-        Event(tick=10,
-              event=EventOrder(type=EventType.MOVE_FORWARD,
-                               payload=MOVE_TEN_UNITS_PAYLOAD)))
+    event_queue.push(event_order=EventOrder(type=EventType.MOVE_FORWARD,
+                                            payload=MOVE_TEN_UNITS_PAYLOAD),
+                     tick_offset=0)
+    event_queue.push(event_order=EventOrder(type=EventType.MOVE_FORWARD,
+                                            payload=MOVE_TEN_UNITS_PAYLOAD),
+                     tick_offset=10)
 
     robot = simulation_runner.state.robots[RobotID.RobotA]
     start_pos = robot.position
@@ -60,16 +58,14 @@ async def test_run_move_forward(simulation_runner, event_queue):
 @pytest.mark.asyncio
 async def test_run_rotate(simulation_runner, event_queue):
     """
-    Test the move forward event.
+    Test the rotate event.
     """
-    event_queue.push(
-        Event(tick=0,
-              event=EventOrder(type=EventType.ROTATE,
-                               payload=ROTATE_TEN_UNITS_PAYLOAD)))
-    event_queue.push(
-        Event(tick=10,
-              event=EventOrder(type=EventType.ROTATE,
-                               payload=ROTATE_TEN_UNITS_PAYLOAD)))
+    event_queue.push(event_order=EventOrder(type=EventType.ROTATE,
+                                            payload=ROTATE_TEN_UNITS_PAYLOAD),
+                     tick_offset=0)
+    event_queue.push(event_order=EventOrder(type=EventType.ROTATE,
+                                            payload=ROTATE_TEN_UNITS_PAYLOAD),
+                     tick_offset=10)
 
     robot = simulation_runner.state.robots[RobotID.RobotA]
     start_ang = robot.angle
@@ -87,8 +83,8 @@ async def test_run_movement_done(simulation_runner, event_queue,
     """
     Test the movement done event.
     """
-    event_queue.push(
-        Event(tick=0, event=EventOrder(type=EventType.MOVEMENT_DONE)))
+    event_queue.push(event_order=EventOrder(type=EventType.MOVEMENT_DONE),
+                     tick_offset=0)
 
     task = asyncio.create_task(simulation_runner.run())
     await asyncio.sleep(0.05)
@@ -103,8 +99,8 @@ async def test_run_incorrect_event_type(simulation_runner, event_queue):
     An unknown event should raise an exception.
     """
     # Pass an incorrect event type on purpose.
-    event_queue.push(Event(tick=0,
-                           event=EventOrder(type='unkown')))  # type: ignore
+    event_queue.push(event_order=EventOrder(type='unkown'),
+                     tick_offset=0)  # type: ignore
 
     with pytest.raises(Exception):
         try:

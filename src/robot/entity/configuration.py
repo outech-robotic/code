@@ -17,7 +17,7 @@ class Configuration:
     initial_position: Vector2
     initial_angle: Radian
 
-    robot_width: float
-    robot_length: float
+    robot_width: Millimeter
+    robot_length: Millimeter
 
     field_shape: Tuple[Millimeter, Millimeter]

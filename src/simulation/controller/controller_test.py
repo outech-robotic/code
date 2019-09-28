@@ -9,15 +9,13 @@ from src.simulation.entity.state import RobotID
 
 
 @fixture(name='simulation_controller')
-def simulation_controller_factory(event_queue, simulation_configuration,
-                                  simulation_runner):
+def simulation_controller_factory(event_queue, simulation_configuration):
     """
     Simulation controller.
     """
     return SimulationController(
         event_queue=event_queue,
         simulation_configuration=simulation_configuration,
-        simulation_runner=simulation_runner,
     )
 
 
@@ -31,11 +29,11 @@ def test_robot_move_forward(simulation_controller, event_queue,
 
     simulation_controller.robot_move_forward(distance, RobotID.RobotA)
 
-    for i in range(ticks):
-        event_list = event_queue.pop(i)
+    for _ in range(ticks):
+        event_list = list(event_queue.pop())
         assert len(event_list) == 1
 
-        event = event_list[0].event
+        event = event_list[0]
         assert event.type == EventType.MOVE_FORWARD
         assert event.payload.get('distance') == distance / ticks
         assert event.payload.get('robot_id') == RobotID.RobotA
@@ -53,11 +51,12 @@ def test_robot_move_forward_send_movement_done(simulation_controller,
     simulation_controller.robot_move_forward(distance, RobotID.RobotA)
 
     # Discard all the other events from previous ticks.
-    event_queue.pop(ticks - 1)
+    for _ in range(ticks):
+        event_queue.pop()
 
-    final_event_list = event_queue.pop(ticks)
+    final_event_list = list(event_queue.pop())
     assert len(final_event_list) == 1
-    assert final_event_list[0].event.type == EventType.MOVEMENT_DONE
+    assert final_event_list[0].type == EventType.MOVEMENT_DONE
 
 
 def test_robot_rotate(simulation_controller, event_queue,
@@ -70,11 +69,11 @@ def test_robot_rotate(simulation_controller, event_queue,
 
     simulation_controller.robot_rotate(angle, RobotID.RobotA)
 
-    for i in range(ticks):
-        event_list = event_queue.pop(i)
+    for _ in range(ticks):
+        event_list = list(event_queue.pop())
         assert len(event_list) == 1
 
-        event = event_list[0].event
+        event = event_list[0]
         assert event.type == EventType.ROTATE
         assert event.payload.get('angle') == angle / ticks
         assert event.payload.get('robot_id') == RobotID.RobotA
@@ -89,10 +88,11 @@ def test_robot_rotate_send_movement_done(simulation_controller, event_queue,
     ticks = simulation_configuration.tickrate
 
     simulation_controller.robot_rotate(angle, RobotID.RobotA)
+
     # Discard all the other events from previous ticks.
+    for _ in range(ticks):
+        event_queue.pop()
 
-    event_queue.pop(ticks - 1)
-
-    final_event_list = event_queue.pop(ticks)
+    final_event_list = event_queue.pop()
     assert len(final_event_list) == 1
-    assert final_event_list[0].event.type == EventType.MOVEMENT_DONE
+    assert final_event_list[0].type == EventType.MOVEMENT_DONE

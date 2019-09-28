@@ -25,7 +25,7 @@ from src.simulation.controller.controller import SimulationController
 from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.robot_adapter import RobotAdapter
 from src.simulation.controller.runner import SimulationRunner
-from src.simulation.entity.event import EventQueue
+from src.simulation.controller.event_queue import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
