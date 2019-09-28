@@ -6,7 +6,10 @@ Just a proof of concept for the architecture described here.
 
 Nothing serious / language specific, this is just an architure POC.
 
-https://download.outech.fr/archi_robot.html
+Source: https://download.outech.fr/archi_robot.html
+
+[![arch](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/docs/img/archi_robot.png)](https://download.outech.fr/archi_robot.html)
+
 
 ## Static checks
 
