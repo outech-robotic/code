@@ -3,6 +3,8 @@ Test for JSON encoder.
 """
 import json
 
+from pytest import raises
+
 from src.robot.entity.vector import Vector2
 from src.util.json_encoder import RobotJSONEncoder
 
@@ -18,15 +20,17 @@ def test_json_encoder_vector2():
     assert dump == '{"a": [2.0, 3.0]}'
 
 
-def test_json_encoder_normal_types():
+def test_json_encoder_not_serializable():
     """
-    Make sure the encoder can still encode "normal" types.
+    Make sure the encoder will try to encode the other types.
     """
 
-    to_encode = {'a': 'hello', 'b': 1}
+    class NotSerializable:
+        """
+        A class that is not JSON serializable.
+        """
 
-    dump = json.dumps(to_encode,
-                      cls=RobotJSONEncoder,
-                      indent=None,
-                      sort_keys=True)
-    assert dump == '{"a": "hello", "b": 1}'
+    to_encode = {'a': NotSerializable()}
+
+    with raises(TypeError):
+        json.dumps(to_encode, cls=RobotJSONEncoder)

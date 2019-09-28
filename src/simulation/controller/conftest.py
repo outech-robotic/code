@@ -13,19 +13,8 @@ from src.robot.handler.motion import MotionHandler
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.robot_adapter import RobotAdapter
-from src.simulation.controller.runner import SimulationRunner
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
-
-
-@fixture(name='simulation_runner')
-def simulation_runner_mock():
-    """
-    Robot adapter.
-    """
-    mock = MagicMock(spec=SimulationRunner)
-    mock.tick = 0
-    return mock
 
 
 @fixture(name='robot_adapter')

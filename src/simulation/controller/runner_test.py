@@ -103,7 +103,18 @@ async def test_run_incorrect_event_type(simulation_runner, event_queue):
                      tick_offset=0)  # type: ignore
 
     with pytest.raises(Exception):
-        try:
-            await asyncio.wait_for(simulation_runner.run(), timeout=1)
-        except asyncio.TimeoutError:
-            pass
+        await asyncio.wait_for(simulation_runner.run(), timeout=1)
+
+
+@pytest.mark.asyncio
+async def test_stop(simulation_runner):
+    """
+    Test that .stop() actually stops the blocking .run().
+    """
+    task = asyncio.create_task(simulation_runner.run())
+    await asyncio.sleep(0)
+    assert task.done() is False
+
+    simulation_runner.stop()
+    await asyncio.sleep(0.05)
+    assert task.done() is True
