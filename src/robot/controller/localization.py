@@ -1,7 +1,7 @@
 """
 Localization controller module.
 """
-
+from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.type import Radian, Millimeter, Direction
 from src.robot.entity.vector import Vector2
@@ -22,8 +22,10 @@ class LocalizationController:
     """
 
     def __init__(self, localization_repository: LocalizationRepository,
+                 symmetry_controller: SymmetryController,
                  configuration: Configuration):
         self.localization_repository = localization_repository
+        self.symmetry_controller = symmetry_controller
         self.configuration = configuration
 
         self.localization_repository.odometry_position = configuration.initial_position
@@ -34,8 +36,10 @@ class LocalizationController:
         """
         Update the position received from odometry.
         """
-        self.localization_repository.odometry_position = Vector2(pos_x, pos_y)
-        self.localization_repository.odometry_angle = angle
+        self.localization_repository.odometry_position = \
+            self.symmetry_controller.symmetries_position(Vector2(pos_x, pos_y))
+        self.localization_repository.odometry_angle = self.symmetry_controller.symmetries_rotate(
+            angle)
 
     def get_direction(self,
                       direction: Direction = Direction.FORWARD) -> Vector2:

@@ -5,6 +5,7 @@ from typing import Tuple
 
 from attr import dataclass
 
+from src.robot.entity.color import Color
 from src.robot.entity.type import Radian, Millimeter
 from src.robot.entity.vector import Vector2
 
@@ -16,6 +17,7 @@ class Configuration:
     """
     initial_position: Vector2
     initial_angle: Radian
+    color: Color
 
     robot_width: Millimeter
     robot_length: Millimeter

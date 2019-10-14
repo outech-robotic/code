@@ -12,6 +12,7 @@ from src.robot.controller.localization import LocalizationController
 from src.robot.controller.map import MapController
 from src.robot.controller.motion import MotionController
 from src.robot.controller.strategy import StrategyController
+from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
@@ -30,6 +31,7 @@ from src.simulation.entity.simulation_configuration import SimulationConfigurati
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
 from src.util.dependency_container import DependencyContainer
+from src.robot.entity.color import Color
 
 CONFIG = Configuration(
     initial_position=Vector2(1500, 1000),
@@ -37,6 +39,7 @@ CONFIG = Configuration(
     robot_width=330,
     robot_length=330,
     field_shape=(3000, 2000),
+    color=Color.BLUE,
 )
 
 LOGGER = structlog.get_logger()
@@ -55,6 +58,7 @@ def _provide_robot_components(i: DependencyContainer) -> None:
     i.provide('localization_controller', LocalizationController)
     i.provide('motion_controller', MotionController)
     i.provide('strategy_controller', StrategyController)
+    i.provide('symmetry_controller', SymmetryController)
 
     i.provide('simulation_gateway', SimulationGateway)
 

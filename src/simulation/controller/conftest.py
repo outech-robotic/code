@@ -10,6 +10,7 @@ from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
 from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
+from src.robot.entity.color import Color
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.robot_adapter import RobotAdapter
@@ -76,6 +77,7 @@ def configuration_stub():
         robot_width=10,
         robot_length=10,
         field_shape=(100, 100),
+        color=Color.BLUE,
     )
 
 

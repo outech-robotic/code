@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.vector import Vector2
+from src.robot.entity.color import Color
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.replay_saver import ReplaySaver
@@ -27,6 +28,7 @@ def test_happy_path():
             robot_width=10,
             robot_length=10,
             field_shape=(100, 100),
+            color=Color.BLUE,
         ),
         simulation_configuration=SimulationConfiguration(obstacles=[]),
         http_client=http_client,
