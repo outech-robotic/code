@@ -36,8 +36,8 @@ from src.robot.entity.color import Color
 CONFIG = Configuration(
     initial_position=Vector2(1500, 1000),
     initial_angle=0,
-    robot_width=330,
-    robot_length=330,
+    robot_width=380,
+    robot_length=240,
     field_shape=(3000, 2000),
     color=Color.BLUE,
 )
