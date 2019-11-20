@@ -4,6 +4,7 @@
 #
 #    pip-compile
 #
+aenum==2.2.3              # via python-can
 astroid==2.2.5            # via pylint
 atomicwrites==1.3.0       # via pytest
 attrs==19.1.0             # via packaging, pytest
@@ -27,6 +28,7 @@ pyparsing==2.4.2          # via packaging
 pytest-asyncio==0.10.0
 pytest-cov==2.7.1
 pytest==5.1.1
+python-can==3.3.2
 requests==2.22.0
 six==1.12.0               # via astroid, packaging, structlog
 structlog==19.1.0
@@ -35,6 +37,6 @@ typing-extensions==3.7.4  # via mypy
 urllib3==1.25.3           # via requests
 uvloop==0.13.0
 wcwidth==0.1.7            # via pytest
-wrapt==1.11.2             # via astroid
+wrapt==1.11.2             # via astroid, python-can
 yapf==0.28.0
 zipp==0.5.2               # via importlib-metadata

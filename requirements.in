@@ -11,3 +11,5 @@ pytest-asyncio # Necessary to test async functions.
 pytest-cov # For coverage report.
 
 requests # To upload replays.
+
+python-can # To use the CAN bus.
