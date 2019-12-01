@@ -7,7 +7,6 @@ from _pytest.fixtures import fixture
 
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
-from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
@@ -26,14 +25,6 @@ def simulation_configuration_stub():
     ])
 
 
-@fixture(name='distance_sensor_handler')
-def distance_sensor_handler_mock():
-    """
-    Distance sensor handler mock.
-    """
-    return MagicMock(spec=DistanceSensorHandler)
-
-
 @fixture(name='motion_handler')
 def motion_handler_mock():
     """
@@ -43,13 +34,11 @@ def motion_handler_mock():
 
 
 @fixture
-def simulation_gateway(simulation_configuration, distance_sensor_handler,
-                       motion_handler):
+def simulation_gateway(simulation_configuration, motion_handler):
     """
     Simulation gateway.
     """
     return SimulationGateway(
         simulation_configuration=simulation_configuration,
-        distance_sensor_handler=distance_sensor_handler,
         motion_handler=motion_handler,
     )

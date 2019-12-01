@@ -7,7 +7,6 @@ from _pytest.fixtures import fixture
 
 from src.robot.controller.localization import LocalizationController
 from src.robot.controller.map import MapController
-from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 
 
@@ -25,14 +24,6 @@ def localization_controller_mock():
     Localization controller mock.
     """
     return MagicMock(spec=LocalizationController)
-
-
-@fixture
-def distance_sensor_handler(map_controller):
-    """
-    Distance sensor handler.
-    """
-    return DistanceSensorHandler(map_controller=map_controller)
 
 
 @fixture

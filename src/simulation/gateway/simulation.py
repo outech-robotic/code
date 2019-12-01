@@ -1,7 +1,6 @@
 """
 Simulation gateway module.
 """
-from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 
@@ -12,11 +11,9 @@ class SimulationGateway:
     This gateway communicates with the sensors of the robot (and thus the handlers of the robot).
     """
 
-    def __init__(self, distance_sensor_handler: DistanceSensorHandler,
-                 motion_handler: MotionHandler,
+    def __init__(self, motion_handler: MotionHandler,
                  simulation_configuration: SimulationConfiguration):
         self.simulation_configuration = simulation_configuration
-        self.distance_sensor_handler = distance_sensor_handler
         self.motion_handler = motion_handler
 
     def movement_done(self) -> None:

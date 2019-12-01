@@ -16,7 +16,6 @@ from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
-from src.robot.handler.distance_sensor import DistanceSensorHandler
 from src.robot.handler.motion import MotionHandler
 from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
@@ -52,7 +51,6 @@ def _provide_robot_components(i: DependencyContainer) -> None:
     i.provide('configuration', CONFIG)
 
     i.provide('motion_handler', MotionHandler)
-    i.provide('distance_sensor_handler', DistanceSensorHandler)
 
     i.provide('map_controller', MapController)
     i.provide('localization_controller', LocalizationController)
