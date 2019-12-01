@@ -18,10 +18,10 @@ class RobotAdapter(SimulationSubscriber):
     """
 
     def __init__(
-            self,
-            simulation_configuration: SimulationConfiguration,
-            motion_handler: MotionHandler,
-            distance_sensor_handler: DistanceSensorHandler,
+        self,
+        simulation_configuration: SimulationConfiguration,
+        motion_handler: MotionHandler,
+        distance_sensor_handler: DistanceSensorHandler,
     ):
         self.distance_sensor_handler = distance_sensor_handler
         self.motion_handler = motion_handler

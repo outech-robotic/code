@@ -7,8 +7,8 @@ from src.robot.entity.vector import Vector2
 from src.robot.repository.map import NumpyMapRepository
 
 
-def test_set_obstacle_happy_path(numpy_map_repository: NumpyMapRepository
-                                ) -> None:
+def test_set_obstacle_happy_path(
+        numpy_map_repository: NumpyMapRepository) -> None:
     """
     Happy path.
     """

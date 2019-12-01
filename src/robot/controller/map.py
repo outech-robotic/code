@@ -12,9 +12,9 @@ class MapController:
     """
 
     def __init__(
-            self,
-            map_repository: MapRepository,
-            localization_controller: LocalizationController,
+        self,
+        map_repository: MapRepository,
+        localization_controller: LocalizationController,
     ):
         self.map_repository = map_repository
         self.localization_controller = localization_controller

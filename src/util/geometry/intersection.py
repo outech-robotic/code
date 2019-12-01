@@ -10,8 +10,9 @@ from src.robot.entity.geometry import Ray, Segment
 from src.robot.entity.vector import Vector2
 
 
-def ray_segment_intersection(ray: Ray, segment: Segment
-                            ) -> Tuple[Optional[Vector2], Optional[float]]:
+def ray_segment_intersection(
+        ray: Ray,
+        segment: Segment) -> Tuple[Optional[Vector2], Optional[float]]:
     """
     Get the intersection point between a ray and a segment. 
     More precisely, will find the intersection point between [a,b) and  ]c,d[ (thus a 0 length 
@@ -66,8 +67,9 @@ def ray_segment_intersection(ray: Ray, segment: Segment
     return Vector2(*intersection_point), v_x
 
 
-def ray_segments_intersection(ray: Ray, segments: Iterable[Segment]
-                             ) -> Tuple[Optional[Vector2], Optional[float]]:
+def ray_segments_intersection(
+    ray: Ray, segments: Iterable[Segment]
+) -> Tuple[Optional[Vector2], Optional[float]]:
     """
     Compute the intersection of a ray and a set of segments.
     """

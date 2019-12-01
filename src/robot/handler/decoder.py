@@ -34,8 +34,8 @@ class PropulsionEncoderPositionMessage:
     right_tick: int
 
 
-def decode_propulsion_encoder_position(data: bytes
-                                      ) -> PropulsionEncoderPositionMessage:
+def decode_propulsion_encoder_position(
+        data: bytes) -> PropulsionEncoderPositionMessage:
     """
     Decode a position message.
     """

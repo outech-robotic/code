@@ -17,8 +17,29 @@ This projects uses:
  * pylint
  * mypy
  * yapf (run `make yapf` or use a plugin for your IDE)
+ * pipenv (for dependency management)
 
 **Run `make jenkins` to check if your project pass the tests.**
+
+## How to set up on local machine?
+
+Install pipenv 
+```shell
+sudo pip3 install pipenv
+```
+
+Install the dependencies
+```shell
+cd hl-flowing-clean-arch
+pipenv install 
+```
+
+Enter into the virtual environment.
+```shell
+pipenv shell
+```
+
+You are done! (see pipenv documentation for how to do other stuff.)
 
 
 ## Simulation

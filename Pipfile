@@ -1,0 +1,22 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+uvloop = "*"
+numpy = "*"
+structlog = "*"
+mypy = "*"
+pylint = "*"
+yapf = "*"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+requests = "*"
+python-can = "*"
+
+[requires]
+python_version = "3.8"

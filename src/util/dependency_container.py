@@ -71,7 +71,7 @@ class DependencyContainer:
 
         cls = self.factories[name]
 
-        args_names = [x for x in inspect.signature(cls).parameters]
+        args_names = list(inspect.signature(cls).parameters.keys())
 
         args = {}
         for arg_name in args_names:
