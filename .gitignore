@@ -3,6 +3,7 @@
 RemoteSystemsTempFiles
 .settings
 Debug
+Release
 *.launch
 
 

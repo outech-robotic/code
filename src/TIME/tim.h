@@ -19,12 +19,12 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __tim_H
 #define __tim_H
+#include "stm32f0xx_ll_tim.h"
 #ifdef __cplusplus
  extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -37,6 +37,7 @@
 void MX_TIM1_Init(void);
 void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
+void MX_TIM14_Init(void);
 void MX_TIM16_Init(void);
 void MX_TIM17_Init(void);
 
