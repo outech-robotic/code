@@ -143,7 +143,7 @@ void MX_TIM2_Init(void)
   LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
   LL_TIM_DisableMasterSlaveMode(TIM2);
   LL_TIM_EnableCounter(TIM2);
-  LL_TIM_SetCounter(TIM2,  (int32_t)(-1));
+  LL_TIM_SetCounter(TIM2, 2147483647);
 }
 /* TIM3 init function */
 void MX_TIM3_Init(void)
@@ -318,7 +318,16 @@ void MX_TIM17_Init(void)
 
 }
 
+volatile uint32_t overflows = 0;
+
 /* USER CODE BEGIN 1 */
+int32_t COD_get_left(){
+	return overflows*65535 + LL_TIM_GetCounter(TIM3) - 32767;
+}
+
+int32_t COD_get_right(){
+	return LL_TIM_GetCounter(TIM2) - 2147483647;
+}
 
 /* USER CODE END 1 */
 

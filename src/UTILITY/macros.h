@@ -14,6 +14,8 @@ if(fn_call != expected) {      \
     return false;              \
 }
 
-
+#define CAN_PIPE_WIDTH        4
+#define CAN_MESSAGE_WIDTH     7
+#define CAN_PKT_ID(pipe_id, message_id) ((pipe_id << CAN_MESSAGE_WIDTH) | message_id)
 
 #endif /* UTILITY_MACROS_H_ */

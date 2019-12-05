@@ -1,9 +1,16 @@
-#include <CAN/can.hpp>
+#include "UTILITY/macros.h"
 #include "UTILITY/config.h"
+#include "CAN/can.hpp"
 #include "GPIO/gpio.hpp"
 #include "UTILITY/ring_buffer.hpp"
 
+/*
+ * CAN TX MESSAGE TEMPLATES
+ */
 
+can_tx_msg CAN_TX_HEARTBEAT;
+can_tx_msg CAN_TX_MOV_END;
+can_tx_msg CAN_TX_COD_POS;
 
 // Buffer storing packets waiting for the peripheral to send them
 ring_buffer<CONST_CAN_BUFFER_SIZE, can_tx_msg> messages_tx;
@@ -37,14 +44,14 @@ int CAN_send_packet(uint16_t std_id, uint8_t* data, uint8_t size, bool remote){
 		msg.header.IDE = CAN_ID_STD;
 		msg.header.RTR = remote?CAN_RTR_REMOTE : CAN_RTR_DATA;
 		for(uint8_t i = 0; i < size; i++){
-			msg.data[i] = data[i];
+			msg.data.u8[i] = data[i];
 		}
 		if(HAL_CAN_IsTxMessagePending(&hcan, CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2)){
 			messages_tx.push(msg);
 			res = HAL_OK;
 		}
 		else{
-			if((res = HAL_CAN_AddTxMessage(&hcan, &msg.header, msg.data, &mailbox)) != HAL_OK){
+			if((res = HAL_CAN_AddTxMessage(&hcan, &msg.header, msg.data.u8, &mailbox)) != HAL_OK){
 				return -4;
 			}
 		}
@@ -53,7 +60,7 @@ int CAN_send_packet(uint16_t std_id, uint8_t* data, uint8_t size, bool remote){
 }
 
 int CAN_send_packet(can_tx_msg* msg){
-	int res;
+	int res=0;
 	uint32_t mailbox;
 	if(msg->header.DLC<0 || msg->header.DLC >8){
 		res = -1;
@@ -61,7 +68,7 @@ int CAN_send_packet(can_tx_msg* msg){
 	if(msg->header.StdId>0x7FF){
 		res = -2;
 	}
-	if(!msg->data){
+	if(!msg->data.u8){
 		res = -3;
 	}
 	if(msg->header.IDE != CAN_ID_STD){
@@ -73,12 +80,18 @@ int CAN_send_packet(can_tx_msg* msg){
 			res = HAL_OK;
 		}
 		else{
-			if((res = HAL_CAN_AddTxMessage(&hcan, &msg->header, msg->data, &mailbox)) != HAL_OK){
+			if((res = HAL_CAN_AddTxMessage(&hcan, &msg->header, msg->data.u8, &mailbox)) != HAL_OK){
 				return -4;
 			}
 		}
     }
 	return res;
+}
+
+int CAN_send_encoder_pos(int32_t left, int32_t right){
+  CAN_TX_COD_POS.data.d32[0]=left;
+  CAN_TX_COD_POS.data.d32[1]=right;
+  return CAN_send_packet(&CAN_TX_COD_POS);
 }
 
 int CAN_receive_packet(can_rx_msg* msg){
@@ -90,7 +103,7 @@ int CAN_receive_packet(can_rx_msg* msg){
     else{
     	if(HAL_CAN_GetRxFifoFillLevel(&hcan, CAN_RX_FIFO0) > 0){
     		// At least one message has been received since last read
-			res = HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &msg->header, msg->data);
+			res = HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &msg->header, msg->data.u8);
     	}
     }
 	return res;
@@ -137,7 +150,9 @@ void MX_CAN_Init(void)
     while(1);
   }
 
-  //FILTERBANK INIT
+  /*
+   * INITIALIZE FILTERS
+   */
   CAN_FilterTypeDef filterConfig;
   filterConfig.FilterBank = 0;
   filterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
@@ -154,6 +169,34 @@ void MX_CAN_Init(void)
   if((res = HAL_CAN_Start(&hcan)) != HAL_OK){
 	  while(1);
   }
+
+  /*
+   * INITIALIZE MESSAGE TEMPLATES
+   */
+
+  CAN_TX_HEARTBEAT.header.DLC=0;
+  CAN_TX_HEARTBEAT.header.IDE=CAN_ID_STD;
+  CAN_TX_HEARTBEAT.header.RTR=CAN_RTR_DATA;
+  CAN_TX_HEARTBEAT.header.StdId = CAN_PKT_ID(CAN_PIPE_HL, CAN_MSG_HEARTBEAT);
+
+  CAN_TX_MOV_END.header.DLC=1;
+  CAN_TX_MOV_END.header.IDE=CAN_ID_STD;
+  CAN_TX_MOV_END.header.RTR=CAN_RTR_DATA;
+  CAN_TX_MOV_END.header.StdId = CAN_PKT_ID(CAN_PIPE_PROP, CAN_MSG_MOV_END);
+  CAN_TX_MOV_END.data.u8[0] = 0;
+
+  CAN_TX_COD_POS.header.DLC=8;
+  CAN_TX_COD_POS.header.IDE=CAN_ID_STD;
+  CAN_TX_COD_POS.header.RTR=CAN_RTR_DATA;
+  CAN_TX_COD_POS.header.StdId = CAN_PKT_ID(CAN_PIPE_PROP, CAN_MSG_COD_POS);
+  CAN_TX_COD_POS.data.d32[0]=0;
+  CAN_TX_COD_POS.data.d32[1]=0;
+
+
+
+  /*
+   * INITIALIZE INTERRUPT SYSTEM FOR CAN
+   */
   CAN_IRQ_RX_Pending_enable(&hcan, CAN_RX_FIFO0);
   //CAN_IRQ_RX_Pending_enable(&hcan, CAN_RX_FIFO1);
   CAN_IRQ_TX_Empty_enable(&hcan);
@@ -236,7 +279,7 @@ void CEC_CAN_IRQHandler(void){
 		// At least one message has been received since last read
 		if(!messages_rx.is_full()){
 			//There is room in the program buffer
-			if((res = HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &rx_msg.header, rx_msg.data)) == HAL_OK){
+			if((res = HAL_CAN_GetRxMessage(&hcan, CAN_RX_FIFO0, &rx_msg.header, rx_msg.data.u8)) == HAL_OK){
 				messages_rx.push(rx_msg);
 			}
 		}
@@ -252,7 +295,7 @@ void CEC_CAN_IRQHandler(void){
 		// A TX mailbox completed a transmit or abort request, it is now free
 		if(!messages_tx.is_empty()){
 			tx_msg = messages_tx.pop();
-			HAL_CAN_AddTxMessage(&hcan, &tx_msg.header, tx_msg.data, &used_mailbox);
+			HAL_CAN_AddTxMessage(&hcan, &tx_msg.header, tx_msg.data.u8, &used_mailbox);
 		}
 		else{
 			CAN_IRQ_TX_Empty_disable(&hcan);

@@ -42,7 +42,8 @@ void MX_TIM16_Init(void);
 void MX_TIM17_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+int32_t COD_get_left();
+int32_t COD_get_right();
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
