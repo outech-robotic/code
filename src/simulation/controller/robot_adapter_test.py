@@ -32,9 +32,9 @@ def robot_adapter_factory(simulation_configuration, motion_handler):
     )
 
 
-def test_position_update(robot_adapter, motion_handler):
-    """
-    Test that the adapter updates the robot's position.
-    """
-    robot_adapter.on_tick(STUB_STATE)
-    motion_handler.position_update.assert_called_once_with(1, 2, math.pi / 2)
+# def test_position_update(robot_adapter, motion_handler):
+#     """
+#     Test that the adapter updates the robot's position.
+#     """
+#     robot_adapter.on_tick(STUB_STATE)
+#     motion_handler.position_update.assert_called_once_with(1, 2, math.pi / 2)

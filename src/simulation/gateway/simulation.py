@@ -3,6 +3,7 @@ Simulation gateway module.
 """
 from src.robot.handler.motion import MotionHandler
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
+from src.util.encoding import packet
 
 
 class SimulationGateway:
@@ -20,4 +21,6 @@ class SimulationGateway:
         """
         Send the "movement done" signal to the robot.
         """
-        self.motion_handler.movement_done()
+        self.motion_handler.movement_done(
+            packet.encode_propulsion_movement_done(
+                packet.PropulsionMovementDonePacket(blocked=False,)))

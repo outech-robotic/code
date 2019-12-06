@@ -4,7 +4,7 @@ RobotAdapter module.
 from src.robot.handler.motion import MotionHandler
 from src.simulation.controller.subscriber import SimulationSubscriber
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
-from src.simulation.entity.state import State, RobotID
+from src.simulation.entity.state import State
 
 
 class RobotAdapter(SimulationSubscriber):
@@ -26,8 +26,13 @@ class RobotAdapter(SimulationSubscriber):
         Send location updates.
         """
 
-        robot_a = state.robots[RobotID.RobotA]
-        position = robot_a.position
-        angle = robot_a.angle
+        # robot_a = state.robots[RobotID.RobotA]
+        # position = robot_a.position
+        # angle = robot_a.angle
 
-        self.motion_handler.position_update(position.x, position.y, angle)
+        # self.motion_handler.position_update(
+        #     packet.encode_propulsion_encoder_position(
+        #         packet.PropulsionEncoderPositionPacket(
+        #             position=Vector2(position.x, position.y),
+        #             angle=angle,
+        #         )))

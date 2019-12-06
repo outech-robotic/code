@@ -9,8 +9,8 @@ import structlog
 import uvloop
 
 from src.robot.controller.localization import LocalizationController
-from src.robot.controller.map import MapController
 from src.robot.controller.motion import MotionController
+from src.robot.controller.odometry import OdometryController
 from src.robot.controller.strategy import StrategyController
 from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.color import Color
@@ -18,7 +18,6 @@ from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
 from src.robot.handler.motion import MotionHandler
-from src.robot.repository.localization import LocalizationRepository
 from src.robot.repository.map import NumpyMapRepository
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
@@ -55,7 +54,7 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('motion_handler', MotionHandler)
 
-    i.provide('map_controller', MapController)
+    i.provide('odometry_controller', OdometryController)
     i.provide('localization_controller', LocalizationController)
     i.provide('motion_controller', MotionController)
     i.provide('strategy_controller', StrategyController)
@@ -63,7 +62,6 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('simulation_gateway', SimulationGateway)
 
-    i.provide('localization_repository', LocalizationRepository)
     i.provide(
         'map_repository',
         NumpyMapRepository(initial_map=numpy.zeros((300, 200), dtype=bool)))

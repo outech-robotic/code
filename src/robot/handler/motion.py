@@ -2,7 +2,7 @@
 Motion handler module.
 """
 from src.robot.controller.localization import LocalizationController
-from src.robot.entity.type import Millimeter, Radian
+from src.util.encoding import packet
 
 
 class MotionHandler:
@@ -13,16 +13,17 @@ class MotionHandler:
     def __init__(self, localization_controller: LocalizationController) -> None:
         self.localization_controller = localization_controller
 
-    def position_update(self, pos_x: Millimeter, pos_y: Millimeter,
-                        angle: Radian) -> None:
+    def position_update(self, data: bytes) -> None:
         """
         Handle position update.
         """
+        msg = packet.decode_propulsion_encoder_position(data)
         self.localization_controller.update_odometry_position(
-            pos_x, pos_y, angle)
+            msg.left_tick, msg.right_tick)
 
-    def movement_done(self) -> None:
+    def movement_done(self, data: bytes) -> None:
         """
         Handle movement done message.
         """
+        _ = packet.decode_propulsion_movement_done(data)
         self.localization_controller.set_is_moving(False)

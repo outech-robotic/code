@@ -6,16 +6,7 @@ from unittest.mock import MagicMock
 from _pytest.fixtures import fixture
 
 from src.robot.controller.localization import LocalizationController
-from src.robot.controller.map import MapController
 from src.robot.handler.motion import MotionHandler
-
-
-@fixture(name='map_controller')
-def map_controller_mock():
-    """
-    Map controller mock.
-    """
-    return MagicMock(spec=MapController)
 
 
 @fixture(name='localization_controller')
