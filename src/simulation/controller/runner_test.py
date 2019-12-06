@@ -17,33 +17,33 @@ ROTATE_TEN_UNITS_PAYLOAD = {'angle': 10, 'robot_id': RobotID.RobotA}
 
 # pylint: disable=too-many-arguments
 @fixture(name='simulation_runner')
-def simulation_runner_factory(event_queue, simulation_gateway,
-                              simulation_configuration, configuration,
-                              robot_adapter, replay_saver):
+def simulation_runner_factory(event_queue_mock, simulation_gateway_mock,
+                              simulation_configuration_test, configuration_test,
+                              robot_adapter_mock, replay_saver_mock):
     """
     Simulation runner.
     """
     return SimulationRunner(
-        event_queue=event_queue,
-        simulation_gateway=simulation_gateway,
-        configuration=configuration,
-        simulation_configuration=simulation_configuration,
-        robot_adapter=robot_adapter,
-        replay_saver=replay_saver,
+        event_queue=event_queue_mock,
+        simulation_gateway=simulation_gateway_mock,
+        configuration=configuration_test,
+        simulation_configuration=simulation_configuration_test,
+        robot_adapter=robot_adapter_mock,
+        replay_saver=replay_saver_mock,
     )
 
 
 @pytest.mark.asyncio
-async def test_run_move_forward(simulation_runner, event_queue):
+async def test_run_move_forward(simulation_runner, event_queue_mock):
     """
     Test the move forward event.
     """
-    event_queue.push(event_order=EventOrder(type=EventType.MOVE_FORWARD,
-                                            payload=MOVE_TEN_UNITS_PAYLOAD),
-                     tick_offset=0)
-    event_queue.push(event_order=EventOrder(type=EventType.MOVE_FORWARD,
-                                            payload=MOVE_TEN_UNITS_PAYLOAD),
-                     tick_offset=10)
+    event_queue_mock.push(event_order=EventOrder(
+        type=EventType.MOVE_FORWARD, payload=MOVE_TEN_UNITS_PAYLOAD),
+                          tick_offset=0)
+    event_queue_mock.push(event_order=EventOrder(
+        type=EventType.MOVE_FORWARD, payload=MOVE_TEN_UNITS_PAYLOAD),
+                          tick_offset=10)
 
     robot = simulation_runner.state.robots[RobotID.RobotA]
     start_pos = robot.position
@@ -56,16 +56,16 @@ async def test_run_move_forward(simulation_runner, event_queue):
 
 
 @pytest.mark.asyncio
-async def test_run_rotate(simulation_runner, event_queue):
+async def test_run_rotate(simulation_runner, event_queue_mock):
     """
     Test the rotate event.
     """
-    event_queue.push(event_order=EventOrder(type=EventType.ROTATE,
-                                            payload=ROTATE_TEN_UNITS_PAYLOAD),
-                     tick_offset=0)
-    event_queue.push(event_order=EventOrder(type=EventType.ROTATE,
-                                            payload=ROTATE_TEN_UNITS_PAYLOAD),
-                     tick_offset=10)
+    event_queue_mock.push(event_order=EventOrder(
+        type=EventType.ROTATE, payload=ROTATE_TEN_UNITS_PAYLOAD),
+                          tick_offset=0)
+    event_queue_mock.push(event_order=EventOrder(
+        type=EventType.ROTATE, payload=ROTATE_TEN_UNITS_PAYLOAD),
+                          tick_offset=10)
 
     robot = simulation_runner.state.robots[RobotID.RobotA]
     start_ang = robot.angle
@@ -78,29 +78,29 @@ async def test_run_rotate(simulation_runner, event_queue):
 
 
 @pytest.mark.asyncio
-async def test_run_movement_done(simulation_runner, event_queue,
-                                 simulation_gateway):
+async def test_run_movement_done(simulation_runner, event_queue_mock,
+                                 simulation_gateway_mock):
     """
     Test the movement done event.
     """
-    event_queue.push(event_order=EventOrder(type=EventType.MOVEMENT_DONE),
-                     tick_offset=0)
+    event_queue_mock.push(event_order=EventOrder(type=EventType.MOVEMENT_DONE),
+                          tick_offset=0)
 
     task = asyncio.create_task(simulation_runner.run())
     await asyncio.sleep(0.05)
     task.cancel()
 
-    simulation_gateway.movement_done.assert_called_once()
+    simulation_gateway_mock.movement_done.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_run_incorrect_event_type(simulation_runner, event_queue):
+async def test_run_incorrect_event_type(simulation_runner, event_queue_mock):
     """
     An unknown event should raise an exception.
     """
     # Pass an incorrect event type on purpose.
-    event_queue.push(event_order=EventOrder(type='unkown'),
-                     tick_offset=0)  # type: ignore
+    event_queue_mock.push(event_order=EventOrder(type='unkown'),
+                          tick_offset=0)  # type: ignore
 
     with pytest.raises(Exception):
         await asyncio.wait_for(simulation_runner.run(), timeout=1)

@@ -4,7 +4,6 @@ Main module.
 import asyncio
 import math
 
-import numpy
 import structlog
 import uvloop
 
@@ -18,7 +17,6 @@ from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
 from src.robot.handler.motion import MotionHandler
-from src.robot.repository.map import NumpyMapRepository
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.controller import SimulationController
@@ -61,10 +59,6 @@ def _provide_robot_components(i: DependencyContainer) -> None:
     i.provide('symmetry_controller', SymmetryController)
 
     i.provide('simulation_gateway', SimulationGateway)
-
-    i.provide(
-        'map_repository',
-        NumpyMapRepository(initial_map=numpy.zeros((300, 200), dtype=bool)))
 
 
 def _provide_simulator(i: DependencyContainer) -> None:

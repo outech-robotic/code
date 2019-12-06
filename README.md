@@ -64,3 +64,7 @@ The simulation would actually be inverted compared to the robot's code. What com
 
 Thus, the handler of the simulation is actually the gateway of the robot. The gateway of the simulation actually "talks" with the handler of the robot.
 
+
+## Testing
+
+All the mocks at in /src/conftest.py
