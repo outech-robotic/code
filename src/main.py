@@ -13,6 +13,7 @@ from src.robot.controller.map import MapController
 from src.robot.controller.motion import MotionController
 from src.robot.controller.strategy import StrategyController
 from src.robot.controller.symmetry import SymmetryController
+from src.robot.entity.color import Color
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
@@ -22,15 +23,14 @@ from src.robot.repository.map import NumpyMapRepository
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.controller import SimulationController
+from src.simulation.controller.event_queue import EventQueue
 from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.controller.robot_adapter import RobotAdapter
 from src.simulation.controller.runner import SimulationRunner
-from src.simulation.controller.event_queue import EventQueue
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
 from src.util.dependency_container import DependencyContainer
-from src.robot.entity.color import Color
 
 CONFIG = Configuration(
     initial_position=Vector2(1500, 1000),
@@ -39,6 +39,9 @@ CONFIG = Configuration(
     robot_length=240,
     field_shape=(3000, 2000),
     color=Color.BLUE,
+    wheel_radius=30,
+    encoder_ticks_per_revolution=2400,
+    distance_between_wheels=357,
 )
 
 LOGGER = structlog.get_logger()

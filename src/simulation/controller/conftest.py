@@ -69,6 +69,9 @@ def configuration_stub():
         robot_length=10,
         field_shape=(100, 100),
         color=Color.BLUE,
+        wheel_radius=1,
+        encoder_ticks_per_revolution=1,
+        distance_between_wheels=1,
     )
 
 

@@ -21,6 +21,9 @@ def get_symmetry_controller(color: Color) -> SymmetryController:
             robot_length=330,
             field_shape=(3000, 2000),
             color=color,
+            wheel_radius=1,
+            encoder_ticks_per_revolution=1,
+            distance_between_wheels=1,
         ))
 
 

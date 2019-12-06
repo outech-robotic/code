@@ -10,6 +10,7 @@ from src.robot.entity.type import Radian, Millimeter
 from src.robot.entity.vector import Vector2
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass(frozen=True)
 class Configuration:
     """
@@ -23,3 +24,7 @@ class Configuration:
     robot_length: Millimeter
 
     field_shape: Tuple[Millimeter, Millimeter]
+
+    wheel_radius: Millimeter
+    encoder_ticks_per_revolution: int
+    distance_between_wheels: Millimeter
