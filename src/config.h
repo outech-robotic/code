@@ -1,0 +1,39 @@
+/*
+ * config.h
+ *
+ *  Created on: 4 déc. 2019
+ *      Author: Tic-Tac
+ */
+
+#ifndef UTILITY_CONFIG_H_
+#define UTILITY_CONFIG_H_
+
+/*
+ * COMMUNICATIONS
+ */
+//CAN CONFIG
+#define CONST_CAN_MODE_LOOPBACK
+#define CONST_CAN_SPEED_100K
+//#define CONST_CAN_SPEED_1M
+
+//USART CONFIG
+#define CONST_USART_BAUDRATE (9600)
+
+//BUFFER SIZE USED IN ISR
+#define CONST_CAN_BUFFER_SIZE (16)
+
+//PIPE IDs
+#define CAN_PIPE_PROP  (0b0000)
+#define CAN_PIPE_HL    (0b0001)
+#define CAN_PIPE_SERVO (0b0010)
+
+//MESSAGE IDs
+//PROPULSION MESSAGES
+#define CAN_MSG_STOP      (0b0000000)
+#define CAN_MSG_MOV_END   (0b0000001)
+#define CAN_MSG_MOV       (0b0000010)
+#define CAN_MSG_COD_POS   (0b0000011)
+//HL MESSAGES
+#define CAN_MSG_HEARTBEAT (0b0101010)
+
+#endif /* UTILITY_CONFIG_H_ */

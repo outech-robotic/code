@@ -1,8 +1,8 @@
 #ifndef GPIO_GPIO_C_
 #define GPIO_GPIO_C_
 
-#include <GPIO/gpio_pins.h>
 #include <stm32f0xx_ll_bus.h>
+#include "GPIO/gpio_pins.h"
 
 
 typedef enum{

@@ -1,9 +1,9 @@
+#include "config.h"
+#include <CAN/can.h>
+#include <GPIO/gpio.h>
 #include "UTILITY/macros.h"
-#include "UTILITY/config.h"
-#include "CAN/can.hpp"
-#include "GPIO/gpio.hpp"
 #include "UTILITY/ring_buffer.hpp"
-
+#include <stdio.h>
 /*
  * CAN TX MESSAGE TEMPLATES
  */
@@ -26,62 +26,36 @@ uint32_t tx_mailbox;
 
 
 int CAN_send_packet(uint16_t std_id, uint8_t* data, uint8_t size, bool remote){
-	int res;
-	uint32_t mailbox;
 	can_tx_msg msg;
-	if(size<0 || size >8){
-		res = -1;
-	}
-	if(std_id>0x7FF){
-		res = -2;
-	}
-	if(!data){
-		res = -3;
-	}
-    if(res >= 0){
-		msg.header.DLC = size;
-		msg.header.StdId = std_id;
-		msg.header.IDE = CAN_ID_STD;
-		msg.header.RTR = remote?CAN_RTR_REMOTE : CAN_RTR_DATA;
-		for(uint8_t i = 0; i < size; i++){
-			msg.data.u8[i] = data[i];
-		}
-		if(HAL_CAN_IsTxMessagePending(&hcan, CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2)){
-			messages_tx.push(msg);
-			res = HAL_OK;
-		}
-		else{
-			if((res = HAL_CAN_AddTxMessage(&hcan, &msg.header, msg.data.u8, &mailbox)) != HAL_OK){
-				return -4;
-			}
-		}
-    }
-	return res;
+	msg.header.DLC=size;
+	msg.header.StdId=std_id;
+	msg.header.RTR=remote ? CAN_RTR_REMOTE : CAN_RTR_DATA;
+	return CAN_send_packet(&msg);
 }
 
 int CAN_send_packet(can_tx_msg* msg){
-	int res=0;
+	int res=CAN_ERROR_STATUS::CAN_PKT_OK;
 	uint32_t mailbox;
-	if(msg->header.DLC<0 || msg->header.DLC >8){
-		res = -1;
+	if(msg->header.DLC >8){
+		res = CAN_ERROR_STATUS::PACKET_DLC_TOO_LARGE;
 	}
 	if(msg->header.StdId>0x7FF){
-		res = -2;
+		res = CAN_ERROR_STATUS::PACKET_ID_TOO_LARGE;
 	}
 	if(!msg->data.u8){
-		res = -3;
+		res = CAN_ERROR_STATUS::DATA_NPE;
 	}
 	if(msg->header.IDE != CAN_ID_STD){
-		res = -4;
+		res = CAN_ERROR_STATUS::NON_STD_NOT_SUPPORTED;
 	}
     if(res >= 0){
 		if(HAL_CAN_IsTxMessagePending(&hcan, CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2)){
 			messages_tx.push(*msg);
-			res = HAL_OK;
+			res = CAN_ERROR_STATUS::CAN_PKT_OK;
 		}
 		else{
 			if((res = HAL_CAN_AddTxMessage(&hcan, &msg->header, msg->data.u8, &mailbox)) != HAL_OK){
-				return -4;
+				return CAN_ERROR_STATUS::PACKET_TX_ERROR;
 			}
 		}
     }
@@ -109,6 +83,13 @@ int CAN_receive_packet(can_rx_msg* msg){
 	return res;
 }
 
+void CAN_print_rx_pkt(can_rx_msg* msg){
+  printf("PKT::0x%04lX::0x%lX", msg->header.StdId, msg->header.DLC);
+  for(uint8_t i = 0; i < msg->header.DLC; i++){
+	  printf("::0x%02hX", msg->data.u8[i]);
+  }
+  printf("\r\n");
+}
 
 void CAN_IRQ_RX_Pending_enable(CAN_HandleTypeDef* can, uint32_t fifo){
     SET_BIT(can->Instance->IER, fifo==CAN_RX_FIFO0?CAN_IER_FMPIE0:CAN_IER_FMPIE1);
@@ -132,13 +113,25 @@ void MX_CAN_Init(void)
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_CAN);
   hcan.State = HAL_CAN_STATE_RESET;
   hcan.Instance = CAN;
-  // Setup CAN speed : 0.1MBit : 1/(48MHz/30) = time quantum = 10/16 us. 13+2+1 Time quantum/bit = 10us/bit
-  hcan.Init.Prescaler = 30;
-  hcan.Init.Mode = CAN_MODE_LOOPBACK;
+#ifdef CONST_CAN_SPEED_1M
+  // Setup CAN speed : 1MBit : 1/(48MHz/3) = time quantum = 1/16 us. 13+2+1 Time quantum/bit = 1us/bit
+  hcan.Init.Prescaler = 3;
   hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
   hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
-
+#endif
+#ifdef CONST_CAN_SPEED_100K
+  // Setup CAN speed : 0.1MBit : 1/(48MHz/30) = time quantum = 10/16 us. 13+2+1 Time quantum/bit = 10us/bit
+  hcan.Init.Prescaler = 30;
+  hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
+  hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
+  hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
+#endif
+#ifdef CONST_CAN_MODE_LOOPBACK
+  hcan.Init.Mode = CAN_MODE_LOOPBACK;
+#else
+  hcan.Init.Mode = CAN_MODE_NORMAL;
+#endif
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
@@ -150,6 +143,10 @@ void MX_CAN_Init(void)
     while(1);
   }
 
+
+  if((res = HAL_CAN_Start(&hcan)) != HAL_OK){
+	  while(1);
+  }
   /*
    * INITIALIZE FILTERS
    */
@@ -166,10 +163,6 @@ void MX_CAN_Init(void)
   if((res = HAL_CAN_ConfigFilter(&hcan, &filterConfig)) != HAL_OK){
       while(1);
   }
-  if((res = HAL_CAN_Start(&hcan)) != HAL_OK){
-	  while(1);
-  }
-
   /*
    * INITIALIZE MESSAGE TEMPLATES
    */
@@ -191,8 +184,6 @@ void MX_CAN_Init(void)
   CAN_TX_COD_POS.header.StdId = CAN_PKT_ID(CAN_PIPE_PROP, CAN_MSG_COD_POS);
   CAN_TX_COD_POS.data.d32[0]=0;
   CAN_TX_COD_POS.data.d32[1]=0;
-
-
 
   /*
    * INITIALIZE INTERRUPT SYSTEM FOR CAN

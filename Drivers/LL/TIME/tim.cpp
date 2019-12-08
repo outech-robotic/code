@@ -1,7 +1,9 @@
+#include <GPIO/gpio.h>
+#include "TIME/tim.h"
+
 #include "stm32f0xx_ll_tim.h"
 //#include "stm32f0xx_hal.h"
-#include "GPIO/gpio.hpp"
-#include "tim.h"
+
 
 
 //TIM16_CH1 : LEFT  - FIN PWM

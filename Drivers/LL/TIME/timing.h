@@ -5,8 +5,8 @@
  *      Author: Tic-Tac
  */
 
-#ifndef TIME_TIMING_H_
-#define TIME_TIMING_H_
+#ifndef LL_TIME_TIMING_H_
+#define LL_TIME_TIMING_H_
 
 #include <stm32f0xx_ll_rcc.h>
 
@@ -21,4 +21,4 @@ void delay_us(uint32_t us);
 #ifdef __cplusplus
 };
 #endif
-#endif /* TIME_TIMING_H_ */
+#endif /* LL_TIME_TIMING_H_ */

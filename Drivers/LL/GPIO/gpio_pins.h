@@ -5,11 +5,10 @@
  *      Author: Tic-Tac
  */
 
-#ifndef GPIO_GPIO_PINS_H_
-#define GPIO_GPIO_PINS_H_
+#ifndef LL_GPIO_GPIO_PINS_H_
+#define LL_GPIO_GPIO_PINS_H_
 
 #include "stm32f0xx_ll_gpio.h"
-
 
 typedef struct{
 	GPIO_TypeDef* port;
@@ -81,4 +80,4 @@ GPIO_Pin_Extern_Def(B,15);
 #define PIN_PWM_R_FIN PB0
 #define PIN_PWM_R_RIN PB1
 
-#endif /* GPIO_GPIO_PINS_H_ */
+#endif /* LL_GPIO_GPIO_PINS_H_ */

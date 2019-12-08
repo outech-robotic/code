@@ -5,11 +5,11 @@
  *      Author: Tic-Tac
  */
 
-#ifndef TIME_METRO_HPP_
-#define TIME_METRO_HPP_
+#ifndef LL_TIME_METRO_HPP_
+#define LL_TIME_METRO_HPP_
 
 
-#include "timing.h"
+#include "TIME/timing.h"
 
 
 class Metro{
@@ -41,4 +41,4 @@ public:
 };
 
 
-#endif /* TIME_METRO_HPP_ */
+#endif /* LL_TIME_METRO_HPP_ */

@@ -1,6 +1,7 @@
-#include <USART/usart.hpp>
+#include <GPIO/gpio.h>
+#include "USART/usart.hpp"
 #include "stm32f0xx_ll_usart.h"
-#include "GPIO/gpio.hpp"
+
 
 
 void MX_USART1_UART_Init(void)

@@ -1,4 +1,4 @@
-#include "GPIO/gpio.hpp"
+#include <GPIO/gpio.h>
 
 void gpio_port_enable_clock(GPIO_TypeDef* port){
     #ifdef GPIOA
