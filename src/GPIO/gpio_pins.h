@@ -72,6 +72,10 @@ GPIO_Pin_Extern_Def(B,15);
 #define PIN_USART1_RX PA10
 
 // MOTOR CONTROL PINS (cf BD62321HFP-TR H Bridge documentation page 7/13 for usage)
+// PA6 - TIM16_CH1
+// PA7 - TIM1_CH1N
+// PB0 - TIM1_CH2N
+// PB1 - TIM1_CH3N
 #define PIN_PWM_L_FIN PA6
 #define PIN_PWM_L_RIN PA7
 #define PIN_PWM_R_FIN PB0

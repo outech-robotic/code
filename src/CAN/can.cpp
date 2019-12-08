@@ -233,21 +233,6 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
   }
 }
 
-void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
-{
-  if(canHandle->Instance==CAN)
-  {
-    /* Peripheral clock disable */
-    __HAL_RCC_CAN1_CLK_DISABLE();
-  
-    /**CAN GPIO Configuration    
-    PA11     ------> CAN_RX
-    PA12     ------> CAN_TX 
-    */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11|GPIO_PIN_12);
-  }
-} 
-
 int8_t CAN_check_request_done(CAN_HandleTypeDef* handle){
     if(HAL_IS_BIT_SET(handle->Instance->TSR, CAN_TSR_RQCP0)){
     	return CAN_TX_MAILBOX0;

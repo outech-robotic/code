@@ -20,6 +20,7 @@
 #ifndef __tim_H
 #define __tim_H
 #include "stm32f0xx_ll_tim.h"
+#include "GPIO/gpio_pins.h"
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -44,6 +45,7 @@ void MX_TIM17_Init(void);
 /* USER CODE BEGIN Prototypes */
 int32_t COD_get_left();
 int32_t COD_get_right();
+void PWM_write(GPIO_Pin& pin, uint16_t value);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

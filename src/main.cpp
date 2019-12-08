@@ -18,7 +18,7 @@ void print_rx_pkt(CAN_RxHeaderTypeDef* header, uint8_t* data){
   }
   printf("\r\n");
 }
-
+bool state = false;
 extern volatile uint32_t overflows;
 volatile int32_t pos = 0;
 volatile int32_t last_pos = 0;
@@ -33,7 +33,7 @@ uint32_t mesure_t_irq_last = 0;
   */
 int main(void)
 {
-  Metro can_wait(100);
+  Metro can_wait(1000);
   // Initialize timing utility functions (delay, millis...)
   Timing_init();
 
@@ -44,7 +44,6 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM14_Init();
   MX_TIM16_Init();
-  MX_TIM17_Init();
   MX_USART1_UART_Init();
 
   printf("Setup done.\r\n");
@@ -64,7 +63,23 @@ int main(void)
       printf("RECV: ");
       print_rx_pkt(&rx_msg.header, rx_msg.data.u8);
     }
+    if(TIM16->CNT>TIM16->CCR1){
+    	continue;
+    }
     if(can_wait.check()){
+    	if(state){
+    		PWM_write(PIN_PWM_L_FIN, 2000);
+    		PWM_write(PIN_PWM_L_RIN, 0);
+    		PWM_write(PIN_PWM_R_FIN, 2000);
+    		PWM_write(PIN_PWM_R_RIN, 0);
+    	}
+    	else{
+    		PWM_write(PIN_PWM_L_FIN, 0);
+    		PWM_write(PIN_PWM_L_RIN, 2000);
+    		PWM_write(PIN_PWM_R_FIN, 0);
+    		PWM_write(PIN_PWM_R_RIN, 2000);
+    	}
+    	state=!state;
 		if((CAN_send_encoder_pos(COD_get_left(), COD_get_right())) != HAL_OK){
 		  printf("ERR: SENDING\r\n");
 		}
@@ -92,6 +107,12 @@ void TIM14_IRQHandler(void){
 		last_pos=pos;
 	}
 	mesure_t_irq = micros()-mesure_t_irq;
+}
+
+void TIM16_IRQHandler(void){
+	if(LL_TIM_IsActiveFlag_CC1(TIM16)){
+		LL_TIM_ClearFlag_CC1(TIM16);
+	}
 }
 #ifdef __cplusplus
 }
