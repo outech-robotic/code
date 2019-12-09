@@ -1,6 +1,7 @@
 """
 Test motion handler module.
 """
+import pytest
 from pytest import fixture
 
 from src.robot.handler.motion import MotionHandler
@@ -15,25 +16,27 @@ def motion_handler_setup(localization_controller_mock):
     return MotionHandler(localization_controller=localization_controller_mock)
 
 
-def test_position_update(motion_handler, localization_controller_mock):
+@pytest.mark.asyncio
+async def test_position_update(motion_handler, localization_controller_mock):
     """
     Happy path.
     """
-    motion_handler.position_update(
+    await motion_handler.handle_position_update(
         packet.encode_propulsion_encoder_position(
             packet.PropulsionEncoderPositionPacket(
                 left_tick=1,
                 right_tick=2,
             )))
-    localization_controller_mock.update_odometry_position.asser_called_once_with(
+    localization_controller_mock.update_odometry_position.assert_called_once_with(
         1, 2)
 
 
-def test_movement_done(motion_handler, localization_controller_mock):
+@pytest.mark.asyncio
+async def test_movement_done(motion_handler, localization_controller_mock):
     """
     Happy path.
     """
-    motion_handler.movement_done(
+    await motion_handler.handle_movement_done(
         packet.encode_propulsion_movement_done(
             packet.PropulsionMovementDonePacket(blocked=True)))
-    localization_controller_mock.set_is_moving.assert_called_with(False)
+    localization_controller_mock.movement_done.assert_called_once()

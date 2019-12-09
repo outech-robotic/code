@@ -7,22 +7,24 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from src.main import CONFIG
 from src.robot.controller.localization import LocalizationController
 from src.robot.entity.vector import Vector2
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument,too-many-arguments
 @pytest.fixture(name='localization_controller')
 def localization_controller_setup(event_loop, odometry_controller_mock,
-                                  symmetry_controller_mock):
+                                  symmetry_controller_mock, configuration_test,
+                                  motion_gateway_mock, simulation_probe_mock):
     """
     Localization controller.
     """
     return LocalizationController(
         symmetry_controller=symmetry_controller_mock,
         odometry_controller=odometry_controller_mock,
-        configuration=CONFIG,
+        configuration=configuration_test,
+        motion_gateway=motion_gateway_mock,
+        simulation_probe=simulation_probe_mock,
     )
 
 
@@ -47,21 +49,64 @@ class TestLocalizationController:
 
     @staticmethod
     @pytest.mark.asyncio
-    async def test_moving_state(localization_controller):
+    async def test_move_forward_is_blocking(localization_controller,
+                                            odometry_controller_mock):
         """
-        Test the functions related to is_moving state.
+        Test that move forward blocks until the end of the movement.
         """
-        # We set is_moving to True.
-        localization_controller.set_is_moving(True)
 
-        # Set it back to False 10ms after.
-        async def movement_done():
-            await asyncio.sleep(0.01)
-            localization_controller.set_is_moving(False)
+        async def stop_movement():
+            """
+            stop movement after 10ms.
+            """
+            await asyncio.sleep(0.1)
+            localization_controller.movement_done()
 
         start_time = time.time()
-        asyncio.create_task(movement_done())
+        asyncio.create_task(stop_movement())
+        await localization_controller.move_forward(10)
+        assert time.time() - start_time > 0.1
 
-        # Wait should at least wait for 10ms (until the movement stops).
-        await localization_controller.wait_for_stop_moving()
-        assert time.time() - start_time >= 0.01
+    @staticmethod
+    @pytest.mark.asyncio
+    async def test_rotate_is_blocking(localization_controller,
+                                      odometry_controller_mock):
+        """
+        Test that rotate blocks until the end of the rotation.
+        """
+
+        async def stop_movement():
+            """
+            stop movement after 10ms.
+            """
+            await asyncio.sleep(0.1)
+            localization_controller.movement_done()
+
+        start_time = time.time()
+        asyncio.create_task(stop_movement())
+        await localization_controller.rotate(10)
+        assert time.time() - start_time > 0.1
+
+    @staticmethod
+    @pytest.mark.asyncio
+    async def test_move_forward_call_gateway(localization_controller,
+                                             motion_gateway_mock):
+        """
+        Test that move forward calls the gateway.
+        """
+        asyncio.create_task(localization_controller.move_forward(10))
+        await asyncio.sleep(0.1)
+        motion_gateway_mock.move_wheels.assert_called_once_with(tick_left=2,
+                                                                tick_right=2)
+
+    @staticmethod
+    @pytest.mark.asyncio
+    async def test_rotate_call_gateway(localization_controller,
+                                       motion_gateway_mock):
+        """
+        Test that rotate calls the gateway.
+        """
+        asyncio.create_task(localization_controller.rotate(10))
+        await asyncio.sleep(0.1)
+        motion_gateway_mock.move_wheels.assert_called_once_with(tick_left=-1,
+                                                                tick_right=1)

@@ -11,15 +11,15 @@ def test_queue_happy_path():
     """
     event_queue = EventQueue()
     event1 = EventOrder(
-        type=EventType.MOVE_FORWARD,
+        type=EventType.MOVE_WHEEL,
         payload=42,
     )
     event2 = EventOrder(
-        type=EventType.MOVE_FORWARD,
+        type=EventType.MOVE_WHEEL,
         payload=24,
     )
     event3 = EventOrder(
-        type=EventType.ROTATE,
+        type=EventType.MOVEMENT_DONE,
         payload=42,
     )
 

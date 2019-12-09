@@ -10,6 +10,12 @@ import pytest
 from src.robot.can_adapter.adapter import CANAdapter
 
 
+async def stub_function():
+    """
+    Stub function.
+    """
+
+
 @pytest.fixture(name='loop')
 async def loop_fixture():
     """
@@ -29,13 +35,11 @@ async def bus_fixture():
 
 
 @pytest.fixture(name='adapter')
-async def adapter_fixture(loop, bus):
+def adapter_fixture(loop, bus):
     """
     CAN adapter.
     """
-    adapter = CANAdapter(can_bus=bus, loop=loop)
-    yield adapter
-    adapter.stop()
+    return CANAdapter(can_bus=bus, loop=loop)
 
 
 @pytest.mark.asyncio
@@ -43,13 +47,15 @@ async def test_can_adapter_dispatch_message(adapter):
     """
     Adapter should dispatch messages to a registered handler.
     """
-    handler = MagicMock()
+    handler = MagicMock(return_value=asyncio.Future())
     adapter.register_handler(0x42, handler)
 
+    task = asyncio.create_task(adapter.run())
     adapter.send(0x42, b'my data')
     await asyncio.sleep(0.01)
 
     handler.assert_called_once_with(b'my data')
+    task.cancel()
 
 
 @pytest.mark.asyncio
@@ -62,10 +68,12 @@ async def test_can_adapter_dont_dispatch_to_wrong_handler(adapter):
     handler = MagicMock()
     adapter.register_handler(0x42, handler)
 
+    task = asyncio.create_task(adapter.run())
     adapter.send(0x10, b'my data')
     await asyncio.sleep(0.01)
 
     handler.assert_not_called()
+    task.cancel()
 
 
 @pytest.mark.asyncio
@@ -73,14 +81,17 @@ async def test_can_adapter_two_handlers_registered_for_same_id(adapter):
     """
     Make sure that the CAN adapter can receive messages.
     """
-    handler1 = MagicMock()
-    handler2 = MagicMock()
+
+    handler1 = MagicMock(return_value=stub_function())
+    handler2 = MagicMock(return_value=stub_function())
 
     adapter.register_handler(0x42, handler1)
     adapter.register_handler(0x42, handler2)
 
+    task = asyncio.create_task(adapter.run())
     adapter.send(0x42, b'my data')
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.1)
 
     handler1.assert_called_once_with(b'my data')
     handler2.assert_called_once_with(b'my data')
+    task.cancel()

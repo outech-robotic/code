@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
+from src.robot.can_adapter.adapter import CANAdapter
 from src.robot.controller.localization import LocalizationController
 from src.robot.controller.odometry import OdometryController
 from src.robot.controller.symmetry import SymmetryController
@@ -12,12 +13,20 @@ from src.robot.entity.color import Color
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.geometry import Segment
 from src.robot.entity.vector import Vector2
+from src.robot.gateway.motion import MotionGateway
 from src.robot.handler.motion import MotionHandler
 from src.simulation.controller.event_queue import EventQueue
+from src.simulation.controller.probe import SimulationProbe
 from src.simulation.controller.replay_saver import ReplaySaver
-from src.simulation.controller.robot_adapter import RobotAdapter
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
+from src.simulation.entity.simulation_state import SimulationState
 from src.simulation.gateway.simulation import SimulationGateway
+
+
+async def stub_function():
+    """
+    Stub function
+    """
 
 
 @fixture
@@ -51,9 +60,24 @@ def simulation_configuration_test():
             Segment(start=Vector2(100, 0), end=Vector2(100, 100)),
         ],
         speed_factor=10000,
-        tickrate=100,
-        translation_speed=10,
+        tickrate=200,
         rotation_speed=10,
+        simulation_notify_rate=60,
+        encoder_position_rate=100,
+    )
+
+
+@fixture
+def simulation_state_mock():
+    """
+    Simulation state mock.
+    """
+    return SimulationState(
+        time=0,
+        cups=[],
+        left_tick=0,
+        right_tick=0,
+        last_position_update=0,
     )
 
 
@@ -82,14 +106,6 @@ def localization_controller_mock():
 
 
 @fixture
-def robot_adapter_mock():
-    """
-    Robot adapter.
-    """
-    return MagicMock(spec=RobotAdapter)
-
-
-@fixture
 def replay_saver_mock():
     """
     Replay saver.
@@ -102,7 +118,9 @@ def event_queue_mock():
     """
     Event queue.
     """
-    return EventQueue()
+    mock = MagicMock(spec=EventQueue)
+    mock.push = MagicMock(return_value=stub_function)
+    return mock
 
 
 @fixture
@@ -119,3 +137,27 @@ def motion_handler_mock():
     Motion handler mock.
     """
     return MagicMock(spec=MotionHandler)
+
+
+@fixture
+def motion_gateway_mock():
+    """
+    Motion gateway mock.
+    """
+    return MagicMock(spec=MotionGateway)
+
+
+@fixture
+def simulation_probe_mock():
+    """
+    Simulation probe mock.
+    """
+    return MagicMock(spec=SimulationProbe)
+
+
+@fixture
+def can_adapter_mock():
+    """
+    CAN adapter mock.
+    """
+    return MagicMock(spec=CANAdapter)

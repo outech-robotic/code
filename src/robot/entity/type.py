@@ -8,6 +8,7 @@ Millimeter = float
 MillimeterPerSec = float
 Radian = float
 RadianPerSec = float
+Hz = float
 
 
 class Wheel(Enum):

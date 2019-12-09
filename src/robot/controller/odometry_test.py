@@ -85,7 +85,7 @@ class TestOdometry:
         """
         Robot rotated without translating.
         """
-        distance = 2 * math.pi * DISTANCE_BETWEEN_WHEELS / 4
+        distance = math.pi / 2 * (DISTANCE_BETWEEN_WHEELS / 2)
         revolution = distance / (2 * math.pi * WHEEL_RADIUS)
         ticks = revolution * TICK_PER_REVOLUTION
         pos, angle = controller.odometry(
@@ -97,12 +97,12 @@ class TestOdometry:
 
         # Rotate 90 degrees without moving.
         assert pos == Vector2(0, 0)
-        assert angle == math.pi / 2
+        assert round(math.pi / 2 / angle, 1) == 1
 
         # Rotate back to 0 degrees without moving.
         pos, angle = controller.odometry(10, 10, Vector2(0, 0), 0)
         assert pos == Vector2(0, 0)
-        assert angle == -math.pi / 2
+        assert round(-math.pi / 2 / angle, 1) == 1
 
     @staticmethod
     def test_rotate_and_move_left(controller):

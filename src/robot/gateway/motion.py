@@ -1,28 +1,34 @@
 """
 Motion gateway module.
 """
-from abc import ABC, abstractmethod
+import structlog
 
-from src.robot.entity.type import Millimeter, Radian
+from src.robot.can_adapter.adapter import CANAdapter
+from src.util import can_id
+from src.util.encoding import packet
+
+LOGGER = structlog.get_logger()
 
 
-class MotionGateway(ABC):
+class MotionGateway:
     """
     Motion gateway.
     """
 
-    @abstractmethod
-    def move_forward(self, distance: Millimeter) -> None:
-        """
-        Move the robot forward.
+    def __init__(self, can_adapter: CANAdapter):
+        self.can_adapter = can_adapter
 
-        :param distance: distance in mm
+    def move_wheels(self, tick_left: int, tick_right: int) -> None:
         """
-
-    @abstractmethod
-    def rotate(self, angle: Radian) -> None:
+        Move the robot wheels.
         """
-        Rotate the robot anti-clockwise.
-
-        :param angle: angle in degrees
-        """
+        LOGGER.debug('gateway_move_wheel',
+                     tick_left=tick_left,
+                     tick_right=tick_right)
+        self.can_adapter.send(
+            can_id.PROPULSION_MOVE_WHEELS,
+            packet.encode_propulsion_move_wheels(
+                packet.PropulsionMoveWheelsPacket(
+                    tick_left=tick_left,
+                    tick_right=tick_right,
+                )))

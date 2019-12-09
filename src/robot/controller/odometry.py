@@ -55,7 +55,7 @@ class OdometryController:
         d_distance = (d_right + d_left) / 2
         if d_distance == 0:
             # Robot did not translate, rotate only.
-            wheel_dist = self.configuration.distance_between_wheels
+            wheel_dist = self.configuration.distance_between_wheels / 2
             d_theta = d_right / wheel_dist
             return pos, angle + d_theta
 
