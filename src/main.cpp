@@ -1,10 +1,12 @@
+#include <TIMER/tim.h>
 #include "CAN/can.h"
 #include "GPIO/gpio.h"
-#include "TIME/Metro.hpp"
-#include "TIME/tim.h"
-#include "TIME/timing.h"
+#include "UTILITY/Metro.hpp"
+#include "UTILITY/timing.h"
 #include "USART/usart.hpp"
 #include "stdio.h"
+
+#include "MOTION/MotionController.h"
 
 bool pwm_state = false; // PWM test state
 
@@ -16,6 +18,7 @@ volatile uint32_t mesure_t_irq = 0;
 uint32_t mesure_t_irq_last = 0;
 
 can_rx_msg rx_msg;
+MotionController mcs;
 
 
 int main(void)
@@ -23,7 +26,6 @@ int main(void)
   /**********************************************************************
    *                             SETUP
    **********************************************************************/
-
   Metro can_wait(50);
   // Initialize timing utility functions (delay, millis...)
   Timing_init();
@@ -37,6 +39,7 @@ int main(void)
   MX_TIM16_Init();
   MX_USART1_UART_Init();
 
+  mcs.init();
   printf("Setup done.\r\n");
 
   /**********************************************************************
@@ -54,19 +57,19 @@ int main(void)
         	printf("T IRQ %lu\r\n", mesure_t_irq);
         	mesure_t_irq_last = mesure_t_irq;
         }
-    	if(pwm_state){
-    		PWM_write(PIN_PWM_L_FIN, 2000);
-    		PWM_write(PIN_PWM_L_RIN, 0);
-    		PWM_write(PIN_PWM_R_FIN, 2000);
-    		PWM_write(PIN_PWM_R_RIN, 0);
-    	}
-    	else{
-    		PWM_write(PIN_PWM_L_FIN, 0);
-    		PWM_write(PIN_PWM_L_RIN, 2000);
-    		PWM_write(PIN_PWM_R_FIN, 0);
-    		PWM_write(PIN_PWM_R_RIN, 2000);
-    	}
-    	pwm_state=!pwm_state;
+//    	if(pwm_state){
+//    		PWM_write(PIN_PWM_L_FIN, 2000);
+//    		PWM_write(PIN_PWM_L_RIN, 0);
+//    		PWM_write(PIN_PWM_R_FIN, 2000);
+//    		PWM_write(PIN_PWM_R_RIN, 0);
+//    	}
+//    	else{
+//    		PWM_write(PIN_PWM_L_FIN, 0);
+//    		PWM_write(PIN_PWM_L_RIN, 2000);
+//    		PWM_write(PIN_PWM_R_FIN, 0);
+//    		PWM_write(PIN_PWM_R_RIN, 2000);
+//    	}
+//    	pwm_state=!pwm_state;
 		if((CAN_send_encoder_pos(COD_get_left(), COD_get_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
 		  printf("ERR: SENDING ENCODER\r\n");
 		}
@@ -82,6 +85,9 @@ void TIM14_IRQHandler(void){
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 		mesure_t_irq = micros();
+    mcs.update();
+    mcs.control();
+
 		pos = LL_TIM_GetCounter(TIM3)-32767;
 		if(pos!=last_pos){
 		  if(pos<last_pos && last_pos-pos>32767){

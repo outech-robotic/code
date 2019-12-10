@@ -192,6 +192,7 @@ void MX_CAN_Init(void)
   //CAN_IRQ_RX_Pending_enable(&hcan, CAN_RX_FIFO1);
   CAN_IRQ_TX_Empty_enable(&hcan);
   //hcan.Instance->IER |= CAN_IER_FMPIE0 | CAN_IER_FMPIE1;
+  NVIC_SetPriority(CEC_CAN_IRQn, 100);
   NVIC_EnableIRQ(CEC_CAN_IRQn);
 }
 

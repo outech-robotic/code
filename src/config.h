@@ -8,6 +8,12 @@
 #ifndef UTILITY_CONFIG_H_
 #define UTILITY_CONFIG_H_
 
+
+/*
+ * MOTOR CONTROL
+ */
+// TIMER PWM
+#define MOTION_PWM_PERIOD (2000)
 /*
  * COMMUNICATIONS
  */

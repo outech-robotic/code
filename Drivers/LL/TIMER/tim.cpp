@@ -1,6 +1,6 @@
-#include <GPIO/gpio.h>
-#include "TIME/tim.h"
-
+#include "GPIO/gpio.h"
+#include "TIMER/tim.h"
+#include "config.h"
 #include "stm32f0xx_ll_tim.h"
 //#include "stm32f0xx_hal.h"
 
@@ -34,7 +34,7 @@ void MX_TIM16_Init(void)
   /* TIM Configuration */
   TIM_InitStruct.Prescaler = 0;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 2000;
+  TIM_InitStruct.Autoreload = MOTION_PWM_PERIOD;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM16, &TIM_InitStruct);
@@ -112,7 +112,7 @@ void MX_TIM1_Init(void)
 	  /* TIM Configuration */
 	  TIM_InitStruct.Prescaler = 0;
 	  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-	  TIM_InitStruct.Autoreload = 2000;
+	  TIM_InitStruct.Autoreload = MOTION_PWM_PERIOD;
 	  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
 	  TIM_InitStruct.RepetitionCounter = 0;
 	  LL_TIM_Init(TIM1, &TIM_InitStruct);
@@ -272,6 +272,7 @@ void MX_TIM14_Init(void)
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM14, &TIM_InitStruct);
   LL_TIM_EnableIT_UPDATE(TIM14);
+  NVIC_SetPriority(TIM14_IRQn, 1);
   NVIC_EnableIRQ(TIM14_IRQn);
   LL_TIM_EnableCounter(TIM14);
 }

@@ -5,11 +5,11 @@
  *      Author: Tic-Tac
  */
 
-#include "TIME/timing.h"
-#define cycles_per_us (F_CPU/1000000)
+#include "UTILITY/timing.h"
+#define cycles_per_us ((F_CPU/1000000))
 #define ticks_freq  (1000)
 #define cycles_per_tick (F_CPU/ticks_freq)
-#define us_per_tick (cycles_per_tick/cycles_per_us)
+#define us_per_tick ((cycles_per_tick/cycles_per_us))
 
 
 volatile uint32_t milliseconds;
