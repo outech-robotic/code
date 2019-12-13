@@ -267,7 +267,7 @@ void MX_TIM14_Init(void)
 
   TIM_InitStruct.Prescaler = (SystemCoreClock/1000000)-1; // 48MHz -> 1MHz
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 1000 - 1 ; // 1MHz -> 1kHz
+  TIM_InitStruct.Autoreload = (TIM_InitStruct.Prescaler/(MOTION_CONTROL_FREQ)) - 1 ; // 1MHz -> 1kHz
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM14, &TIM_InitStruct);
@@ -328,10 +328,14 @@ void MX_TIM14_Init(void)
 //  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 //}
 
-volatile uint32_t overflows = 0;
+volatile int16_t cod_left_overflows = 0;
+
+uint16_t COD_get_left_raw(){
+  return LL_TIM_GetCounter(TIM3);
+}
 
 int32_t COD_get_left(){
-	return overflows*65535 + LL_TIM_GetCounter(TIM3) - 32767;
+	return cod_left_overflows*65535 + LL_TIM_GetCounter(TIM3) - 32767;
 }
 
 int32_t COD_get_right(){

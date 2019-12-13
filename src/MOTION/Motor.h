@@ -26,12 +26,11 @@ public:
   Motor(const Side new_side);
   void init();
   Direction get_direction();
-  void set_direction(Direction new_dir);
   void set_pwm(int16_t pwm);
   void stop();
   void brake();
-
 private:
+  void set_direction(Direction new_dir);
   volatile const Side side;
   volatile Direction dir;
   volatile uint16_t pwm;

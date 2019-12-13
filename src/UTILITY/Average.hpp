@@ -1,30 +1,15 @@
 #ifndef UTILITY_AVERAGE_HPP_
 #define UTILITY_AVERAGE_HPP_
 
+#include "UTILITY/macros.h"
 
-/**
- *  @file library/average.hpp
- *  @brief Ce fichier  defini la classe Average permettant de calculer des moyennes sur les n precedentes valeurs d'une variable,
- *      et d'actaliser efficacement cette moyenne a chaque ajout de valeur.
- *  @author Sylvain Gaultier
- *  @date 25/05/2015
- */
-
-#ifndef AVERAGE_HPP
-#define AVERAGE_HPP
-
-/*
- *  Limites d'utilisation : le type T doit repr�senter un nombre (int, float, double) et doit permettre
- *  non seulement de contenir les valeurs de donn�es mais aussi et surtout la somme de BUFFER_SIZE de ces
- *  donn�es. En gros, �viter le type int8_t avec BUFFER_SIZE grand ^.^
- */
-
-template<typename T, unsigned int BUFFER_SIZE>
+template<typename T, const unsigned int BUFFER_SIZE>
 class Average
 {
 public:
   Average()
   {
+    static_assert(is_powerof2(BUFFER_SIZE), "Buffer size should be a power of 2.");
     reset();
   }
 
@@ -43,12 +28,12 @@ public:
     currentSum -= buffer[currentElement];
     buffer[currentElement] = newValue;
     currentSum += newValue;
-    currentElement = (currentElement + 1) % BUFFER_SIZE;
+    currentElement = (currentElement + 1) & (BUFFER_SIZE-1); // X%(2^Y) == X & ((2^Y)-1)
   }
 
   T value() const
   {
-    return currentSum / (T)BUFFER_SIZE;
+    return currentSum >> log2(BUFFER_SIZE);
   }
 
 private:

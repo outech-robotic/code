@@ -44,6 +44,7 @@ void MX_TIM16_Init(void);
 void MX_TIM17_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+uint16_t COD_get_left_raw();
 int32_t COD_get_left();
 int32_t COD_get_right();
 void PWM_write(GPIO_Pin& pin, uint16_t value);

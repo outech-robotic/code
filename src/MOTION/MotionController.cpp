@@ -1,4 +1,5 @@
-#include <MOTION/MotionController.h>
+#include "MOTION/MotionController.h"
+#include "config.h"
 
 MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_right(Motor::Side::RIGHT){
 
@@ -13,17 +14,14 @@ int MotionController::init() {
   pid_speed_left.set_output_limit(2000);
   pid_speed_left.set_anti_windup(2000);
   pid_speed_left.set_derivative_limit(2000);
-  pid_speed_right.reset();
   pid_speed_right.set_coefficients(0.0, 0.0, 0.0, 0.0);
   pid_speed_right.set_output_limit(2000);
   pid_speed_right.set_anti_windup(2000);
   pid_speed_right.set_derivative_limit(2000);
-  pid_position_left.reset();
   pid_position_left.set_coefficients(0.0, 0.0, 0.0, 0.0);
   pid_position_left.set_output_limit(2000);
   pid_position_left.set_anti_windup(2000);
   pid_position_left.set_derivative_limit(2000);
-  pid_position_right.reset();
   pid_position_right.set_coefficients(0.0, 0.0, 0.0, 0.0);
   pid_position_right.set_output_limit(2000);
   pid_position_right.set_anti_windup(2000);
@@ -36,20 +34,94 @@ int MotionController::init() {
   controlled_speed = true;
 
   cod_left_last = 0;
+  cod_left_raw_last = 32767;
   cod_right_last = 0;
   cod_left_target = 0;
   cod_right_target = 0;
+  cod_left = {};
+  cod_right = {};
 
   return 0;
 }
 
+extern volatile int16_t cod_left_overflows;
 
 
 void MotionController::update() {
+  int32_t cod_left_raw = COD_get_left_raw()-32767;
+  int32_t delta_cod_left_raw = cod_left_raw - cod_left_raw_last;
+  if(delta_cod_left_raw > 32767){
+    cod_left_overflows--;
+  }
+  else if(delta_cod_left_raw < -32767){
+    cod_left_overflows++;
+  }
+  cod_left_raw_last = cod_left_raw;
 
+  cod_left.current  = COD_get_left();
+  cod_right.current = COD_get_right();
+
+  cod_left.speed_current = (cod_left.current - cod_left.last)*MOTION_CONTROL_FREQ;
+  cod_right.speed_current = (cod_right.current - cod_right.last)*MOTION_CONTROL_FREQ;
+
+  cod_left.last  = cod_left.current;
+  cod_right.last = cod_right.current;
+
+  cod_left_speed_avg.add(cod_left.speed_current);
+  cod_right_speed_avg.add(cod_right.speed_current);
+
+  cod_left.speed_average = cod_left_speed_avg.value();
+  cod_right.speed_average = cod_right_speed_avg.value();
 }
 
 
 void MotionController::control() {
+  int16_t left_pwm, right_pwm;
 
+  if(controlled_position){
+    cod_left.speed_setpoint = pid_position_left.compute(cod_left.current, cod_left.setpoint);
+    cod_right.speed_setpoint = pid_position_right.compute(cod_right.current, cod_right.setpoint);
+  }
+
+  if(controlled_speed){
+    left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_setpoint);
+    right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_setpoint);
+  }
+  else if(controlled_position){
+    left_pwm = cod_left.speed_setpoint;
+    right_pwm = cod_right.speed_setpoint;
+  }
+
+  //TODO : cap acceleration
+
+
+  if(controlled_speed || controlled_position){
+    motor_left.set_pwm(left_pwm);
+    motor_right.set_pwm(right_pwm);
+  }
+}
+
+
+void MotionController::set_target_speed(Motor::Side side, int16_t speed){
+  switch(side){
+    case Motor::Side::LEFT:
+      cod_left.speed_setpoint = speed;
+    case Motor::Side::RIGHT:
+      cod_right.speed_setpoint = speed;
+  }
+}
+
+void MotionController::set_target_position(Motor::Side side, int16_t position){
+  switch(side){
+    case Motor::Side::LEFT:
+      cod_left.setpoint = position;
+    case Motor::Side::RIGHT:
+      cod_right.setpoint = position;
+  }
+}
+
+
+void MotionController::set_control(bool speed, bool position){
+  controlled_position = position;
+  controlled_speed = speed;
 }

@@ -10,14 +10,11 @@
 
 bool pwm_state = false; // PWM test state
 
-extern volatile uint32_t overflows;
-volatile int32_t pos = 0;
-volatile int32_t last_pos = 0;
-
 volatile uint32_t mesure_t_irq = 0;
 uint32_t mesure_t_irq_last = 0;
 
 can_rx_msg rx_msg;
+
 MotionController mcs;
 
 
@@ -81,25 +78,13 @@ int main(void)
 extern "C"{
 #endif
 void TIM14_IRQHandler(void){
-	mesure_t_irq = micros();
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 		mesure_t_irq = micros();
     mcs.update();
     mcs.control();
-
-		pos = LL_TIM_GetCounter(TIM3)-32767;
-		if(pos!=last_pos){
-		  if(pos<last_pos && last_pos-pos>32767){
-			  overflows++;
-		  }
-		  else if(pos>last_pos && pos-last_pos > 32767){
-			  overflows--;
-		  }
-		}
-		last_pos=pos;
+		mesure_t_irq = micros()-mesure_t_irq;
 	}
-	mesure_t_irq = micros()-mesure_t_irq;
 }
 #ifdef __cplusplus
 }
