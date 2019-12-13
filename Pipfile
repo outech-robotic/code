@@ -17,6 +17,7 @@ pytest-asyncio = "*"
 pytest-cov = "*"
 requests = "*"
 python-can = "*"
+colorama = "*"
 
 [requires]
 python_version = "3.8"

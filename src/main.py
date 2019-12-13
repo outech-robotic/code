@@ -5,9 +5,9 @@ import asyncio
 import math
 
 import can
-import structlog
 import uvloop
 
+from src.logger import LOGGER
 from src.robot.can_adapter.adapter import CANAdapter
 from src.robot.controller.localization import LocalizationController
 from src.robot.controller.motion import MotionController
@@ -44,8 +44,6 @@ CONFIG = Configuration(
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
 )
-
-LOGGER = structlog.get_logger()
 
 
 def _provide_robot_components(i: DependencyContainer) -> None:
@@ -149,7 +147,7 @@ async def main() -> None:
 
     async def run_and_stop_simulation() -> None:
         await strategy_controller.run()
-        LOGGER.info('Main algorithm stopped, stopping the simulation')
+        LOGGER.get().info('Main algorithm stopped, stopping the simulation')
         simulation_runner.stop()
 
     await asyncio.gather(run_and_stop_simulation(), simulation_runner.run())

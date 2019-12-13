@@ -1,13 +1,9 @@
 """
 Strategy module
 """
-
-import structlog
-
+from src.logger import LOGGER
 from src.robot.controller.motion import MotionController
 from src.robot.entity.vector import Vector2
-
-LOGGER = structlog.get_logger()
 
 
 class StrategyController:
@@ -23,4 +19,4 @@ class StrategyController:
         Run the strategy.
         """
         await self.motion_controller.move_to(Vector2(0, 0))
-        LOGGER.info("Strategy algorithm finished running")  # lol
+        LOGGER.get().info("Strategy algorithm finished running")  # lol

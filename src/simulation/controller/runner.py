@@ -3,8 +3,7 @@ Simulation runner module.
 """
 import asyncio
 
-import structlog
-
+from src.logger import LOGGER
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.controller.probe import SimulationProbe
 from src.simulation.controller.replay_saver import ReplaySaver
@@ -12,8 +11,6 @@ from src.simulation.entity.event import EventType, EventOrder
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.simulation_state import SimulationState, RobotID
 from src.simulation.gateway.simulation import SimulationGateway
-
-LOGGER = structlog.get_logger()
 
 
 class SimulationRunner:
@@ -73,7 +70,7 @@ class SimulationRunner:
             await asyncio.sleep(1 / self.simulation_configuration.tickrate /
                                 self.simulation_configuration.speed_factor)
 
-        LOGGER.info("simulation_runner_quit", time=self.state.time)
+        LOGGER.get().info("simulation_runner_quit", time=self.state.time)
 
     def stop(self):
         """

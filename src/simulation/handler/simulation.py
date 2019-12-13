@@ -4,16 +4,13 @@ Simulation handler module.
 import math
 from typing import List
 
-import structlog
-
+from src.logger import LOGGER
 from src.robot.entity.configuration import Configuration
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.entity.event import EventOrder, EventType
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.simulation_state import SimulationState
 from src.util.encoding import packet
-
-LOGGER = structlog.get_logger()
 
 
 def _spread_delta_on_ticks(delta: int, ticks: int) -> List[int]:
@@ -45,9 +42,9 @@ class SimulationHandler:
         Handle move wheels packets.
         """
         msg = packet.decode_propulsion_move_wheels(data)
-        LOGGER.info('simulation_handler_received_move_wheels',
-                    tick_left=msg.tick_left,
-                    tick_right=msg.tick_right)
+        LOGGER.get().info('simulation_handler_received_move_wheels',
+                          tick_left=msg.tick_left,
+                          tick_right=msg.tick_right)
 
         if msg.tick_left == msg.tick_right == 0:
             return

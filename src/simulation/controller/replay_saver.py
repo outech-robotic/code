@@ -4,15 +4,12 @@ Replay saver module.
 import json
 from typing import List
 
-import structlog
-
+from src.logger import LOGGER
 from src.robot.entity.configuration import Configuration
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.simulation_state import RobotID
-
-LOGGER = structlog.get_logger()
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
 REPLAY_VIEWER_URL = 'https://nicolasbon.net/replay/'
@@ -54,10 +51,10 @@ class ReplaySaver:
         """
 
         dump = json.dumps(self.result)
-        LOGGER.info("saving_replay", size=len(dump))
+        LOGGER.get().info("saving_replay", size=len(dump))
 
         replay_id = self.http_client.post_file(REPLAY_API_URL, dump)['id']
 
-        LOGGER.info("saved_replay", url=REPLAY_API_URL + replay_id)
+        LOGGER.get().info("saved_replay", url=REPLAY_API_URL + replay_id)
         self.web_browser_client.open(REPLAY_VIEWER_URL + '?replay=' +
                                      REPLAY_API_URL + replay_id)

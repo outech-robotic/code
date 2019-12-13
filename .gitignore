@@ -2,3 +2,4 @@ venv
 **/*.pyc
 .idea
 .mypy_cache
+**/outech.log

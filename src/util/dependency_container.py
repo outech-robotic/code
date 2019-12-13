@@ -4,9 +4,7 @@ Dependency injector module.
 import inspect
 from typing import Any, Dict, Callable
 
-import structlog
-
-LOGGER = structlog.get_logger()
+from src.logger import LOGGER
 
 
 class DependencyContainer:
@@ -84,6 +82,6 @@ class DependencyContainer:
                 raise RuntimeError(f"{arg_name} not provided, needed by {name}")
             args[arg_name] = value
 
-        LOGGER.info('injecting_dependency', name=name)
+        LOGGER.get().info('injecting_dependency', name=name)
         self.instances[name] = cls(**args)
         return self.instances[name]

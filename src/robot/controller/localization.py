@@ -5,8 +5,7 @@ import asyncio
 import math
 from dataclasses import dataclass
 
-import structlog
-
+from src.logger import LOGGER
 from src.robot.controller.odometry import OdometryController
 from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.configuration import Configuration
@@ -15,8 +14,6 @@ from src.robot.entity.vector import Vector2
 from src.robot.gateway.motion import MotionGateway
 from src.simulation.controller.probe import SimulationProbe
 from src.util.geometry.direction import right, backward, left, forward
-
-LOGGER = structlog.get_logger()
 
 DIRECTION_FUNCTION = {
     Direction.FORWARD: forward,
@@ -79,11 +76,11 @@ class LocalizationController:
             self._state.odometry_position,
             self._state.odometry_angle,
         )
-        LOGGER.debug('localization_controller_update_odometry',
-                     left_tick=left_tick,
-                     right_tick=right_tick,
-                     new_position=pos,
-                     new_angle=angle / (2 * math.pi) * 360)
+        LOGGER.get().debug('localization_controller_update_odometry',
+                           left_tick=left_tick,
+                           right_tick=right_tick,
+                           new_position=pos,
+                           new_angle=angle / (2 * math.pi) * 360)
 
         self._state.odometry_position = pos
         self._state.odometry_angle = angle
@@ -95,14 +92,15 @@ class LocalizationController:
         """"
         Set the a flag to indicate that the robot is not moving anymore.
         """
-        LOGGER.debug('localization_controller_movement_done')
+        LOGGER.get().debug('localization_controller_movement_done')
         self._state.movement_done_event.set()
 
     async def move_forward(self, distance: Millimeter) -> None:
         """
         Make the robot move forward and block until the movement is done.
         """
-        LOGGER.debug('localization_controller_move_forward', distance=distance)
+        LOGGER.get().debug('localization_controller_move_forward',
+                           distance=distance)
         circumference = 2 * math.pi * self.configuration.wheel_radius
         ticks = round(distance / circumference *
                       self.configuration.encoder_ticks_per_revolution)
@@ -117,7 +115,7 @@ class LocalizationController:
         """
         Make the robot rotate counter-clockwise and block until the movement is done.
         """
-        LOGGER.debug('localization_controller_rotate', angle=angle)
+        LOGGER.get().debug('localization_controller_rotate', angle=angle)
         circumference = 2 * math.pi * self.configuration.wheel_radius
         distance = self.configuration.distance_between_wheels / 2 * angle
         ticks = round(distance / circumference *

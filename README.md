@@ -39,6 +39,12 @@ Enter into the virtual environment.
 pipenv shell
 ```
 
+If you want to run the code:
+```shell
+python -m src.main
+```
+
+
 You are done! (see pipenv documentation for how to do other stuff.)
 
 

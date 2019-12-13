@@ -1,13 +1,10 @@
 """
 Motion gateway module.
 """
-import structlog
-
+from src.logger import LOGGER
 from src.robot.can_adapter.adapter import CANAdapter
 from src.util import can_id
 from src.util.encoding import packet
-
-LOGGER = structlog.get_logger()
 
 
 class MotionGateway:
@@ -22,9 +19,9 @@ class MotionGateway:
         """
         Move the robot wheels.
         """
-        LOGGER.debug('gateway_move_wheel',
-                     tick_left=tick_left,
-                     tick_right=tick_right)
+        LOGGER.get().debug('gateway_move_wheel',
+                           tick_left=tick_left,
+                           tick_right=tick_right)
         self.can_adapter.send(
             can_id.PROPULSION_MOVE_WHEELS,
             packet.encode_propulsion_move_wheels(
