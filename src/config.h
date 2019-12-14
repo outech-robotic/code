@@ -13,9 +13,9 @@
  * MOTOR CONTROL
  */
 // TIMER PWM
-#define MOTION_PWM_PERIOD (2000)
+#define MOTION_PWM_PERIOD ((uint16_t)2000) // Cycles
 // ASSERVISSEMENT
-#define MOTION_CONTROL_FREQ (1000)
+#define MOTION_CONTROL_FREQ ((int32_t)(500)) // Hz
 /*
  * COMMUNICATIONS
  */

@@ -54,6 +54,8 @@ public:
 	void set_target_speed(Motor::Side side, int16_t speed);
 	void set_target_position(Motor::Side side, int16_t position);
 	void set_control(bool speed, bool position);
+	int32_t get_COD_left();
+	int32_t get_COD_right();
 };
 
 #endif /* MOTION_MOTIONCONTROLLER_H_ */

@@ -33,11 +33,12 @@ public:
 
   T value() const
   {
-    return currentSum >> log2(BUFFER_SIZE);
+    return currentSum >> BUFFER_SIZE_BITS;
   }
 
 private:
   T buffer[BUFFER_SIZE];
+  static constexpr uint8_t BUFFER_SIZE_BITS = ceil_log2(BUFFER_SIZE);
   unsigned int currentElement;
   T currentSum;
 };

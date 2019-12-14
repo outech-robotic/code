@@ -10,19 +10,19 @@ int MotionController::init() {
   pid_speed_right.reset();
   pid_position_left.reset();
   pid_position_right.reset();
-  pid_speed_left.set_coefficients(0.0, 0.0, 0.0, 0.0);
+  pid_speed_left.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_speed_left.set_output_limit(2000);
   pid_speed_left.set_anti_windup(2000);
   pid_speed_left.set_derivative_limit(2000);
-  pid_speed_right.set_coefficients(0.0, 0.0, 0.0, 0.0);
+  pid_speed_right.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_speed_right.set_output_limit(2000);
   pid_speed_right.set_anti_windup(2000);
   pid_speed_right.set_derivative_limit(2000);
-  pid_position_left.set_coefficients(0.0, 0.0, 0.0, 0.0);
+  pid_position_left.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_position_left.set_output_limit(2000);
   pid_position_left.set_anti_windup(2000);
   pid_position_left.set_derivative_limit(2000);
-  pid_position_right.set_coefficients(0.0, 0.0, 0.0, 0.0);
+  pid_position_right.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_position_right.set_output_limit(2000);
   pid_position_right.set_anti_windup(2000);
   pid_position_right.set_derivative_limit(2000);
@@ -33,33 +33,28 @@ int MotionController::init() {
   controlled_position = true;
   controlled_speed = true;
 
-  cod_left_last = 0;
-  cod_left_raw_last = 32767;
-  cod_right_last = 0;
-  cod_left_target = 0;
-  cod_right_target = 0;
   cod_left = {};
   cod_right = {};
-
+  cod_left_raw_last = 0;
   return 0;
 }
 
-extern volatile int16_t cod_left_overflows;
-
 
 void MotionController::update() {
-  int32_t cod_left_raw = COD_get_left_raw()-32767;
-  int32_t delta_cod_left_raw = cod_left_raw - cod_left_raw_last;
-  if(delta_cod_left_raw > 32767){
+  static int16_t cod_left_overflows=0;
+  int32_t cod_left_raw = COD_get_left();
+  cod_right.current = COD_get_right();
+  if(cod_left_raw != cod_left_raw_last){
+    asm volatile("nop");
+  }
+  if(cod_left_raw - cod_left_raw_last > 32767){
     cod_left_overflows--;
   }
-  else if(delta_cod_left_raw < -32767){
+  else if(cod_left_raw_last - cod_left_raw > 32767){
     cod_left_overflows++;
   }
   cod_left_raw_last = cod_left_raw;
-
-  cod_left.current  = COD_get_left();
-  cod_right.current = COD_get_right();
+  cod_left.current  = -(cod_left_overflows*65536 + cod_left_raw);
 
   cod_left.speed_current = (cod_left.current - cod_left.last)*MOTION_CONTROL_FREQ;
   cod_right.speed_current = (cod_right.current - cod_right.last)*MOTION_CONTROL_FREQ;
@@ -125,3 +120,12 @@ void MotionController::set_control(bool speed, bool position){
   controlled_position = position;
   controlled_speed = speed;
 }
+
+int32_t MotionController::get_COD_left(){
+  return cod_left.current;
+}
+
+int32_t MotionController::get_COD_right(){
+  return cod_right.current;
+}
+

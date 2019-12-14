@@ -28,8 +28,9 @@ constexpr bool is_powerof2(const unsigned int v) {
     return v && ((v & (v - 1)) == 0);
 }
 
-constexpr unsigned int log2(unsigned int n){
-  return ((n<2?1:1+log2(n/2)));
+constexpr uint8_t ceil_log2(uint8_t n){
+    return n < 2 ? 0 : 1+ceil_log2(n>>1);
 }
+
 
 #endif /* UTILITY_MACROS_H_ */

@@ -23,7 +23,7 @@ int main(void)
   /**********************************************************************
    *                             SETUP
    **********************************************************************/
-  Metro can_wait(50);
+  Metro can_wait(2000);
   // Initialize timing utility functions (delay, millis...)
   Timing_init();
 
@@ -36,7 +36,7 @@ int main(void)
   MX_TIM16_Init();
   MX_USART1_UART_Init();
 
-  mcs.init();
+//  mcs.init();
   printf("Setup done.\r\n");
 
   /**********************************************************************
@@ -54,20 +54,20 @@ int main(void)
         	printf("T IRQ %lu\r\n", mesure_t_irq);
         	mesure_t_irq_last = mesure_t_irq;
         }
-//    	if(pwm_state){
-//    		PWM_write(PIN_PWM_L_FIN, 2000);
-//    		PWM_write(PIN_PWM_L_RIN, 0);
-//    		PWM_write(PIN_PWM_R_FIN, 2000);
-//    		PWM_write(PIN_PWM_R_RIN, 0);
-//    	}
-//    	else{
-//    		PWM_write(PIN_PWM_L_FIN, 0);
-//    		PWM_write(PIN_PWM_L_RIN, 2000);
-//    		PWM_write(PIN_PWM_R_FIN, 0);
-//    		PWM_write(PIN_PWM_R_RIN, 2000);
-//    	}
-//    	pwm_state=!pwm_state;
-		if((CAN_send_encoder_pos(COD_get_left(), COD_get_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
+    	if(pwm_state){
+    		PWM_write(PIN_PWM_L_FIN, 1000);
+    		PWM_write(PIN_PWM_L_RIN, 0);
+    		PWM_write(PIN_PWM_R_FIN, 1000);
+    		PWM_write(PIN_PWM_R_RIN, 0);
+    	}
+    	else{
+    		PWM_write(PIN_PWM_L_FIN, 0);
+    		PWM_write(PIN_PWM_L_RIN, 1000);
+    		PWM_write(PIN_PWM_R_FIN, 0);
+    		PWM_write(PIN_PWM_R_RIN, 1000);
+    	}
+    	pwm_state=!pwm_state;
+		if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
 		  printf("ERR: SENDING ENCODER\r\n");
 		}
     }
@@ -81,8 +81,8 @@ void TIM14_IRQHandler(void){
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 		mesure_t_irq = micros();
-    mcs.update();
-    mcs.control();
+//    mcs.update();
+//    mcs.control();
 		mesure_t_irq = micros()-mesure_t_irq;
 	}
 }
