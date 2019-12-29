@@ -31,20 +31,20 @@ void PID::set_coefficients(float new_kp, float new_ki, float new_kd, float new_f
 
 
 void PID::set_output_limit(int16_t new_limit){
-  min = -new_limit;
-  max = new_limit;
+  min = -new_limit*COEFF_MULTIPLIER;
+  max = new_limit*COEFF_MULTIPLIER;
 }
 
 
 void PID::set_anti_windup(int16_t new_limit){
-  integral_min = -new_limit;
-  integral_max = new_limit;
+  integral_min = -new_limit*COEFF_MULTIPLIER;
+  integral_max = new_limit*COEFF_MULTIPLIER;
 }
 
 
 void PID::set_derivative_limit(int16_t new_limit){
-  derivative_min = - new_limit;
-  derivative_max = new_limit;
+  derivative_min = - new_limit*COEFF_MULTIPLIER;
+  derivative_max = new_limit*COEFF_MULTIPLIER;
 }
 
 
@@ -91,6 +91,6 @@ int16_t PID::compute(int32_t input, int32_t setpoint){
   if(res& (1ULL << (COEFF_SHIFT - 1)))
     out++;
 
-  return res;
+  return out;
 }
 

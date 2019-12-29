@@ -56,6 +56,6 @@ public:
 	void set_control(bool speed, bool position);
 	int32_t get_COD_left();
 	int32_t get_COD_right();
+	void set_raw_pwm(Motor::Side side, int16_t pwm);
 };
-
 #endif /* MOTION_MOTIONCONTROLLER_H_ */

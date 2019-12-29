@@ -34,9 +34,9 @@ enum CAN_ERROR_STATUS{
 void MX_CAN_Init(void);
 int CAN_send_packet(uint16_t std_id, uint8_t* data=nullptr, uint8_t size=0, bool remote = false);
 int CAN_send_packet(can_tx_msg* msg);
-int CAN_send_encoder_pos(int32_t left, int32_t right);
 int CAN_receive_packet(can_rx_msg* msg);
 void CAN_print_rx_pkt(can_rx_msg* msg);
+int CAN_send_encoder_pos(int32_t left, int32_t right);
 
 /*
  * CAN TX MESSAGE TEMPLATES
@@ -45,6 +45,7 @@ void CAN_print_rx_pkt(can_rx_msg* msg);
 extern can_tx_msg CAN_TX_HEARTBEAT;
 extern can_tx_msg CAN_TX_MOV_END;
 extern can_tx_msg CAN_TX_COD_POS;
+
 
 
 #endif // LL_CAN_CAN_H_

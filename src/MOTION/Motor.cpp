@@ -9,18 +9,21 @@
 #include "TIMER/tim.h"
 #include "UTILITY/macros.h"
 #include "config.h"
+#include "GPIO/gpio.h"
 
-Motor::Motor(const Side new_side) : side(new_side), dir(Direction::IDLE){}
+Motor::Motor(const Side new_side) : side(new_side), dir((new_side == Side::LEFT) ? (Direction::FORWARD) : (Direction::BACKWARD)){}
 
 
 void Motor::init(){
   if(side == Side::LEFT){
-    //TODO Separate PWM init
+    pinMode(PIN_DIR_L1, OUTPUT);
+    pinMode(PIN_DIR_L2, OUTPUT);
   }
   else{
-    //TODO Separate PWM init
+    pinMode(PIN_DIR_R1, OUTPUT);
+    pinMode(PIN_DIR_R2, OUTPUT);
   }
-  set_direction(Direction::IDLE);
+  set_direction(dir);
 }
 
 
@@ -33,41 +36,33 @@ void Motor::set_direction(Direction new_dir){
   dir = new_dir;
   if(side == Side::LEFT){
     switch(dir){
-      case Direction::IDLE:
-        PWM_write(PIN_PWM_L_FIN, 0);
-        PWM_write(PIN_PWM_L_RIN, 0);
-        break;
       case Direction::FORWARD:
-        PWM_write(PIN_PWM_L_FIN, pwm);
-        PWM_write(PIN_PWM_L_RIN, 0);
+        digitalWrite(PIN_DIR_L1, GPIO_HIGH);
+        digitalWrite(PIN_DIR_L2, GPIO_LOW);
         break;
       case Direction::BACKWARD:
-        PWM_write(PIN_PWM_L_FIN, 0);
-        PWM_write(PIN_PWM_L_RIN, pwm);
+        digitalWrite(PIN_DIR_L1, GPIO_LOW);
+        digitalWrite(PIN_DIR_L2, GPIO_HIGH);
         break;
       case Direction::BRAKE:
-        PWM_write(PIN_PWM_L_FIN, MOTION_PWM_PERIOD);
-        PWM_write(PIN_PWM_L_RIN, MOTION_PWM_PERIOD);
+        digitalWrite(PIN_DIR_L1, GPIO_HIGH);
+        digitalWrite(PIN_DIR_L2, GPIO_HIGH);
         break;
     }
   }
   else{
     switch(dir){
-      case Direction::IDLE:
-        PWM_write(PIN_PWM_L_FIN, 0);
-        PWM_write(PIN_PWM_L_RIN, 0);
-        break;
       case Direction::FORWARD:
-        PWM_write(PIN_PWM_L_FIN, 0);
-        PWM_write(PIN_PWM_L_RIN, pwm);
+        digitalWrite(PIN_DIR_R1, GPIO_HIGH);
+        digitalWrite(PIN_DIR_R2, GPIO_LOW);
         break;
       case Direction::BACKWARD:
-        PWM_write(PIN_PWM_L_FIN, pwm);
-        PWM_write(PIN_PWM_L_RIN, 0);
+        digitalWrite(PIN_DIR_R1, GPIO_LOW);
+        digitalWrite(PIN_DIR_R2, GPIO_HIGH);
         break;
       case Direction::BRAKE:
-        PWM_write(PIN_PWM_L_FIN, MOTION_PWM_PERIOD);
-        PWM_write(PIN_PWM_L_RIN, MOTION_PWM_PERIOD);
+        digitalWrite(PIN_DIR_R1, GPIO_HIGH);
+        digitalWrite(PIN_DIR_R2, GPIO_HIGH);
         break;
     }
   }
@@ -75,17 +70,19 @@ void Motor::set_direction(Direction new_dir){
 
 
 void Motor::set_pwm(int16_t new_pwm){
-  if(pwm>0){
-    pwm = (uint16_t)MIN(new_pwm, MOTION_PWM_PERIOD);
-    set_direction(Direction::FORWARD);
-  }
-  else if(pwm<0){
-    pwm = (uint16_t)MIN(-new_pwm, MOTION_PWM_PERIOD);
+  if(new_pwm<0){
+    pwm = (uint16_t)MIN(-new_pwm, CONST_PWM_MAX);
     set_direction(Direction::BACKWARD);
   }
   else{
-    pwm = 0;
-    set_direction(Direction::IDLE);
+    pwm = (uint16_t)MIN(new_pwm, CONST_PWM_MAX);
+    set_direction(Direction::FORWARD);
+  }
+  if(side == Side::LEFT){
+    PWM_write(PIN_PWM_L, pwm);
+  }
+  else{
+    PWM_write(PIN_PWM_R, pwm);
   }
 }
 

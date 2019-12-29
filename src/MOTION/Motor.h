@@ -19,8 +19,7 @@ public:
   enum Direction{
     FORWARD,
     BACKWARD,
-    BRAKE,
-    IDLE
+    BRAKE
   };
 
   Motor(const Side new_side);

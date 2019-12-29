@@ -12,7 +12,7 @@
 
 class PID {
   uint32_t kp, ki, kd;
-  int16_t min, max;
+  int32_t min, max;
   int32_t integral_max;
   int32_t integral_min;
   int32_t derivative_max;

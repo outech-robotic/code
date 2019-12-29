@@ -1,9 +1,10 @@
-#include "config.h"
 #include <CAN/can.h>
 #include <GPIO/gpio.h>
+#include <stdio.h>
+
+#include "config.h"
 #include "UTILITY/macros.h"
 #include "UTILITY/ring_buffer.hpp"
-#include <stdio.h>
 /*
  * CAN TX MESSAGE TEMPLATES
  */
@@ -24,6 +25,19 @@ CAN_HandleTypeDef hcan;
 CAN_TxHeaderTypeDef txHeader;
 uint32_t tx_mailbox;
 
+void CAN_IRQ_RX_Pending_enable(CAN_HandleTypeDef* can, uint32_t fifo){
+    SET_BIT(can->Instance->IER, fifo==CAN_RX_FIFO0?CAN_IER_FMPIE0:CAN_IER_FMPIE1);
+}
+void CAN_IRQ_RX_Pending_disable(CAN_HandleTypeDef* can, uint32_t fifo){
+    CLEAR_BIT(can->Instance->IER, fifo==CAN_RX_FIFO0?CAN_IER_FMPIE0:CAN_IER_FMPIE1);
+}
+
+void CAN_IRQ_TX_Empty_enable(CAN_HandleTypeDef* can){
+    SET_BIT(can->Instance->IER, CAN_IER_TMEIE);
+}
+void CAN_IRQ_TX_Empty_disable(CAN_HandleTypeDef* can){
+    CLEAR_BIT(can->Instance->IER, CAN_IER_TMEIE);
+}
 
 int CAN_send_packet(uint16_t std_id, uint8_t* data, uint8_t size, bool remote){
 	can_tx_msg msg;
@@ -49,15 +63,16 @@ int CAN_send_packet(can_tx_msg* msg){
 		res = CAN_ERROR_STATUS::NON_STD_NOT_SUPPORTED;
 	}
     if(res >= 0){
-		if(HAL_CAN_IsTxMessagePending(&hcan, CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2)){
-			messages_tx.push(*msg);
-			res = CAN_ERROR_STATUS::CAN_PKT_OK;
-		}
-		else{
-			if((res = HAL_CAN_AddTxMessage(&hcan, &msg->header, msg->data.u8, &mailbox)) != HAL_OK){
-				return CAN_ERROR_STATUS::PACKET_TX_ERROR;
-			}
-		}
+      if(HAL_CAN_IsTxMessagePending(&hcan, CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2)){
+        messages_tx.push(*msg);
+        res = CAN_ERROR_STATUS::CAN_PKT_OK;
+      }
+      else{
+        if((res = HAL_CAN_AddTxMessage(&hcan, &msg->header, msg->data.u8, &mailbox)) != HAL_OK){
+          return CAN_ERROR_STATUS::PACKET_TX_ERROR;
+        }
+        CAN_IRQ_TX_Empty_enable(&hcan);
+      }
     }
 	return res;
 }
@@ -91,20 +106,6 @@ void CAN_print_rx_pkt(can_rx_msg* msg){
   printf("\r\n");
 }
 
-void CAN_IRQ_RX_Pending_enable(CAN_HandleTypeDef* can, uint32_t fifo){
-    SET_BIT(can->Instance->IER, fifo==CAN_RX_FIFO0?CAN_IER_FMPIE0:CAN_IER_FMPIE1);
-}
-void CAN_IRQ_RX_Pending_disable(CAN_HandleTypeDef* can, uint32_t fifo){
-    CLEAR_BIT(can->Instance->IER, fifo==CAN_RX_FIFO0?CAN_IER_FMPIE0:CAN_IER_FMPIE1);
-}
-
-void CAN_IRQ_TX_Empty_enable(CAN_HandleTypeDef* can){
-    SET_BIT(can->Instance->IER, CAN_IER_TMEIE);
-}
-void CAN_IRQ_TX_Empty_disable(CAN_HandleTypeDef* can){
-    CLEAR_BIT(can->Instance->IER, CAN_IER_TMEIE);
-}
-
 
 /* CAN init function */
 void MX_CAN_Init(void)
@@ -135,7 +136,7 @@ void MX_CAN_Init(void)
   hcan.Init.TimeTriggeredMode = DISABLE;
   hcan.Init.AutoBusOff = DISABLE;
   hcan.Init.AutoWakeUp = DISABLE;
-  hcan.Init.AutoRetransmission = DISABLE;
+  hcan.Init.AutoRetransmission = ENABLE;
   hcan.Init.ReceiveFifoLocked = ENABLE;
   hcan.Init.TransmitFifoPriority = DISABLE;
   if ((res = HAL_CAN_Init(&hcan)) != HAL_OK)
@@ -143,20 +144,21 @@ void MX_CAN_Init(void)
     while(1);
   }
 
-
   if((res = HAL_CAN_Start(&hcan)) != HAL_OK){
 	  while(1);
   }
+
   /*
    * INITIALIZE FILTERS
    */
   CAN_FilterTypeDef filterConfig;
+
   filterConfig.FilterBank = 0;
   filterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   filterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-  filterConfig.FilterIdHigh = 0x0000;//(0x123 & 0x7FF)<<5;
+  filterConfig.FilterIdHigh = CAN_PKT_ID(CAN_PIPE_MOTOR, 0) << CAN_STDID_SHIFT;
   filterConfig.FilterIdLow = 0x0000;
-  filterConfig.FilterMaskIdHigh = 0x0000;
+  filterConfig.FilterMaskIdHigh = CAN_PKT_ID(CAN_PIPE_MASK, 0); // ACCEPT ALL PROPULSION MESSAGES
   filterConfig.FilterMaskIdLow = 0x0000;
   filterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
   filterConfig.FilterActivation = ENABLE;
@@ -175,13 +177,13 @@ void MX_CAN_Init(void)
   CAN_TX_MOV_END.header.DLC=1;
   CAN_TX_MOV_END.header.IDE=CAN_ID_STD;
   CAN_TX_MOV_END.header.RTR=CAN_RTR_DATA;
-  CAN_TX_MOV_END.header.StdId = CAN_PKT_ID(CAN_PIPE_PROP, CAN_MSG_MOV_END);
+  CAN_TX_MOV_END.header.StdId = CAN_PKT_ID(CAN_PIPE_MOTOR, CAN_MSG_MOT_MOVE_END);
   CAN_TX_MOV_END.data.u8[0] = 0;
 
   CAN_TX_COD_POS.header.DLC=8;
   CAN_TX_COD_POS.header.IDE=CAN_ID_STD;
   CAN_TX_COD_POS.header.RTR=CAN_RTR_DATA;
-  CAN_TX_COD_POS.header.StdId = CAN_PKT_ID(CAN_PIPE_PROP, CAN_MSG_COD_POS);
+  CAN_TX_COD_POS.header.StdId = CAN_PKT_ID(CAN_PIPE_MOTOR, CAN_MSG_MOT_COD_POS);
   CAN_TX_COD_POS.data.d32[0]=0;
   CAN_TX_COD_POS.data.d32[1]=0;
 
@@ -213,7 +215,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     gpioConfig.Mode         = LL_GPIO_MODE_ALTERNATE;
     gpioConfig.Alternate    = LL_GPIO_AF_4;     //Alternate function for can
     gpioConfig.OutputType   = LL_GPIO_OUTPUT_PUSHPULL;
-    gpioConfig.Pull         = LL_GPIO_PULL_UP;
+    gpioConfig.Pull         = LL_GPIO_PULL_NO;
     gpioConfig.Speed        = LL_GPIO_SPEED_FREQ_HIGH;
     gpioConfig.Pin          = LL_GPIO_PIN_12;
     ErrorStatus res;

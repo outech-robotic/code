@@ -10,22 +10,22 @@ int MotionController::init() {
   pid_speed_right.reset();
   pid_position_left.reset();
   pid_position_right.reset();
-  pid_speed_left.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
-  pid_speed_left.set_output_limit(2000);
-  pid_speed_left.set_anti_windup(2000);
-  pid_speed_left.set_derivative_limit(2000);
-  pid_speed_right.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
-  pid_speed_right.set_output_limit(2000);
-  pid_speed_right.set_anti_windup(2000);
-  pid_speed_right.set_derivative_limit(2000);
+  pid_speed_left.set_coefficients(10.0, 5.0, 5.0, MOTION_CONTROL_FREQ);
+  pid_speed_left.set_output_limit(CONST_PWM_MAX);
+  pid_speed_left.set_anti_windup(CONST_PWM_MAX);
+  pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
+  pid_speed_right.set_coefficients(10.0, 5.0, 5.0, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_output_limit(CONST_PWM_MAX);
+  pid_speed_right.set_anti_windup(CONST_PWM_MAX);
+  pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
   pid_position_left.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
-  pid_position_left.set_output_limit(2000);
-  pid_position_left.set_anti_windup(2000);
-  pid_position_left.set_derivative_limit(2000);
+  pid_position_left.set_output_limit(CONST_PWM_MAX);
+  pid_position_left.set_anti_windup(CONST_PWM_MAX);
+  pid_position_left.set_derivative_limit(CONST_PWM_MAX);
   pid_position_right.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
-  pid_position_right.set_output_limit(2000);
-  pid_position_right.set_anti_windup(2000);
-  pid_position_right.set_derivative_limit(2000);
+  pid_position_right.set_output_limit(CONST_PWM_MAX);
+  pid_position_right.set_anti_windup(CONST_PWM_MAX);
+  pid_position_right.set_derivative_limit(CONST_PWM_MAX);
 
   motor_left.init();
   motor_right.init();
@@ -129,3 +129,9 @@ int32_t MotionController::get_COD_right(){
   return cod_right.current;
 }
 
+void MotionController::set_raw_pwm(Motor::Side side, int16_t pwm){
+  switch(side){
+    case Motor::Side::LEFT : motor_left.set_pwm(pwm); break;
+    case Motor::Side::RIGHT: motor_right.set_pwm(pwm); break;
+  }
+}

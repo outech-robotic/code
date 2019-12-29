@@ -53,31 +53,4 @@ GPIO_Pin_Extern_Def(B,13);
 GPIO_Pin_Extern_Def(B,14);
 GPIO_Pin_Extern_Def(B,15);
 
-/**
- * Project Specific Defines
- */
-// ENCODERS
-#define PIN_COD_L_A PB4
-#define PIN_COD_L_B PB5
-#define PIN_COD_R_A PA15
-#define PIN_COD_R_B PB3
-
-// CAN BUS
-#define PIN_CAN_RX PA11
-#define PIN_CAN_TX PA12
-
-// DEBUG USART1 PORT
-#define PIN_USART1_TX PA9
-#define PIN_USART1_RX PA10
-
-// MOTOR CONTROL PINS (cf BD62321HFP-TR H Bridge documentation page 7/13 for usage)
-// PA6 - TIM16_CH1
-// PA7 - TIM1_CH1N
-// PB0 - TIM1_CH2N
-// PB1 - TIM1_CH3N
-#define PIN_PWM_L_FIN PA6
-#define PIN_PWM_L_RIN PA7
-#define PIN_PWM_R_FIN PB0
-#define PIN_PWM_R_RIN PB1
-
 #endif /* LL_GPIO_GPIO_PINS_H_ */
