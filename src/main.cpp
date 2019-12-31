@@ -1,3 +1,5 @@
+#define CARTE_SERVO
+
 #include "UTILITY/timing.h"
 #include "TIMER/tim.h"
 #include "CAN/can.h"
@@ -9,21 +11,47 @@
 #include "config.h"
 #include "MOTION/MotionController.h"
 
+
 bool pwm_state = false; // PWM test state
 
 volatile uint32_t mesure_t_irq = 0;
 uint32_t mesure_t_irq_last = 0;
 
 can_rx_msg rx_msg;
-
+Metro can_wait(100);
 MotionController mcs;
+
+void servo_main(){
+  while (1)
+  {
+    if((CAN_receive_packet(&rx_msg)) == HAL_OK){
+      printf("RECV: ");
+      CAN_print_rx_pkt(&rx_msg);
+      if(CAN_PKT_MESSAG_ID(rx_msg.header.StdId) == ((CAN_MSG_SERVO_POS<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID)){
+        uint8_t servo_id = rx_msg.data.u8[0];
+        uint16_t value = rx_msg.data.u8[1] | (rx_msg.data.u8[2] << 8);
+        printf("SERVO %u DURATION %u us\r\n", servo_id, value);
+        switch(servo_id){
+          case 0 : PWM_write_us(PIN_PWM_L,value);    break;
+          case 1 : PWM_write_us(PIN_PWM_R,value);    break;
+          default: printf("WRONG SERVO ID\r\n"); break;
+        }
+      }
+    }
+    if(can_wait.check()){
+      if(mesure_t_irq != mesure_t_irq_last){
+        printf("T IRQ %lu\r\n", mesure_t_irq);
+        mesure_t_irq_last = mesure_t_irq;
+      }
+    }
+  }
+}
 
 int main(void)
 {
   /**********************************************************************
    *                             SETUP
    ********************************s**************************************/
-  Metro can_wait(100);
   // Initialize timing utility functions (delay, millis...)
   Timing_init();
 
@@ -36,13 +64,17 @@ int main(void)
   MX_TIM14_Init();
   pinMode(PIN_LED,OUTPUT);
   digitalWrite(PIN_LED, GPIO_HIGH);
-  mcs.init();
-  mcs.set_control(true, false);
-  mcs.set_target_speed(Motor::Side::LEFT, -100);
-  mcs.set_target_speed(Motor::Side::RIGHT, 100);
+
+
+
+#ifdef CARTE_MOTEUR
+//  mcs.init();
+//  mcs.set_control(true, false);
+//  mcs.set_target_speed(Motor::Side::LEFT, -100);
+//  mcs.set_target_speed(Motor::Side::RIGHT, 100);
   printf("Setup done.\r\n");
-  const int16_t step = 1;
-  int16_t i = 0;
+  const int16_t step = 20;
+  int16_t i = 1100;
   int16_t s = step;
   /**********************************************************************
    *                             MAIN LOOP
@@ -59,13 +91,14 @@ int main(void)
         printf("T IRQ %lu\r\n", mesure_t_irq);
         mesure_t_irq_last = mesure_t_irq;
       }
-      if(i > CONST_PWM_MAX){
-        s = -step;
+      if(i > 1500){
+        i = 1050;
       }
-      else if(i < -CONST_PWM_MAX){
-        s = step;
+      else if(i < 1500){
+        i = 1950;
       }
-      i += s;
+      PWM_write_us(PIN_PWM_L,i);
+      PWM_write_us(PIN_PWM_R,i);
 //      mcs.set_raw_pwm(Motor::Side::LEFT, i);
 //      mcs.set_raw_pwm(Motor::Side::RIGHT, -i);
       if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
@@ -73,6 +106,11 @@ int main(void)
       }
     }
   }
+#endif
+#ifdef CARTE_SERVO
+  servo_main();
+#endif
+  return 0;
 }
 
 #ifdef __cplusplus
@@ -82,8 +120,8 @@ void TIM14_IRQHandler(void){
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 		mesure_t_irq = micros();
-    mcs.update();
-    mcs.control();
+//    mcs.update();
+//    mcs.control();
 		mesure_t_irq = micros()-mesure_t_irq;
 	}
 }

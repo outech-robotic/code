@@ -8,6 +8,7 @@ extern CAN_HandleTypeDef hcan;
 
 typedef union{
   uint8_t u8[8];
+  uint16_t u16[4];
   int32_t d32[2];
 }byte_union;
 
