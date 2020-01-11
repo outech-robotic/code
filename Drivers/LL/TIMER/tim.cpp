@@ -286,16 +286,5 @@ void PWM_write(GPIO_Pin& pin, uint16_t value){
 
 void PWM_write_us(GPIO_Pin& pin, uint16_t width_us){
   uint16_t val_cycles = width_us*CONST_PWM_MAX/20000;
-  if(pin.port == GPIOA){
-    switch(pin.pin){
-      case LL_GPIO_PIN_8:
-        LL_TIM_OC_SetCompareCH1(TIM1, val_cycles); break;
-      case LL_GPIO_PIN_10:
-        LL_TIM_OC_SetCompareCH3(TIM1, val_cycles); break;
-      default: while(1);
-    }
-  }
-  else{
-    while(1);
-  }
+  PWM_write(pin,  val_cycles);
 }
