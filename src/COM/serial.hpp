@@ -88,11 +88,11 @@ public:
     bool init(uint32_t baudrate=115200){
         LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_USART1);
         this->usart_x = USART1;
-        this->mPin_rx = &PIN_USART1_RX;
-        this->mPin_tx = &PIN_USART1_TX;
+        this->mPin_rx = &PIN_USART_RX;
+        this->mPin_tx = &PIN_USART_TX;
         this->mBaudrate=baudrate;
         timeout_ms = 2000;
-        this->init_gpios(PIN_USART1_RX, PIN_USART1_TX);
+        this->init_gpios(PIN_USART_RX, PIN_USART_TX);
         this->init_usart(baudrate);
         return true;
     }
