@@ -40,11 +40,11 @@ class MotionController {
   volatile int32_t cod_left_raw_last;
   volatile int32_t cod_left_speed_current;
   volatile int32_t cod_left_target;
-  Average<int32_t, 8> cod_left_speed_avg;
+  Average<int32_t, 32> cod_left_speed_avg;
   volatile int32_t cod_right_last;
   volatile int32_t cod_right_speed_current;
   volatile int32_t cod_right_target;
-  Average<int32_t, 8> cod_right_speed_avg;
+  Average<int32_t, 32> cod_right_speed_avg;
 
 public:
 	MotionController();

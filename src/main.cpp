@@ -22,6 +22,7 @@ Metro can_wait(10);
 MotionController mcs;
 Serial serial;
 
+
 int main(void)
 {
   /**********************************************************************
@@ -42,9 +43,9 @@ int main(void)
   printf("Setup done.\r\n");
 
   mcs.init();
-//  mcs.set_control(true, false);
-//  mcs.set_target_speed(Motor::Side::LEFT, -100);
-//  mcs.set_target_speed(Motor::Side::RIGHT, 100);
+  mcs.set_control(true, false);
+  mcs.set_target_speed(Motor::Side::LEFT, 0);
+  mcs.set_target_speed(Motor::Side::RIGHT, 0);
 
   const int16_t step = 20;
   int16_t i = 1100;
@@ -60,6 +61,7 @@ int main(void)
     }
     if(can_wait.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
+      /*
       if(mesure_t_irq != mesure_t_irq_last){
         printf("T IRQ %lu\r\n", mesure_t_irq);
         mesure_t_irq_last = mesure_t_irq;
@@ -74,7 +76,7 @@ int main(void)
       //PWM_write_us(PIN_PWM_L,i);
       //PWM_write_us(PIN_PWM_R,i);
       mcs.set_raw_pwm(Motor::Side::LEFT, i);
-      mcs.set_raw_pwm(Motor::Side::RIGHT, i);
+      mcs.set_raw_pwm(Motor::Side::RIGHT, i);*/
       if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
         printf("ERR: SENDING ENCODER\r\n");
       }
@@ -90,8 +92,8 @@ void TIM14_IRQHandler(void){
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 		mesure_t_irq = micros();
-		//mcs.update();
-		//mcs.control();
+		mcs.update();
+		mcs.control();
 		mesure_t_irq = micros()-mesure_t_irq;
 	}
 }

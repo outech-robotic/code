@@ -9,24 +9,16 @@
 #define UTILITY_CONFIG_H_
 
 #define MAKE_MASK(length) ((1<<length)-1)
+
 /*
  * MOTOR CONTROL
  */
 // TIMER PWM
-#ifdef CARTE_MOTEUR
 #define CONST_PWM_PRESCALER  1
 #define CONST_PWM_AUTORELOAD 2000
 #define CONST_PWM_REPETITION 1
 #define CONST_PWM_MAX        2000
-#endif
-#ifdef CARTE_SERVO
-// TIMER PWM
-#define CONST_PWM_PRESCALER  240 // 5us resolution : 48MHz/240
-#define CONST_PWM_AUTORELOAD 4000 // 20ms PWM period : 4000*5us
-#define CONST_PWM_REPETITION 1
-#define CONST_PWM_MAX        4000
-#define CONST_PWM_PERIOD_US  20000
-#endif
+
 // ASSERVISSEMENT
 #define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
 /*
@@ -56,20 +48,22 @@
 #define CAN_PIPE_SENSOR      (0b10)
 #define CAN_PIPE_SERVO       (0b11)
 
-#define CAN_BOARD_ID         (0b01011) // used with in message id for sensor or servo messages (5bits out of 9)
+#define CAN_BOARD_ID         (0) // used with message id for messages (5LSbs out of 9)
 #define CAN_BOARD_ID_WIDTH   (5)
 #define CAN_BOARD_ID_MASK     MAKE_MASK(CAN_BOARD_ID_WIDTH)
 
 //MESSAGE IDs
 //PROPULSION MESSAGES
-#define CAN_MSG_MOT_STOP        (0b000000)
-#define CAN_MSG_MOT_MOVE_END    (0b000001)
-#define CAN_MSG_MOT_MOVE        (0b000010)
-#define CAN_MSG_MOT_COD_POS     (0b000011)
+#define CAN_MSG_MOT_STOP        (0b0000)
+#define CAN_MSG_MOT_MOVE_END    (0b0001)
+#define CAN_MSG_MOT_MOVE        (0b0010)
+#define CAN_MSG_MOT_COD_POS     (0b0011)
+
 //HL MESSAGES
-#define CAN_MSG_HEARTBEAT       (0b101010)
+#define CAN_MSG_HEARTBEAT       (0b1010)
+
 //SERVO MESSAGES
-#define CAN_MSG_SERVO_POS       (0b1010)
+#define CAN_MSG_SERVO_POS       (0b0000)
 #define CAN_MSG_SERVO_POS_WIDTH (4)
 
 
@@ -93,8 +87,8 @@
 #define PIN_USART_RX PA15
 
 // MOTOR CONTROL PINS (cf L298 IC)
-#define PIN_PWM_L PA8
-#define PIN_PWM_R PA10
+#define PIN_PWM_R PA8
+#define PIN_PWM_L PA10
 #define PIN_DIR_L1 PB0
 #define PIN_DIR_L2 PB1
 #define PIN_DIR_R1 PB4
