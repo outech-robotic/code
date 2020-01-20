@@ -10,11 +10,11 @@ int MotionController::init() {
   pid_speed_right.reset();
   pid_position_left.reset();
   pid_position_right.reset();
-  pid_speed_left.set_coefficients(1.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
+  pid_speed_left.set_coefficients(0.1, 0.01, 0.005, MOTION_CONTROL_FREQ);
   pid_speed_left.set_output_limit(CONST_PWM_MAX);
   pid_speed_left.set_anti_windup(CONST_PWM_MAX);
   pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
-  pid_speed_right.set_coefficients(1.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_coefficients(0.1, 0.01, 0.005, MOTION_CONTROL_FREQ);
   pid_speed_right.set_output_limit(CONST_PWM_MAX);
   pid_speed_right.set_anti_windup(CONST_PWM_MAX);
   pid_speed_right.set_derivative_limit(CONST_PWM_MAX);

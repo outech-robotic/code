@@ -7,7 +7,7 @@
 
 #ifndef MOTION_MOTIONCONTROLLER_H_
 #define MOTION_MOTIONCONTROLLER_H_
-#include "MOTION/PID.h"
+#include <MOTION/PIDFP.h>
 #include "MOTION/Motor.h"
 #include "TIMER/tim.h"
 #include "UTILITY/Average.hpp"
@@ -24,10 +24,10 @@ class MotionController {
     volatile int32_t speed_setpoint_last;
   } encoder_status;
 
-  PID pid_speed_left;
-  PID pid_speed_right;
-  PID pid_position_left;
-  PID pid_position_right;
+  PID_FP pid_speed_left;
+  PID_FP pid_speed_right;
+  PID_FP pid_position_left;
+  PID_FP pid_position_right;
 
   Motor motor_left;
   Motor motor_right;

@@ -17,7 +17,7 @@ uint32_t mesure_t_irq_last = 0;
 
 can_rx_msg rx_msg;
 
-Metro can_wait(10);
+Metro can_wait(100);
 
 MotionController mcs;
 Serial serial;
@@ -47,8 +47,8 @@ int main(void)
   mcs.set_target_speed(Motor::Side::LEFT, 0);
   mcs.set_target_speed(Motor::Side::RIGHT, 0);
 
-  const int16_t step = 20;
-  int16_t i = 1100;
+  const int16_t step = 10;
+  int16_t i = 500;
   int16_t s = step;
   /**********************************************************************
    *                             MAIN LOOP
@@ -61,22 +61,24 @@ int main(void)
     }
     if(can_wait.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
-      /*
-      if(mesure_t_irq != mesure_t_irq_last){
-        printf("T IRQ %lu\r\n", mesure_t_irq);
-        mesure_t_irq_last = mesure_t_irq;
-      }
-      if(i > 1990){
+    if(mesure_t_irq != mesure_t_irq_last){
+      printf("T IRQ %lu\r\n", mesure_t_irq);
+      mesure_t_irq_last = mesure_t_irq;
+    }
+#if 0
+
+      if(i >= CONST_PWM_MAX-step){
         s = -step;
       }
-      else if(i < -1990){
+      else if(i <= -CONST_PWM_MAX+step){
         s = step;
       }
       i += s;
       //PWM_write_us(PIN_PWM_L,i);
       //PWM_write_us(PIN_PWM_R,i);
       mcs.set_raw_pwm(Motor::Side::LEFT, i);
-      mcs.set_raw_pwm(Motor::Side::RIGHT, i);*/
+      mcs.set_raw_pwm(Motor::Side::RIGHT, i);
+#endif
       if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
         printf("ERR: SENDING ENCODER\r\n");
       }

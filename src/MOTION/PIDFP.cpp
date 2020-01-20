@@ -5,57 +5,57 @@
  *      Author: ticta
  */
 
-#include <MOTION/PID.h>
+#include <MOTION/PIDFP.h>
 
 #define COEFF_SHIFT       (8)
 #define COEFF_SIZE        (16)
 #define COEFF_MULTIPLIER  ((1ULL)<<COEFF_SHIFT)
 #define COEFF_MAX         (((1ULL)<<COEFF_SIZE)-1)>>COEFF_SHIFT
 
-PID::PID() {
+PID_FP::PID_FP() {
   reset();
 }
 
-void PID::reset(){
+void PID_FP::reset(){
   last_error = 0;
   last_setpoint = 0;
   integral_sum = 0;
 }
 
 
-void PID::set_coefficients(float new_kp, float new_ki, float new_kd, float new_freq){
+void PID_FP::set_coefficients(float new_kp, float new_ki, float new_kd, float new_freq){
   kp = new_kp * COEFF_MULTIPLIER;
   kd = new_kd * COEFF_MULTIPLIER * new_freq;
   ki = new_ki * COEFF_MULTIPLIER / new_freq;
 }
 
 
-void PID::set_output_limit(int16_t new_limit){
+void PID_FP::set_output_limit(int32_t new_limit){
   min = -new_limit*COEFF_MULTIPLIER;
   max = new_limit*COEFF_MULTIPLIER;
 }
 
 
-void PID::set_anti_windup(int16_t new_limit){
+void PID_FP::set_anti_windup(int32_t new_limit){
   integral_min = -new_limit*COEFF_MULTIPLIER;
   integral_max = new_limit*COEFF_MULTIPLIER;
 }
 
 
-void PID::set_derivative_limit(int16_t new_limit){
+void PID_FP::set_derivative_limit(int32_t new_limit){
   derivative_min = - new_limit*COEFF_MULTIPLIER;
   derivative_max = new_limit*COEFF_MULTIPLIER;
 }
 
 
-void PID::get_coefficients(float* ret_kp, float* ret_ki, float* ret_kd){
+void PID_FP::get_coefficients(float* ret_kp, float* ret_ki, float* ret_kd){
   *ret_kp = kp;
   *ret_ki = ki;
   *ret_kd = kd;
 }
 
 
-int16_t PID::compute(int32_t input, int32_t setpoint){
+int16_t PID_FP::compute(int32_t input, int32_t setpoint){
   int32_t res;
   int16_t out;
   int32_t delta_err;
@@ -79,6 +79,7 @@ int16_t PID::compute(int32_t input, int32_t setpoint){
       d = integral_max;
     else if(d < integral_min)
       d = integral_min;
+    last_error = error;
   }
   res = p+i+d;
   // Saturation
