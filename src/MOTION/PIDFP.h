@@ -13,10 +13,12 @@
 class PID_FP {
   uint32_t kp, ki, kd;
   int32_t min, max;
+
   int32_t integral_max;
   int32_t integral_min;
   int32_t derivative_max;
   int32_t derivative_min;
+
   int64_t integral_sum;
   int32_t last_error, last_setpoint;
 public:

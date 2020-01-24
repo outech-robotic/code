@@ -1,6 +1,7 @@
 #include "MOTION/MotionController.h"
 #include "config.h"
 
+
 MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_right(Motor::Side::RIGHT){
 
 }
@@ -10,11 +11,11 @@ int MotionController::init() {
   pid_speed_right.reset();
   pid_position_left.reset();
   pid_position_right.reset();
-  pid_speed_left.set_coefficients(0.1, 0.01, 0.005, MOTION_CONTROL_FREQ);
+  pid_speed_left.set_coefficients(0.2, 0.1, 0.001, MOTION_CONTROL_FREQ);
   pid_speed_left.set_output_limit(CONST_PWM_MAX);
   pid_speed_left.set_anti_windup(CONST_PWM_MAX);
   pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
-  pid_speed_right.set_coefficients(0.1, 0.01, 0.005, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_coefficients(0.2, 0.1, 0.001, MOTION_CONTROL_FREQ);
   pid_speed_right.set_output_limit(CONST_PWM_MAX);
   pid_speed_right.set_anti_windup(CONST_PWM_MAX);
   pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
@@ -36,6 +37,9 @@ int MotionController::init() {
   cod_left = {};
   cod_right = {};
   cod_left_raw_last = 0;
+
+  MX_TIM14_Init();
+
   return 0;
 }
 
@@ -101,8 +105,10 @@ void MotionController::set_target_speed(Motor::Side side, int16_t speed){
   switch(side){
     case Motor::Side::LEFT:
       cod_left.speed_setpoint = speed;
+      break;
     case Motor::Side::RIGHT:
       cod_right.speed_setpoint = speed;
+      break;
   }
 }
 
@@ -110,8 +116,10 @@ void MotionController::set_target_position(Motor::Side side, int16_t position){
   switch(side){
     case Motor::Side::LEFT:
       cod_left.setpoint = position;
+      break;
     case Motor::Side::RIGHT:
       cod_right.setpoint = position;
+      break;
   }
 }
 
@@ -131,7 +139,30 @@ int32_t MotionController::get_COD_right(){
 
 void MotionController::set_raw_pwm(Motor::Side side, int16_t pwm){
   switch(side){
-    case Motor::Side::LEFT : motor_left.set_pwm(pwm); break;
-    case Motor::Side::RIGHT: motor_right.set_pwm(pwm); break;
+    case Motor::Side::LEFT :
+      motor_left.set_pwm(pwm);
+      break;
+    case Motor::Side::RIGHT:
+      motor_right.set_pwm(pwm);
+      break;
   }
+}
+
+void MotionController::stop(){
+   LL_TIM_DisableCounter(TIM14);
+
+  cod_left.setpoint = cod_left.current;
+  cod_right.setpoint = cod_right.current;
+
+  pid_position_left.reset();
+  pid_position_right.reset();
+  pid_speed_left.reset();
+  pid_speed_right.reset();
+  cod_left.speed_setpoint = 0;
+  cod_left.speed_setpoint_last = 0;
+  cod_right.speed_setpoint = 0;
+  cod_right.speed_setpoint_last = 0;
+  cod_left_speed_avg.reset();
+  cod_right_speed_avg.reset();
+  LL_TIM_EnableCounter(TIM14);
 }

@@ -20,7 +20,7 @@
 #define CONST_PWM_MAX        500
 
 // ASSERVISSEMENT
-#define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
+#define MOTION_CONTROL_FREQ ((int32_t)(500)) // Hz
 /*
  * COMMUNICATIONS
  */
@@ -48,7 +48,7 @@
 #define CAN_PIPE_SENSOR      (0b10)
 #define CAN_PIPE_SERVO       (0b11)
 
-#define CAN_BOARD_ID         (0) // used with message id for messages (5LSbs out of 9)
+#define CAN_BOARD_ID         (15) // used with message id for messages (5LSbs out of 9)
 #define CAN_BOARD_ID_WIDTH   (5)
 #define CAN_BOARD_ID_MASK     MAKE_MASK(CAN_BOARD_ID_WIDTH)
 
@@ -58,7 +58,8 @@
 #define CAN_MSG_MOT_MOVE_END    (0b0001)
 #define CAN_MSG_MOT_MOVE        (0b0010)
 #define CAN_MSG_MOT_COD_POS     (0b0011)
-
+#define CAN_MSG_MOT_MODE        (0b1111)
+#define CAN_MSG_MOT_COD_SPEED   (0b1110)
 //HL MESSAGES
 #define CAN_MSG_HEARTBEAT       (0b1010)
 

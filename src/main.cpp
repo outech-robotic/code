@@ -11,6 +11,7 @@
 #include "MOTION/MotionController.h"
 #include "COM/serial.hpp"
 
+#define CMP_CAN_MSG(rxmsg, msg_id) CAN_PKT_MESSAG_ID(rxmsg.header.StdId) == (msg_id<<CAN_BOARD_ID_WIDTH | CAN_BOARD_ID)
 
 volatile uint32_t mesure_t_irq = 0;
 uint32_t mesure_t_irq_last = 0;
@@ -21,6 +22,7 @@ Metro can_wait(100);
 
 MotionController mcs;
 Serial serial;
+
 
 
 int main(void)
@@ -37,18 +39,24 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
-  MX_TIM14_Init();
   pinMode(PIN_LED,OUTPUT);
   digitalWrite(PIN_LED, GPIO_HIGH);
   printf("Setup done.\r\n");
 
+  LL_RCC_ClocksTypeDef clocks;
+  LL_RCC_GetSystemClocksFreq(&clocks);
   mcs.init();
-  mcs.set_control(true, false);
+  mcs.set_control(true, true);
   mcs.set_target_speed(Motor::Side::LEFT, 0);
   mcs.set_target_speed(Motor::Side::RIGHT, 0);
+  mcs.set_target_position(Motor::Side::LEFT, 0);
+  mcs.set_target_position(Motor::Side::RIGHT, 0);
+
+  //mcs.set_raw_pwm(Motor::Side::LEFT, 150);
+  //mcs.set_raw_pwm(Motor::Side::RIGHT, 150);
 
   const int16_t step = 10;
-  int16_t i = 500;
+  int16_t i = 150;
   int16_t s = step;
   /**********************************************************************
    *                             MAIN LOOP
@@ -56,17 +64,38 @@ int main(void)
   while (1)
   {
     if((CAN_receive_packet(&rx_msg)) == HAL_OK){
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_STOP)){
+        mcs.stop();
+      }
+
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)){
+        int32_t left_tick = rx_msg.data.d32[0];
+        int32_t right_tick = rx_msg.data.d32[1];
+        mcs.set_target_position(Motor::Side::LEFT, left_tick);
+        mcs.set_target_position(Motor::Side::RIGHT, right_tick);
+      }
+
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_COD_SPEED)){
+        int32_t left_tick = rx_msg.data.d32[0];
+        int32_t right_tick = rx_msg.data.d32[1];
+        mcs.set_target_speed(Motor::Side::LEFT, left_tick);
+        mcs.set_target_speed(Motor::Side::RIGHT, right_tick);
+      }
+
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MODE)){
+        mcs.set_control(rx_msg.data.u8[0]&0b1, rx_msg.data.u8[0]&0b10);
+      }
+
       printf("RECV: ") ;
       CAN_print_rx_pkt(&rx_msg);
     }
     if(can_wait.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
-    if(mesure_t_irq != mesure_t_irq_last){
-      printf("T IRQ %lu\r\n", mesure_t_irq);
-      mesure_t_irq_last = mesure_t_irq;
-    }
+      if(mesure_t_irq != mesure_t_irq_last){
+        printf("T IRQ %lu\r\n", mesure_t_irq);
+        mesure_t_irq_last = mesure_t_irq;
+      }
 #if 0
-
       if(i >= CONST_PWM_MAX-step){
         s = -step;
       }

@@ -38,12 +38,7 @@ class MotionController {
   encoder_status cod_right;
   volatile int32_t cod_left_last;
   volatile int32_t cod_left_raw_last;
-  volatile int32_t cod_left_speed_current;
-  volatile int32_t cod_left_target;
   Average<int32_t, 32> cod_left_speed_avg;
-  volatile int32_t cod_right_last;
-  volatile int32_t cod_right_speed_current;
-  volatile int32_t cod_right_target;
   Average<int32_t, 32> cod_right_speed_avg;
 
 public:
@@ -57,5 +52,6 @@ public:
 	int32_t get_COD_left();
 	int32_t get_COD_right();
 	void set_raw_pwm(Motor::Side side, int16_t pwm);
+	void stop();
 };
 #endif /* MOTION_MOTIONCONTROLLER_H_ */
