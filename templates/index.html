@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Outech - PID configurator</title>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
+            integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
+            crossorigin="anonymous"></script>
+</head>
+<body>
+Oublie pas de sauvegarder les coeficients...
+<form method="POST" action="{{ url_for('pid_view') }}">
+    {{ form.hidden_tag() }}
+
+    <div class="block">
+        {% for field in form if field.widget.input_type != 'hidden' %}
+
+        {% if field.errors %}
+        <div style="color:red">
+            {% endif %}
+
+            {{ field.label }}
+            {{ field }}
+
+            {% if form.errors %}
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</form>
+<hr>
+<form method="POST" action="{{ url_for('order_view') }}">
+    {{ form.hidden_tag() }}
+
+    <div class="block">
+        {% for field in order_form if field.widget.input_type != 'hidden' %}
+        {{ field.label }} {{ field }}<br/>
+        {% endfor %}
+    </div>
+</form>
+<hr>
+<button id="startStopButton">Stop capture</button>
+
+<hr>
+<div id="left" style="width:49%; height: 500px; display:inline-block"></div>
+<div id="right" style="width:49%; height: 500px; display:inline-block"></div>
+
+<script>
+    window.onload = function () {
+        function createGraph(name, color1, color2) {
+            var data = [];
+            var dataSeries1 = {
+                type: "line",
+                markerSize: 0,
+                lineColor: color1,
+                showInLegend: true,
+                name: "speed-"+name,
+                legendMarkerColor: color1,
+            };
+            var speedPoints = [];
+            dataSeries1.dataPoints = speedPoints;
+            data.push(dataSeries1);
+            var dataSeries2 = {
+                type: "line",
+                markerSize: 0,
+                lineColor: "dark" + color1,
+                lineDashType: "longDash",
+            };
+            var speedSetPoints = [];
+            dataSeries2.dataPoints = speedSetPoints;
+            data.push(dataSeries2);
+            //////////////////////////
+            var dataSeries3 = {
+                type: "line",
+                markerSize: 0,
+                lineColor: color2,
+                axisYType: "secondary",
+                showInLegend: true,
+                name: "position-"+name,
+                legendMarkerColor: color2,
+            };
+            var posPoints = [];
+            dataSeries3.dataPoints = posPoints;
+            data.push(dataSeries3);
+            var dataSeries4 = {
+                type: "line",
+                markerSize: 0,
+                lineColor: "dark" + color2,
+                lineDashType: "longDash",
+                axisYType: "secondary",
+            };
+            var posSetPoints = [];
+            dataSeries4.dataPoints = posSetPoints;
+            data.push(dataSeries4);
+
+            var options = {
+                zoomEnabled: true,
+                animationEnabled: false,
+                title: {
+                    text: name,
+                },
+
+                axisY: {
+                    title: "position",
+                    includeZero: false,
+                    lineThickness: 1
+                },
+                axisY2: {
+                    title: "speed",
+                    includeZero: false,
+                    lineThickness: 1,
+                },
+                data: data,
+            };
+            var chart = new CanvasJS.Chart(name, options);
+
+            var firstSpeedX = undefined;
+
+            function addSpeedPoint(x, y, setpoint) {
+                if (speedPoints.length === 0) {
+                    firstSpeedX = x;
+                }
+                speedSetPoints.push({
+                    x: x - firstSpeedX,
+                    y: setpoint,
+                });
+                speedPoints.push({
+                    x: x - firstSpeedX,
+                    y: y,
+                });
+                if (speedPoints.length % 25 === 0) {
+                    chart.render()
+                }
+            }
+
+            var firstPosX = undefined;
+
+            function addPosPoint(x, y, setpoint) {
+                if (posPoints.length === 0) {
+                    firstPosX = x;
+                }
+                posSetPoints.push({
+                    x: x - firstPosX,
+                    y: setpoint,
+                });
+                posPoints.push({
+                    x: x - firstPosX,
+                    y: y,
+                });
+                if (posPoints.length % 25 === 0) {
+                    chart.render()
+                }
+            }
+
+            function clear() {
+                speedPoints.length = 0;
+                speedSetPoints.length = 0;
+                posPoints.length = 0;
+                posSetPoints.length = 0;
+                chart.render()
+            }
+
+            return [addSpeedPoint, addPosPoint, clear];
+        }
+
+        var [addPointLeftSpeedChart, addPointLeftPosChart, clearLeftSpeedChart] = createGraph("left", "blue", "green");
+        var [addPointRightSpeedChart, addPointRightPosChart, clearRightSpeedChart] = createGraph("right", "red", "orange");
+
+        var capture = true;
+        var button = document.getElementById("startStopButton")
+        button.onclick = function () {
+            capture = !capture;
+            if (capture) {
+                button.innerText = "Stop capture";
+                clearLeftPosChart();
+                clearRightPosChart();
+                clearLeftSpeedChart();
+                clearRightSpeedChart();
+            } else {
+                button.innerText = "Start capture"
+            }
+        };
+
+        var socket = io.connect(null, {rememberTransport: false});
+        socket.on('pos_left', function (msg) {
+            if (!capture) {
+                return
+            }
+            addPointLeftPosChart(msg[0], msg[1], msg[2])
+        });
+        socket.on('pos_right', function (msg) {
+            if (!capture) {
+                return
+            }
+            addPointRightPosChart(msg[0], msg[1], msg[2])
+        });
+        socket.on('speed_left', function (msg) {
+            if (!capture) {
+                return
+            }
+            addPointLeftSpeedChart(msg[0], msg[1], msg[2])
+        });
+        socket.on('speed_right', function (msg) {
+            if (!capture) {
+                return
+            }
+            addPointRightSpeedChart(msg[0], msg[1], msg[2])
+        });
+
+    }
+</script>
+</body>
+
+</html>
