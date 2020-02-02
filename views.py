@@ -78,22 +78,6 @@ def get_saved_pid_form():
     return form
 
 
-def get_graph():
-    return {
-        "labels": [],
-        "datasets": [
-            {
-                "label": 'left encoder',
-                "data": [],
-                "borderColor": 'blue',
-                "backgroundColor": 'rgba(0, 0, 0, 0)',
-                "fill": False,
-                "lineTension": 0
-            },
-        ]
-    }
-
-
 def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
     @app.route('/pid', methods=['GET', 'POST'])
     def pid_view():
@@ -114,7 +98,6 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
 
         return render_template(
             'index.html',
-            graph=get_graph(),
             form=form,
             order_form=OrderForm(),
         )
@@ -134,7 +117,6 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
 
         return render_template(
             'index.html',
-            graph=get_graph(),
             form=get_saved_pid_form(),
             order_form=form,
         )
@@ -143,7 +125,6 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
     def index():
         return render_template(
             'index.html',
-            graph=get_graph(),
             form=get_saved_pid_form(),
             order_form=OrderForm()
         )
