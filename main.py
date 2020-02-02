@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import random
 import string
 from math import sin, pi
@@ -17,8 +18,9 @@ CAN_BOARD_ID_WIDTH = 5
 CAN_MSG_WIDTH  = 9
 CAN_BOARD_ID_MOTOR = 15
 CAN_CHANNEL_MOTOR  = 0b00
-CAN_MSG_SPEED   = 0b1110
+CAN_MSG_SPEED   = 0b1000
 CAN_MSG_POS     = 0b0010
+CAN_MSG_STOP    = 0b0000
 CAN_KP_ID = 0b1100
 CAN_KI_ID = 0b1101
 CAN_KD_ID = 0b1110
@@ -26,13 +28,14 @@ PID_LEFT_SPEED = 0
 PID_LEFT_POS = 1
 PID_RIGHT_SPEED = 2
 PID_RIGHT_POS = 3
-
+COD_UPDATE_FREQ = 100 #Hz
 fmt_motor_set_speed = struct.Struct('<ll')  # 32b + 32b signe
 fmt_motor_set_pos   = struct.Struct('<ll')
+fmt_motor_cod_pos   = struct.Struct('<ll')
 fmt_motor_set_pid   = struct.Struct('<BL')  # 8b + 32b non signes
 
-WHEEL_DIAMETER = 60  # en mm ; 2400 ticks par tour donc par 2*pi*60 mm
-DISTANCE_BETWEEN_WHEELS = 300  # en mm
+WHEEL_DIAMETER = 70  # en mm ; 2400 ticks par tour donc par 2*pi*60 mm
+DISTANCE_BETWEEN_WHEELS = 365  # en mm
 
 
 # CAN
@@ -44,7 +47,7 @@ def send_packet(channel, message_id, board, data=[]):
         )
         try:
             bus.send(msg)
-            print(f"message_id sent on {bus.channel_info}")
+            print(can_pkt_id, "sent on", bus.channel_info)
         except can.CanError:
             print(can.CanError)
             print("message_id NOT sent")
@@ -64,17 +67,23 @@ class Adapter(InterfaceAdapter):
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
         # appelle les fonctions .push_*_*
         def f():
-            while True:
-                sleep(1 / 100)
-                t = int(time() * 1000)
-                v = 100 + sin(time() * 1) * 10
-                # 1er argument le temps (time.time()), 2eme la valeur, 3eme la consigne.
-
-                self.push_speed_left(t, 10 + v, 100)
-                self.push_pos_left(t, -v, -100)
-
-                self.push_speed_right(t, 10 + v, 100)
-                self.push_pos_right(t, -v, -100)
+            start_t=time()
+            last_left, last_right = 0, 0
+            with can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000) as bus:
+                for message in bus:
+                    if (message.arbitration_id >>5) == 0b000011:
+                        #sleep(1.0/COD_UPDATE_FREQ)
+                        posl, posr = fmt_motor_cod_pos.unpack(message.data)
+                        #print(posl, posr)
+                        speedl, speedr = (posl-last_left)*COD_UPDATE_FREQ, (posr - last_right)*COD_UPDATE_FREQ
+                        #print(speedl, speedr)
+                        last_left, last_right = posl, posr
+                        t = int((time()-start_t) * 1000)
+                        self.push_speed_left(t, speedl, 0)
+                        self.push_speed_right(t, speedr, 0)
+                        self.push_pos_left(t, posl, 0)
+                        self.push_pos_right(t, posr, 0)
+                       # 1er argument le temps (time.time()), 2eme la valeur, 3eme la consigne.
 
         Thread(target=f).start()
 
@@ -122,27 +131,29 @@ class Adapter(InterfaceAdapter):
         # Conversion en ticks
         coeff = 2400/(2*pi*60)
 
+        # Cas 1 : translation avec asserv en vitesse uniquement (2 roues allant à la meme vitesse)
+        if speed is not None:   
+            print("SPEED")
+            speed_ticks = speed * coeff
+            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_SPEED, CAN_BOARD_ID_MOTOR, fmt_motor_set_speed.pack(int(speed_ticks), int(speed_ticks)))
+
         # Cas 1 : juste translation
-        if angle is None or angle == 0 or angle == 0.0:
-            if speed is not None:
-                speed_ticks = speed * coeff
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_SPEED, CAN_BOARD_ID_MOTOR, fmt_motor_set_speed.pack(speed_ticks, speed_ticks))
-            if position is not None:
-                position_ticks = position * coeff
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(position_ticks, position_ticks))
+        elif position is not None:
+            print("POS")
+            position_ticks = position * coeff
+            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(int(position_ticks), int(position_ticks)))
 
         # Cas 2 : juste rotation
-        else:
+        elif angle is not None:
+            print("ANGLE")
             angle_ticks = angle * DISTANCE_BETWEEN_WHEELS / 2
-            if speed is not None:
-                speed_ticks = speed * coeff
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_SPEED, CAN_BOARD_ID_MOTOR,
-                            fmt_motor_set_speed.pack(speed_ticks, speed_ticks))
-            if angle > 0:  # sens trigo
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(-angle_ticks, angle_ticks))  # roue gauche, roue droite
+            if angle >= 0:  # sens trigo
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(-int(angle_ticks), int(angle_ticks)))  # roue gauche, roue droite
             if angle < 0:
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(+angle_ticks, -angle_ticks))  # roue gauche, roue droite
-
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(int(angle_ticks), -int(angle_ticks)))  # roue gauche, roue droite
+        else:
+            print("STOP")
+            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
 
 register_views(app, socketio, Adapter(socketio))
 
