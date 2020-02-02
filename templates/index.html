@@ -8,6 +8,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
             integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
             crossorigin="anonymous"></script>
+    <style id="dbr"></style>
 </head>
 <body>
 Oublie pas de sauvegarder les coeficients...
@@ -51,6 +52,13 @@ Oublie pas de sauvegarder les coeficients...
 <div id="right" style="width:49%; height: 500px; display:inline-block"></div>
 
 <script>
+    var turn = 0;
+    var doABarrelRoll = function(){
+        turn++;
+        document.getElementById("dbr").remove();
+        var a="-webkit-",b='transform:rotate(' + turn + 'turn);',c='transition:1s;';document.head.innerHTML+='<style id="dbr">body{'+a+b+a+c+b+c
+    };
+
     window.onload = function () {
         function createGraph(name, color1, color2) {
             var data = [];
@@ -185,10 +193,12 @@ Oublie pas de sauvegarder les coeficients...
 
         var socket = io.connect(null, {rememberTransport: false});
         var stop_button = document.getElementById("stop_button");
-        var doABarrelRoll = function(){var a="-webkit-",b='transform:rotate(1turn);',c='transition:1s;';document.head.innerHTML+='<style>body{'+a+b+a+c+b+c}
+        var soundPath = 'https://www.myinstants.com/media/sounds/peproll1.mp3';
+        var sound = new Audio(soundPath);
         stop_button.onclick = function () {
             socket.emit("STOP", null);
             doABarrelRoll();
+            sound.play();
         };
         socket.on('pos_left', function (msg) {
             if (!capture) {
