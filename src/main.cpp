@@ -4,21 +4,21 @@
 #include "GPIO/gpio.h"
 #include "UTILITY/Metro.hpp"
 #include "USART/usart.hpp"
-#include <stdio.h>
+//#include <stdio.h>
 #include <cstdlib>
 #include "UTILITY/macros.h"
 #include "config.h"
 #include "MOTION/MotionController.h"
 #include "COM/serial.hpp"
 
-#define CMP_CAN_MSG(rxmsg, msg_id) CAN_PKT_MESSAG_ID(rxmsg.header.StdId) == (msg_id<<CAN_BOARD_ID_WIDTH | CAN_BOARD_ID)
+#define CMP_CAN_MSG(rxmsg, msg_id) (CAN_PKT_MESSAG_ID(rxmsg.header.StdId) == (msg_id<<CAN_BOARD_ID_WIDTH | CAN_BOARD_ID))
 
 volatile uint32_t mesure_t_irq = 0;
 uint32_t mesure_t_irq_last = 0;
 
 can_rx_msg rx_msg;
 
-Metro can_wait(100);
+Metro can_wait(10);
 
 MotionController mcs;
 Serial serial;
@@ -41,12 +41,12 @@ int main(void)
   MX_TIM3_Init();
   pinMode(PIN_LED,OUTPUT);
   digitalWrite(PIN_LED, GPIO_HIGH);
-  printf("Setup done.\r\n");
+  //printf("Setup done.\r\n");
 
   LL_RCC_ClocksTypeDef clocks;
   LL_RCC_GetSystemClocksFreq(&clocks);
   mcs.init();
-  mcs.set_control(true, true);
+  mcs.set_control(true, false);
   mcs.set_target_speed(Motor::Side::LEFT, 0);
   mcs.set_target_speed(Motor::Side::RIGHT, 0);
   mcs.set_target_position(Motor::Side::LEFT, 0);
@@ -58,6 +58,9 @@ int main(void)
   const int16_t step = 10;
   int16_t i = 150;
   int16_t s = step;
+  uint8_t count = 0;
+  float values[12]={};
+
   /**********************************************************************
    *                             MAIN LOOP
    **********************************************************************/
@@ -86,13 +89,33 @@ int main(void)
         mcs.set_control(rx_msg.data.u8[0]&0b1, rx_msg.data.u8[0]&0b10);
       }
 
-      printf("RECV: ") ;
-      CAN_print_rx_pkt(&rx_msg);
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KP)){
+        mcs.set_kp(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
+        values[rx_msg.data.u8[0]+(count++)] = (uint32_t)(rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1])/65535.0;
+      }
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KI)){
+        mcs.set_ki(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
+        values[rx_msg.data.u8[0]+(count++)] = (uint32_t)(rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1])/65535.0;
+      }
+      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KD)){
+        mcs.set_kd(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
+        values[rx_msg.data.u8[0]+count] = (uint32_t)(rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1])/65535.0;
+        count = 0;
+        if(rx_msg.data.u8[0] == MotionController::PID_ID::PID_RIGHT_SPEED && count == 2){
+          count = 0;
+        }
+      }
+
+      if(count >=12){
+        count=0;
+      }
+      //printf("RECV: ") ;
+      //CAN_print_rx_pkt(&rx_msg);
     }
     if(can_wait.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
       if(mesure_t_irq != mesure_t_irq_last){
-        printf("T IRQ %lu\r\n", mesure_t_irq);
+        //printf("T IRQ %lu\r\n", mesure_t_irq);
         mesure_t_irq_last = mesure_t_irq;
       }
 #if 0
@@ -109,7 +132,7 @@ int main(void)
       mcs.set_raw_pwm(Motor::Side::RIGHT, i);
 #endif
       if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
-        printf("ERR: SENDING ENCODER\r\n");
+        //printf("ERR: SENDING ENCODER\r\n");
       }
     }
   }

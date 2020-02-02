@@ -14,10 +14,10 @@
  * MOTOR CONTROL
  */
 // TIMER PWM
-#define CONST_PWM_PRESCALER  48
-#define CONST_PWM_AUTORELOAD 500
-#define CONST_PWM_REPETITION 1
-#define CONST_PWM_MAX        500
+#define CONST_PWM_PRESCALER  2
+#define CONST_PWM_AUTORELOAD 1500
+#define CONST_PWM_REPETITION 2
+#define CONST_PWM_MAX        1500
 
 // ASSERVISSEMENT
 #define MOTION_CONTROL_FREQ ((int32_t)(500)) // Hz
@@ -58,8 +58,16 @@
 #define CAN_MSG_MOT_MOVE_END    (0b0001)
 #define CAN_MSG_MOT_MOVE        (0b0010)
 #define CAN_MSG_MOT_COD_POS     (0b0011)
+#define CAN_MSG_MOT_MAX_SPEED   (0b0100)
+
+ //propulsion debugs
 #define CAN_MSG_MOT_MODE        (0b1111)
-#define CAN_MSG_MOT_COD_SPEED   (0b1110)
+#define CAN_MSG_MOT_COD_SPEED   (0b1000)
+#define CAN_MSG_MOT_SET_KP      (0b1100)
+#define CAN_MSG_MOT_SET_KI      (0b1101)
+#define CAN_MSG_MOT_SET_KD      (0b1110)
+
+
 //HL MESSAGES
 #define CAN_MSG_HEARTBEAT       (0b1010)
 
@@ -74,10 +82,10 @@
 #define PIN_LED PB3
 
 // ENCODERS
-#define PIN_COD_L_A PA0
-#define PIN_COD_L_B PA1
-#define PIN_COD_R_A PA6
-#define PIN_COD_R_B PA7
+#define PIN_COD_R_A PA0
+#define PIN_COD_R_B PA1
+#define PIN_COD_L_A PA6
+#define PIN_COD_L_B PA7
 
 // CAN BUS
 #define PIN_CAN_RX PA11
@@ -88,11 +96,11 @@
 #define PIN_USART_RX PA15
 
 // MOTOR CONTROL PINS (cf L298 IC)
-#define PIN_PWM_R PA8
-#define PIN_PWM_L PA10
-#define PIN_DIR_L1 PB0
-#define PIN_DIR_L2 PB1
-#define PIN_DIR_R1 PB4
-#define PIN_DIR_R2 PB5
+#define PIN_PWM_L PA8
+#define PIN_PWM_R PA10
+#define PIN_DIR_R2 PB0
+#define PIN_DIR_R1 PB1
+#define PIN_DIR_L2 PB4
+#define PIN_DIR_L1 PB5
 
 #endif /* UTILITY_CONFIG_H_ */

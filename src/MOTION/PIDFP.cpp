@@ -7,8 +7,8 @@
 
 #include <MOTION/PIDFP.h>
 
-#define COEFF_SHIFT       (8)
-#define COEFF_SIZE        (16)
+#define COEFF_SHIFT       (16)
+#define COEFF_SIZE        (32)
 #define COEFF_MULTIPLIER  ((1ULL)<<COEFF_SHIFT)
 #define COEFF_MAX         (((1ULL)<<COEFF_SIZE)-1)>>COEFF_SHIFT
 
@@ -23,11 +23,30 @@ void PID_FP::reset(){
 }
 
 
-void PID_FP::set_coefficients(float new_kp, float new_ki, float new_kd, float new_freq){
+void PID_FP::set_coefficients(float new_kp, float new_ki, float new_kd, uint32_t new_freq){
   kp = new_kp * COEFF_MULTIPLIER;
   kd = new_kd * COEFF_MULTIPLIER * new_freq;
   ki = new_ki * COEFF_MULTIPLIER / new_freq;
 }
+
+void PID_FP::set_coefficients(uint32_t new_kp, uint32_t new_ki, uint32_t new_kd){
+  kp = new_kp;
+  kd = new_kd;
+  ki = new_ki;
+}
+
+void PID_FP::set_kp(uint32_t new_kp){
+  kp = new_kp;
+}
+
+void PID_FP::set_ki(uint32_t new_ki){
+  ki = new_ki;
+}
+
+void PID_FP::set_kd(uint32_t new_kd){
+  kd = new_kd;
+}
+
 
 
 void PID_FP::set_output_limit(int32_t new_limit){
@@ -60,7 +79,7 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
   int16_t out;
   int32_t delta_err;
   int32_t error = setpoint-input;
-  int32_t p=0,i=0,d=0;
+  int64_t p=0,i=0,d=0;
   if(kp){
     p = kp * error;
   }

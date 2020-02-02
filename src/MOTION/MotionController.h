@@ -36,12 +36,20 @@ class MotionController {
   bool controlled_position;
   encoder_status cod_left;
   encoder_status cod_right;
-  volatile int32_t cod_left_last;
-  volatile int32_t cod_left_raw_last;
+  volatile int32_t cod_right_last;
+  volatile int32_t cod_right_raw_last;
   Average<int32_t, 32> cod_left_speed_avg;
   Average<int32_t, 32> cod_right_speed_avg;
 
 public:
+
+  enum PID_ID{
+      PID_LEFT_SPEED  = 0,
+      PID_LEFT_POS    = 1,
+      PID_RIGHT_SPEED = 2,
+      PID_RIGHT_POS   = 3,
+  };
+
 	MotionController();
 	int init();
 	void update();
@@ -52,6 +60,9 @@ public:
 	int32_t get_COD_left();
 	int32_t get_COD_right();
 	void set_raw_pwm(Motor::Side side, int16_t pwm);
+	void set_kp(uint8_t id, uint32_t k);
+	void set_ki(uint8_t id, uint32_t k);
+	void set_kd(uint8_t id, uint32_t k);
 	void stop();
 };
 #endif /* MOTION_MOTIONCONTROLLER_H_ */

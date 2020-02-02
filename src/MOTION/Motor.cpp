@@ -41,8 +41,8 @@ void Motor::set_direction(Direction new_dir){
         digitalWrite(PIN_DIR_L2, GPIO_LOW);
         break;
       case Direction::BACKWARD:
-        digitalWrite(PIN_DIR_L1, GPIO_LOW);
         digitalWrite(PIN_DIR_L2, GPIO_HIGH);
+        digitalWrite(PIN_DIR_L1, GPIO_LOW);
         break;
       case Direction::BRAKE:
         digitalWrite(PIN_DIR_L1, GPIO_HIGH);
@@ -53,12 +53,12 @@ void Motor::set_direction(Direction new_dir){
   else{
     switch(dir){
       case Direction::FORWARD: //For other side, pins are inverted
-        digitalWrite(PIN_DIR_R2, GPIO_HIGH);
-        digitalWrite(PIN_DIR_R1, GPIO_LOW);
+        digitalWrite(PIN_DIR_R1, GPIO_HIGH);
+        digitalWrite(PIN_DIR_R2, GPIO_LOW);
         break;
       case Direction::BACKWARD:
-        digitalWrite(PIN_DIR_R2, GPIO_LOW);
-        digitalWrite(PIN_DIR_R1, GPIO_HIGH);
+        digitalWrite(PIN_DIR_R2, GPIO_HIGH);
+        digitalWrite(PIN_DIR_R1, GPIO_LOW);
         break;
       case Direction::BRAKE:
         digitalWrite(PIN_DIR_R1, GPIO_HIGH);

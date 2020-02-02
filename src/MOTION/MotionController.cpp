@@ -11,11 +11,11 @@ int MotionController::init() {
   pid_speed_right.reset();
   pid_position_left.reset();
   pid_position_right.reset();
-  pid_speed_left.set_coefficients(0.2, 0.1, 0.001, MOTION_CONTROL_FREQ);
+  pid_speed_left.set_coefficients(0.5, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_speed_left.set_output_limit(CONST_PWM_MAX);
   pid_speed_left.set_anti_windup(CONST_PWM_MAX);
   pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
-  pid_speed_right.set_coefficients(0.2, 0.1, 0.001, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_coefficients(0.5, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_speed_right.set_output_limit(CONST_PWM_MAX);
   pid_speed_right.set_anti_windup(CONST_PWM_MAX);
   pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
@@ -36,7 +36,7 @@ int MotionController::init() {
 
   cod_left = {};
   cod_right = {};
-  cod_left_raw_last = 0;
+  cod_right_raw_last = 0;
 
   MX_TIM14_Init();
 
@@ -45,20 +45,18 @@ int MotionController::init() {
 
 
 void MotionController::update() {
-  static int16_t cod_left_overflows=0;
-  int32_t cod_left_raw = COD_get_left();
-  cod_right.current = COD_get_right();
-  if(cod_left_raw != cod_left_raw_last){
-    asm volatile("nop");
+  static int16_t cod_right_overflows=0;
+  int32_t cod_right_raw = COD_get_right();
+  cod_left.current = -COD_get_left();
+
+  if(cod_right_raw - cod_right_raw_last > 32767){
+	  cod_right_overflows--;
   }
-  if(cod_left_raw - cod_left_raw_last > 32767){
-    cod_left_overflows--;
+  else if(cod_right_raw_last - cod_right_raw > 32767){
+	  cod_right_overflows++;
   }
-  else if(cod_left_raw_last - cod_left_raw > 32767){
-    cod_left_overflows++;
-  }
-  cod_left_raw_last = cod_left_raw;
-  cod_left.current  = -(cod_left_overflows*65536 + cod_left_raw);
+  cod_right_raw_last = cod_right_raw;
+  cod_right.current  = (cod_right_overflows*65536 + cod_right_raw);
 
   cod_left.speed_current = (cod_left.current - cod_left.last)*MOTION_CONTROL_FREQ;
   cod_right.speed_current = (cod_right.current - cod_right.last)*MOTION_CONTROL_FREQ;
@@ -147,6 +145,66 @@ void MotionController::set_raw_pwm(Motor::Side side, int16_t pwm){
       break;
   }
 }
+
+void MotionController::set_kp(uint8_t id, uint32_t k){
+  switch(id){
+  case PID_ID::PID_LEFT_SPEED :
+    pid_speed_left.set_kp(k);
+    break;
+  case PID_ID::PID_LEFT_POS :
+    pid_position_left.set_kp(k);
+    break;
+  case PID_ID::PID_RIGHT_SPEED :
+    pid_speed_right.set_kp(k);
+    break;
+  case PID_ID::PID_RIGHT_POS :
+    pid_position_right.set_kp(k);
+    break;
+  default:
+    while(true);
+  }
+}
+
+void MotionController::set_ki(uint8_t id, uint32_t k){
+  switch(id){
+  case PID_ID::PID_LEFT_SPEED :
+    pid_speed_left.set_ki(k);
+    break;
+  case PID_ID::PID_LEFT_POS :
+    pid_position_left.set_ki(k);
+    break;
+  case PID_ID::PID_RIGHT_SPEED :
+    pid_speed_right.set_ki(k);
+    break;
+  case PID_ID::PID_RIGHT_POS :
+    pid_position_right.set_ki(k);
+    break;
+  default:
+    while(true);
+  }
+}
+
+void MotionController::set_kd(uint8_t id, uint32_t k){
+  switch(id){
+  case PID_ID::PID_LEFT_SPEED :
+    pid_speed_left.set_kd(k);
+    break;
+  case PID_ID::PID_LEFT_POS :
+    pid_position_left.set_kd(k);
+    break;
+  case PID_ID::PID_RIGHT_SPEED :
+    pid_speed_right.set_kd(k);
+    break;
+  case PID_ID::PID_RIGHT_POS :
+    pid_position_right.set_kd(k);
+    break;
+  default:
+    while(true);
+  }
+}
+
+
+
 
 void MotionController::stop(){
    LL_TIM_DisableCounter(TIM14);

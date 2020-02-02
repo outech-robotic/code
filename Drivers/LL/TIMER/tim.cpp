@@ -260,11 +260,11 @@ void MX_TIM14_Init(void)
 }
 
 
-int16_t COD_get_left(){
+int16_t COD_get_right(){
   return LL_TIM_GetCounter(TIM3) - 32767;
 }
 
-int32_t COD_get_right(){
+int32_t COD_get_left(){
 	return LL_TIM_GetCounter(TIM2) - 2147483647;
 }
 
