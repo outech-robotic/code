@@ -55,6 +55,10 @@ class InterfaceAdapter(ABC):
                             angle: Optional[float]):
         """ Order submission. """
 
+    @abstractmethod
+    def on_stop_button(self):
+        """ On stop button pressed."""
+
 
 def get_pid_coefs():
     try:
@@ -131,3 +135,7 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
             order_form=OrderForm(),
             capture=False,
         )
+
+    @socketio.on('STOP')
+    def on_stop(_):
+        interface.on_stop_button()

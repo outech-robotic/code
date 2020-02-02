@@ -153,6 +153,9 @@ class Adapter(InterfaceAdapter):
         else:
             print("STOP")
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
+    def on_stop_button(self):
+        self.on_pid_submission(PID(0, 0, 0), PID(0, 0, 0), PID(0, 0, 0), PID(0, 0, 0))
+
 
 register_views(app, socketio, Adapter(socketio))
 

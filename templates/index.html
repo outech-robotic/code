@@ -42,7 +42,10 @@ Oublie pas de sauvegarder les coeficients...
 </form>
 <hr>
 <button id="startStopButton">{{ 'Stop' if capture else 'Start' }} capture</button>
-
+<button id="stop_button"><img
+        style="width: 25%"
+        src="https://www.cdiscount.com/pdt2/6/7/5/1/550x550/fie3700804174675/rw/lampe-gyrophare-projecteur-rouge-rotatif-effet-pom.jpg"/>
+</button>
 <hr>
 <div id="left" style="width:49%; height: 500px; display:inline-block"></div>
 <div id="right" style="width:49%; height: 500px; display:inline-block"></div>
@@ -181,6 +184,10 @@ Oublie pas de sauvegarder les coeficients...
         };
 
         var socket = io.connect(null, {rememberTransport: false});
+        var stop_button = document.getElementById("stop_button");
+        stop_button.onclick = function () {
+            socket.emit("STOP", null);
+        };
         socket.on('pos_left', function (msg) {
             if (!capture) {
                 return
