@@ -1,6 +1,5 @@
 flask
 flask-socketio
-gevent-websocket
 flask-wtf
 python-can
 
