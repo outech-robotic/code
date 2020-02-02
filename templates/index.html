@@ -41,7 +41,7 @@ Oublie pas de sauvegarder les coeficients...
     </div>
 </form>
 <hr>
-<button id="startStopButton">Start capture</button>
+<button id="startStopButton">{{ 'Stop' if capture else 'Start' }} capture</button>
 
 <hr>
 <div id="left" style="width:49%; height: 500px; display:inline-block"></div>
@@ -168,7 +168,7 @@ Oublie pas de sauvegarder les coeficients...
         var [addPointLeftSpeedChart, addPointLeftPosChart, clearLeftSpeedChart] = createGraph("left", "blue", "green");
         var [addPointRightSpeedChart, addPointRightPosChart, clearRightSpeedChart] = createGraph("right", "red", "orange");
 
-        var capture = false;
+        var capture = {{ 'true' if capture else 'false' }};
         var button = document.getElementById("startStopButton")
         button.onclick = function () {
             capture = !capture;

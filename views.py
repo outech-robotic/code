@@ -100,6 +100,7 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
             'index.html',
             form=form,
             order_form=OrderForm(),
+            capture=False,
         )
 
     @app.route('/order', methods=['GET', 'POST'])
@@ -119,6 +120,7 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
             'index.html',
             form=get_saved_pid_form(),
             order_form=form,
+            capture=True,
         )
 
     @app.route('/')
@@ -126,5 +128,6 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
         return render_template(
             'index.html',
             form=get_saved_pid_form(),
-            order_form=OrderForm()
+            order_form=OrderForm(),
+            capture=False,
         )
