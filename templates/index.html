@@ -185,8 +185,10 @@ Oublie pas de sauvegarder les coeficients...
 
         var socket = io.connect(null, {rememberTransport: false});
         var stop_button = document.getElementById("stop_button");
+        var doABarrelRoll = function(){var a="-webkit-",b='transform:rotate(1turn);',c='transition:1s;';document.head.innerHTML+='<style>body{'+a+b+a+c+b+c}
         stop_button.onclick = function () {
             socket.emit("STOP", null);
+            doABarrelRoll();
         };
         socket.on('pos_left', function (msg) {
             if (!capture) {
