@@ -4,5 +4,5 @@
 2. Run `pipenv install`
 3. Run `pipenv shell`
 4. Run `python main.py`
-5. Go to `https://localhost:5000`
+5. Go to `http://localhost:5000`
 
