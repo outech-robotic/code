@@ -130,9 +130,6 @@ Oublie pas de sauvegarder les coeficients...
                     x: x - firstSpeedX,
                     y: y,
                 });
-                if (speedPoints.length % 25 === 0) {
-                    chart.render()
-                }
             }
 
             var firstPosX = undefined;
@@ -149,9 +146,11 @@ Oublie pas de sauvegarder les coeficients...
                     x: x - firstPosX,
                     y: y,
                 });
-                if (posPoints.length % 25 === 0) {
-                    chart.render()
-                }
+            }
+
+            setInterval(renderChart, 1000/60); // 60 FPS in yo eyes.
+            function renderChart() {
+                chart.render()
             }
 
             function clear() {
