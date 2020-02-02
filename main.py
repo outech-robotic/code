@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import random
 import string
 from math import sin, pi

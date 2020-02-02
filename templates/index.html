@@ -41,7 +41,7 @@ Oublie pas de sauvegarder les coeficients...
     </div>
 </form>
 <hr>
-<button id="startStopButton">Stop capture</button>
+<button id="startStopButton">Start capture</button>
 
 <hr>
 <div id="left" style="width:49%; height: 500px; display:inline-block"></div>
@@ -164,18 +164,16 @@ Oublie pas de sauvegarder les coeficients...
 
             return [addSpeedPoint, addPosPoint, clear];
         }
-
+        
         var [addPointLeftSpeedChart, addPointLeftPosChart, clearLeftSpeedChart] = createGraph("left", "blue", "green");
         var [addPointRightSpeedChart, addPointRightPosChart, clearRightSpeedChart] = createGraph("right", "red", "orange");
 
-        var capture = true;
+        var capture = false;
         var button = document.getElementById("startStopButton")
         button.onclick = function () {
             capture = !capture;
             if (capture) {
                 button.innerText = "Stop capture";
-                clearLeftPosChart();
-                clearRightPosChart();
                 clearLeftSpeedChart();
                 clearRightSpeedChart();
             } else {
