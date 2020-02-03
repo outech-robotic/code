@@ -223,7 +223,7 @@ class CANAdapter(InterfaceAdapter):
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
 
     def on_stop_button(self):
-        self.on_order_submission(0, 0, 0)
+        self.on_order_submission(None, None, None)
 
 
 class RandomAdapter(InterfaceAdapter):
