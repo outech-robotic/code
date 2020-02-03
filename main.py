@@ -1,9 +1,10 @@
+import os
 import random
 import string
 import struct
-from math import pi
+from math import pi, sin, cos
 from threading import Thread
-from time import time
+from time import time, sleep
 from typing import Optional
 
 import can
@@ -71,14 +72,14 @@ app.config['SECRET_KEY'] = ''.join(random.choice(string.printable) for i in rang
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 
-class Adapter(InterfaceAdapter):
+class CANAdapter(InterfaceAdapter):
     """ La classe qu'il faut implem pour s'interfacer avec la page web. """
 
     def __init__(self, socketio: SocketIO):
-        super(Adapter, self).__init__(socketio)  # Il faut garder cette ligne.
         self.setpoint_speed = 0.0
         self.setpoint_pos   = None
         self.setpoint_angle = None
+        super(CANAdapter, self).__init__(socketio)  # Il faut garder cette ligne.
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
         # appelle les fonctions .push_*_*
         def f():
@@ -91,7 +92,7 @@ class Adapter(InterfaceAdapter):
                         posl, posr = fmt_motor_cod_pos.unpack(message.data)
                         # print(posl, posr)
                         speedl, speedr = (posl - last_left) * COD_UPDATE_FREQ, (
-                                    posr - last_right) * COD_UPDATE_FREQ
+                                posr - last_right) * COD_UPDATE_FREQ
                         # print(speedl, speedr)
                         last_left, last_right = posl, posr
                         t = int((time() - start_t) * 1000)
@@ -210,7 +211,36 @@ class Adapter(InterfaceAdapter):
         self.on_order_submission(0, 0, 0)
 
 
-register_views(app, socketio, Adapter(socketio))
+class RandomAdapter(InterfaceAdapter):
+    def on_stop_button(self):
+        print("STOP !!!")
+
+    def __init__(self, socketio):
+        super().__init__(socketio)
+
+        def f():
+            while True:
+                sleep(0.1)
+                self.push_pos_left(time(), random.randint(0, 100), (cos(time()) + 1) / 2 * 100)
+                self.push_pos_right(time(), random.randint(0, 100), (sin(time()) + 1) / 2 * 100)
+                self.push_speed_left(time(), random.randint(0, 100), (sin(time()) + 1) / 2 * 100)
+                self.push_speed_right(time(), random.randint(0, 100), (cos(time()) + 1) / 2 * 100)
+
+        Thread(target=f).start()
+
+    def on_pid_submission(self, speed_left: PID, speed_right: PID, pos_left: PID,
+                          pos_right: PID) -> None:
+        pass
+
+    def on_order_submission(self, speed: Optional[float], position: Optional[float],
+                            angle: Optional[float]):
+        pass
+
+
+if os.environ.get('RANDOM_GRAPH'):
+    register_views(app, socketio, RandomAdapter(socketio))
+else:
+    register_views(app, socketio, CANAdapter(socketio))
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
