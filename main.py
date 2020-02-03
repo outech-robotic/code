@@ -2,7 +2,7 @@ import os
 import random
 import string
 import struct
-from math import pi
+from math import pi, sin, cos
 from threading import Thread
 from time import time, sleep
 from typing import Optional
@@ -190,10 +190,10 @@ class RandomAdapter(InterfaceAdapter):
         def f():
             while True:
                 sleep(0.1)
-                self.push_pos_left(time(), random.randint(0, 100), 0)
-                self.push_pos_right(time(), random.randint(0, 100), 0)
-                self.push_speed_left(time(), random.randint(0, 100), 0)
-                self.push_speed_right(time(), random.randint(0, 100), 0)
+                self.push_pos_left(time(), random.randint(0, 100), (cos(time()) + 1) / 2 * 100)
+                self.push_pos_right(time(), random.randint(0, 100), (sin(time()) + 1) / 2 * 100)
+                self.push_speed_left(time(), random.randint(0, 100), (sin(time()) + 1) / 2 * 100)
+                self.push_speed_right(time(), random.randint(0, 100), (cos(time()) + 1) / 2 * 100)
 
         Thread(target=f).start()
 

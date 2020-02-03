@@ -11,7 +11,6 @@
     <style id="dbr"></style>
 </head>
 <body>
-Oublie pas de sauvegarder les coeficients...
 <form method="POST" action="{{ url_for('pid_view') }}">
     {{ form.hidden_tag() }}
 
@@ -48,8 +47,11 @@ Oublie pas de sauvegarder les coeficients...
         src="https://www.cdiscount.com/pdt2/6/7/5/1/550x550/fie3700804174675/rw/lampe-gyrophare-projecteur-rouge-rotatif-effet-pom.jpg"/>
 </button>
 <hr>
-<div id="left" style="width:99%; height: 500px; display:inline-block"></div>
-<div id="right" style="width:99%; height: 500px; display:inline-block"></div>
+<span style="color:darkred"><strong>R</strong>ouge (<strong>R</strong>ed) = <strong>R</strong>ight (droite)<br/></span>
+<span style="color:darkblue">B<strong>l</strong>ue (B<strong>l</strong>eu) = <strong>L</strong>eft (gauche)<br/></span>
+<div id="speed" style="width:99%; height: 500px; display:inline-block"></div>
+<div id="pos" style="width:99%; height: 500px; display:inline-block"></div>
+<i>Florian, pour zoomer, maintiens cliqué sur ta souris et selectionne une partie du graphe. Bisous, ton petit fils.</i>
 
 <script>
     var turn = 0;
@@ -62,15 +64,14 @@ Oublie pas de sauvegarder les coeficients...
 
     window.onload = function () {
 
-        function buildDataSeries(name, color, lineDashType) {
+        function buildDataSeries(name, color, lineDashType, secondary) {
             var dataSeries = {
                 type: "line",
                 markerSize: 0,
                 lineColor: color,
                 lineDashType: lineDashType,
-                showInLegend: true,
                 name: "speed-" + name,
-                legendMarkerColor: color,
+                axisYType: secondary ? "secondary" : "primary",
             };
             dataSeries.dataPoints = [];
 
@@ -88,11 +89,48 @@ Oublie pas de sauvegarder les coeficients...
             return [dataSeries, clear, addPoint];
         }
 
-        function createGraph(name, color1, color2) {
-            var [dataSeriesSpeed, clearSpeed, addSpeed] = buildDataSeries("speed_" + name, color1, "solid");
-            var [dataSeriesSetpointSpeed, clearSetpointSpeed, addSetpointSpeed] = buildDataSeries("speed_" + name, "dark" + color1, "longDash");
-            var [dataSeriesPos, clearPos, addPos] = buildDataSeries("pos_" + name, color2, "solid");
-            var [dataSeriesSetpointPos, clearSetpointPos, addSetpointPos] = buildDataSeries("pos_" + name, "dark" + color2, "longDash");
+        function startOnTimeZero(f) {
+            var firstTimeValue = undefined;
+
+            function g(x, y, setpoint) {
+                if (firstTimeValue === undefined) {
+                    firstTimeValue = x;
+                }
+                return f(x - firstTimeValue, y);
+            }
+
+            return g
+        }
+
+        function createGraph(name, colorLeft, colorRight) {
+            var [dataSeriesLeft, clearLeft, addLeft] = buildDataSeries("left", colorLeft, "solid", false);
+            var [dataSeriesRight, clearRight, addRight] = buildDataSeries("right", colorRight, "solid", true);
+
+            var [dataSeriesSetpointLeft, clearSetpointLeft, addSetpointLeft] = buildDataSeries("setpoint_left", "dark" + colorLeft, "longDash", false);
+            var [dataSeriesSetpointRight, clearSetpointRight, addSetpointRight] = buildDataSeries("setpoint_right", "dark" + colorRight, "longDash", true);
+
+            function clear() {
+                clearLeft();
+                clearRight();
+                clearSetpointLeft();
+                clearSetpointRight();
+                chart.render()
+            }
+
+            addLeft = startOnTimeZero(addLeft);
+            addRight = startOnTimeZero(addRight);
+            addSetpointLeft = startOnTimeZero(addSetpointLeft);
+            addSetpointRight = startOnTimeZero(addSetpointRight);
+
+            function addLeftPoint(x, y, setpoint) {
+                addLeft(x, y);
+                addSetpointLeft(x, setpoint);
+            }
+
+            function addRightPoint(x, y, setpoint) {
+                addRight(x, y);
+                addSetpointRight(x, setpoint);
+            }
 
             var chart = new CanvasJS.Chart(name, {
                 zoomEnabled: true,
@@ -100,22 +138,21 @@ Oublie pas de sauvegarder les coeficients...
                 title: {
                     text: name,
                 },
-
                 axisY: {
-                    title: "position",
+                    title: "left",
                     includeZero: false,
                     lineThickness: 1
                 },
                 axisY2: {
-                    title: "speed",
+                    title: "right",
                     includeZero: false,
                     lineThickness: 1,
                 },
                 data: [
-                    dataSeriesSetpointSpeed,
-                    dataSeriesSpeed,
-                    dataSeriesSetpointPos,
-                    dataSeriesPos,
+                    dataSeriesLeft,
+                    dataSeriesRight,
+                    dataSeriesSetpointLeft,
+                    dataSeriesSetpointRight,
                 ],
             });
 
@@ -124,39 +161,12 @@ Oublie pas de sauvegarder les coeficients...
                 chart.render()
             }
 
-            var firstSpeedX = undefined;
-            function addSpeedPoint(x, y, setpoint) {
-                if (firstSpeedX === undefined) {
-                    firstSpeedX = x;
-                }
-                addSetpointSpeed(x - firstSpeedX, setpoint);
-                addSpeed(x - firstSpeedX, y);
-            }
 
-            var firstPosX = undefined;
-
-            function addPosPoint(x, y, setpoint) {
-                if (firstPosX === undefined) {
-                    firstPosX = x;
-                }
-                addSetpointPos(x - firstPosX, setpoint);
-                addPos(x - firstPosX, y);
-            }
-
-            function clear() {
-                clearSetpointPos();
-                clearPos();
-                clearSetpointSpeed();
-                clearSpeed();
-
-                chart.render()
-            }
-
-            return [addSpeedPoint, addPosPoint, clear];
+            return [addLeftPoint, addRightPoint, clear];
         }
 
-        var [addPointLeftSpeedChart, addPointLeftPosChart, clearLeftSpeedChart] = createGraph("left", "blue", "green");
-        var [addPointRightSpeedChart, addPointRightPosChart, clearRightSpeedChart] = createGraph("right", "red", "orange");
+        var [addLeftPos, addRightPos, clearPos] = createGraph("pos", "blue", "red");
+        var [addLeftSpeed, addRightSpeed, clearSpeed] = createGraph("speed", "blue", "red");
 
         var capture = {{ 'true' if capture else 'false' }};
         var button = document.getElementById("startStopButton")
@@ -164,8 +174,8 @@ Oublie pas de sauvegarder les coeficients...
             capture = !capture;
             if (capture) {
                 button.innerText = "Stop capture";
-                clearLeftSpeedChart();
-                clearRightSpeedChart();
+                clearSpeed();
+                clearPos();
             } else {
                 button.innerText = "Start capture"
             }
@@ -184,25 +194,25 @@ Oublie pas de sauvegarder les coeficients...
             if (!capture) {
                 return
             }
-            addPointLeftPosChart(msg[0], msg[1], msg[2])
+            addLeftPos(msg[0], msg[1], msg[2])
         });
         socket.on('pos_right', function (msg) {
             if (!capture) {
                 return
             }
-            addPointRightPosChart(msg[0], msg[1], msg[2])
+            addRightPos(msg[0], msg[1], msg[2])
         });
         socket.on('speed_left', function (msg) {
             if (!capture) {
                 return
             }
-            addPointLeftSpeedChart(msg[0], msg[1], msg[2])
+            addLeftSpeed(msg[0], msg[1], msg[2])
         });
         socket.on('speed_right', function (msg) {
             if (!capture) {
                 return
             }
-            addPointRightSpeedChart(msg[0], msg[1], msg[2])
+            addRightSpeed(msg[0], msg[1], msg[2])
         });
 
     }
