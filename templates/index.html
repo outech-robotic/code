@@ -53,60 +53,48 @@ Oublie pas de sauvegarder les coeficients...
 
 <script>
     var turn = 0;
-    var doABarrelRoll = function(){
+    var doABarrelRoll = function () {
         turn++;
         document.getElementById("dbr").remove();
-        var a="-webkit-",b='transform:rotate(' + turn + 'turn);',c='transition:1s;';document.head.innerHTML+='<style id="dbr">body{'+a+b+a+c+b+c
+        var a = "-webkit-", b = 'transform:rotate(' + turn + 'turn);', c = 'transition:1s;';
+        document.head.innerHTML += '<style id="dbr">body{' + a + b + a + c + b + c
     };
 
     window.onload = function () {
-        function createGraph(name, color1, color2) {
-            var data = [];
-            var dataSeries1 = {
+
+        function buildDataSeries(name, color, lineDashType) {
+            var dataSeries = {
                 type: "line",
                 markerSize: 0,
-                lineColor: color1,
+                lineColor: color,
+                lineDashType: lineDashType,
                 showInLegend: true,
                 name: "speed-" + name,
-                legendMarkerColor: color1,
+                legendMarkerColor: color,
             };
-            var speedPoints = [];
-            dataSeries1.dataPoints = speedPoints;
-            data.push(dataSeries1);
-            var dataSeries2 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: "dark" + color1,
-                lineDashType: "longDash",
-            };
-            var speedSetPoints = [];
-            dataSeries2.dataPoints = speedSetPoints;
-            data.push(dataSeries2);
-            //////////////////////////
-            var dataSeries3 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: color2,
-                axisYType: "secondary",
-                showInLegend: true,
-                name: "position-" + name,
-                legendMarkerColor: color2,
-            };
-            var posPoints = [];
-            dataSeries3.dataPoints = posPoints;
-            data.push(dataSeries3);
-            var dataSeries4 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: "dark" + color2,
-                lineDashType: "longDash",
-                axisYType: "secondary",
-            };
-            var posSetPoints = [];
-            dataSeries4.dataPoints = posSetPoints;
-            data.push(dataSeries4);
+            dataSeries.dataPoints = [];
 
-            var options = {
+            function addPoint(x, y) {
+                dataSeries.dataPoints.push({
+                    x: x,
+                    y: y,
+                });
+            }
+
+            function clear() {
+                dataSeries.dataPoints.length = 0;
+            }
+
+            return [dataSeries, clear, addPoint];
+        }
+
+        function createGraph(name, color1, color2) {
+            var [dataSeriesSpeed, clearSpeed, addSpeed] = buildDataSeries("speed_" + name, color1, "solid");
+            var [dataSeriesSetpointSpeed, clearSetpointSpeed, addSetpointSpeed] = buildDataSeries("speed_" + name, "dark" + color1, "longDash");
+            var [dataSeriesPos, clearPos, addPos] = buildDataSeries("pos_" + name, color2, "solid");
+            var [dataSeriesSetpointPos, clearSetpointPos, addSetpointPos] = buildDataSeries("pos_" + name, "dark" + color2, "longDash");
+
+            var chart = new CanvasJS.Chart(name, {
                 zoomEnabled: true,
                 animationEnabled: false,
                 title: {
@@ -123,52 +111,44 @@ Oublie pas de sauvegarder les coeficients...
                     includeZero: false,
                     lineThickness: 1,
                 },
-                data: data,
-            };
-            var chart = new CanvasJS.Chart(name, options);
-
-            var firstSpeedX = undefined;
-
-            function addSpeedPoint(x, y, setpoint) {
-                if (speedPoints.length === 0) {
-                    firstSpeedX = x;
-                }
-                speedSetPoints.push({
-                    x: x - firstSpeedX,
-                    y: setpoint,
-                });
-                speedPoints.push({
-                    x: x - firstSpeedX,
-                    y: y,
-                });
-            }
-
-            var firstPosX = undefined;
-
-            function addPosPoint(x, y, setpoint) {
-                if (posPoints.length === 0) {
-                    firstPosX = x;
-                }
-                posSetPoints.push({
-                    x: x - firstPosX,
-                    y: setpoint,
-                });
-                posPoints.push({
-                    x: x - firstPosX,
-                    y: y,
-                });
-            }
+                data: [
+                    dataSeriesSetpointSpeed,
+                    dataSeriesSpeed,
+                    dataSeriesSetpointPos,
+                    dataSeriesPos,
+                ],
+            });
 
             setInterval(renderChart, 1000 / 60); // 60 FPS in yo eyes.
             function renderChart() {
                 chart.render()
             }
 
+            var firstSpeedX = undefined;
+            function addSpeedPoint(x, y, setpoint) {
+                if (firstSpeedX === undefined) {
+                    firstSpeedX = x;
+                }
+                addSetpointSpeed(x - firstSpeedX, setpoint);
+                addSpeed(x - firstSpeedX, y);
+            }
+
+            var firstPosX = undefined;
+
+            function addPosPoint(x, y, setpoint) {
+                if (firstPosX === undefined) {
+                    firstPosX = x;
+                }
+                addSetpointPos(x - firstPosX, setpoint);
+                addPos(x - firstPosX, y);
+            }
+
             function clear() {
-                speedPoints.length = 0;
-                speedSetPoints.length = 0;
-                posPoints.length = 0;
-                posSetPoints.length = 0;
+                clearSetpointPos();
+                clearPos();
+                clearSetpointSpeed();
+                clearSpeed();
+
                 chart.render()
             }
 
