@@ -80,6 +80,8 @@ void MotionController::control() {
     cod_right.speed_setpoint = pid_position_right.compute(cod_right.current, cod_right.setpoint);
   }
 
+  //TODO : cap acceleration
+
   if(controlled_speed){
     left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_setpoint);
     right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_setpoint);
@@ -88,9 +90,6 @@ void MotionController::control() {
     left_pwm = cod_left.speed_setpoint;
     right_pwm = cod_right.speed_setpoint;
   }
-
-  //TODO : cap acceleration
-
 
   if(controlled_speed || controlled_position){
     motor_left.set_pwm(left_pwm);
