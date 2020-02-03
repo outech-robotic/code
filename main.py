@@ -64,6 +64,8 @@ def send_packet(channel, message_id, board, data=[]):
             print(can.CanError)
             print("message_id NOT sent")
 
+def avg_list(values):
+    return sum(values)/len(values) if len(values)>0 else 0
 
 # Flask
 app = Flask(__name__)
@@ -80,6 +82,8 @@ class CANAdapter(InterfaceAdapter):
         self.setpoint_pos   = None
         self.setpoint_angle = None
         self.start_t = 0.0
+        self.avg_left = [0.0 for i in range(16)]
+        self.avg_right = [0.0 for i in range(16)]
         super(CANAdapter, self).__init__(socketio)  # Il faut garder cette ligne.
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
         # appelle les fonctions .push_*_*
@@ -96,6 +100,12 @@ class CANAdapter(InterfaceAdapter):
                                 posr - last_right) * COD_UPDATE_FREQ
                         # print(speedl, speedr)
                         last_left, last_right = posl, posr
+                        self.avg_left = self.avg_left[1:]
+                        self.avg_left.append(speedl)
+                        self.avg_right = self.avg_right[1:]
+                        self.avg_right.append(speedr)
+                        speedl = avg_list(self.avg_left)
+                        speedr = avg_list(self.avg_right)
                         t = int((time() - self.start_t) * 1000)
                         self.push_speed_left(t, speedl, self.setpoint_speed)
                         self.push_speed_right(t, speedr, self.setpoint_speed)
@@ -177,6 +187,7 @@ class CANAdapter(InterfaceAdapter):
             print("SPEED")
             self.setpoint_speed = speed
             speed_ticks = speed * MM_TO_TICK
+            print(speed_ticks)
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_SPEED, CAN_BOARD_ID_MOTOR,
                         fmt_motor_set_speed.pack(int(speed_ticks), int(speed_ticks)))
 
