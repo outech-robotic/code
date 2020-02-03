@@ -81,14 +81,12 @@ class CANAdapter(InterfaceAdapter):
         self.setpoint_speed = 0.0
         self.setpoint_pos   = None
         self.setpoint_angle = None
-        self.start_t = 0.0
         self.avg_left = [0.0 for i in range(16)]
         self.avg_right = [0.0 for i in range(16)]
         super(CANAdapter, self).__init__(socketio)  # Il faut garder cette ligne.
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
         # appelle les fonctions .push_*_*
         def f():
-            self.start_t = time()
             last_left, last_right = 0, 0
             with can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000) as bus:
                 for message in bus:
@@ -107,7 +105,7 @@ class CANAdapter(InterfaceAdapter):
                         self.avg_right.append(speedr)
                         speedl = avg_list(self.avg_left)
                         speedr = avg_list(self.avg_right)
-                        t = int((time() - self.start_t) * 1000)
+                        t = int(time()*1000)
                         self.push_speed_left(t, speedl, self.setpoint_speed)
                         self.push_speed_right(t, speedr, self.setpoint_speed)
                         setpoint_left, setpoint_right = 0.0, 0.0
@@ -183,7 +181,6 @@ class CANAdapter(InterfaceAdapter):
         self.setpoint_angle = None
         # Cas 1 : translation avec asserv en vitesse uniquement (2 roues allant à la meme vitesse)
         if speed is not None:
-            self.start_t = time()
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_SPEED)
             print("SPEED")
             self.setpoint_speed = speed
@@ -194,7 +191,6 @@ class CANAdapter(InterfaceAdapter):
 
         # Cas 2 : juste translation, les vitesses des roues sont gérées par le LL
         elif position is not None:
-            self.start_t = time()
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
             print("POS")
             self.setpoint_pos = position # position in mm that each wheel have to travel
@@ -204,7 +200,6 @@ class CANAdapter(InterfaceAdapter):
 
         # Cas 3 : juste rotation
         elif angle is not None:
-            self.start_t = time()
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
             print("ANGLE")
             # distance for each wheel(in opposite direcitons), to reach angle, in mm for graph
