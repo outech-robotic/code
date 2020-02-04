@@ -222,7 +222,7 @@ class CANAdapter(InterfaceAdapter):
                                                            angle_ticks)))  # roue gauche, roue droite
         if speed is not None or position is not None or angle is not None:
             Timer(2, send_order).start() # Delayed movement order
-        else
+        else:
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, []) # instant stop order if not parameters
 
     def on_stop_button(self):
