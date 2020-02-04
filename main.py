@@ -179,7 +179,6 @@ class CANAdapter(InterfaceAdapter):
         # Ici tu implem l'envoi des paquets sur le CAN.
         print(
             f"Got order {speed} {position} {angle}")  # position en mm, speed en mm/s, angle en degré
-
         def send_order():
             self.setpoint_speed = 0.0
             self.setpoint_pos = None
@@ -221,14 +220,13 @@ class CANAdapter(InterfaceAdapter):
                                 fmt_motor_set_pos.pack(int(angle_ticks),
                                                        -int(
                                                            angle_ticks)))  # roue gauche, roue droite
-            else:
-                print("STOP")
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
-
-        Timer(2, send_order).start()
+        if speed is not None or position is not None or angle is not None:
+            Timer(2, send_order).start() # Delayed movement order
+        else
+            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, []) # instant stop order if not parameters
 
     def on_stop_button(self):
-        self.on_order_submission(None, None, None)
+        send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
 
 
 class RandomAdapter(InterfaceAdapter):
