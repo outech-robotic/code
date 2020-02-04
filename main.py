@@ -3,7 +3,7 @@ import random
 import string
 import struct
 from math import pi, sin, cos
-from threading import Thread
+from threading import Thread, Timer
 from time import time, sleep
 from typing import Optional
 
@@ -17,17 +17,17 @@ CAN_BOARD_ID_WIDTH = 5
 CAN_MSG_WIDTH = 9
 CAN_BOARD_ID_MOTOR = 15
 CAN_CHANNEL_MOTOR = 0b00
-CAN_MSG_SPEED = 0b1000    # orders the movement of both wheels at constant speed (2x32bits signed, left and right encoder speeds)
-CAN_MSG_POS = 0b0010      # orders a movement of both wheels (data: 2x32bits signed, left and right encoder position)
-CAN_MSG_STOP = 0b0000     # Stops robot on the spot, resetting all errors of PIDs
-CAN_MSG_MCS_MODE = 0b1001 # Sets motion control mode : data: 1 byte: bit 0 = speed mode on/off, bit 1 = position mode on/off
-CAN_KP_ID = 0b1100        # sets proportionnal constant of PID of ID at first byte of data, value is the following 32 bits (unsigned, 65535 * value in floating point of KP)
-CAN_KI_ID = 0b1101        # same for integral constant
-CAN_KD_ID = 0b1110        # and derivative
+CAN_MSG_SPEED = 0b1000  # orders the movement of both wheels at constant speed (2x32bits signed, left and right encoder speeds)
+CAN_MSG_POS = 0b0010  # orders a movement of both wheels (data: 2x32bits signed, left and right encoder position)
+CAN_MSG_STOP = 0b0000  # Stops robot on the spot, resetting all errors of PIDs
+CAN_MSG_MCS_MODE = 0b1001  # Sets motion control mode : data: 1 byte: bit 0 = speed mode on/off, bit 1 = position mode on/off
+CAN_KP_ID = 0b1100  # sets proportionnal constant of PID of ID at first byte of data, value is the following 32 bits (unsigned, 65535 * value in floating point of KP)
+CAN_KI_ID = 0b1101  # same for integral constant
+CAN_KD_ID = 0b1110  # and derivative
 
 MCS_MODE_SPEED = 0b01
-MCS_MODE_POS   = 0b10
-MCS_MODE_BOTH  = 0b11
+MCS_MODE_POS = 0b10
+MCS_MODE_BOTH = 0b11
 
 # PID IDs
 PID_LEFT_SPEED = 0
@@ -43,12 +43,13 @@ fmt_motor_set_pos = struct.Struct('<ll')
 fmt_motor_cod_pos = struct.Struct('<ll')
 fmt_motor_set_pid = struct.Struct('<BL')  # 8b + 32b non signes
 
-#Physical constants of the robot
+# Physical constants of the robot
 WHEEL_DIAMETER = 70.0  # en mm ; 2400 ticks par tour donc par 2*pi*60 mm
 DISTANCE_BETWEEN_WHEELS = 365.0  # en mm
 TICKS_PER_TURN = 2400.0
 MM_TO_TICK = TICKS_PER_TURN / (pi * WHEEL_DIAMETER)
-TICK_TO_MM = (pi*WHEEL_DIAMETER)/TICKS_PER_TURN
+TICK_TO_MM = (pi * WHEEL_DIAMETER) / TICKS_PER_TURN
+
 
 # CAN
 def send_packet(channel, message_id, board, data=[]):
@@ -64,8 +65,10 @@ def send_packet(channel, message_id, board, data=[]):
             print(can.CanError)
             print("message_id NOT sent")
 
+
 def avg_list(values):
-    return sum(values)/len(values) if len(values)>0 else 0
+    return sum(values) / len(values) if len(values) > 0 else 0
+
 
 # Flask
 app = Flask(__name__)
@@ -79,11 +82,12 @@ class CANAdapter(InterfaceAdapter):
 
     def __init__(self, socketio: SocketIO):
         self.setpoint_speed = 0.0
-        self.setpoint_pos   = None
+        self.setpoint_pos = None
         self.setpoint_angle = None
         self.avg_left = [0.0 for i in range(16)]
         self.avg_right = [0.0 for i in range(16)]
         super(CANAdapter, self).__init__(socketio)  # Il faut garder cette ligne.
+
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
         # appelle les fonctions .push_*_*
         def f():
@@ -93,7 +97,7 @@ class CANAdapter(InterfaceAdapter):
                     if (message.arbitration_id >> 5) == 0b000011:
                         # sleep(1.0/COD_UPDATE_FREQ)
                         posl, posr = fmt_motor_cod_pos.unpack(message.data)
-                        posl, posr = posl*TICK_TO_MM, posr*TICK_TO_MM
+                        posl, posr = posl * TICK_TO_MM, posr * TICK_TO_MM
                         # print(posl, posr)
                         speedl, speedr = (posl - last_left) * COD_UPDATE_FREQ, (
                                 posr - last_right) * COD_UPDATE_FREQ
@@ -105,7 +109,7 @@ class CANAdapter(InterfaceAdapter):
                         self.avg_right.append(speedr)
                         speedl = avg_list(self.avg_left)
                         speedr = avg_list(self.avg_right)
-                        t = int(time()*1000)
+                        t = int(time() * 1000)
                         self.push_speed_left(t, speedl, self.setpoint_speed)
                         self.push_speed_right(t, speedr, self.setpoint_speed)
                         setpoint_left, setpoint_right = 0.0, 0.0
@@ -175,48 +179,53 @@ class CANAdapter(InterfaceAdapter):
         # Ici tu implem l'envoi des paquets sur le CAN.
         print(
             f"Got order {speed} {position} {angle}")  # position en mm, speed en mm/s, angle en degré
-       
-        self.setpoint_speed = 0.0
-        self.setpoint_pos   = None
-        self.setpoint_angle = None
-        # Cas 1 : translation avec asserv en vitesse uniquement (2 roues allant à la meme vitesse)
-        if speed is not None:
-            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_SPEED)
-            print("SPEED")
-            self.setpoint_speed = speed
-            speed_ticks = speed * MM_TO_TICK
-            print(speed_ticks)
-            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_SPEED, CAN_BOARD_ID_MOTOR,
-                        fmt_motor_set_speed.pack(int(speed_ticks), int(speed_ticks)))
 
-        # Cas 2 : juste translation, les vitesses des roues sont gérées par le LL
-        elif position is not None:
-            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
-            print("POS")
-            self.setpoint_pos = position # position in mm that each wheel have to travel
-            position_ticks = position * MM_TO_TICK # in ticks for Motion control board
-            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                        fmt_motor_set_pos.pack(int(position_ticks), int(position_ticks)))
+        def send_order():
+            self.setpoint_speed = 0.0
+            self.setpoint_pos = None
+            self.setpoint_angle = None
+            # Cas 1 : translation avec asserv en vitesse uniquement (2 roues allant à la meme vitesse)
+            if speed is not None:
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_SPEED)
+                print("SPEED")
+                self.setpoint_speed = speed
+                speed_ticks = speed * MM_TO_TICK
+                print(speed_ticks)
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_SPEED, CAN_BOARD_ID_MOTOR,
+                            fmt_motor_set_speed.pack(int(speed_ticks), int(speed_ticks)))
 
-        # Cas 3 : juste rotation
-        elif angle is not None:
-            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
-            print("ANGLE")
-            # distance for each wheel(in opposite direcitons), to reach angle, in mm for graph
-            self.setpoint_angle = angle * DISTANCE_BETWEEN_WHEELS / 2 
-            angle_ticks = self.setpoint_angle*MM_TO_TICK # in ticks for Motion control board
-            
-            if angle >= 0:  # sens trigo
+            # Cas 2 : juste translation, les vitesses des roues sont gérées par le LL
+            elif position is not None:
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
+                print("POS")
+                self.setpoint_pos = position  # position in mm that each wheel have to travel
+                position_ticks = position * MM_TO_TICK  # in ticks for Motion control board
                 send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                            fmt_motor_set_pos.pack(-int(angle_ticks),
-                                                   int(angle_ticks)))  # roue gauche, roue droite
-            if angle < 0:
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                            fmt_motor_set_pos.pack(int(angle_ticks),
-                                                   -int(angle_ticks)))  # roue gauche, roue droite
-        else:
-            print("STOP")
-            send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
+                            fmt_motor_set_pos.pack(int(position_ticks), int(position_ticks)))
+
+            # Cas 3 : juste rotation
+            elif angle is not None:
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
+                print("ANGLE")
+                # distance for each wheel(in opposite direcitons), to reach angle, in mm for graph
+                self.setpoint_angle = angle * DISTANCE_BETWEEN_WHEELS / 2
+                angle_ticks = self.setpoint_angle * MM_TO_TICK  # in ticks for Motion control board
+
+                if angle >= 0:  # sens trigo
+                    send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
+                                fmt_motor_set_pos.pack(-int(angle_ticks),
+                                                       int(
+                                                           angle_ticks)))  # roue gauche, roue droite
+                if angle < 0:
+                    send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
+                                fmt_motor_set_pos.pack(int(angle_ticks),
+                                                       -int(
+                                                           angle_ticks)))  # roue gauche, roue droite
+            else:
+                print("STOP")
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
+
+        Timer(2, send_order).start()
 
     def on_stop_button(self):
         self.on_order_submission(None, None, None)
@@ -245,7 +254,10 @@ class RandomAdapter(InterfaceAdapter):
 
     def on_order_submission(self, speed: Optional[float], position: Optional[float],
                             angle: Optional[float]):
-        pass
+        def send_order():
+            print("delayed order submission")
+
+        Timer(2, send_order).start()
 
 
 if os.environ.get('RANDOM_GRAPH'):
