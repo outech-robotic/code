@@ -11,7 +11,7 @@ import can
 from flask import Flask
 from flask_socketio import SocketIO
 
-from views import register_views, InterfaceAdapter, PID
+from views import register_views, InterfaceAdapter, PID, Cap
 
 CAN_BOARD_ID_WIDTH = 5
 CAN_MSG_WIDTH = 9
@@ -126,7 +126,7 @@ class CANAdapter(InterfaceAdapter):
         Thread(target=f).start()
 
     def on_pid_submission(self, speed_left: PID, speed_right: PID, pos_left: PID,
-                          pos_right: PID) -> None:
+                          pos_right: PID, cap: Cap) -> None:
         # Ici tu implem l'envoi des paquets sur le CAN.
         print(f"Got PID {pos_left} {pos_right} {speed_left} {speed_right}")
 
@@ -249,8 +249,8 @@ class RandomAdapter(InterfaceAdapter):
         Thread(target=f).start()
 
     def on_pid_submission(self, speed_left: PID, speed_right: PID, pos_left: PID,
-                          pos_right: PID) -> None:
-        pass
+                          pos_right: PID, cap: Cap) -> None:
+        print(cap)
 
     def on_order_submission(self, speed: Optional[float], position: Optional[float],
                             angle: Optional[float]):

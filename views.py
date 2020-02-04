@@ -18,11 +18,28 @@ class PID:
     d: float
 
 
+@dataclass
+class Cap:
+    AccelForward: float
+    AccelBackward: float
+    SpeedForward: float
+    SpeedBackward: float
+
+
 def to_pid(tbl: dict) -> PID:
     return PID(
         p=tbl['P'],
         i=tbl['I'],
         d=tbl['D'],
+    )
+
+
+def to_cap(tbl: dict) -> Cap:
+    return Cap(
+        AccelForward=tbl['cap_accel_forward'],
+        AccelBackward=tbl['cap_accel_backward'],
+        SpeedForward=tbl['cap_speed_forward'],
+        SpeedBackward=tbl['cap_speed_backward'],
     )
 
 
@@ -45,7 +62,8 @@ class InterfaceAdapter(ABC):
     @abstractmethod
     def on_pid_submission(self,
                           speed_left: PID, speed_right: PID,
-                          pos_left: PID, pos_right: PID) -> None:
+                          pos_left: PID, pos_right: PID,
+                          cap: Cap) -> None:
         """ PID submission. """
 
     @abstractmethod
@@ -70,6 +88,12 @@ def get_pid_coefs():
             'PosRight': {'P': 4.0, 'I': 5.0, 'D': 6.0, },
             'SpeedLeft': {'P': 7.0, 'I': 8.0, 'D': 9.0, },
             'SpeedRight': {'P': 10.0, 'I': 11.0, 'D': 12.0, },
+            'CapForm': {
+                'cap_accel_forward': -42,
+                'cap_accel_backward': -42,
+                'cap_speed_forward': -42,
+                'cap_speed_backward': -42,
+            }
         }
 
 
@@ -98,6 +122,7 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
                 speed_right=to_pid(form.data['SpeedRight']),
                 pos_right=to_pid(form.data['PosRight']),
                 pos_left=to_pid(form.data['PosLeft']),
+                cap=to_cap(form.data['CapForm']),
             )
 
         return render_template(
