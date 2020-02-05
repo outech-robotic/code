@@ -1,3 +1,4 @@
+#!venv/bin/python
 import os
 import random
 import string
@@ -226,6 +227,9 @@ class CANAdapter(InterfaceAdapter):
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, []) # instant stop order if not parameters
 
     def on_stop_button(self):
+        self.setpoint_pos = None
+        self.setpoint_angle = None
+        self.setpoint_speed = 0.0
         send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, [])
 
 
