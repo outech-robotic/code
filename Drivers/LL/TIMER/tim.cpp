@@ -249,7 +249,7 @@ void MX_TIM14_Init(void)
 
   TIM_InitStruct.Prescaler = (SystemCoreClock/1000000)-1; // 48MHz -> 1MHz
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = ((1000000)/(MOTION_CONTROL_FREQ)) - 1 ; // 1MHz -> 1kHz
+  TIM_InitStruct.Autoreload = ((1000000)/(MOTION_CONTROL_FREQ)) - 1 ; // 1MHz -> MOTION_CONTROL_FREQ Hz
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM14, &TIM_InitStruct);

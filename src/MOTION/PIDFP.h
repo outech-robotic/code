@@ -25,10 +25,9 @@ public:
   PID_FP();
   void reset();
   void set_coefficients(float new_kp, float new_ki, float new_kd, uint32_t new_freq);
-  void set_coefficients(uint32_t new_kp, uint32_t new_ki, uint32_t new_kd);
   void set_kp(uint32_t new_kp);
-  void set_ki(uint32_t new_ki);
-  void set_kd(uint32_t new_kd);
+  void set_ki(uint32_t new_ki, uint32_t new_freq);
+  void set_kd(uint32_t new_kd, uint32_t new_freq);
   void set_output_limit(int32_t new_limits);
   void set_derivative_limit(int32_t new_limit);
   void set_anti_windup(int32_t new_limit);

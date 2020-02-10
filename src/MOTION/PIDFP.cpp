@@ -29,22 +29,17 @@ void PID_FP::set_coefficients(float new_kp, float new_ki, float new_kd, uint32_t
   ki = new_ki * COEFF_MULTIPLIER / new_freq;
 }
 
-void PID_FP::set_coefficients(uint32_t new_kp, uint32_t new_ki, uint32_t new_kd){
-  kp = new_kp;
-  kd = new_kd;
-  ki = new_ki;
-}
 
 void PID_FP::set_kp(uint32_t new_kp){
   kp = new_kp;
 }
 
-void PID_FP::set_ki(uint32_t new_ki){
-  ki = new_ki;
+void PID_FP::set_ki(uint32_t new_ki, uint32_t new_freq){
+  ki = new_ki/new_freq;
 }
 
-void PID_FP::set_kd(uint32_t new_kd){
-  kd = new_kd;
+void PID_FP::set_kd(uint32_t new_kd, uint32_t new_freq){
+  kd = new_kd*new_freq;
 }
 
 
@@ -75,7 +70,7 @@ void PID_FP::get_coefficients(float* ret_kp, float* ret_ki, float* ret_kd){
 
 
 int16_t PID_FP::compute(int32_t input, int32_t setpoint){
-  int32_t res;
+  int64_t res;
   int16_t out;
   int32_t delta_err;
   int32_t error = setpoint-input;

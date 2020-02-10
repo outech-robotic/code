@@ -4,8 +4,6 @@
 #include "GPIO/gpio.h"
 #include "UTILITY/Metro.hpp"
 #include "USART/usart.hpp"
-//#include <stdio.h>
-#include <cstdlib>
 #include "UTILITY/macros.h"
 #include "config.h"
 #include "MOTION/MotionController.h"
@@ -18,7 +16,8 @@ uint32_t mesure_t_irq_last = 0;
 
 can_rx_msg rx_msg;
 
-Metro can_wait(10);
+Metro can_timer(10);
+Metro heartbeat_timer(250);
 
 MotionController mcs;
 Serial serial;
@@ -36,30 +35,23 @@ int main(void)
   // Initialize all peripherals
   MX_USART2_UART_Init();
   MX_CAN_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
-  pinMode(PIN_LED,OUTPUT);
+  MX_TIM1_Init(); // Motion control PWM generators
+  MX_TIM2_Init(); // Left Encoder
+  MX_TIM3_Init(); // Right Encoder
+  pinMode(PIN_LED,OUTPUT); // Heartbeat Led
   digitalWrite(PIN_LED, GPIO_HIGH);
-  //printf("Setup done.\r\n");
 
   LL_RCC_ClocksTypeDef clocks;
   LL_RCC_GetSystemClocksFreq(&clocks);
   mcs.init();
-  mcs.set_control(true, false);
-  mcs.set_target_speed(Motor::Side::LEFT, 0);
-  mcs.set_target_speed(Motor::Side::RIGHT, 0);
-  mcs.set_target_position(Motor::Side::LEFT, 0);
-  mcs.set_target_position(Motor::Side::RIGHT, 0);
+  mcs.set_control(true, true);
+
+  serial.init(115200);
+  serial.print("Setup done \r\n");
 
   //mcs.set_raw_pwm(Motor::Side::LEFT, 150);
   //mcs.set_raw_pwm(Motor::Side::RIGHT, 150);
 
-  const int16_t step = 10;
-  int16_t i = 150;
-  int16_t s = step;
-  uint8_t count = 0;
-  float values[12]={};
 
   /**********************************************************************
    *                             MAIN LOOP
@@ -70,69 +62,50 @@ int main(void)
       if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_STOP)){
         mcs.stop();
       }
-
-      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)){
-        int32_t left_tick = rx_msg.data.d32[0];
-        int32_t right_tick = rx_msg.data.d32[1];
-        mcs.set_target_position(Motor::Side::LEFT, left_tick);
-        mcs.set_target_position(Motor::Side::RIGHT, right_tick);
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)){
+        int32_t ticks_translation = rx_msg.data.d32[0];
+        int32_t ticks_rotation = rx_msg.data.d32[1];
+        if(rx_msg.data.d32[0] != 0){
+          mcs.translate_ticks(ticks_translation);
+        }
+        else{
+          mcs.rotate_ticks(ticks_rotation);
+        }
       }
-
-      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_COD_SPEED)){
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_COD_SPEED)){
         int32_t left_tick = rx_msg.data.d32[0];
         int32_t right_tick = rx_msg.data.d32[1];
         mcs.set_target_speed(Motor::Side::LEFT, left_tick);
         mcs.set_target_speed(Motor::Side::RIGHT, right_tick);
       }
-
-      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MODE)){
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MODE)){
         mcs.set_control(rx_msg.data.u8[0]&0b1, rx_msg.data.u8[0]&0b10);
       }
-
-      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KP)){
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KP)){
         mcs.set_kp(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
-        values[rx_msg.data.u8[0]+(count++)] = (uint32_t)(rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1])/65535.0;
       }
-      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KI)){
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KI)){
         mcs.set_ki(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
-        values[rx_msg.data.u8[0]+(count++)] = (uint32_t)(rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1])/65535.0;
       }
-      if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KD)){
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KD)){
         mcs.set_kd(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
-        values[rx_msg.data.u8[0]+count] = (uint32_t)(rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1])/65535.0;
-        count = 0;
-        if(rx_msg.data.u8[0] == MotionController::PID_ID::PID_RIGHT_SPEED && count == 2){
-          count = 0;
-        }
       }
-
-      if(count >=12){
-        count=0;
-      }
-      //printf("RECV: ") ;
-      //CAN_print_rx_pkt(&rx_msg);
     }
-    if(can_wait.check()){
+
+    // Periodic Encoder Position Report Message to HL
+    if(can_timer.check()){
+      if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
+        serial.print("ERR: SENDING ENCODER\r\n");
+      }
+    }
+    if(heartbeat_timer.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
       if(mesure_t_irq != mesure_t_irq_last){
-        //printf("T IRQ %lu\r\n", mesure_t_irq);
+        serial.printf("T IRQ %lu\r\n", mesure_t_irq);
         mesure_t_irq_last = mesure_t_irq;
       }
-#if 0
-      if(i >= CONST_PWM_MAX-step){
-        s = -step;
-      }
-      else if(i <= -CONST_PWM_MAX+step){
-        s = step;
-      }
-      i += s;
-      //PWM_write_us(PIN_PWM_L,i);
-      //PWM_write_us(PIN_PWM_R,i);
-      mcs.set_raw_pwm(Motor::Side::LEFT, i);
-      mcs.set_raw_pwm(Motor::Side::RIGHT, i);
-#endif
-      if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
-        //printf("ERR: SENDING ENCODER\r\n");
+      if(CAN_send_packet(&CAN_TX_HEARTBEAT) != CAN_ERROR_STATUS::CAN_PKT_OK){
+        serial.print("ERR: SENDING HEARTBEAT\r\n");
       }
     }
   }
@@ -143,11 +116,16 @@ int main(void)
 extern "C"{
 #endif
 void TIM14_IRQHandler(void){
+  static uint8_t i=0;
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 		mesure_t_irq = micros();
-		mcs.update();
-		mcs.control();
+		mcs.update_position();
+		mcs.control_motion();
+		if((i++) == 25){ // Evry 50ms
+		  mcs.detect_stop();
+		  i = 0;
+		}
 		mesure_t_irq = micros()-mesure_t_irq;
 	}
 }

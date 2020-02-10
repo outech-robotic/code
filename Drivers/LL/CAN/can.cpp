@@ -1,7 +1,5 @@
 #include <CAN/can.h>
 #include <GPIO/gpio.h>
-#include <stdio.h>
-
 #include "config.h"
 #include "UTILITY/macros.h"
 #include "UTILITY/ring_buffer.hpp"
@@ -98,6 +96,7 @@ int CAN_receive_packet(can_rx_msg* msg){
 	return res;
 }
 
+/*
 void CAN_print_rx_pkt(can_rx_msg* msg){
   printf("PKT::0x%04lX::0x%lX", msg->header.StdId, msg->header.DLC);
   for(uint8_t i = 0; i < msg->header.DLC; i++){
@@ -105,7 +104,7 @@ void CAN_print_rx_pkt(can_rx_msg* msg){
   }
   printf("\r\n");
 }
-
+*/
 
 /* CAN init function */
 void MX_CAN_Init(void)
