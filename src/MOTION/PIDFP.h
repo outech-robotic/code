@@ -19,6 +19,8 @@ class PID_FP {
   int32_t derivative_max;
   int32_t derivative_min;
 
+  int32_t error;
+  int32_t derivative_error;
   int64_t integral_sum;
   int32_t last_error, last_setpoint;
 public:
@@ -33,6 +35,9 @@ public:
   void set_anti_windup(int32_t new_limit);
   void get_coefficients(float* ret_kp, float* ret_ki, float* ret_kd);
   int16_t compute(int32_t input, int32_t setpoint);
+
+  int32_t get_derivative_error();
+  int32_t get_error();
 };
 
 #endif /* MOTION_PIDFP_H_ */

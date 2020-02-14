@@ -36,7 +36,7 @@ int MotionController::init() {
   pid_translation.set_output_limit(MAX_SPEED_TRANSLATION_TICK);
   pid_translation.set_anti_windup(MAX_SPEED_TRANSLATION_TICK);
   pid_translation.set_derivative_limit(MAX_SPEED_TRANSLATION_TICK);
-  pid_rotation.set_coefficients(1.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
+  pid_rotation.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
   pid_rotation.set_output_limit(MAX_SPEED_ROTATION_TICK);
   pid_rotation.set_anti_windup(MAX_SPEED_ROTATION_TICK);
   pid_rotation.set_derivative_limit(MAX_SPEED_ROTATION_TICK);
@@ -55,8 +55,8 @@ int MotionController::init() {
   speed_max_rotation = MAX_SPEED_ROTATION_TICK;
   speed_max_wheel = MAX_SPEED_TRANSLATION_TICK;
 
-  robot_position.rotation_setpoint = 0;
-  robot_position.translation_setpoint = 0;
+  robot_position = {};
+  robot_position = {};
   MX_TIM14_Init();
 
   return 0;
@@ -124,19 +124,19 @@ void MotionController::control_motion() {
     cod_right.speed_setpoint = ((int32_t)speed_sp_translation + (int32_t)speed_sp_rotation);
 
     //Wheel Acceleration limits
-    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last)  > accel_max) && moving)
+    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last)  > accel_max) && robot_position.moving)
     {
       cod_left.speed_setpoint = (cod_left.speed_setpoint_last + accel_max);
     }
-    else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint)  > accel_max) && moving)
+    else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint)  > accel_max) && robot_position.moving)
     {
       cod_left.speed_setpoint = (cod_left.speed_setpoint_last - accel_max);
     }
-    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last)  > accel_max) && moving)
+    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last)  > accel_max) && robot_position.moving)
     {
       cod_right.speed_setpoint = (cod_right.speed_setpoint_last + accel_max);
     }
-    else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint)  > accel_max) && moving)
+    else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint)  > accel_max) && robot_position.moving)
     {
       cod_right.speed_setpoint = (cod_right.speed_setpoint_last - accel_max);
     }
@@ -181,12 +181,37 @@ void MotionController::control_motion() {
 }
 
 
+bool MotionController::detect_block(){
+  //TODO
+  return false;
+}
+
+bool MotionController::detect_movement_end(){
+  static uint8_t countdown = 5; // 100ms countdown
+  if(ABS(pid_translation.get_error()) <= robot_position.translation_tolerance && ABS(pid_rotation.get_error()) <= robot_position.rotation_tolerance){
+    //Approximately at destination
+    countdown--;
+    if(countdown == 0){
+      countdown = 5;
+      return true;
+    }
+  }
+  return false;
+}
+
 void MotionController::detect_stop(){
-    //TODO
+  bool status_end;
+  bool status_block;
+  status_block = detect_block();
+  status_end= detect_movement_end();
+
+  if(status_end || status_block){
+    stop(status_block || !status_end);
+  }
 }
 
 
-void MotionController::set_target_speed(Motor::Side side, int16_t speed){
+void MotionController::set_target_speed(Motor::Side side, int32_t speed){
   switch(side){
     case Motor::Side::LEFT:
       cod_left.speed_setpoint = speed;
@@ -195,18 +220,20 @@ void MotionController::set_target_speed(Motor::Side side, int16_t speed){
       cod_right.speed_setpoint = speed;
       break;
   }
-  moving = true;
+  robot_position.moving = true;
 }
 
 
-void MotionController::translate_ticks(int16_t position){
+void MotionController::translate_ticks(int32_t position){
 //TODO
-  moving = true;
+  robot_position.translation_setpoint = position;
+  robot_position.moving = true;
 }
 
-void MotionController::rotate_ticks(int16_t position){
+void MotionController::rotate_ticks(int32_t position){
 //TODO
-  moving = true;
+  robot_position.rotation_setpoint = position;
+  robot_position.moving = true;
 }
 
 
@@ -298,7 +325,7 @@ void MotionController::set_kd(uint8_t id, uint32_t k){
 }
 
 
-void MotionController::stop(){
+void MotionController::stop(bool wheels_blocked){
    LL_TIM_DisableCounter(TIM14);
 
   robot_position.translation_setpoint = robot_position.translation_total;
@@ -314,6 +341,26 @@ void MotionController::stop(){
   cod_right.speed_setpoint_last = 0;
   cod_left_speed_avg.reset();
   cod_right_speed_avg.reset();
-  moving = false;
+  if(robot_position.moving){
+    robot_position.movement_stopped = true;
+    robot_position.moving = false;
+    robot_position.blocked = wheels_blocked;
+  }
   LL_TIM_EnableCounter(TIM14);
+}
+
+int8_t MotionController::has_stopped(){
+  int8_t return_val=0; //default : not stopped
+
+  if(robot_position.blocked){
+    return_val = -1;   // stopped and blocked
+  }else if(robot_position.movement_stopped){
+    return_val = 1;    // stopped, not blocked
+  }
+
+  //acknowledge
+  robot_position.blocked = false;
+  robot_position.movement_stopped = false;
+
+  return return_val;
 }

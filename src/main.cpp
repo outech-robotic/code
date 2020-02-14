@@ -26,6 +26,7 @@ Serial serial;
 
 int main(void)
 {
+  int8_t mcs_stop_status;
   /**********************************************************************
    *                             SETUP
    ********************************s**************************************/
@@ -60,7 +61,7 @@ int main(void)
   {
     if((CAN_receive_packet(&rx_msg)) == HAL_OK){
       if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_STOP)){
-        mcs.stop();
+        mcs.stop(false);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)){
         int32_t ticks_translation = rx_msg.data.d32[0];
@@ -89,6 +90,14 @@ int main(void)
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KD)){
         mcs.set_kd(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
+      }
+    }
+
+    mcs_stop_status = mcs.has_stopped();
+    if(mcs_stop_status != 0){
+      CAN_TX_MOV_END.data.u8[0] = ((mcs_stop_status==-1)?1:0); // 1 if blocked, 0 if just end of movement
+      if(CAN_send_packet(&CAN_TX_MOV_END) != CAN_ERROR_STATUS::CAN_PKT_OK){
+        serial.print("ERR: SENDING MOV END\r\n");
       }
     }
 
@@ -122,7 +131,7 @@ void TIM14_IRQHandler(void){
 		mesure_t_irq = micros();
 		mcs.update_position();
 		mcs.control_motion();
-		if((i++) == 25){ // Evry 50ms
+		if((++i) == 10){ // Evry 20ms
 		  mcs.detect_stop();
 		  i = 0;
 		}
