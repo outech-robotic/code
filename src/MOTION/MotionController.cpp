@@ -129,22 +129,21 @@ void MotionController::control_motion() {
       cod_right.speed_setpoint = cod_right.speed_setpoint_wanted;
     }
 
-
     //Wheel Acceleration limits
-    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last)  > robot_position.accel_max) && robot_position.moving)
+    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last)  > robot_position.accel_max))
     {
       cod_left.speed_setpoint = (cod_left.speed_setpoint_last + robot_position.accel_max);
     }
-    else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint)  > robot_position.accel_max) && robot_position.moving)
+    else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint)  > robot_position.accel_max))
     {
       cod_left.speed_setpoint = (cod_left.speed_setpoint_last - robot_position.accel_max);
     }
 
-    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last)  > robot_position.accel_max) && robot_position.moving)
+    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last)  > robot_position.accel_max))
     {
       cod_right.speed_setpoint = (cod_right.speed_setpoint_last + robot_position.accel_max);
     }
-    else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint)  > robot_position.accel_max) && robot_position.moving)
+    else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint)  > robot_position.accel_max))
     {
       cod_right.speed_setpoint = (cod_right.speed_setpoint_last - robot_position.accel_max);
     }
@@ -334,14 +333,13 @@ void MotionController::stop(bool wheels_blocked){
 
   robot_position.translation_setpoint = robot_position.translation_total;
   robot_position.rotation_setpoint = robot_position.rotation_total;
-
+  motor_left.set_pwm(0);
+  motor_right.set_pwm(0);
   pid_translation.reset();
   pid_rotation.reset();
   pid_speed_left.reset();
   pid_speed_right.reset();
-  cod_left.speed_setpoint = cod_left.speed_setpoint_last;
   cod_left.speed_setpoint_wanted = 0;
-  cod_right.speed_setpoint = cod_right.speed_setpoint_last;
   cod_right.speed_setpoint_wanted = 0;
   //cod_left_speed_avg.reset();
   //cod_right_speed_avg.reset();
