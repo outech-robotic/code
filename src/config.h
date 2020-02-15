@@ -66,7 +66,7 @@
 #define CAN_MSG_MOT_SET_KP      (0b1100)
 #define CAN_MSG_MOT_SET_KI      (0b1101)
 #define CAN_MSG_MOT_SET_KD      (0b1110)
-
+#define CAN_MSG_MOT_LIMITS      (0b1011)
 
 //HL MESSAGES
 #define CAN_MSG_HEARTBEAT       (0b1010)

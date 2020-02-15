@@ -45,7 +45,7 @@ int main(void)
   LL_RCC_ClocksTypeDef clocks;
   LL_RCC_GetSystemClocksFreq(&clocks);
   mcs.init();
-  mcs.set_control(true, true);
+  mcs.set_control(true, false);
 
   serial.init(115200);
   serial.print("Setup done \r\n");
@@ -91,6 +91,9 @@ int main(void)
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KD)){
         mcs.set_kd(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
       }
+      else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_LIMITS)){
+        mcs.set_limits(rx_msg.data.u16[0], rx_msg.data.u16[1], rx_msg.data.u16[2], rx_msg.data.u16[3]);
+      }
     }
 
     mcs_stop_status = mcs.has_stopped();
@@ -132,7 +135,7 @@ void TIM14_IRQHandler(void){
 		mcs.update_position();
 		mcs.control_motion();
 		if((++i) == 10){ // Evry 20ms
-		  mcs.detect_stop();
+		  //mcs.detect_stop();
 		  i = 0;
 		}
 		mesure_t_irq = micros()-mesure_t_irq;

@@ -20,6 +20,7 @@ class MotionController {
     volatile int32_t speed_current;
     volatile int32_t speed_average;
     volatile int32_t speed_setpoint;
+    volatile int32_t speed_setpoint_wanted;
     volatile int32_t speed_setpoint_last;
   } encoder_status;
 
@@ -30,6 +31,12 @@ class MotionController {
     volatile int32_t rotation_total;
     volatile int32_t rotation_setpoint;
     int32_t rotation_tolerance;
+
+    int32_t accel_max;
+    int32_t speed_max_translation;
+    int32_t speed_max_rotation;
+    int32_t speed_max_wheel;
+
     volatile bool blocked;
     volatile bool moving;
     volatile bool movement_stopped;
@@ -51,10 +58,6 @@ class MotionController {
   encoder_status cod_right;
   volatile int32_t cod_right_last;
   volatile int32_t cod_right_raw_last;
-  int32_t accel_max;
-  int32_t speed_max_translation;
-  int32_t speed_max_rotation;
-  int32_t speed_max_wheel;
   Average<volatile int32_t, 16> cod_left_speed_avg;
   Average<volatile int32_t, 16> cod_right_speed_avg;
 
@@ -87,7 +90,7 @@ public:
 
 	bool detect_block();
 	bool detect_movement_end();
-
+	void set_limits(uint16_t speed_translation, uint16_t speed_rotation, uint16_t speed_wheel, uint16_t accel_wheel);
 	int8_t has_stopped();
 };
 #endif /* MOTION_MOTIONCONTROLLER_H_ */

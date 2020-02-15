@@ -44,16 +44,16 @@ int MotionController::init() {
   motor_left.init();
   motor_right.init();
 
-  controlled_position = true;
-  controlled_speed = true;
+  controlled_position = false;
+  controlled_speed = false;
 
   cod_left = {};
   cod_right = {};
   cod_right_raw_last = 0;
-  accel_max = MAX_ACCEL_TICK;
-  speed_max_translation = MAX_SPEED_TRANSLATION_TICK;
-  speed_max_rotation = MAX_SPEED_ROTATION_TICK;
-  speed_max_wheel = MAX_SPEED_TRANSLATION_TICK;
+  robot_position.accel_max = MAX_ACCEL_TICK;
+  robot_position.speed_max_translation = MAX_SPEED_TRANSLATION_TICK;
+  robot_position.speed_max_rotation = MAX_SPEED_ROTATION_TICK;
+  robot_position.speed_max_wheel = MAX_SPEED_TRANSLATION_TICK;
 
   robot_position = {};
   robot_position = {};
@@ -98,80 +98,84 @@ void MotionController::control_motion() {
   int16_t left_pwm, right_pwm;
   int16_t speed_sp_translation, speed_sp_rotation;
 
-  if(controlled_position){
+  if(controlled_position || controlled_speed){
 
-    speed_sp_translation = pid_translation.compute(robot_position.translation_total, robot_position.translation_setpoint);
-    speed_sp_rotation = pid_rotation.compute(robot_position.rotation_total, robot_position.rotation_setpoint);
+    if(controlled_position){
+      speed_sp_translation = pid_translation.compute(robot_position.translation_total, robot_position.translation_setpoint);
+      speed_sp_rotation = pid_rotation.compute(robot_position.rotation_total, robot_position.rotation_setpoint);
 
 
-    //CAP ROT/TRANSLATION SPEED
-    if(speed_sp_translation>speed_max_translation){
-      speed_sp_translation = speed_max_translation;
+      //CAP ROT/TRANSLATION SPEED
+      if(speed_sp_translation>robot_position.speed_max_translation){
+        speed_sp_translation = robot_position.speed_max_translation;
+      }
+      else if(speed_sp_translation< -robot_position.speed_max_translation){
+        speed_sp_translation = -robot_position.speed_max_translation;
+      }
+
+      if(speed_sp_rotation>robot_position.speed_max_rotation){
+        speed_sp_rotation = robot_position.speed_max_rotation;
+      }
+      else if(speed_sp_rotation< -robot_position.speed_max_rotation){
+        speed_sp_rotation = -robot_position.speed_max_rotation;
+      }
+
+      //Update wheel speed setpoints
+      cod_left.speed_setpoint  = ((int32_t)speed_sp_translation - (int32_t)speed_sp_rotation); // Clockwise rotation is positive
+      cod_right.speed_setpoint = ((int32_t)speed_sp_translation + (int32_t)speed_sp_rotation);
     }
-    else if(speed_sp_translation< -speed_max_translation){
-      speed_sp_translation = -speed_max_translation;
+    else{
+      cod_left.speed_setpoint  = cod_left.speed_setpoint_wanted;
+      cod_right.speed_setpoint = cod_right.speed_setpoint_wanted;
     }
 
-    if(speed_sp_rotation>speed_max_rotation){
-      speed_sp_rotation = speed_max_rotation;
-    }
-    else if(speed_sp_rotation< -speed_max_rotation){
-      speed_sp_rotation = -speed_max_rotation;
-    }
-
-    //Update wheel speed setpoints
-    cod_left.speed_setpoint  = ((int32_t)speed_sp_translation - (int32_t)speed_sp_rotation); // Clockwise rotation is positive
-    cod_right.speed_setpoint = ((int32_t)speed_sp_translation + (int32_t)speed_sp_rotation);
 
     //Wheel Acceleration limits
-    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last)  > accel_max) && robot_position.moving)
+    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last)  > robot_position.accel_max) && robot_position.moving)
     {
-      cod_left.speed_setpoint = (cod_left.speed_setpoint_last + accel_max);
+      cod_left.speed_setpoint = (cod_left.speed_setpoint_last + robot_position.accel_max);
     }
-    else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint)  > accel_max) && robot_position.moving)
+    else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint)  > robot_position.accel_max) && robot_position.moving)
     {
-      cod_left.speed_setpoint = (cod_left.speed_setpoint_last - accel_max);
+      cod_left.speed_setpoint = (cod_left.speed_setpoint_last - robot_position.accel_max);
     }
-    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last)  > accel_max) && robot_position.moving)
+
+    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last)  > robot_position.accel_max) && robot_position.moving)
     {
-      cod_right.speed_setpoint = (cod_right.speed_setpoint_last + accel_max);
+      cod_right.speed_setpoint = (cod_right.speed_setpoint_last + robot_position.accel_max);
     }
-    else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint)  > accel_max) && robot_position.moving)
+    else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint)  > robot_position.accel_max) && robot_position.moving)
     {
-      cod_right.speed_setpoint = (cod_right.speed_setpoint_last - accel_max);
+      cod_right.speed_setpoint = (cod_right.speed_setpoint_last - robot_position.accel_max);
     }
 
     //Wheel speed limits
-    if (cod_left.speed_setpoint > speed_max_wheel)
+    if (cod_left.speed_setpoint > robot_position.speed_max_wheel)
     {
-      cod_left.speed_setpoint = speed_max_wheel;
+      cod_left.speed_setpoint = robot_position.speed_max_wheel;
     }
-    else if (cod_left.speed_setpoint < -speed_max_wheel)
+    else if (cod_left.speed_setpoint < -robot_position.speed_max_wheel)
     {
-      cod_left.speed_setpoint = -speed_max_wheel;
+      cod_left.speed_setpoint = -robot_position.speed_max_wheel;
     }
-    if (cod_right.speed_setpoint > speed_max_wheel)
+
+    if (cod_right.speed_setpoint > robot_position.speed_max_wheel)
     {
-      cod_right.speed_setpoint = speed_max_wheel;
+      cod_right.speed_setpoint = robot_position.speed_max_wheel;
     }
-    else if (cod_right.speed_setpoint < -speed_max_wheel)
+    else if (cod_right.speed_setpoint < -robot_position.speed_max_wheel)
     {
-      cod_right.speed_setpoint = -speed_max_wheel;
+      cod_right.speed_setpoint = -robot_position.speed_max_wheel;
     }
 
     // Update last wheel setpoints
     cod_left.speed_setpoint_last = cod_left.speed_setpoint;
     cod_right.speed_setpoint_last = cod_right.speed_setpoint;
-
   }
 
   if(controlled_speed){
     left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_setpoint);
     right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_setpoint);
-  }
-  else if(controlled_position){
-    left_pwm = cod_left.speed_setpoint;
-    right_pwm = cod_right.speed_setpoint;
   }
 
   if(controlled_speed || controlled_position){
@@ -214,10 +218,10 @@ void MotionController::detect_stop(){
 void MotionController::set_target_speed(Motor::Side side, int32_t speed){
   switch(side){
     case Motor::Side::LEFT:
-      cod_left.speed_setpoint = speed;
+      cod_left.speed_setpoint_wanted = speed;
       break;
     case Motor::Side::RIGHT:
-      cod_right.speed_setpoint = speed;
+      cod_right.speed_setpoint_wanted = speed;
       break;
   }
   robot_position.moving = true;
@@ -335,12 +339,12 @@ void MotionController::stop(bool wheels_blocked){
   pid_rotation.reset();
   pid_speed_left.reset();
   pid_speed_right.reset();
-  cod_left.speed_setpoint = 0;
-  cod_left.speed_setpoint_last = 0;
-  cod_right.speed_setpoint = 0;
-  cod_right.speed_setpoint_last = 0;
-  cod_left_speed_avg.reset();
-  cod_right_speed_avg.reset();
+  cod_left.speed_setpoint = cod_left.speed_setpoint_last;
+  cod_left.speed_setpoint_wanted = 0;
+  cod_right.speed_setpoint = cod_right.speed_setpoint_last;
+  cod_right.speed_setpoint_wanted = 0;
+  //cod_left_speed_avg.reset();
+  //cod_right_speed_avg.reset();
   if(robot_position.moving){
     robot_position.movement_stopped = true;
     robot_position.moving = false;
@@ -363,4 +367,11 @@ int8_t MotionController::has_stopped(){
   robot_position.movement_stopped = false;
 
   return return_val;
+}
+
+void MotionController::set_limits(uint16_t speed_translation, uint16_t speed_rotation, uint16_t speed_wheel, uint16_t accel_wheel){
+  robot_position.speed_max_translation = speed_translation;
+  robot_position.speed_max_rotation = speed_rotation;
+  robot_position.speed_max_wheel= speed_wheel;
+  robot_position.accel_max = accel_wheel;
 }
