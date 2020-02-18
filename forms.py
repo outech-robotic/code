@@ -10,10 +10,10 @@ class PIDForm(FlaskForm):
 
 
 class CapForm(FlaskForm):
-    cap_accel_forward = FloatField('cap_accel_forward', default=-1, validators=[InputRequired()])
-    cap_accel_backward = FloatField('cap_accel_backward', default=-1, validators=[InputRequired()])
-    cap_speed_forward = FloatField('cap_speed_forward', default=-1, validators=[InputRequired()])
-    cap_speed_backward = FloatField('cap_speed_backward', default=-1, validators=[InputRequired()])
+    cap_speed_translation = FloatField('cap_speed_translation', default=-1, validators=[InputRequired()])
+    cap_speed_rotation = FloatField('cap_speed_rotation', default=-1, validators=[InputRequired()])
+    cap_speed_wheel = FloatField('cap_speed_wheel', default=-1, validators=[InputRequired()])
+    cap_accel_wheel = FloatField('cap_accel_wheel', default=-1, validators=[InputRequired()])
 
 
 class AllPIDForms(FlaskForm):

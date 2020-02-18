@@ -21,19 +21,20 @@ CAN_CHANNEL_MOTOR = 0b00
 CAN_MSG_SPEED = 0b1000  # orders the movement of both wheels at constant speed (2x32bits signed, left and right encoder speeds)
 CAN_MSG_POS = 0b0010  # orders a movement of both wheels (data: 2x32bits signed, left and right encoder position)
 CAN_MSG_STOP = 0b0000  # Stops robot on the spot, resetting all errors of PIDs
-CAN_MSG_MCS_MODE = 0b1001  # Sets motion control mode : data: 1 byte: bit 0 = speed mode on/off, bit 1 = position mode on/off
+CAN_MSG_MCS_MODE = 0b1111  # Sets motion control mode : data: 1 byte: bit 0 = speed mode on/off, bit 1 = position mode on/off
 CAN_KP_ID = 0b1100  # sets proportionnal constant of PID of ID at first byte of data, value is the following 32 bits (unsigned, 65535 * value in floating point of KP)
 CAN_KI_ID = 0b1101  # same for integral constant
 CAN_KD_ID = 0b1110  # and derivative
 
-MCS_MODE_SPEED = 0b01
-MCS_MODE_POS = 0b10
-MCS_MODE_BOTH = 0b11
+CAN_SPEED_ACCEL_LIM = 0b1011
+MCS_MODE_SPEED = [0b01]
+MCS_MODE_POS = [0b10]
+MCS_MODE_BOTH = [0b11]
 
 # PID IDs
 PID_LEFT_SPEED = 0
-PID_LEFT_POS = 1
-PID_RIGHT_SPEED = 2
+PID_LEFT_POS = 2
+PID_RIGHT_SPEED = 1
 PID_RIGHT_POS = 3
 
 COD_UPDATE_FREQ = 100  # Hz, encoder positions sent from Motion control board each seconds
@@ -43,6 +44,7 @@ fmt_motor_set_speed = struct.Struct('<ll')  # 32b + 32b signe
 fmt_motor_set_pos = struct.Struct('<ll')
 fmt_motor_cod_pos = struct.Struct('<ll')
 fmt_motor_set_pid = struct.Struct('<BL')  # 8b + 32b non signes
+fmt_motor_lim = struct.Struct('<HHHH')
 
 # Physical constants of the robot
 WHEEL_DIAMETER = 70.0  # en mm ; 2400 ticks par tour donc par 2*pi*60 mm
@@ -55,6 +57,7 @@ TICK_TO_MM = (pi * WHEEL_DIAMETER) / TICKS_PER_TURN
 # CAN
 def send_packet(channel, message_id, board, data=[]):
     can_pkt_id = ((channel << CAN_MSG_WIDTH) | (message_id << CAN_BOARD_ID_WIDTH) | board)
+    print(can_pkt_id, " MSG:", data)
     with can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000) as bus:
         msg = can.Message(
             arbitration_id=can_pkt_id, data=data, is_extended_id=False
@@ -174,6 +177,7 @@ class CANAdapter(InterfaceAdapter):
                     fmt_motor_set_pid.pack(PID_RIGHT_SPEED, int(speed_right.i)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KD_ID, CAN_BOARD_ID_MOTOR,
                     fmt_motor_set_pid.pack(PID_RIGHT_SPEED, int(speed_right.d)))
+        send_packet(CAN_CHANNEL_MOTOR, CAN_SPEED_ACCEL_LIM, CAN_BOARD_ID_MOTOR, fmt_motor_lim.pack(int(cap.SpeedTranslation*MM_TO_TICK), int(cap.SpeedRotation*MM_TO_TICK), int(cap.SpeedWheel*MM_TO_TICK), int(cap.AccelWheel*MM_TO_TICK)))
 
     def on_order_submission(self, speed: Optional[float], position: Optional[float],
                             angle: Optional[float]):
@@ -201,7 +205,7 @@ class CANAdapter(InterfaceAdapter):
                 self.setpoint_pos = position  # position in mm that each wheel have to travel
                 position_ticks = position * MM_TO_TICK  # in ticks for Motion control board
                 send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                            fmt_motor_set_pos.pack(int(position_ticks), int(position_ticks)))
+                            fmt_motor_set_pos.pack(int(position_ticks), 0))
 
             # Cas 3 : juste rotation
             elif angle is not None:
@@ -210,17 +214,9 @@ class CANAdapter(InterfaceAdapter):
                 # distance for each wheel(in opposite direcitons), to reach angle, in mm for graph
                 self.setpoint_angle = angle * DISTANCE_BETWEEN_WHEELS / 2
                 angle_ticks = self.setpoint_angle * MM_TO_TICK  # in ticks for Motion control board
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(0, int(angle_ticks)))
+                print(angle_ticks)
 
-                if angle >= 0:  # sens trigo
-                    send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                                fmt_motor_set_pos.pack(-int(angle_ticks),
-                                                       int(
-                                                           angle_ticks)))  # roue gauche, roue droite
-                if angle < 0:
-                    send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                                fmt_motor_set_pos.pack(int(angle_ticks),
-                                                       -int(
-                                                           angle_ticks)))  # roue gauche, roue droite
         if speed is not None or position is not None or angle is not None:
             Timer(2, send_order).start() # Delayed movement order
         else:

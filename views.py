@@ -20,10 +20,10 @@ class PID:
 
 @dataclass
 class Cap:
-    AccelForward: float
-    AccelBackward: float
-    SpeedForward: float
-    SpeedBackward: float
+    SpeedTranslation: float
+    SpeedRotation   : float
+    SpeedWheel      : float
+    AccelWheel      : float
 
 
 def to_pid(tbl: dict) -> PID:
@@ -36,10 +36,10 @@ def to_pid(tbl: dict) -> PID:
 
 def to_cap(tbl: dict) -> Cap:
     return Cap(
-        AccelForward=tbl['cap_accel_forward'],
-        AccelBackward=tbl['cap_accel_backward'],
-        SpeedForward=tbl['cap_speed_forward'],
-        SpeedBackward=tbl['cap_speed_backward'],
+        SpeedTranslation=tbl['cap_speed_translation'],
+        SpeedRotation=tbl['cap_speed_rotation'],
+        SpeedWheel=tbl['cap_speed_wheel'],
+        AccelWheel=tbl['cap_accel_wheel'],
     )
 
 
@@ -89,10 +89,10 @@ def get_pid_coefs():
             'SpeedLeft': {'P': 7.0, 'I': 8.0, 'D': 9.0, },
             'SpeedRight': {'P': 10.0, 'I': 11.0, 'D': 12.0, },
             'CapForm': {
-                'cap_accel_forward': -42,
-                'cap_accel_backward': -42,
-                'cap_speed_forward': -42,
-                'cap_speed_backward': -42,
+                'cap_speed_translation': -42,
+                'cap_speed_rotation': -42,
+                'cap_speed_wheel': -42,
+                'cap_accel_wheel': -42,
             }
         }
 
