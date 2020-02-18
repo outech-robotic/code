@@ -38,6 +38,7 @@ PID_RIGHT_SPEED = 1
 PID_RIGHT_POS = 3
 
 COD_UPDATE_FREQ = 100  # Hz, encoder positions sent from Motion control board each seconds
+MCS_UPDATE_FREQ = 500 # Hz, frequency of motion controller updates
 
 # Formatters for data packing
 fmt_motor_set_speed = struct.Struct('<ll')  # 32b + 32b signe
@@ -177,7 +178,7 @@ class CANAdapter(InterfaceAdapter):
                     fmt_motor_set_pid.pack(PID_RIGHT_SPEED, int(speed_right.i)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KD_ID, CAN_BOARD_ID_MOTOR,
                     fmt_motor_set_pid.pack(PID_RIGHT_SPEED, int(speed_right.d)))
-        send_packet(CAN_CHANNEL_MOTOR, CAN_SPEED_ACCEL_LIM, CAN_BOARD_ID_MOTOR, fmt_motor_lim.pack(int(cap.SpeedTranslation*MM_TO_TICK), int(cap.SpeedRotation*MM_TO_TICK), int(cap.SpeedWheel*MM_TO_TICK), int(cap.AccelWheel*MM_TO_TICK)))
+        send_packet(CAN_CHANNEL_MOTOR, CAN_SPEED_ACCEL_LIM, CAN_BOARD_ID_MOTOR, fmt_motor_lim.pack(int(cap.SpeedTranslation*MM_TO_TICK), int(cap.SpeedRotation*MM_TO_TICK), int(cap.SpeedWheel*MM_TO_TICK), int(cap.AccelWheel*MM_TO_TICK/MCS_UPDATE_FREQ)))
 
     def on_order_submission(self, speed: Optional[float], position: Optional[float],
                             angle: Optional[float]):
