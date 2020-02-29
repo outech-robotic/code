@@ -6,7 +6,7 @@ Just a proof of concept for the architecture described here.
 
 ### Diagram
 
-[![arch](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/docs/img/archi_robot.png)](https://download.outech.fr/archi_robot.html)
+[![arch](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/docs/img/archi_robot.png)](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/docs/img/archi_robot.png)
 
 
 ## How to set up the project on local machine?
