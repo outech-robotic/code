@@ -26,7 +26,7 @@ Serial serial;
 
 int main(void)
 {
-  int8_t mcs_stop_status;
+  MotionController::StopStatus mcs_stop_status;
   /**********************************************************************
    *                             SETUP
    ********************************s**************************************/
@@ -45,7 +45,7 @@ int main(void)
   LL_RCC_ClocksTypeDef clocks;
   LL_RCC_GetSystemClocksFreq(&clocks);
   mcs.init();
-  mcs.set_control(true, false);
+  mcs.set_control(0b000); //Everything disabed, by default
 
   serial.init(115200);
   serial.print("Setup done \r\n");
@@ -61,26 +61,33 @@ int main(void)
   {
     if((CAN_receive_packet(&rx_msg)) == HAL_OK){
       if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_STOP)){
+        // Stop order. blocked boolean is set to false
         mcs.stop(false);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)){
-        int32_t ticks_translation = rx_msg.data.d32[0];
-        int32_t ticks_rotation = rx_msg.data.d32[1];
-        if(rx_msg.data.d32[0] != 0){
-          mcs.translate_ticks(ticks_translation);
-        }
-        else{
-          mcs.rotate_ticks(ticks_rotation);
+        // Movement messages : first byte == 0 => translation, 1 => rotation, ticks = next 32 bits
+        uint8_t movement_type = rx_msg.data.u8[0];
+        int32_t movement_ticks = rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1];
+
+        switch(movement_type){
+          case 0:
+            mcs.translate_ticks(movement_ticks);
+            break;
+          case 1:
+            mcs.rotate_ticks(movement_ticks);
+            break;
         }
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_COD_SPEED)){
+        //Order to move encoders at a specific speed (in ticks/s)
         int32_t left_tick = rx_msg.data.d32[0];
         int32_t right_tick = rx_msg.data.d32[1];
         mcs.set_target_speed(Motor::Side::LEFT, left_tick);
         mcs.set_target_speed(Motor::Side::RIGHT, right_tick);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MODE)){
-        mcs.set_control(rx_msg.data.u8[0]&0b1, rx_msg.data.u8[0]&0b10);
+        //MCS mode : nothing, speed control, speed and (rotation and/or translation)
+        mcs.set_control(rx_msg.data.u8[0]&0b11); //Only 2 LSb are useful
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KP)){
         mcs.set_kp(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
@@ -97,8 +104,9 @@ int main(void)
     }
 
     mcs_stop_status = mcs.has_stopped();
-    if(mcs_stop_status != 0){
-      CAN_TX_MOV_END.data.u8[0] = ((mcs_stop_status==-1)?1:0); // 1 if blocked, 0 if just end of movement
+    //If the robot has stopped or cannot move normally
+    if(mcs_stop_status != MotionController::StopStatus::NONE){
+      CAN_TX_MOV_END.data.u8[0] = ((mcs_stop_status==MotionController::StopStatus::BLOCKED)?1:0); // 1 if blocked, 0 if just end of movement
       if(CAN_send_packet(&CAN_TX_MOV_END) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING MOV END\r\n");
       }
@@ -135,7 +143,7 @@ void TIM14_IRQHandler(void){
 		mcs.update_position();
 		mcs.control_motion();
 		if((++i) == 10){ // Evry 20ms
-		  //mcs.detect_stop();
+		  mcs.detect_stop();
 		  i = 0;
 		}
 		mesure_t_irq = micros()-mesure_t_irq;
