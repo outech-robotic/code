@@ -14,6 +14,8 @@ from src.util.encoding import packet
 
 
 def _spread_delta_on_ticks(delta: int, ticks: int) -> List[int]:
+    if ticks == 1:
+        return [delta]
     delta_per_tick = abs(delta) // (ticks - 1)
     delta_for_last_tick = abs(delta) % (ticks - 1)
     result = [int(math.copysign(delta_per_tick, delta))] * ticks
@@ -56,35 +58,36 @@ class SimulationHandler:
             abs(delta_tick_left /
                 self.configuration.encoder_ticks_per_revolution * 2 * math.pi /
                 rot_speed * self.simulation_configuration.tickrate))
-
-        for k, ticks_to_move in enumerate(
-                _spread_delta_on_ticks(delta_tick_left, time_left)):
-            if ticks_to_move != 0:
-                self.event_queue.push(
-                    EventOrder(
-                        type=EventType.MOVE_WHEEL,
-                        payload={
-                            'left': ticks_to_move,
-                            'right': 0,
-                        },
-                    ), k)
+        if time_left:
+            for k, ticks_to_move in enumerate(
+                    _spread_delta_on_ticks(delta_tick_left, time_left)):
+                if ticks_to_move != 0:
+                    self.event_queue.push(
+                        EventOrder(
+                            type=EventType.MOVE_WHEEL,
+                            payload={
+                                'left': ticks_to_move,
+                                'right': 0,
+                            },
+                        ), k)
 
         delta_tick_right = msg.tick_right - self.simulation_state.right_tick
         time_right = round(
             abs(delta_tick_right /
                 self.configuration.encoder_ticks_per_revolution * 2 * math.pi /
                 rot_speed * self.simulation_configuration.tickrate))
-        for k, ticks_to_move in enumerate(
-                _spread_delta_on_ticks(delta_tick_right, time_right)):
-            if ticks_to_move != 0:
-                self.event_queue.push(
-                    EventOrder(
-                        type=EventType.MOVE_WHEEL,
-                        payload={
-                            'right': ticks_to_move,
-                            'left': 0,
-                        },
-                    ), k)
+        if time_right:
+            for k, ticks_to_move in enumerate(
+                    _spread_delta_on_ticks(delta_tick_right, time_right)):
+                if ticks_to_move != 0:
+                    self.event_queue.push(
+                        EventOrder(
+                            type=EventType.MOVE_WHEEL,
+                            payload={
+                                'right': ticks_to_move,
+                                'left': 0,
+                            },
+                        ), k)
 
         self.event_queue.push(
             EventOrder(type=EventType.MOVEMENT_DONE),

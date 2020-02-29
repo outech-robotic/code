@@ -1,6 +1,7 @@
 """
 Mocks.
 """
+import asyncio
 from unittest.mock import MagicMock
 
 from pytest import fixture
@@ -128,7 +129,11 @@ def simulation_gateway_mock():
     """
     Simulation gateway.
     """
-    return MagicMock(spec=SimulationGateway)
+    mock = MagicMock(spec=SimulationGateway)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.encoder_position = MagicMock(return_value=future)
+    return mock
 
 
 @fixture
@@ -144,7 +149,11 @@ def motion_gateway_mock():
     """
     Motion gateway mock.
     """
-    return MagicMock(spec=MotionGateway)
+    mock = MagicMock(spec=MotionGateway)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.move_wheels = MagicMock(return_value=future)
+    return mock
 
 
 @fixture
@@ -160,4 +169,8 @@ def can_adapter_mock():
     """
     CAN adapter mock.
     """
-    return MagicMock(spec=CANAdapter)
+    mock = MagicMock(spec=CANAdapter)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.send = MagicMock(return_value=future)
+    return mock

@@ -4,7 +4,7 @@ Vector entity.
 from __future__ import annotations
 
 import sys
-from math import sqrt
+from math import sqrt, atan2
 
 import numpy
 
@@ -81,6 +81,12 @@ class Vector2:
         Return the norm2 of the vector.
         """
         return sqrt(self.norm2())
+
+    def to_angle(self) -> float:
+        """
+        Return the angle of the vector.
+        """
+        return atan2(self.y, self.x)
 
 
 def _to_array(vec: Vector2) -> numpy.ndarray:

@@ -4,11 +4,9 @@ Main module.
 import asyncio
 import math
 
-import can
 import uvloop
 
-from src.logger import LOGGER
-from src.robot.can_adapter.adapter import CANAdapter
+from src.robot.can_adapter.adapter import CANAdapter, LoopbackCANAdapter
 from src.robot.controller.localization import LocalizationController
 from src.robot.controller.motion import MotionController
 from src.robot.controller.odometry import OdometryController
@@ -34,13 +32,13 @@ from src.util import can_id
 from src.util.dependency_container import DependencyContainer
 
 CONFIG = Configuration(
-    initial_position=Vector2(1500, 1000),
+    initial_position=Vector2(200, 1200),
     initial_angle=0,
     robot_width=380,
     robot_length=240,
     field_shape=(3000, 2000),
     color=Color.BLUE,
-    wheel_radius=30,
+    wheel_radius=70 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
 )
@@ -63,7 +61,7 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('motion_gateway', MotionGateway)
 
-    i.provide('can_adapter', CANAdapter)
+    i.provide('can_adapter', LoopbackCANAdapter)
 
     event_loop = asyncio.get_event_loop()
     i.provide('loop', event_loop)
@@ -106,10 +104,6 @@ def _provide_simulator(i: DependencyContainer) -> None:
     i.provide('web_browser_client', WebBrowserClient)
     i.provide('replay_saver', ReplaySaver)
 
-    i.provide(
-        'can_bus',
-        can.ThreadSafeBus('test', bustype='virtual', receive_own_messages=True))
-
 
 def _get_container() -> DependencyContainer:
     """
@@ -139,18 +133,16 @@ async def main() -> None:
                                  motion_handler.handle_movement_done)
     can_adapter.register_handler(can_id.PROPULSION_MOVE_WHEELS,
                                  simulation_handler.handle_move_wheels)
-    asyncio.create_task(can_adapter.run())
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
     replay_saver = i.get('replay_saver')
 
-    async def run_and_stop_simulation() -> None:
-        await strategy_controller.run()
-        LOGGER.get().info('Main algorithm stopped, stopping the simulation')
-        simulation_runner.stop()
-
-    await asyncio.gather(run_and_stop_simulation(), simulation_runner.run())
+    await asyncio.wait(
+        {strategy_controller.run(),
+         simulation_runner.run(),
+         can_adapter.run()},
+        return_when=asyncio.FIRST_COMPLETED)
 
     replay_saver.save_replay()
 

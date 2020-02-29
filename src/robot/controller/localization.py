@@ -99,13 +99,13 @@ class LocalizationController:
         """
         Make the robot move forward and block until the movement is done.
         """
-        LOGGER.get().debug('localization_controller_move_forward',
-                           distance=distance)
+        LOGGER.get().info('localization_controller_move_forward',
+                          distance=distance)
         circumference = 2 * math.pi * self.configuration.wheel_radius
         ticks = round(distance / circumference *
                       self.configuration.encoder_ticks_per_revolution)
         self._state.movement_done_event.clear()
-        self.motion_gateway.move_wheels(
+        await self.motion_gateway.move_wheels(
             tick_left=self._state.last_left_tick + ticks,
             tick_right=self._state.last_right_tick + ticks,
         )
@@ -115,14 +115,14 @@ class LocalizationController:
         """
         Make the robot rotate counter-clockwise and block until the movement is done.
         """
-        LOGGER.get().debug('localization_controller_rotate', angle=angle)
+        LOGGER.get().info('localization_controller_rotate', angle=angle)
         circumference = 2 * math.pi * self.configuration.wheel_radius
         distance = self.configuration.distance_between_wheels / 2 * angle
         ticks = round(distance / circumference *
                       self.configuration.encoder_ticks_per_revolution)
 
         self._state.movement_done_event.clear()
-        self.motion_gateway.move_wheels(
+        await self.motion_gateway.move_wheels(
             tick_left=self._state.last_left_tick - ticks,
             tick_right=self._state.last_right_tick + ticks,
         )

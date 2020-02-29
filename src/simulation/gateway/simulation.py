@@ -23,23 +23,19 @@ class SimulationGateway:
         """
         Send the "movement done" signal to the robot.
         """
-        self.can_adapter.send(
+        await self.can_adapter.send(
             can_id.PROPULSION_MOVEMENT_DONE,
             packet.encode_propulsion_movement_done(
                 packet.PropulsionMovementDonePacket(blocked=False,)))
-
-        await self.can_adapter.wait_until_recv_queue_empty()
 
     async def encoder_position(self, left_tick: int, right_tick: int) -> None:
         """
         Send encoder positions.
         """
-        self.can_adapter.send(
+        await self.can_adapter.send(
             can_id.PROPULSION_ENCODER_POSITION,
             packet.encode_propulsion_encoder_position(
                 packet.PropulsionEncoderPositionPacket(
                     left_tick=left_tick,
                     right_tick=right_tick,
                 )))
-
-        await self.can_adapter.wait_until_recv_queue_empty()

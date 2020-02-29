@@ -21,22 +21,36 @@ class MotionController:
         self.motion_gateway = motion_gateway
         self.localization_controller = localization_controller
 
-    async def move_to(self, _: Vector2) -> None:
+    async def move_to(self, dest_pos: Vector2, reverse: bool = False) -> None:
         """
         Move the robot to a specific position.
         """
+        current_pos = self.localization_controller.get_position()
+        if (current_pos - dest_pos).euclidean_norm() < 1:
+            return
+        direction = dest_pos - current_pos
+        distance = direction.euclidean_norm()
+        if reverse:
+            direction = -direction
+            distance = -distance
 
-        length = 500
-        await self.localization_controller.move_forward(length / 2)
-        await self.localization_controller.rotate(math.pi / 2)
+        current_angle = self.localization_controller.get_angle()
+        delta_angle = direction.to_angle() - current_angle
+        delta_angle = normalize_angle(delta_angle)
 
-        await self.localization_controller.move_forward(length)
-        await self.localization_controller.rotate(math.pi / 2)
+        await self.localization_controller.rotate(delta_angle)
+        await self.localization_controller.move_forward(distance)
 
-        await self.localization_controller.move_forward(length)
-        await self.localization_controller.rotate(math.pi / 2)
 
-        await self.localization_controller.move_forward(length)
-        await self.localization_controller.rotate(math.pi / 2)
+def normalize_angle(angle: float) -> float:
+    """
+    Takes an arbitrary angle (expressed in radians) and normalize it into an angle that is in
+    ]-pi, pi].
+    """
+    while angle <= -math.pi:
+        angle += 2 * math.pi
 
-        await self.localization_controller.move_forward(length / 2)
+    while angle > math.pi:
+        angle -= 2 * math.pi
+
+    return angle

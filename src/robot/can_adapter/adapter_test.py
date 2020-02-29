@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import can
 import pytest
 
-from src.robot.can_adapter.adapter import CANAdapter
+from src.robot.can_adapter.adapter import PyCANAdapter
 
 
 async def stub_function():
@@ -39,7 +39,7 @@ def adapter_fixture(loop, bus):
     """
     CAN adapter.
     """
-    return CANAdapter(can_bus=bus, loop=loop)
+    return PyCANAdapter(can_bus=bus, loop=loop)
 
 
 @pytest.mark.asyncio
@@ -51,7 +51,7 @@ async def test_can_adapter_dispatch_message(adapter):
     adapter.register_handler(0x42, handler)
 
     task = asyncio.create_task(adapter.run())
-    adapter.send(0x42, b'my data')
+    await adapter.send(0x42, b'my data')
     await asyncio.sleep(0.01)
 
     handler.assert_called_once_with(b'my data')
@@ -69,7 +69,7 @@ async def test_can_adapter_dont_dispatch_to_wrong_handler(adapter):
     adapter.register_handler(0x42, handler)
 
     task = asyncio.create_task(adapter.run())
-    adapter.send(0x10, b'my data')
+    await adapter.send(0x10, b'my data')
     await asyncio.sleep(0.01)
 
     handler.assert_not_called()
@@ -89,7 +89,7 @@ async def test_can_adapter_two_handlers_registered_for_same_id(adapter):
     adapter.register_handler(0x42, handler2)
 
     task = asyncio.create_task(adapter.run())
-    adapter.send(0x42, b'my data')
+    await adapter.send(0x42, b'my data')
     await asyncio.sleep(0.1)
 
     handler1.assert_called_once_with(b'my data')

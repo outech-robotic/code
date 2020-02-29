@@ -27,7 +27,7 @@ class MotionHandler:
         """
         Handle movement done message.
         """
-        LOGGER.get().debug("handle_movement_done", data=data)
+        LOGGER.get().info("handle_movement_done", data=data)
 
         _ = packet.decode_propulsion_movement_done(data)
         self.localization_controller.movement_done()
