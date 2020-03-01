@@ -73,6 +73,10 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
   int64_t res;
   int16_t out;
   error = setpoint-input;
+  derivative_error = (error-last_error) - (setpoint - last_setpoint);
+  last_error = error;
+  last_setpoint = setpoint;
+
   int64_t p=0,i=0,d=0;
   if(kp){
     p = (int64_t)kp * (int64_t)error;
@@ -86,14 +90,11 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
     i = integral_sum;
   }
   if(kd){
-    derivative_error = (error-last_error) - (setpoint - last_setpoint);
-    last_setpoint = setpoint;
     d = (int64_t)kd * (int64_t)derivative_error;
     if(d>integral_max)
       d = integral_max;
     else if(d < integral_min)
       d = integral_min;
-    last_error = error;
   }
   res = p+i+d;
   // Saturation

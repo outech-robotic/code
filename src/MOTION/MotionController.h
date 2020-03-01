@@ -28,13 +28,13 @@ class MotionController {
   struct {
     volatile int32_t translation_total;
     volatile int32_t translation_setpoint;
-    int32_t          translation_tolerance;
+    uint32_t          translation_tolerance;
     volatile int32_t rotation_total;
     volatile int32_t rotation_setpoint;
-    int32_t          rotation_tolerance;
+    uint32_t          rotation_tolerance;
 
-    int32_t derivative_tolerance;
-    int32_t differential_tolerance;
+    uint32_t derivative_tolerance;
+    uint32_t differential_tolerance;
 
     int32_t accel_max;
     int32_t speed_max_translation;
@@ -43,6 +43,7 @@ class MotionController {
 
     volatile bool blocked;
     volatile bool moving;
+    volatile bool forced_movement;
     volatile bool movement_stopped;
 
     bool controlled_speed;

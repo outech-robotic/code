@@ -6,9 +6,9 @@ MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_righ
 
 }
 
-#define PI (3.14159265359)
-#define WHEEL_DIAMETER 70
-#define TICKS_PER_TURN 2400
+#define PI ((float)3.14159265359)
+#define WHEEL_DIAMETER 74
+#define TICKS_PER_TURN ((float)2400)
 #define MM_TO_TICK (TICKS_PER_TURN/(PI*WHEEL_DIAMETER))
 
 #define MAX_SPEED_TRANSLATION_MM (500)
@@ -19,6 +19,7 @@ MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_righ
 #define MAX_ACCEL_TICK (MAX_ACCEL_MM*MM_TO_TICK)
 
 void MotionController::init() {
+  robot_status = {};
   pid_speed_left.reset();
   pid_speed_right.reset();
   pid_translation.reset();
@@ -56,8 +57,12 @@ void MotionController::init() {
   robot_status.speed_max_rotation = MAX_SPEED_ROTATION_TICK;
   robot_status.speed_max_wheel = MAX_SPEED_TRANSLATION_TICK;
 
-  robot_status = {};
-  robot_status = {};
+  robot_status.derivative_tolerance = 0;
+  robot_status.differential_tolerance = 200;
+  robot_status.rotation_tolerance = 10;
+  robot_status.translation_tolerance = 20;
+
+
   MX_TIM14_Init();
 }
 
@@ -188,55 +193,53 @@ void MotionController::control_motion() {
   }
 }
 
-
 //Detects if the robot is physically stopped (blocked or movement terminated)
 MotionController::StopStatus MotionController::get_stop_status(){
-  static uint8_t countdown = 5;
   StopStatus status = NONE;
-
-  if((robot_status.controlled_position || robot_status.controlled_rotation) &&
-      (((ABS(pid_translation_avg_derivarive_error.value()) <= robot_status.derivative_tolerance)  &&  // Translation isn't changing much anymore
-        (ABS(pid_rotation_avg_derivarive_error.value())    <= robot_status.derivative_tolerance)) ||  // Rotation isn't changing much anymore
-        (ABS(ABS(pid_speed_left_avg_error.value()) - ABS(pid_speed_right_avg_error.value())) > 0)))   // Differential block: one wheel has more trouble moving than the other
+  uint32_t transl_deriv_error = ABS(pid_translation.get_derivative_error());//ABS(pid_translation_avg_derivarive_error.value());
+  uint32_t rot_deriv_error = ABS(pid_rotation.get_derivative_error());//ABS(pid_rotation_avg_derivarive_error.value());
+  uint32_t diff_error = ABS(ABS(pid_speed_left_avg_error.value()) - ABS(pid_speed_right_avg_error.value()));
+  if(robot_status.moving &&
+      (((transl_deriv_error <= robot_status.derivative_tolerance)  &&  // Translation isn't changing much anymore
+       (rot_deriv_error <= robot_status.derivative_tolerance)) ||  // Rotation isn't changing much anymore
+       (diff_error > robot_status.differential_tolerance)))   // Differential block: one wheel has more trouble moving than the other
   {
-    countdown--;
-    if(countdown == 0){
-      status = StopStatus::STOPPED;
-      countdown = 5;
-    }
+    status = StopStatus::STOPPED;
   }
-  else{
-    countdown = 5;
-  }
-
   return status;
 }
 
+// Detects if the robot completed its previous movement order
 bool MotionController::detect_movement_end(){
-  static uint8_t countdown = 5; // 100ms countdown
-  if(ABS(pid_translation.get_error()) <= robot_status.translation_tolerance && ABS(pid_rotation.get_error()) <= robot_status.rotation_tolerance){
+  uint32_t err_trans = ABS(pid_translation.get_error());
+  uint32_t err_rot = ABS(pid_rotation.get_error());
+
+  if(err_trans <= robot_status.translation_tolerance && err_rot <= robot_status.rotation_tolerance){
     //Approximately at destination
-    countdown--;
-    if(countdown == 0){
-      countdown = 5;
-      return true;
-    }
+    return true;
   }
-  else{
-    countdown = 5;
-  }
+
   return false;
 }
 
 void MotionController::detect_stop(){
+  const uint8_t COUNT_INIT = 5;
+  static uint8_t countdown = COUNT_INIT;
   StopStatus status_stop; // If the robot is not moving (BLOCKED(robot can't move normally), NONE(still moving) or STOPPED(done))
   bool status_end;        // If the robot finished it's movement order (if so, status_stop must be STOPPED)
   status_stop = get_stop_status();
   status_end= detect_movement_end();
 
-  // If movement done or if can't move normally : stop the movement and signal it
-  if((status_end && status_stop == StopStatus::STOPPED) || (status_stop == StopStatus::BLOCKED)){
-    stop(status_stop ==  StopStatus::BLOCKED);
+  // If the robot isn't moving, check if done or blocked
+  if(robot_status.moving && !robot_status.forced_movement && status_stop != StopStatus::NONE){
+    countdown--;
+    if(countdown == 0){
+      countdown = COUNT_INIT;
+      stop(!status_end); // Wheels were blocked if the robot didn't complete its movement but is not moving
+    }
+  }
+  else{
+    countdown = COUNT_INIT;
   }
 }
 
@@ -251,6 +254,7 @@ void MotionController::set_target_speed(Motor::Side side, int32_t speed){
       break;
   }
   robot_status.moving = true;
+  robot_status.forced_movement = true;
 }
 
 
@@ -382,6 +386,9 @@ void MotionController::stop(bool wheels_blocked){
     robot_status.movement_stopped = true;
     robot_status.moving = false;
     robot_status.blocked = wheels_blocked;
+  }
+  if(robot_status.forced_movement){
+    robot_status.forced_movement = false;
   }
 
   LL_TIM_EnableCounter(TIM14);
