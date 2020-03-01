@@ -42,13 +42,13 @@ MCS_UPDATE_FREQ = 500 # Hz, frequency of motion controller updates
 
 # Formatters for data packing
 fmt_motor_set_speed = struct.Struct('<ll')  # 32b + 32b signe
-fmt_motor_set_pos = struct.Struct('<ll')
-fmt_motor_cod_pos = struct.Struct('<ll')
-fmt_motor_set_pid = struct.Struct('<BL')  # 8b + 32b non signes
+fmt_motor_cod_pos = struct.Struct('<ll')  # 32b + 32b signe
+fmt_motor_move = struct.Struct('<Bi')
+fmt_motor_set_pid = struct.Struct('<Bi')  # 8b + 32b non signes
 fmt_motor_lim = struct.Struct('<HHHH')
 
 # Physical constants of the robot
-WHEEL_DIAMETER = 70.0  # en mm ; 2400 ticks par tour donc par 2*pi*60 mm
+WHEEL_DIAMETER = 74.0  # en mm ; 2400 ticks par tour donc par 2*pi*74 mm
 DISTANCE_BETWEEN_WHEELS = 365.0  # en mm
 TICKS_PER_TURN = 2400.0
 MM_TO_TICK = TICKS_PER_TURN / (pi * WHEEL_DIAMETER)
@@ -89,8 +89,8 @@ class CANAdapter(InterfaceAdapter):
         self.setpoint_speed = 0.0
         self.setpoint_pos = None
         self.setpoint_angle = None
-        self.avg_left = [0.0 for i in range(16)]
-        self.avg_right = [0.0 for i in range(16)]
+        self.avg_left = [0.0 for i in range(10)]
+        self.avg_right = [0.0 for i in range(10)]
         super(CANAdapter, self).__init__(socketio)  # Il faut garder cette ligne.
 
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
@@ -99,14 +99,12 @@ class CANAdapter(InterfaceAdapter):
             last_left, last_right = 0, 0
             with can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000) as bus:
                 for message in bus:
+                    # Encoder position
                     if (message.arbitration_id >> 5) == 0b000011:
-                        # sleep(1.0/COD_UPDATE_FREQ)
                         posl, posr = fmt_motor_cod_pos.unpack(message.data)
                         posl, posr = posl * TICK_TO_MM, posr * TICK_TO_MM
-                        # print(posl, posr)
-                        speedl, speedr = (posl - last_left) * COD_UPDATE_FREQ, (
-                                posr - last_right) * COD_UPDATE_FREQ
-                        # print(speedl, speedr)
+                        speedl, speedr = ((posl - last_left)  * COD_UPDATE_FREQ,
+                                          (posr - last_right) * COD_UPDATE_FREQ)
                         last_left, last_right = posl, posr
                         self.avg_left = self.avg_left[1:]
                         self.avg_left.append(speedl)
@@ -126,7 +124,12 @@ class CANAdapter(InterfaceAdapter):
                             setpoint_right = self.setpoint_angle
                         self.push_pos_left(t, posl, setpoint_left)
                         self.push_pos_right(t, posr, setpoint_right)
-                    # 1er argument le temps (time.time()), 2eme la valeur, 3eme la consigne.
+                        # 1er argument le temps (time.time()), 2eme la valeur, 3eme la consigne.
+
+                    # Stop message received
+                    elif (message.arbitration_id>>5) == 0b000001:
+                        print("############# MESSAGE :", message.arbitration_id, " ", message.data, "#############") 
+
 
         Thread(target=f).start()
 
@@ -206,7 +209,7 @@ class CANAdapter(InterfaceAdapter):
                 self.setpoint_pos = position  # position in mm that each wheel have to travel
                 position_ticks = position * MM_TO_TICK  # in ticks for Motion control board
                 send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR,
-                            fmt_motor_set_pos.pack(int(position_ticks), 0))
+                            fmt_motor_move.pack(0, int(position_ticks)))
 
             # Cas 3 : juste rotation
             elif angle is not None:
@@ -215,7 +218,7 @@ class CANAdapter(InterfaceAdapter):
                 # distance for each wheel(in opposite direcitons), to reach angle, in mm for graph
                 self.setpoint_angle = angle * DISTANCE_BETWEEN_WHEELS / 2
                 angle_ticks = self.setpoint_angle * MM_TO_TICK  # in ticks for Motion control board
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_set_pos.pack(0, int(angle_ticks)))
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_POS, CAN_BOARD_ID_MOTOR, fmt_motor_move.pack(1, int(angle_ticks)))
                 print(angle_ticks)
 
         if speed is not None or position is not None or angle is not None:

@@ -105,10 +105,10 @@ La consigne est en pointillés.
 
         function createGraph(name, colorLeft, colorRight) {
             var [dataSeriesLeft, clearLeft, addLeft] = buildDataSeries("left", colorLeft, "solid", false);
-            var [dataSeriesRight, clearRight, addRight] = buildDataSeries("right", colorRight, "solid", true);
+            var [dataSeriesRight, clearRight, addRight] = buildDataSeries("right", colorRight, "solid", false);
 
             var [dataSeriesSetpointLeft, clearSetpointLeft, addSetpointLeft] = buildDataSeries("setpoint_left", "dark" + colorLeft, "longDash", false);
-            var [dataSeriesSetpointRight, clearSetpointRight, addSetpointRight] = buildDataSeries("setpoint_right", "dark" + colorRight, "longDash", true);
+            var [dataSeriesSetpointRight, clearSetpointRight, addSetpointRight] = buildDataSeries("setpoint_right", "dark" + colorRight, "longDash", false);
 
             function clear() {
                 clearLeft();
