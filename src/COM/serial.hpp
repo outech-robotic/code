@@ -86,8 +86,8 @@ public:
      * @return false else
      */
     bool init(uint32_t baudrate=115200){
-        LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_USART1);
-        this->usart_x = USART1;
+        LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
+        this->usart_x = USART2;
         this->mPin_rx = &PIN_USART_RX;
         this->mPin_tx = &PIN_USART_TX;
         this->mBaudrate=baudrate;

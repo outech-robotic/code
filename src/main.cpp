@@ -34,7 +34,7 @@ int main(void)
   Timing_init();
 
   // Initialize all peripherals
-  MX_USART2_UART_Init();
+  //MX_USART2_UART_Init();
   MX_CAN_Init();
   MX_TIM1_Init(); // Motion control PWM generators
   MX_TIM2_Init(); // Left Encoder
@@ -142,7 +142,7 @@ void TIM14_IRQHandler(void){
 		mesure_t_irq = micros();
 		mcs.update_position();
 		mcs.control_motion();
-		if((++i) == 10){ // Evry 20ms
+		if((++i) == 5){ // Evry 10ms
 		  mcs.detect_stop();
 		  i = 0;
 		}

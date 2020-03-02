@@ -27,9 +27,11 @@ class MotionController {
 
   struct {
     volatile int32_t translation_total;
+    volatile int32_t translation_speed;
     volatile int32_t translation_setpoint;
     uint32_t          translation_tolerance;
     volatile int32_t rotation_total;
+    volatile int32_t rotation_speed;
     volatile int32_t rotation_setpoint;
     uint32_t          rotation_tolerance;
 
@@ -64,17 +66,14 @@ class MotionController {
   volatile int32_t cod_right_last;
   volatile int32_t cod_right_raw_last;
 
+  Average<volatile int32_t, 8> robot_speed_translation_avg;
   Average<volatile int32_t, 8> cod_left_speed_avg;
+  Average<volatile int32_t, 8> robot_speed_rotation_avg;
   Average<volatile int32_t, 8> cod_right_speed_avg;
 
   // Average wheel speed error averages, for physical blocks
   Average<volatile int32_t, 8> pid_speed_left_avg_error;
   Average<volatile int32_t, 8> pid_speed_right_avg_error;
-
-  // Average translation/rotation derivative errors, for end of movements
-  Average<volatile int32_t, 8> pid_translation_avg_derivarive_error;
-  Average<volatile int32_t, 8> pid_rotation_avg_derivarive_error;
-
 
 public:
 
@@ -107,6 +106,9 @@ public:
 	void set_ki(uint8_t id, uint32_t k);
 	void set_kd(uint8_t id, uint32_t k);
 	void stop(bool);
+
+	bool is_wheel_blocked(Motor::Side side);
+
 
 	StopStatus get_stop_status();
 	void detect_stop();

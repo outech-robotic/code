@@ -7,7 +7,7 @@ MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_righ
 }
 
 #define PI ((float)3.14159265359)
-#define WHEEL_DIAMETER 74
+#define WHEEL_DIAMETER ((float)73.7)
 #define TICKS_PER_TURN ((float)2400)
 #define MM_TO_TICK (TICKS_PER_TURN/(PI*WHEEL_DIAMETER))
 
@@ -57,8 +57,8 @@ void MotionController::init() {
   robot_status.speed_max_rotation = MAX_SPEED_ROTATION_TICK;
   robot_status.speed_max_wheel = MAX_SPEED_TRANSLATION_TICK;
 
-  robot_status.derivative_tolerance = 0;
-  robot_status.differential_tolerance = 200;
+  robot_status.derivative_tolerance = 10;
+  robot_status.differential_tolerance = 250;
   robot_status.rotation_tolerance = 10;
   robot_status.translation_tolerance = 20;
 
@@ -68,6 +68,7 @@ void MotionController::init() {
 
 
 void MotionController::update_position() {
+  static int32_t translation_last=0, rotation_last=0;
   static int16_t cod_right_overflows=0;
   int32_t cod_right_raw = COD_get_right();
   cod_left.current = -COD_get_left();
@@ -95,6 +96,15 @@ void MotionController::update_position() {
 
   robot_status.translation_total = (cod_left.current + cod_right.current) >> 1;
   robot_status.rotation_total = ((cod_right.current - robot_status.translation_total) - (cod_left.current - robot_status.translation_total)) >> 1;
+
+  robot_status.translation_speed = (robot_status.translation_total-translation_last)*MOTION_CONTROL_FREQ;
+  robot_status.rotation_speed = (robot_status.rotation_total-rotation_last)*MOTION_CONTROL_FREQ;
+
+  translation_last = robot_status.translation_total;
+  rotation_last = robot_status.rotation_total;
+
+  robot_speed_translation_avg.add(robot_status.translation_speed);
+  robot_speed_rotation_avg.add(robot_status.rotation_speed);
 }
 
 
@@ -108,8 +118,6 @@ void MotionController::control_motion() {
       speed_sp_translation = pid_translation.compute(robot_status.translation_total, robot_status.translation_setpoint);
       speed_sp_rotation = pid_rotation.compute(robot_status.rotation_total, robot_status.rotation_setpoint);
 
-      pid_translation_avg_derivarive_error.add(pid_translation.get_derivative_error());
-      pid_rotation_avg_derivarive_error.add(pid_rotation.get_derivative_error());
 
       //CAP ROT/TRANSLATION SPEED
       if(speed_sp_translation>robot_status.speed_max_translation){
@@ -193,40 +201,104 @@ void MotionController::control_motion() {
   }
 }
 
-//Detects if the robot is physically stopped (blocked or movement terminated)
-MotionController::StopStatus MotionController::get_stop_status(){
-  StopStatus status = NONE;
-  uint32_t transl_deriv_error = ABS(pid_translation.get_derivative_error());//ABS(pid_translation_avg_derivarive_error.value());
-  uint32_t rot_deriv_error = ABS(pid_rotation.get_derivative_error());//ABS(pid_rotation_avg_derivarive_error.value());
-  uint32_t diff_error = ABS(ABS(pid_speed_left_avg_error.value()) - ABS(pid_speed_right_avg_error.value()));
-  if(robot_status.moving &&
-      (((transl_deriv_error <= robot_status.derivative_tolerance)  &&  // Translation isn't changing much anymore
-       (rot_deriv_error <= robot_status.derivative_tolerance)) ||  // Rotation isn't changing much anymore
-       (diff_error > robot_status.differential_tolerance)))   // Differential block: one wheel has more trouble moving than the other
-  {
-    status = StopStatus::STOPPED;
+bool MotionController::is_wheel_blocked(Motor::Side side){
+  bool return_val = false;
+  const uint8_t INIT_COUNT = 10;
+  const float LIMIT = 0.25;
+  static uint8_t left_count = INIT_COUNT;
+  static uint8_t right_count = INIT_COUNT;
+  static bool left_blocked = false;
+  static bool right_blocked = false;
+
+  switch(side){
+    case Motor::Side::LEFT:
+      if(ABS(cod_left.speed_average)<ABS(cod_left.speed_setpoint)*LIMIT){
+        if(!left_blocked){
+          left_blocked = true;
+          left_count = INIT_COUNT;
+        }
+        if(left_count > 0){
+          left_count --;
+        }
+      }
+      else{
+        left_blocked = false;
+      }
+      return_val = (left_blocked && (left_count == 0));
+      break;
+    case Motor::Side::RIGHT:
+      if(ABS(cod_right.speed_average)<ABS(cod_right.speed_setpoint)*LIMIT){
+        if(!right_blocked){
+          right_blocked = true;
+          right_count = INIT_COUNT;
+        }
+        if(right_count > 0){
+          right_count --;
+        }
+      }
+      else{
+        right_blocked = false;
+      }
+      return_val = (right_blocked && (right_count == 0));
+      break;
   }
-  return status;
+
+  return return_val;
+}
+
+//Detects if the robot is physically stopped (blocked)
+MotionController::StopStatus MotionController::get_stop_status(){
+  bool left_wheel_blocked = is_wheel_blocked(Motor::Side::LEFT);
+  bool right_wheel_blocked = is_wheel_blocked(Motor::Side::RIGHT);
+
+  bool wheels_blocked = left_wheel_blocked || right_wheel_blocked;
+
+//  StopStatus status = NONE;
+//  uint32_t transl_deriv_error = ABS(robot_speed_translation_avg.value());//ABS(pid_translation_avg_derivarive_error.value());
+//  uint32_t rot_deriv_error = ABS(robot_speed_rotation_avg.value());//ABS(pid_rotation_avg_derivarive_error.value());
+//
+//  uint32_t diff_error = ABS(ABS(pid_speed_left_avg_error.value()) - ABS(pid_speed_right_avg_error.value()));
+//  if((/*(((transl_deriv_error <= robot_status.derivative_tolerance)  &&  // Translation isn't changing much anymore
+//       (rot_deriv_error <= robot_status.derivative_tolerance)) ||  // Rotation isn't changing much anymore*/
+//       (diff_error > robot_status.differential_tolerance)))   // Differential block: one wheel has more trouble moving than the other
+//  {
+//    status = StopStatus::BLOCKED;
+//  }
+  return wheels_blocked?StopStatus::BLOCKED : StopStatus::NONE;
 }
 
 // Detects if the robot completed its previous movement order
 bool MotionController::detect_movement_end(){
+  const uint8_t INIT_COUNT = 5;
+  static uint8_t stop_count = INIT_COUNT;
+  static bool done = false;
   uint32_t err_trans = ABS(pid_translation.get_error());
   uint32_t err_rot = ABS(pid_rotation.get_error());
 
   if(err_trans <= robot_status.translation_tolerance && err_rot <= robot_status.rotation_tolerance){
     //Approximately at destination
-    return true;
+    if(!done){
+      done = true;
+      stop_count = INIT_COUNT;
+    }
+
+    if(stop_count > 0){
+      stop_count--;
+    }
+  }
+  else{
+    done = false;
   }
 
-  return false;
+  return done && (stop_count == 0);
 }
 
 void MotionController::detect_stop(){
-  const uint8_t COUNT_INIT = 5;
-  static uint8_t countdown = COUNT_INIT;
-  StopStatus status_stop; // If the robot is not moving (BLOCKED(robot can't move normally), NONE(still moving) or STOPPED(done))
+  const uint8_t INIT_COUNT = 10;
+  static uint8_t countdown = INIT_COUNT;
+  StopStatus status_stop = NONE;
   bool status_end;        // If the robot finished it's movement order (if so, status_stop must be STOPPED)
+
   status_stop = get_stop_status();
   status_end= detect_movement_end();
 
@@ -234,12 +306,9 @@ void MotionController::detect_stop(){
   if(robot_status.moving && !robot_status.forced_movement && status_stop != StopStatus::NONE){
     countdown--;
     if(countdown == 0){
-      countdown = COUNT_INIT;
+      countdown = INIT_COUNT;
       stop(!status_end); // Wheels were blocked if the robot didn't complete its movement but is not moving
     }
-  }
-  else{
-    countdown = COUNT_INIT;
   }
 }
 
@@ -412,7 +481,14 @@ MotionController::StopStatus MotionController::has_stopped(){
 
 void MotionController::set_limits(uint16_t speed_translation, uint16_t speed_rotation, uint16_t speed_wheel, uint16_t accel_wheel){
   robot_status.speed_max_translation = speed_translation;
+  pid_translation.set_output_limit(speed_translation);
+  pid_translation.set_anti_windup(speed_translation);
+  pid_translation.set_derivative_limit(speed_translation);
   robot_status.speed_max_rotation = speed_rotation;
+  pid_rotation.set_output_limit(speed_rotation);
+  pid_rotation.set_anti_windup(speed_rotation);
+  pid_rotation.set_derivative_limit(speed_rotation);
+
   robot_status.speed_max_wheel= speed_wheel;
-  robot_status.accel_max = accel_wheel;
+  robot_status.accel_max = accel_wheel/MOTION_CONTROL_FREQ; // Acceleration is in mm/s each mcs update iteration
 }

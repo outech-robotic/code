@@ -73,7 +73,7 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
   int64_t res;
   int16_t out;
   error = setpoint-input;
-  derivative_error = (error-last_error) - (setpoint - last_setpoint);
+  derivative_error = (error-last_error);// - (setpoint - last_setpoint);
   last_error = error;
   last_setpoint = setpoint;
 
@@ -82,12 +82,12 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
     p = (int64_t)kp * (int64_t)error;
   }
   if(ki){
-    integral_sum += (int64_t)ki * (int64_t)error;
+    integral_sum += (int64_t)error;
     if(integral_sum>integral_max)
       integral_sum = integral_max;
     else if(integral_sum < integral_min)
       integral_sum = integral_min;
-    i = integral_sum;
+    i = (int64_t)ki * integral_sum;
   }
   if(kd){
     d = (int64_t)kd * (int64_t)derivative_error;
