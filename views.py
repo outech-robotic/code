@@ -115,7 +115,7 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
         form = AllPIDForms()
         if form.validate_on_submit():
             with open(FILE_NAME, "w") as f:
-                f.write(json.dumps(form.data))
+                f.write(json.dumps(form.data, indent=2))
 
             interface.on_pid_submission(
                 speed_left=to_pid(form.data['SpeedLeft']),
