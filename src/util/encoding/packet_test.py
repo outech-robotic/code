@@ -89,27 +89,38 @@ class TestPropulsionMoveWheels:
     """
 
     @staticmethod
-    def test_encode():
+    @pytest.mark.parametrize("movement_type,expected", [
+        (packet.PropulsionMovementOrderPacket.MovementType.ROTATION,
+         b'\x01\x02\x00\x00\x00'),
+        (packet.PropulsionMovementOrderPacket.MovementType.TRANSLATION,
+         b'\x00\x02\x00\x00\x00'),
+    ])
+    def test_encode(movement_type, expected):
         """
         Test encode.
         """
-        msg = packet.encode_propulsion_move_wheels(
-            packet.PropulsionMoveWheelsPacket(
-                tick_left=1,
-                tick_right=2,
+        msg = packet.encode_propulsion_movement_order(
+            packet.PropulsionMovementOrderPacket(
+                type=movement_type,
+                ticks=2,
             ))
-        assert msg == b'\x01\x00\x00\x00\x02\x00\x00\x00'
+        assert msg == expected
 
     @staticmethod
-    def test_decode():
+    @pytest.mark.parametrize("data,expected_type, expected_ticks", [
+        (b'\x01\x0f\x00\x00\x00',
+         packet.PropulsionMovementOrderPacket.MovementType.ROTATION, 15),
+        (b'\x00\x0f\x00\x00\x00',
+         packet.PropulsionMovementOrderPacket.MovementType.TRANSLATION, 15),
+    ])
+    def test_decode(data, expected_type, expected_ticks):
         """
         Test decode.
         """
-        msg = packet.decode_propulsion_move_wheels(
-            b'\x01\x00\x00\x00\x02\x00\x00\x00')
-        assert packet.PropulsionMoveWheelsPacket(
-            tick_left=1,
-            tick_right=2,
+        msg = packet.decode_propulsion_movement_order(data)
+        assert packet.PropulsionMovementOrderPacket(
+            type=expected_type,
+            ticks=expected_ticks,
         ) == msg
 
 

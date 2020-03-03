@@ -24,28 +24,70 @@ def simulation_handler_setup(configuration_test, event_queue_mock,
 
 
 @pytest.mark.asyncio
-async def test_move_wheels(simulation_handler, event_queue_mock):
+async def test_move_backward(simulation_handler, event_queue_mock):
     """
-    Happy path.
+    Happy path for translation.
     """
-    await simulation_handler.handle_move_wheels(
-        packet.encode_propulsion_move_wheels(
-            packet.PropulsionMoveWheelsPacket(tick_left=1, tick_right=2)))
+    await simulation_handler.handle_movement_order(
+        packet.encode_propulsion_movement_order(
+            packet.PropulsionMovementOrderPacket(
+                type=packet.PropulsionMovementOrderPacket.MovementType.
+                TRANSLATION,
+                ticks=-3)))
     event_queue_mock.push.assert_any_call(
         EventOrder(type=EventType.MOVE_WHEEL, payload={
-            'left': 1,
-            'right': 0
-        }), 125)
+            'left': -1,
+            'right': -1
+        }), 62)
 
     event_queue_mock.push.assert_any_call(
         EventOrder(type=EventType.MOVE_WHEEL, payload={
-            'left': 0,
-            'right': 2
-        }), 250)
+            'left': -1,
+            'right': -1
+        }), 188)
 
     event_queue_mock.push.assert_any_call(
-        EventOrder(type=EventType.MOVEMENT_DONE, payload=None), 271)
-    assert event_queue_mock.push.call_count == 3
+        EventOrder(type=EventType.MOVE_WHEEL, payload={
+            'left': -1,
+            'right': -1
+        }), 313)
+
+    event_queue_mock.push.assert_any_call(
+        EventOrder(type=EventType.MOVEMENT_DONE, payload=None), 397)
+    assert event_queue_mock.push.call_count == 4
+
+
+@pytest.mark.asyncio
+async def test_move_rotation(simulation_handler, event_queue_mock):
+    """
+    Happy path for rotation.
+    """
+    await simulation_handler.handle_movement_order(
+        packet.encode_propulsion_movement_order(
+            packet.PropulsionMovementOrderPacket(
+                type=packet.PropulsionMovementOrderPacket.MovementType.ROTATION,
+                ticks=3)))
+    event_queue_mock.push.assert_any_call(
+        EventOrder(type=EventType.MOVE_WHEEL, payload={
+            'left': -1,
+            'right': 1
+        }), 62)
+
+    event_queue_mock.push.assert_any_call(
+        EventOrder(type=EventType.MOVE_WHEEL, payload={
+            'left': -1,
+            'right': 1
+        }), 188)
+
+    event_queue_mock.push.assert_any_call(
+        EventOrder(type=EventType.MOVE_WHEEL, payload={
+            'left': -1,
+            'right': 1
+        }), 313)
+
+    event_queue_mock.push.assert_any_call(
+        EventOrder(type=EventType.MOVEMENT_DONE, payload=None), 397)
+    assert event_queue_mock.push.call_count == 4
 
 
 @pytest.mark.asyncio
@@ -53,8 +95,10 @@ async def test_move_wheels_zero_unit(simulation_handler, event_queue_mock):
     """
     If we receive a packet to move wheels by 0 unit, do nothing.
     """
-    await simulation_handler.handle_move_wheels(
-        packet.encode_propulsion_move_wheels(
-            packet.PropulsionMoveWheelsPacket(tick_left=0, tick_right=0)))
+    translation = packet.PropulsionMovementOrderPacket.MovementType.TRANSLATION
+    await simulation_handler.handle_movement_order(
+        packet.encode_propulsion_movement_order(
+            packet.PropulsionMovementOrderPacket(ticks=0, type=translation)))
 
-    event_queue_mock.push.assert_not_called()
+    event_queue_mock.push.assert_called_with(
+        EventOrder(type=EventType.MOVEMENT_DONE, payload=None), 0)

@@ -3,11 +3,12 @@ Provide a module to decode raw messages (bytes) into structures.
 """
 import struct
 from dataclasses import dataclass
+from enum import Enum
 
 HEARTBEAT = struct.Struct('<B')
 PROPULSION_MOVEMENT_DONE = struct.Struct('<B')
 PROPULSION_ENCODER_POSITION = struct.Struct('<ii')
-PROPULSION_MOVE_WHEELS = struct.Struct('<ii')
+PROPULSION_ORDER_MOVEMENT = struct.Struct('<Bi')
 PROPULSION_STOP = struct.Struct('<')
 SERVO_SET_ANGLE = struct.Struct('<BBB')
 
@@ -94,27 +95,50 @@ def decode_propulsion_movement_done(
 
 
 @dataclass(frozen=True)
-class PropulsionMoveWheelsPacket:
+class PropulsionMovementOrderPacket:
     """
-    Move wheel message.
+    Movement order message.
     """
-    tick_left: int
-    tick_right: int
+
+    class MovementType(Enum):
+        """
+        Movement type.
+        """
+        TRANSLATION = 'TRANSLATION'
+        ROTATION = 'ROTATION'
+
+    type: MovementType
+    ticks: int
 
 
-def encode_propulsion_move_wheels(msg: PropulsionMoveWheelsPacket) -> bytes:
-    """
-    Encode a move wheel message.
-    """
-    return PROPULSION_MOVE_WHEELS.pack(msg.tick_left, msg.tick_right)
+ORDER_TYPE_TO_ENUM = {
+    0: PropulsionMovementOrderPacket.MovementType.TRANSLATION,
+    1: PropulsionMovementOrderPacket.MovementType.ROTATION,
+}
+
+ENUM_TO_ORDER_TYPE = {
+    PropulsionMovementOrderPacket.MovementType.TRANSLATION: 0,
+    PropulsionMovementOrderPacket.MovementType.ROTATION: 1,
+}
 
 
-def decode_propulsion_move_wheels(data: bytes) -> PropulsionMoveWheelsPacket:
+def encode_propulsion_movement_order(
+        msg: PropulsionMovementOrderPacket) -> bytes:
     """
-    Decode a move wheel message.
+    Encode a movement order message.
     """
-    result = PROPULSION_MOVE_WHEELS.unpack(data)
-    return PropulsionMoveWheelsPacket(tick_left=result[0], tick_right=result[1])
+    return PROPULSION_ORDER_MOVEMENT.pack(ENUM_TO_ORDER_TYPE[msg.type],
+                                          msg.ticks)
+
+
+def decode_propulsion_movement_order(
+        data: bytes) -> PropulsionMovementOrderPacket:
+    """
+    Decode a movement order message.
+    """
+    result = PROPULSION_ORDER_MOVEMENT.unpack(data)
+    return PropulsionMovementOrderPacket(type=ORDER_TYPE_TO_ENUM[result[0]],
+                                         ticks=result[1])
 
 
 @dataclass(frozen=True)

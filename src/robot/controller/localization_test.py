@@ -2,6 +2,7 @@
 Test the localization module.
 """
 import asyncio
+import math
 import time
 from unittest.mock import MagicMock
 
@@ -94,10 +95,9 @@ class TestLocalizationController:
         """
         Test that move forward calls the gateway.
         """
-        asyncio.create_task(localization_controller.move_forward(10))
+        asyncio.create_task(localization_controller.move_forward(2 * math.pi))
         await asyncio.sleep(0.1)
-        motion_gateway_mock.move_wheels.assert_called_once_with(tick_left=2,
-                                                                tick_right=2)
+        motion_gateway_mock.translate.assert_called_once_with(1)
 
     @staticmethod
     @pytest.mark.asyncio
@@ -106,7 +106,6 @@ class TestLocalizationController:
         """
         Test that rotate calls the gateway.
         """
-        asyncio.create_task(localization_controller.rotate(10))
+        asyncio.create_task(localization_controller.rotate(4 * math.pi))
         await asyncio.sleep(0.1)
-        motion_gateway_mock.move_wheels.assert_called_once_with(tick_left=-1,
-                                                                tick_right=1)
+        motion_gateway_mock.rotate.assert_called_once_with(1)

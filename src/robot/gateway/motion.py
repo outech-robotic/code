@@ -6,6 +6,8 @@ from src.robot.can_adapter.adapter import CANAdapter
 from src.util import can_id
 from src.util.encoding import packet
 
+MovementType = packet.PropulsionMovementOrderPacket.MovementType
+
 
 class MotionGateway:
     """
@@ -15,17 +17,28 @@ class MotionGateway:
     def __init__(self, can_adapter: CANAdapter):
         self.can_adapter = can_adapter
 
-    async def move_wheels(self, tick_left: int, tick_right: int) -> None:
+    async def translate(self, ticks: int) -> None:
         """
-        Move the robot wheels.
+        Move forward if ticks > 0, backward if ticks < 0.
         """
-        LOGGER.get().debug('gateway_move_wheel',
-                           tick_left=tick_left,
-                           tick_right=tick_right)
+        LOGGER.get().debug('gateway_translate', ticks=ticks)
         await self.can_adapter.send(
-            can_id.PROPULSION_MOVE_WHEELS,
-            packet.encode_propulsion_move_wheels(
-                packet.PropulsionMoveWheelsPacket(
-                    tick_left=tick_left,
-                    tick_right=tick_right,
+            can_id.PROPULSION_MOVEMENT_ORDER,
+            packet.encode_propulsion_movement_order(
+                packet.PropulsionMovementOrderPacket(
+                    type=MovementType.TRANSLATION,
+                    ticks=ticks,
+                )))
+
+    async def rotate(self, ticks: int) -> None:
+        """
+        Rotate counter-clockwise if ticks > 0, clockwise if ticks < 0.
+        """
+        LOGGER.get().debug('gateway_rotate', ticks=ticks)
+        await self.can_adapter.send(
+            can_id.PROPULSION_MOVEMENT_ORDER,
+            packet.encode_propulsion_movement_order(
+                packet.PropulsionMovementOrderPacket(
+                    type=MovementType.ROTATION,
+                    ticks=ticks,
                 )))

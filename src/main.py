@@ -131,18 +131,29 @@ async def main() -> None:
                                  motion_handler.handle_position_update)
     can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_DONE,
                                  motion_handler.handle_movement_done)
-    can_adapter.register_handler(can_id.PROPULSION_MOVE_WHEELS,
-                                 simulation_handler.handle_move_wheels)
+    can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_ORDER,
+                                 simulation_handler.handle_movement_order)
 
     simulation_runner = i.get('simulation_runner')
     strategy_controller = i.get('strategy_controller')
     replay_saver = i.get('replay_saver')
 
-    await asyncio.wait(
+    done, pending = await asyncio.wait(
         {strategy_controller.run(),
          simulation_runner.run(),
          can_adapter.run()},
         return_when=asyncio.FIRST_COMPLETED)
+
+    # Gather the done coroutines to have proper stacktraces.
+    await asyncio.gather(*done)
+
+    # Cancel every coroutines that have not stopped yet.
+    gather = asyncio.gather(*pending)
+    gather.cancel()
+    try:
+        await gather
+    except asyncio.CancelledError:
+        pass
 
     replay_saver.save_replay()
 

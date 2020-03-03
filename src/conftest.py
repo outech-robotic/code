@@ -150,9 +150,14 @@ def motion_gateway_mock():
     Motion gateway mock.
     """
     mock = MagicMock(spec=MotionGateway)
+
     future = asyncio.Future()
     future.set_result(None)
-    mock.move_wheels = MagicMock(return_value=future)
+    mock.rotate = MagicMock(return_value=future)
+
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.translate = MagicMock(return_value=future)
     return mock
 
 

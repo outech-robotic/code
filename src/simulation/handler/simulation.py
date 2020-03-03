@@ -2,7 +2,9 @@
 Simulation handler module.
 """
 import math
-from typing import List
+from typing import Iterator, Tuple
+
+import numpy
 
 from src.logger import LOGGER
 from src.robot.entity.configuration import Configuration
@@ -13,16 +15,9 @@ from src.simulation.entity.simulation_state import SimulationState
 from src.util.encoding import packet
 
 
-def _spread_delta_on_ticks(delta: int, ticks: int) -> List[int]:
-    if ticks == 1:
-        return [delta]
-    delta_per_tick = abs(delta) // (ticks - 1)
-    delta_for_last_tick = abs(delta) % (ticks - 1)
-    result = [int(math.copysign(delta_per_tick, delta))] * ticks
-    result[-1] = int(math.copysign(delta_for_last_tick, delta))
-    assert sum(result) == delta
-
-    return result
+def _spread_delta_on_ticks(delta: int, ticks: int) -> Iterator[Tuple[int, int]]:
+    return enumerate(
+        map(int, numpy.diff(numpy.round(numpy.linspace(0, delta, num=ticks)))))
 
 
 class SimulationHandler:
@@ -39,58 +34,44 @@ class SimulationHandler:
         self.simulation_state = simulation_state
         self.simulation_configuration = simulation_configuration
 
-    async def handle_move_wheels(self, data: bytes) -> None:
+    async def handle_movement_order(self, data: bytes) -> None:
         """
         Handle move wheels packets.
         """
-        msg = packet.decode_propulsion_move_wheels(data)
-        LOGGER.get().info('simulation_handler_received_move_wheels',
-                          tick_left=msg.tick_left,
-                          tick_right=msg.tick_right)
+        msg = packet.decode_propulsion_movement_order(data)
+        LOGGER.get().info('simulation_handler_received_movement_order',
+                          ticks=msg.ticks,
+                          type=msg.type)
 
-        if msg.tick_left == msg.tick_right == 0:
+        if msg.ticks == 0:
+            self.event_queue.push(EventOrder(type=EventType.MOVEMENT_DONE), 0)
             return
 
-        rot_speed = self.simulation_configuration.rotation_speed
+        ticks_per_revolution = self.configuration.encoder_ticks_per_revolution
+        rotation_speed = self.simulation_configuration.rotation_speed
+        tickrate = self.simulation_configuration.tickrate
 
-        delta_tick_left = msg.tick_left - self.simulation_state.left_tick
-        time_left = round(
-            abs(delta_tick_left /
-                self.configuration.encoder_ticks_per_revolution * 2 * math.pi /
-                rot_speed * self.simulation_configuration.tickrate))
-        if time_left:
-            for k, ticks_to_move in enumerate(
-                    _spread_delta_on_ticks(delta_tick_left, time_left)):
-                if ticks_to_move != 0:
-                    self.event_queue.push(
-                        EventOrder(
-                            type=EventType.MOVE_WHEEL,
-                            payload={
-                                'left': ticks_to_move,
-                                'right': 0,
-                            },
-                        ), k)
+        revolution_to_rotate = msg.ticks / ticks_per_revolution
+        angle_to_rotate = revolution_to_rotate * 2 * math.pi
+        time_to_rotate = abs(angle_to_rotate) / rotation_speed
+        time_ticks_to_rotate = round(time_to_rotate * tickrate)
 
-        delta_tick_right = msg.tick_right - self.simulation_state.right_tick
-        time_right = round(
-            abs(delta_tick_right /
-                self.configuration.encoder_ticks_per_revolution * 2 * math.pi /
-                rot_speed * self.simulation_configuration.tickrate))
-        if time_right:
-            for k, ticks_to_move in enumerate(
-                    _spread_delta_on_ticks(delta_tick_right, time_right)):
-                if ticks_to_move != 0:
-                    self.event_queue.push(
-                        EventOrder(
-                            type=EventType.MOVE_WHEEL,
-                            payload={
-                                'right': ticks_to_move,
-                                'left': 0,
-                            },
-                        ), k)
+        for k, ticks_to_move in _spread_delta_on_ticks(msg.ticks,
+                                                       time_ticks_to_rotate):
+            if ticks_to_move == 0:
+                continue
+            rotate = msg.type == packet.PropulsionMovementOrderPacket.MovementType.ROTATION
+
+            self.event_queue.push(
+                EventOrder(
+                    type=EventType.MOVE_WHEEL,
+                    payload={
+                        'left': ticks_to_move if not rotate else -ticks_to_move,
+                        'right': ticks_to_move,
+                    },
+                ), k)
 
         self.event_queue.push(
             EventOrder(type=EventType.MOVEMENT_DONE),
-            max(time_left, time_right) +
-            self.simulation_configuration.tickrate // 10,
+            time_ticks_to_rotate + self.simulation_configuration.tickrate // 10,
         )
