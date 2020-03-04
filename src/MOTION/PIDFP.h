@@ -14,15 +14,14 @@ class PID_FP {
   uint32_t kp, ki, kd;
   int32_t min, max;
 
-  int32_t integral_max;
-  int32_t integral_min;
-  int32_t derivative_max;
-  int32_t derivative_min;
+  int64_t integral_max, integral_min;
 
-  int32_t error;
-  int32_t derivative_error;
-  int64_t integral_sum;
-  int32_t last_error, last_setpoint;
+  int32_t derivative_max, derivative_min;
+
+  int64_t comp_proportional, comp_integral, comp_derivative;
+
+  int32_t error, last_error, derivative_error, last_setpoint;
+
 public:
   PID_FP();
   void reset();
@@ -36,8 +35,12 @@ public:
   void get_coefficients(float* ret_kp, float* ret_ki, float* ret_kd);
   int16_t compute(int32_t input, int32_t setpoint);
 
-  int32_t get_derivative_error();
   int32_t get_error();
+
+  //Returns components of output
+  int32_t get_derivative();
+  int64_t get_integral();
+  int32_t get_proportional();
 };
 
 #endif /* MOTION_PIDFP_H_ */

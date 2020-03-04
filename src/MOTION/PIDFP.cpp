@@ -18,8 +18,7 @@ PID_FP::PID_FP() {
 
 void PID_FP::reset(){
   last_error = 0;
-  last_setpoint = 0;
-  integral_sum = 0;
+  comp_integral = 0;
 }
 
 
@@ -73,37 +72,40 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
   int64_t res;
   int16_t out;
   error = setpoint-input;
-  derivative_error = (error-last_error);// - (setpoint - last_setpoint);
+  derivative_error = (error-last_error) - (setpoint - last_setpoint);
   last_error = error;
   last_setpoint = setpoint;
 
-  int64_t p=0,i=0,d=0;
-  if(kp){
-    p = (int64_t)kp * (int64_t)error;
-  }
-  if(ki){
-    integral_sum += (int64_t)error;
-    if(integral_sum>integral_max)
-      integral_sum = integral_max;
-    else if(integral_sum < integral_min)
-      integral_sum = integral_min;
-    i = (int64_t)ki * integral_sum;
-  }
-  if(kd){
-    d = (int64_t)kd * (int64_t)derivative_error;
-    if(d>integral_max)
-      d = integral_max;
-    else if(d < integral_min)
-      d = integral_min;
-  }
-  res = p+i+d;
+  //Proportionnal component of output
+  comp_proportional = ((int64_t)kp) * ((int64_t)error);
+
+  //Integral component
+  comp_integral += ((int64_t)ki) * ((int64_t)error);
+  if(comp_integral > integral_max)
+    comp_integral = integral_max;
+  else if(comp_integral < integral_min)
+    comp_integral = integral_min;
+
+  //Derivative component
+  comp_derivative = (int64_t)kd * (int64_t)derivative_error;
+  if(comp_derivative>integral_max)
+    comp_derivative = integral_max;
+  else if(comp_derivative < integral_min)
+    comp_derivative = integral_min;
+
+  //Complete scaled output
+  res = comp_proportional + comp_integral + comp_derivative;
+
   // Saturation
   if(res>max)
     res = max;
   else if(res<min)
     res = min;
 
+  // Remove scale factor to get output
   out = res>>COEFF_SHIFT;
+
+  // Round the output half up
   if(res& (1ULL << (COEFF_SHIFT - 1)))
     out++;
 
@@ -114,6 +116,14 @@ int32_t PID_FP::get_error(){
   return error;
 }
 
-int32_t PID_FP::get_derivative_error(){
-  return derivative_error;
+int32_t PID_FP::get_proportional(){
+  return comp_proportional>>COEFF_SHIFT;
+}
+
+int64_t PID_FP::get_integral(){
+  return comp_integral>>COEFF_SHIFT;
+}
+
+int32_t PID_FP::get_derivative(){
+  return comp_derivative>>COEFF_SHIFT;
 }

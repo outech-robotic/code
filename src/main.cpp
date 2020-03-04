@@ -22,11 +22,9 @@ Metro heartbeat_timer(250);
 MotionController mcs;
 Serial serial;
 
-
-
 int main(void)
 {
-  MotionController::StopStatus mcs_stop_status;
+  MotionController::STOP_STATUS mcs_stop_status;
   /**********************************************************************
    *                             SETUP
    ********************************s**************************************/
@@ -39,13 +37,14 @@ int main(void)
   MX_TIM1_Init(); // Motion control PWM generators
   MX_TIM2_Init(); // Left Encoder
   MX_TIM3_Init(); // Right Encoder
+
   pinMode(PIN_LED,OUTPUT); // Heartbeat Led
   digitalWrite(PIN_LED, GPIO_HIGH);
 
   LL_RCC_ClocksTypeDef clocks;
   LL_RCC_GetSystemClocksFreq(&clocks);
   mcs.init();
-  mcs.set_control(0b000); //Everything disabed, by default
+  mcs.set_control(false, false, false); //Everything disabed, by default
 
   serial.init(115200);
   serial.print("Setup done \r\n");
@@ -61,7 +60,7 @@ int main(void)
   {
     if((CAN_receive_packet(&rx_msg)) == HAL_OK){
       if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_STOP)){
-        // Stop order. blocked boolean is set to false
+        // Stop order. blocked boolean is set to false since it's an order, not regular end of movement
         mcs.stop(false);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)){
@@ -86,8 +85,8 @@ int main(void)
         mcs.set_target_speed(Motor::Side::RIGHT, right_tick);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MODE)){
-        //MCS mode : nothing, speed control, speed and (rotation and/or translation)
-        mcs.set_control(rx_msg.data.u8[0]&0b11); //Only 2 LSb are useful
+        //MCS mode : 3 bits : 0: speed, 1: translation, 2 : rotation
+        mcs.set_control(rx_msg.data.u8[0]&0b001, rx_msg.data.u8[0]&0b010, rx_msg.data.u8[0]&0b100);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KP)){
         mcs.set_kp(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
@@ -105,8 +104,8 @@ int main(void)
 
     mcs_stop_status = mcs.has_stopped();
     //If the robot has stopped or cannot move normally
-    if(mcs_stop_status != MotionController::StopStatus::NONE){
-      CAN_TX_MOV_END.data.u8[0] = ((mcs_stop_status==MotionController::StopStatus::BLOCKED)?1:0); // 1 if blocked, 0 if just end of movement
+    if(mcs_stop_status != MotionController::STOP_STATUS::NONE){
+      CAN_TX_MOV_END.data.u8[0] = ((mcs_stop_status==MotionController::STOP_STATUS::BLOCKED)?1:0); // 1 if blocked, 0 if just end of movement
       if(CAN_send_packet(&CAN_TX_MOV_END) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING MOV END\r\n");
       }
@@ -114,16 +113,23 @@ int main(void)
 
     // Periodic Encoder Position Report Message to HL
     if(can_timer.check()){
-      if((CAN_send_encoder_pos(mcs.get_COD_left(), mcs.get_COD_right())) != CAN_ERROR_STATUS::CAN_PKT_OK){
+      CAN_TX_COD_POS.data.d32[0]=mcs.get_COD_left();
+      CAN_TX_COD_POS.data.d32[1]=mcs.get_COD_right();
+      if((CAN_send_packet(&CAN_TX_COD_POS)) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING ENCODER\r\n");
       }
+
+#if 1
+      CAN_TX_DEBUG_DATA.data.d32[0] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::INTEGRAL_LSB);
+      CAN_TX_DEBUG_DATA.data.d32[1] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::INTEGRAL_MSB);;
+      if((CAN_send_packet(&CAN_TX_DEBUG_DATA)) != CAN_ERROR_STATUS::CAN_PKT_OK){
+        serial.print("ERR: SENDING DEBUG DATA\r\n");
+      }
+#endif
+
     }
     if(heartbeat_timer.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
-      if(mesure_t_irq != mesure_t_irq_last){
-        serial.printf("T IRQ %lu\r\n", mesure_t_irq);
-        mesure_t_irq_last = mesure_t_irq;
-      }
       if(CAN_send_packet(&CAN_TX_HEARTBEAT) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING HEARTBEAT\r\n");
       }
@@ -136,18 +142,18 @@ int main(void)
 extern "C"{
 #endif
 void TIM14_IRQHandler(void){
-  static uint8_t i=0;
-	if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
-		LL_TIM_ClearFlag_UPDATE(TIM14);
-		mesure_t_irq = micros();
-		mcs.update_position();
-		mcs.control_motion();
-		if((++i) == 5){ // Evry 10ms
-		  mcs.detect_stop();
-		  i = 0;
-		}
-		mesure_t_irq = micros()-mesure_t_irq;
-	}
+  static uint8_t i = 4;
+
+  // Control loop
+  if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
+    LL_TIM_ClearFlag_UPDATE(TIM14);
+    mcs.update_position();
+    mcs.control_motion();
+    if((++i) == 5){ // Evry 10ms
+      mcs.detect_stop();
+      i = 0;
+    }
+  }
 }
 #ifdef __cplusplus
 }

@@ -32,6 +32,7 @@ enum CAN_ERROR_STATUS{
 	PACKET_DLC_TOO_LARGE = -1,
 	CAN_PKT_OK=0
 };
+
 void MX_CAN_Init(void);
 int CAN_send_packet(uint16_t std_id, uint8_t* data=nullptr, uint8_t size=0, bool remote = false);
 int CAN_send_packet(can_tx_msg* msg);
@@ -46,7 +47,6 @@ int CAN_send_encoder_pos(int32_t left, int32_t right);
 extern can_tx_msg CAN_TX_HEARTBEAT;
 extern can_tx_msg CAN_TX_MOV_END;
 extern can_tx_msg CAN_TX_COD_POS;
-
-
+extern can_tx_msg CAN_TX_DEBUG_DATA;
 
 #endif // LL_CAN_CAN_H_

@@ -10,6 +10,7 @@
 can_tx_msg CAN_TX_HEARTBEAT;
 can_tx_msg CAN_TX_MOV_END;
 can_tx_msg CAN_TX_COD_POS;
+can_tx_msg CAN_TX_DEBUG_DATA;
 
 // Buffer storing packets waiting for the peripheral to send them
 ring_buffer<CONST_CAN_BUFFER_SIZE, can_tx_msg> messages_tx;
@@ -75,12 +76,6 @@ int CAN_send_packet(can_tx_msg* msg){
 	return res;
 }
 
-int CAN_send_encoder_pos(int32_t left, int32_t right){
-  CAN_TX_COD_POS.data.d32[0]=left;
-  CAN_TX_COD_POS.data.d32[1]=right;
-  return CAN_send_packet(&CAN_TX_COD_POS);
-}
-
 int CAN_receive_packet(can_rx_msg* msg){
 	int res = HAL_ERROR;
     if(!messages_rx.is_empty()){
@@ -96,15 +91,6 @@ int CAN_receive_packet(can_rx_msg* msg){
 	return res;
 }
 
-/*
-void CAN_print_rx_pkt(can_rx_msg* msg){
-  printf("PKT::0x%04lX::0x%lX", msg->header.StdId, msg->header.DLC);
-  for(uint8_t i = 0; i < msg->header.DLC; i++){
-	  printf("::0x%02hX", msg->data.u8[i]);
-  }
-  printf("\r\n");
-}
-*/
 
 /* CAN init function */
 void MX_CAN_Init(void)
@@ -177,23 +163,30 @@ void MX_CAN_Init(void)
    * INITIALIZE MESSAGE TEMPLATES
    */
 
-  CAN_TX_HEARTBEAT.header.DLC=0;
-  CAN_TX_HEARTBEAT.header.IDE=CAN_ID_STD;
-  CAN_TX_HEARTBEAT.header.RTR=CAN_RTR_DATA;
+  CAN_TX_HEARTBEAT.header.DLC   = 0;
+  CAN_TX_HEARTBEAT.header.IDE   = CAN_ID_STD;
+  CAN_TX_HEARTBEAT.header.RTR   = CAN_RTR_DATA;
   CAN_TX_HEARTBEAT.header.StdId = CAN_PKT_ID(CAN_PIPE_HL, (CAN_MSG_HEARTBEAT<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
 
-  CAN_TX_MOV_END.header.DLC=1;
-  CAN_TX_MOV_END.header.IDE=CAN_ID_STD;
-  CAN_TX_MOV_END.header.RTR=CAN_RTR_DATA;
-  CAN_TX_MOV_END.header.StdId = CAN_PKT_ID(CAN_PIPE_MOTOR, (CAN_MSG_MOT_MOVE_END<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
-  CAN_TX_MOV_END.data.u8[0] = 0;
+  CAN_TX_MOV_END.header.DLC     = 1;
+  CAN_TX_MOV_END.header.IDE     = CAN_ID_STD;
+  CAN_TX_MOV_END.header.RTR     = CAN_RTR_DATA;
+  CAN_TX_MOV_END.header.StdId   = CAN_PKT_ID(CAN_PIPE_MOTOR, (CAN_MSG_MOT_MOVE_END<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
+  CAN_TX_MOV_END.data.u8[0]     = 0;
 
-  CAN_TX_COD_POS.header.DLC=8;
-  CAN_TX_COD_POS.header.IDE=CAN_ID_STD;
-  CAN_TX_COD_POS.header.RTR=CAN_RTR_DATA;
-  CAN_TX_COD_POS.header.StdId = CAN_PKT_ID(CAN_PIPE_MOTOR, (CAN_MSG_MOT_COD_POS<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
-  CAN_TX_COD_POS.data.d32[0]=0;
-  CAN_TX_COD_POS.data.d32[1]=0;
+  CAN_TX_COD_POS.header.DLC     = 8;
+  CAN_TX_COD_POS.header.IDE     = CAN_ID_STD;
+  CAN_TX_COD_POS.header.RTR     = CAN_RTR_DATA;
+  CAN_TX_COD_POS.header.StdId   = CAN_PKT_ID(CAN_PIPE_MOTOR, (CAN_MSG_MOT_COD_POS<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
+  CAN_TX_COD_POS.data.d32[0]    = 0;
+  CAN_TX_COD_POS.data.d32[1]    = 0;
+
+  CAN_TX_DEBUG_DATA.header.DLC  = 8;
+  CAN_TX_DEBUG_DATA.header.IDE  = CAN_ID_STD;
+  CAN_TX_DEBUG_DATA.header.RTR  = CAN_RTR_DATA;
+  CAN_TX_DEBUG_DATA.header.StdId= CAN_PKT_ID(CAN_PIPE_HL, (CAN_MSG_DEBUG_DATA<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
+  CAN_TX_DEBUG_DATA.data.d32[0] = 0;
+  CAN_TX_DEBUG_DATA.data.d32[1] = 0;
 
   /*
    * INITIALIZE INTERRUPT SYSTEM FOR CAN
