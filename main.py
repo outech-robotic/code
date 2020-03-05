@@ -14,22 +14,27 @@ from flask_socketio import SocketIO
 
 from views import register_views, InterfaceAdapter, PID, Cap
 
-CAN_BOARD_ID_WIDTH = 5
-CAN_MSG_WIDTH = 9
-CAN_BOARD_ID_MOTOR = 15
-CAN_CHANNEL_MOTOR = 0b00
-CAN_MSG_SPEED = 0b1000  # orders the movement of both wheels at constant speed (2x32bits signed, left and right encoder speeds)
-CAN_MSG_POS = 0b0010  # orders a movement of both wheels (data: 2x32bits signed, left and right encoder position)
-CAN_MSG_STOP = 0b0000  # Stops robot on the spot, resetting all errors of PIDs
-CAN_MSG_MCS_MODE = 0b1111  # Sets motion control mode : data: 1 byte: bit 0 = speed mode on/off, bit 1 = position mode on/off
-CAN_KP_ID = 0b1100  # sets proportionnal constant of PID of ID at first byte of data, value is the following 32 bits (unsigned, 65535 * value in floating point of KP)
-CAN_KI_ID = 0b1101  # same for integral constant
-CAN_KD_ID = 0b1110  # and derivative
+CAN_BOARD_ID_WIDTH  = 4
+CAN_MSG_WIDTH       = 9
+CAN_BOARD_ID_MOTOR  = 15
+CAN_CHANNEL_MOTOR   = 0b00
+CAN_MSG_STOP        = 0b00000  # Stops robot on the spot, resetting all errors of PIDs
+CAN_MSG_POS         = 0b00010  # orders a movement : 1 byte for movement type, and 32 bits signed ticks to move
+CAN_MSG_SPEED       = 0b10000  # orders the movement of both wheels at constant speed (2x32bits signed, left and right encoder speeds)
+CAN_SPEED_ACCEL_LIM = 0b10011
+CAN_KP_ID           = 0b10100  # sets proportionnal constant of PID of ID at first byte of data, value is the following 32 bits (unsigned, 65535 * value in floating point of KP)
+CAN_KI_ID           = 0b10101  # same for integral constant
+CAN_KD_ID           = 0b10110  # and derivative
+CAN_MSG_MCS_MODE    = 0b10111  # Sets motion control mode : data: 1 byte: bit 0 = speed mode on/off, bit 1 = position mode on/off
 
-CAN_SPEED_ACCEL_LIM = 0b1011
-MCS_MODE_SPEED = [0b01]
-MCS_MODE_POS = [0b10]
-MCS_MODE_BOTH = [0b11]
+CAN_MSG_DEBUG_DATA  = 0b10001  # 32b 32b debug data
+CAN_MSG_HEARTBEAT   = 0b10010
+
+
+MCS_MODE_SPEED       = [0b001]
+MCS_MODE_TRANSLATION = [0b011]
+MCS_MODE_ROTATION    = [0b101]
+MCS_MODE_ALL         = [0b111]
 
 # PID IDs
 PID_LEFT_SPEED = 0
@@ -209,7 +214,7 @@ class CANAdapter(InterfaceAdapter):
 
             # Cas 2 : juste translation, les vitesses des roues sont gérées par le LL
             elif position is not None:
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_ALL)
                 print("POS")
                 self.setpoint_pos = position  # position in mm that each wheel have to travel
                 position_ticks = position * MM_TO_TICK  # in ticks for Motion control board
@@ -218,7 +223,7 @@ class CANAdapter(InterfaceAdapter):
 
             # Cas 3 : juste rotation
             elif angle is not None:
-                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_BOTH)
+                send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_MCS_MODE, CAN_BOARD_ID_MOTOR, MCS_MODE_ALL)
                 print("ANGLE")
                 # distance for each wheel(in opposite direcitons), to reach angle, in mm for graph
                 self.setpoint_angle = angle * DISTANCE_BETWEEN_WHEELS / 2
@@ -273,4 +278,5 @@ else:
     register_views(app, socketio, CANAdapter(socketio))
 
 if __name__ == '__main__':
+    os.system("can_enable.sh")
     socketio.run(app, host='0.0.0.0', port=5000)
