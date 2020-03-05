@@ -18,6 +18,7 @@ CAN_BOARD_ID_WIDTH  = 4
 CAN_MSG_WIDTH       = 9
 CAN_BOARD_ID_MOTOR  = 15
 CAN_CHANNEL_MOTOR   = 0b00
+CAN_MSG_COD         = 0b00011  # Encoder positions sent from LL (2x32b signed, left and right positions)
 CAN_MSG_STOP        = 0b00000  # Stops robot on the spot, resetting all errors of PIDs
 CAN_MSG_POS         = 0b00010  # orders a movement : 1 byte for movement type, and 32 bits signed ticks to move
 CAN_MSG_SPEED       = 0b10000  # orders the movement of both wheels at constant speed (2x32bits signed, left and right encoder speeds)
@@ -35,6 +36,8 @@ MCS_MODE_SPEED       = [0b001]
 MCS_MODE_TRANSLATION = [0b011]
 MCS_MODE_ROTATION    = [0b101]
 MCS_MODE_ALL         = [0b111]
+
+CAN_MSG_COD_FULL     = CAN_CHANNEL_MOTOR << CAN_MSG_WIDTH | CAN_MSG_COD<<CAN_BOARD_ID_WIDTH | CAN_BOARD_ID_MOTOR
 
 # PID IDs
 PID_LEFT_SPEED = 0
@@ -101,7 +104,7 @@ class CANAdapter(InterfaceAdapter):
             with can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000) as bus:
                 for message in bus:
                     # Encoder position
-                    if (message.arbitration_id >> 5) == 0b000011:
+                    if (message.arbitration_id) == CAN_MSG_COD_FULL:
                         posl, posr = fmt_motor_cod_pos.unpack(message.data)
                         posl, posr = posl * TICK_TO_MM, posr * TICK_TO_MM
                         speedl, speedr = ((posl - self.cod_last_left)  * COD_UPDATE_FREQ,
@@ -128,7 +131,7 @@ class CANAdapter(InterfaceAdapter):
                         # 1er argument le temps (time.time()), 2eme la valeur, 3eme la consigne.
 
                     # Stop message received
-                    elif (message.arbitration_id>>5) == 0b000001:
+                    elif (message.arbitration_id>>CAN_BOARD_ID_WIDTH) == 0b0000001:
                         print("############# MESSAGE :", message.arbitration_id, " ", message.data, "#############") 
 
 
@@ -225,7 +228,7 @@ class CANAdapter(InterfaceAdapter):
                 print(angle_ticks)
 
         if speed is not None or position is not None or angle is not None:
-            Timer(2, send_order).start() # Delayed movement order
+            Timer(0.8, send_order).start() # Delayed movement order
         else:
             send_packet(CAN_CHANNEL_MOTOR, CAN_MSG_STOP, CAN_BOARD_ID_MOTOR, []) # instant stop order if not parameters
 
@@ -262,7 +265,7 @@ class RandomAdapter(InterfaceAdapter):
         def send_order():
             print("delayed order submission")
 
-        Timer(2, send_order).start()
+        Timer(0.8, send_order).start()
 
 
 if __name__ == '__main__':
