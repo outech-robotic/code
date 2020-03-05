@@ -11,9 +11,6 @@
 
 #define CMP_CAN_MSG(rxmsg, msg_id) (CAN_PKT_MESSAG_ID(rxmsg.header.StdId) == (msg_id<<CAN_BOARD_ID_WIDTH | CAN_BOARD_ID))
 
-volatile uint32_t mesure_t_irq = 0;
-uint32_t mesure_t_irq_last = 0;
-
 can_rx_msg rx_msg;
 
 Metro can_timer(10);
@@ -142,11 +139,12 @@ int main(void)
 extern "C"{
 #endif
 void TIM14_IRQHandler(void){
-  static uint8_t i = 4;
+  static uint8_t i = 0;
 
   // Control loop
   if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
     LL_TIM_ClearFlag_UPDATE(TIM14);
+
     mcs.update_position();
     mcs.control_motion();
     if((++i) == 5){ // Evry 10ms

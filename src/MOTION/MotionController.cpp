@@ -1,7 +1,6 @@
 #include "MOTION/MotionController.h"
 #include "config.h"
 
-
 MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_right(Motor::Side::RIGHT){
 
 }
@@ -60,7 +59,7 @@ void MotionController::init() {
   robot_status.derivative_tolerance = 10;
   robot_status.differential_tolerance = 250;
   robot_status.rotation_tolerance = 10;
-  robot_status.translation_tolerance = 20;
+  robot_status.translation_tolerance = 15;
 
   left_block_status.blocked = false;
   right_block_status.blocked = false;
@@ -110,7 +109,6 @@ void MotionController::update_position() {
 void MotionController::control_motion() {
   int16_t left_pwm, right_pwm;
   int16_t speed_sp_translation, speed_sp_rotation;
-
   if(robot_status.controlled_position || robot_status.controlled_rotation || robot_status.controlled_speed){
 
     if(robot_status.controlled_position || robot_status.controlled_rotation){
@@ -234,12 +232,13 @@ int32_t MotionController::get_COD_right(){
 
 
 bool MotionController::is_wheel_blocked(wheel_block_status& wheel_status, const encoder_status& cod_status){
-  const uint8_t INIT_COUNT = 20;
-  const float LIMIT = 0.25;
+  static const uint8_t INIT_COUNT = 20;
+  static const float LIMIT = 0.25;
+  static const uint8_t LIMIT_FP = LIMIT*8; // We use fixed point numbers, or the comparison takes too long in Floats
 
   // Each time the wheel speed starts to be far from its setpoint:
   // a count is initialized and goes down to 0 and stays there until the wheel isn't blocked
-  if(ABS(cod_status.speed_average)<ABS(cod_status.speed_setpoint)*LIMIT){
+  if((ABS(cod_status.speed_average)<<2)<ABS(cod_status.speed_setpoint)*LIMIT_FP){
     // Init count if first block detection
     if(!wheel_status.blocked){
       wheel_status.count_blocks = INIT_COUNT;
@@ -269,7 +268,7 @@ bool MotionController::is_robot_blocked(){
 
 // Detects if the robot completed its previous movement order
 bool MotionController::has_movement_ended(){
-  const uint8_t INIT_COUNT = 5;
+  const uint8_t INIT_COUNT = 10;
   static uint8_t stop_count = INIT_COUNT;
   static bool done = false;
   uint32_t err_trans = ABS(pid_translation.get_error());

@@ -34,11 +34,11 @@ class MotionController {
     volatile int32_t translation_total;
     volatile int32_t translation_speed;
     volatile int32_t translation_setpoint;
-    uint32_t          translation_tolerance;
+    uint32_t         translation_tolerance;
     volatile int32_t rotation_total;
     volatile int32_t rotation_speed;
     volatile int32_t rotation_setpoint;
-    uint32_t          rotation_tolerance;
+    uint32_t         rotation_tolerance;
 
     uint32_t derivative_tolerance;
     uint32_t differential_tolerance;
@@ -74,8 +74,6 @@ class MotionController {
   volatile int32_t cod_right_last;
   volatile int32_t cod_right_raw_last;
 
-  Average<volatile int32_t, 8> robot_speed_translation_avg;
-  Average<volatile int32_t, 8> robot_speed_rotation_avg;
   Average<volatile int32_t, 8> cod_left_speed_avg;
   Average<volatile int32_t, 8> cod_right_speed_avg;
 
