@@ -38,7 +38,6 @@ PID_RIGHT_SPEED = 1
 PID_RIGHT_POS = 3
 
 COD_UPDATE_FREQ = 100  # Hz, encoder positions sent from Motion control board each seconds
-MCS_UPDATE_FREQ = 500 # Hz, frequency of motion controller updates
 
 # Formatters for data packing
 fmt_motor_set_speed = struct.Struct('<ll')  # 32b + 32b signe
@@ -48,7 +47,7 @@ fmt_motor_set_pid = struct.Struct('<Bi')  # 8b + 32b non signes
 fmt_motor_lim = struct.Struct('<HHHH')
 
 # Physical constants of the robot
-WHEEL_DIAMETER = 74.0  # en mm ; 2400 ticks par tour donc par 2*pi*74 mm
+WHEEL_DIAMETER = 73.7  # en mm ; 2400 ticks par tour donc par 2*pi*74 mm
 DISTANCE_BETWEEN_WHEELS = 365.0  # en mm
 TICKS_PER_TURN = 2400.0
 MM_TO_TICK = TICKS_PER_TURN / (pi * WHEEL_DIAMETER)
@@ -89,23 +88,27 @@ class CANAdapter(InterfaceAdapter):
         self.setpoint_speed = 0.0
         self.setpoint_pos = None
         self.setpoint_angle = None
-        self.avg_left = [0.0 for i in range(10)]
-        self.avg_right = [0.0 for i in range(10)]
+        self.avg_left = [0.0 for i in range(5)]
+        self.avg_right = [0.0 for i in range(5)]
+        self.cod_start_left = 0
+        self.cod_start_right = 0
+        self.cod_last_left = 0
+        self.cod_last_right = 0
+
         super(CANAdapter, self).__init__(socketio)  # Il faut garder cette ligne.
 
         # A la place de cette fonction et du thread, on met le code qui recoit les msg CAN et on
         # appelle les fonctions .push_*_*
         def f():
-            last_left, last_right = 0, 0
             with can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000) as bus:
                 for message in bus:
                     # Encoder position
                     if (message.arbitration_id >> 5) == 0b000011:
                         posl, posr = fmt_motor_cod_pos.unpack(message.data)
                         posl, posr = posl * TICK_TO_MM, posr * TICK_TO_MM
-                        speedl, speedr = ((posl - last_left)  * COD_UPDATE_FREQ,
-                                          (posr - last_right) * COD_UPDATE_FREQ)
-                        last_left, last_right = posl, posr
+                        speedl, speedr = ((posl - self.cod_last_left)  * COD_UPDATE_FREQ,
+                                          (posr - self.cod_last_right) * COD_UPDATE_FREQ)
+                        self.cod_last_left, self.cod_last_right = posl, posr
                         self.avg_left = self.avg_left[1:]
                         self.avg_left.append(speedl)
                         self.avg_right = self.avg_right[1:]
@@ -122,8 +125,8 @@ class CANAdapter(InterfaceAdapter):
                         elif self.setpoint_angle is not None:
                             setpoint_left = -self.setpoint_angle
                             setpoint_right = self.setpoint_angle
-                        self.push_pos_left(t, posl, setpoint_left)
-                        self.push_pos_right(t, posr, setpoint_right)
+                        self.push_pos_left(t, posl-self.cod_start_left, setpoint_left)
+                        self.push_pos_right(t, posr-self.cod_start_right, setpoint_right)
                         # 1er argument le temps (time.time()), 2eme la valeur, 3eme la consigne.
 
                     # Stop message received
@@ -133,18 +136,18 @@ class CANAdapter(InterfaceAdapter):
 
         Thread(target=f).start()
 
-    def on_pid_submission(self, speed_left: PID, speed_right: PID, pos_left: PID,
-                          pos_right: PID, cap: Cap) -> None:
+    def on_pid_submission(self, speed_left: PID, speed_right: PID, translation: PID,
+                          rotation: PID, cap: Cap) -> None:
         # Ici tu implem l'envoi des paquets sur le CAN.
-        print(f"Got PID {pos_left} {pos_right} {speed_left} {speed_right}")
+        print(f"Got PID {translation} {rotation} {speed_left} {speed_right}")
 
-        pos_left.p = round(pos_left.p * 65535)
-        pos_left.i = round(pos_left.i * 65535)
-        pos_left.d = round(pos_left.d * 65535)
+        translation.p = round(translation.p * 65535)
+        translation.i = round(translation.i * 65535)
+        translation.d = round(translation.d * 65535)
 
-        pos_right.p = round(pos_right.p * 65535)
-        pos_right.i = round(pos_right.i * 65535)
-        pos_right.d = round(pos_right.d * 65535)
+        rotation.p = round(rotation.p * 65535)
+        rotation.i = round(rotation.i * 65535)
+        rotation.d = round(rotation.d * 65535)
 
         speed_left.p = round(speed_left.p * 65535)
         speed_left.i = round(speed_left.i * 65535)
@@ -155,18 +158,18 @@ class CANAdapter(InterfaceAdapter):
         speed_right.d = round(speed_right.d * 65535)
 
         send_packet(CAN_CHANNEL_MOTOR, CAN_KP_ID, CAN_BOARD_ID_MOTOR,
-                    fmt_motor_set_pid.pack(PID_LEFT_POS, int(pos_left.p)))
+                    fmt_motor_set_pid.pack(PID_LEFT_POS, int(translation.p)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KI_ID, CAN_BOARD_ID_MOTOR,
-                    fmt_motor_set_pid.pack(PID_LEFT_POS, int(pos_left.i)))
+                    fmt_motor_set_pid.pack(PID_LEFT_POS, int(translation.i)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KD_ID, CAN_BOARD_ID_MOTOR,
-                    fmt_motor_set_pid.pack(PID_LEFT_POS, int(pos_left.d)))
+                    fmt_motor_set_pid.pack(PID_LEFT_POS, int(translation.d)))
 
         send_packet(CAN_CHANNEL_MOTOR, CAN_KP_ID, CAN_BOARD_ID_MOTOR,
-                    fmt_motor_set_pid.pack(PID_RIGHT_POS, int(pos_right.p)))
+                    fmt_motor_set_pid.pack(PID_RIGHT_POS, int(rotation.p)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KI_ID, CAN_BOARD_ID_MOTOR,
-                    fmt_motor_set_pid.pack(PID_RIGHT_POS, int(pos_right.i)))
+                    fmt_motor_set_pid.pack(PID_RIGHT_POS, int(rotation.i)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KD_ID, CAN_BOARD_ID_MOTOR,
-                    fmt_motor_set_pid.pack(PID_RIGHT_POS, int(pos_right.d)))
+                    fmt_motor_set_pid.pack(PID_RIGHT_POS, int(rotation.d)))
 
         send_packet(CAN_CHANNEL_MOTOR, CAN_KP_ID, CAN_BOARD_ID_MOTOR,
                     fmt_motor_set_pid.pack(PID_LEFT_SPEED, int(speed_left.p)))
@@ -181,7 +184,7 @@ class CANAdapter(InterfaceAdapter):
                     fmt_motor_set_pid.pack(PID_RIGHT_SPEED, int(speed_right.i)))
         send_packet(CAN_CHANNEL_MOTOR, CAN_KD_ID, CAN_BOARD_ID_MOTOR,
                     fmt_motor_set_pid.pack(PID_RIGHT_SPEED, int(speed_right.d)))
-        send_packet(CAN_CHANNEL_MOTOR, CAN_SPEED_ACCEL_LIM, CAN_BOARD_ID_MOTOR, fmt_motor_lim.pack(int(cap.SpeedTranslation*MM_TO_TICK), int(cap.SpeedRotation*MM_TO_TICK), int(cap.SpeedWheel*MM_TO_TICK), int(cap.AccelWheel*MM_TO_TICK/MCS_UPDATE_FREQ)))
+        send_packet(CAN_CHANNEL_MOTOR, CAN_SPEED_ACCEL_LIM, CAN_BOARD_ID_MOTOR, fmt_motor_lim.pack(int(cap.SpeedTranslation*MM_TO_TICK), int(cap.SpeedRotation*MM_TO_TICK), int(cap.SpeedWheel*MM_TO_TICK), int(cap.AccelWheel*MM_TO_TICK)))
 
     def on_order_submission(self, speed: Optional[float], position: Optional[float],
                             angle: Optional[float]):
@@ -189,6 +192,8 @@ class CANAdapter(InterfaceAdapter):
         print(
             f"Got order {speed} {position} {angle}")  # position en mm, speed en mm/s, angle en degré
         def send_order():
+            self.cod_start_left = self.cod_last_left
+            self.cod_start_right = self.cod_last_right
             self.setpoint_speed = 0.0
             self.setpoint_pos = None
             self.setpoint_angle = None
@@ -250,8 +255,8 @@ class RandomAdapter(InterfaceAdapter):
 
         Thread(target=f).start()
 
-    def on_pid_submission(self, speed_left: PID, speed_right: PID, pos_left: PID,
-                          pos_right: PID, cap: Cap) -> None:
+    def on_pid_submission(self, speed_left: PID, speed_right: PID, translation: PID,
+                          rotation: PID, cap: Cap) -> None:
         print(cap)
 
     def on_order_submission(self, speed: Optional[float], position: Optional[float],

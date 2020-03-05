@@ -62,7 +62,7 @@ class InterfaceAdapter(ABC):
     @abstractmethod
     def on_pid_submission(self,
                           speed_left: PID, speed_right: PID,
-                          pos_left: PID, pos_right: PID,
+                          translation: PID, rotation: PID,
                           cap: Cap) -> None:
         """ PID submission. """
 
@@ -84,8 +84,8 @@ def get_pid_coefs():
             return json.loads(f.read())
     except FileNotFoundError:
         return {
-            'PosLeft': {'P': 1.0, 'I': 2.0, 'D': 3.0, },
-            'PosRight': {'P': 4.0, 'I': 5.0, 'D': 6.0, },
+            'Translation': {'P': 1.0, 'I': 2.0, 'D': 3.0, },
+            'Rotation': {'P': 4.0, 'I': 5.0, 'D': 6.0, },
             'SpeedLeft': {'P': 7.0, 'I': 8.0, 'D': 9.0, },
             'SpeedRight': {'P': 10.0, 'I': 11.0, 'D': 12.0, },
             'CapForm': {
@@ -120,8 +120,8 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
             interface.on_pid_submission(
                 speed_left=to_pid(form.data['SpeedLeft']),
                 speed_right=to_pid(form.data['SpeedRight']),
-                pos_right=to_pid(form.data['PosRight']),
-                pos_left=to_pid(form.data['PosLeft']),
+                translation=to_pid(form.data['Translation']),
+                rotation=to_pid(form.data['Rotation']),
                 cap=to_cap(form.data['CapForm']),
             )
 

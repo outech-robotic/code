@@ -188,8 +188,8 @@ La consigne est en pointillés.
         var sound = new Audio(soundPath);
         stop_button.onclick = function () {
             socket.emit("STOP", null);
-            doABarrelRoll();
-            sound.play();
+            //doABarrelRoll();
+            //sound.play();
         };
         socket.on('pos_left', function (msg) {
             if (!capture) {

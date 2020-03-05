@@ -17,8 +17,8 @@ class CapForm(FlaskForm):
 
 
 class AllPIDForms(FlaskForm):
-    PosLeft = FormField(PIDForm)
-    PosRight = FormField(PIDForm)
+    Translation = FormField(PIDForm)
+    Rotation = FormField(PIDForm)
     SpeedLeft = FormField(PIDForm)
     SpeedRight = FormField(PIDForm)
     CapForm = FormField(CapForm)
