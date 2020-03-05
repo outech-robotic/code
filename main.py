@@ -79,13 +79,6 @@ def avg_list(values):
     return sum(values) / len(values) if len(values) > 0 else 0
 
 
-# Flask
-app = Flask(__name__)
-app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['SECRET_KEY'] = ''.join(random.choice(string.printable) for i in range(64))
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-
 class CANAdapter(InterfaceAdapter):
     """ La classe qu'il faut implem pour s'interfacer avec la page web. """
 
@@ -272,11 +265,20 @@ class RandomAdapter(InterfaceAdapter):
         Timer(2, send_order).start()
 
 
-if os.environ.get('RANDOM_GRAPH'):
-    register_views(app, socketio, RandomAdapter(socketio))
-else:
-    register_views(app, socketio, CANAdapter(socketio))
-
 if __name__ == '__main__':
-    os.system("can_enable.sh")
+    
+    # Flask
+    app = Flask(__name__)
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SECRET_KEY'] = ''.join(random.choice(string.printable) for i in range(64))
+    socketio = SocketIO(app, cors_allowed_origins="*")
+
+    # Enable CAN
+    os.system("./can_enable.sh")
+
+    if os.environ.get('RANDOM_GRAPH'):
+        register_views(app, socketio, RandomAdapter(socketio))
+    else:
+        register_views(app, socketio, CANAdapter(socketio))
+
     socketio.run(app, host='0.0.0.0', port=5000)
