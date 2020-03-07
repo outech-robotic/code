@@ -1,6 +1,7 @@
 """
 Test for vector.
 """
+import math
 from math import sqrt
 
 from src.robot.entity.vector import Vector2
@@ -113,3 +114,10 @@ def test_dot():
     Test dot product.
     """
     assert Vector2(1, 2).dot(Vector2(3, 4)) == 11
+
+
+def test_to_angle():
+    """
+    Test to angle.
+    """
+    assert Vector2(1, -1).to_angle() == -math.pi / 4
