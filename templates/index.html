@@ -55,7 +55,7 @@
     <input type="submit" value="Submit">
 </form>
 <hr>
-<button id="startStopButton">Start capture</button>
+<button id="startStopButton" class="start-button">Start capture</button>
 
 <hr>
 <div id="left" class="graph" ></div>
@@ -189,10 +189,12 @@
             capture = !capture;
             if (capture) {
                 button.innerText = "Stop capture";
+                button.className = "stop-button";
                 clearLeftSpeedChart();
                 clearRightSpeedChart();
             } else {
-                button.innerText = "Start capture"
+                button.innerText = "Start capture";
+                button.className = "start-button";
             }
         };
 

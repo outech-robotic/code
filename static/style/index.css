@@ -15,9 +15,17 @@ body {
 form,
 .block {
     overflow: auto;
+    margin-left: 5%;
+    width: 90%;
 }
 
 h1 {
+    text-align: center;
+}
+
+.sub {
+    font-style: italic;
+    color: #f05000;
     text-align: center;
 }
 
@@ -27,6 +35,7 @@ hr {
     margin-top: 30px;
     margin-bottom: 30px;
     color: #444;
+    opacity: 20%;
 }
 
 label {
@@ -36,24 +45,15 @@ label {
     font-weight: bold;
 }
 
+label::selection {
+    background-color: #f05000;
+    color: #f7f7ff;
+    border-radius: 3px;
+}
+
 table tbody tr th {
     width: 3rem;
     text-align: left;
-}
-
-input[type="submit"],
-button[id="startStopButton"] {
-    margin-top: 6px;
-    margin-bottom: 6px;
-    background-color: #444;
-    border: 0 solid transparent;
-    border-radius: 4px;
-    color: #ffa027;
-    font-size: 1.2em;
-    font-weight: bold;
-    width: 180px;
-    height: 40px;
-    margin-left: 10%;
 }
 
 input[type="text"]:focus {
@@ -61,22 +61,31 @@ input[type="text"]:focus {
     border-radius: 5px;
 }
 
-button[id="startStopButton"]:hover,
-input[type="submit"]:hover
-{
+input[type="submit"],
+button[id="startStopButton"] {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    border: 0 solid transparent;
+    border-radius: 4px;
+    font-size: 1.2em;
+    font-weight: bold;
+    width: 180px;
+    height: 40px;
+    margin-left: 10%;
+}
+
+.stop-button,
+.start-button:hover,
+input[type="submit"]:hover {
     color: #444;
     background-color: #ffa027;
 }
 
-.sub {
-    font-style: italic;
-    color: #f05000;
-    text-align: center;
-}
-
-.block {
-    margin-left: 5%;
-    width: 90%;
+.stop-button:hover,
+.start-button,
+input[type="submit"] {
+    color: #ffa027;
+    background-color: #444;
 }
 
 .cell {
@@ -89,4 +98,8 @@ input[type="submit"]:hover
     width:49%; 
     height: 500px; 
     display:inline-block
+}
+
+.canvasjs-chart-canvas {
+    background-color: #f7f7ff;
 }
