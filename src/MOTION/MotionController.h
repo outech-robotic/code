@@ -80,7 +80,7 @@ class MotionController {
   /**
    * Detects if a wheel seems to be blocked (actual speed relatively far from the setpoint).
    */
-  bool is_wheel_blocked(wheel_block_status& wheel_status, const encoder_status& cod_status);
+  bool is_wheel_blocked(wheel_block_status& wheel_status, const encoder_status& cod_status, PID_FP& pid_status);
 
   /**
    * Checks if the robot is blocked

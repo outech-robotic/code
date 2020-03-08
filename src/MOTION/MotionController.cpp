@@ -1,20 +1,20 @@
 #include "MOTION/MotionController.h"
 #include "config.h"
-
+#include "UTILITY/timing.h"
 MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_right(Motor::Side::RIGHT){
 
 }
 
 #define PI ((float)3.14159265359)
-#define WHEEL_DIAMETER ((float)73.7)
+#define WHEEL_DIAMETER ((float)73.6)
 #define TICKS_PER_TURN ((float)2400)
 #define MM_TO_TICK (TICKS_PER_TURN/(PI*WHEEL_DIAMETER))
 
-#define MAX_SPEED_TRANSLATION_MM (500)
-#define MAX_SPEED_ROTATION_MM (500)
+#define MAX_SPEED_TRANSLATION_MM (800)
+#define MAX_SPEED_ROTATION_MM (400)
 #define MAX_SPEED_TRANSLATION_TICK (MAX_SPEED_TRANSLATION_MM*MM_TO_TICK)
 #define MAX_SPEED_ROTATION_TICK (MAX_SPEED_ROTATION_MM*MM_TO_TICK)
-#define MAX_ACCEL_MM (1000)
+#define MAX_ACCEL_MM (1200/MOTION_CONTROL_FREQ)
 #define MAX_ACCEL_TICK (MAX_ACCEL_MM*MM_TO_TICK)
 
 void MotionController::init() {
@@ -23,20 +23,20 @@ void MotionController::init() {
   pid_speed_right.reset();
   pid_translation.reset();
   pid_rotation.reset();
-  pid_speed_left.set_coefficients(0.65, 0.0, 0.008, MOTION_CONTROL_FREQ);
+  pid_speed_left.set_coefficients(0.275, 0.24, 0.0002, MOTION_CONTROL_FREQ);
   pid_speed_left.set_output_limit(CONST_PWM_MAX);
   pid_speed_left.set_anti_windup(CONST_PWM_MAX);
   pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
-  pid_speed_right.set_coefficients(0.7, 0.0, 0.008, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_coefficients(0.27, 0.22, 0.0002, MOTION_CONTROL_FREQ);
   pid_speed_right.set_output_limit(CONST_PWM_MAX);
   pid_speed_right.set_anti_windup(CONST_PWM_MAX);
   pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
 
-  pid_translation.set_coefficients(1.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
+  pid_translation.set_coefficients(3.0, 0.0, 0.2, MOTION_CONTROL_FREQ);
   pid_translation.set_output_limit(MAX_SPEED_TRANSLATION_TICK);
   pid_translation.set_anti_windup(MAX_SPEED_TRANSLATION_TICK);
   pid_translation.set_derivative_limit(MAX_SPEED_TRANSLATION_TICK);
-  pid_rotation.set_coefficients(0.0, 0.0, 0.0, MOTION_CONTROL_FREQ);
+  pid_rotation.set_coefficients(4.9, 0.0, 0.8, MOTION_CONTROL_FREQ);
   pid_rotation.set_output_limit(MAX_SPEED_ROTATION_TICK);
   pid_rotation.set_anti_windup(MAX_SPEED_ROTATION_TICK);
   pid_rotation.set_derivative_limit(MAX_SPEED_ROTATION_TICK);
@@ -57,8 +57,8 @@ void MotionController::init() {
   robot_status.speed_max_wheel = MAX_SPEED_TRANSLATION_TICK;
 
   robot_status.derivative_tolerance = 10;
-  robot_status.differential_tolerance = 250;
-  robot_status.rotation_tolerance = 10;
+  robot_status.differential_tolerance = 800;
+  robot_status.rotation_tolerance = 15;
   robot_status.translation_tolerance = 15;
 
   left_block_status.blocked = false;
@@ -71,8 +71,8 @@ void MotionController::init() {
 void MotionController::update_position() {
   static int32_t translation_last=0, rotation_last=0;
   static int16_t cod_right_overflows=0;
-  int32_t cod_right_raw = COD_get_right();
-  cod_left.current = -COD_get_left();
+  int32_t cod_right_raw = COD_get_right();           // Right wheel is positive (trigo rotations)
+  cod_left.current = -COD_get_left();                // Left wheel is the opposite
 
   if(cod_right_raw - cod_right_raw_last > 32767){
 	  cod_right_overflows--;
@@ -231,44 +231,42 @@ int32_t MotionController::get_COD_right(){
 }
 
 
-bool MotionController::is_wheel_blocked(wheel_block_status& wheel_status, const encoder_status& cod_status){
+bool MotionController::is_wheel_blocked(wheel_block_status& wheel_status, const encoder_status& cod_status, PID_FP& pid_status){
   static const uint8_t INIT_COUNT = 20;
-  static const float LIMIT = 0.25;
-  static const uint8_t LIMIT_FP = LIMIT*8; // We use fixed point numbers, or the comparison takes too long in Floats
-
+  static const float LIMIT = 0.3;
   // Each time the wheel speed starts to be far from its setpoint:
   // a count is initialized and goes down to 0 and stays there until the wheel isn't blocked
-  if((ABS(cod_status.speed_average)<<2)<ABS(cod_status.speed_setpoint)*LIMIT_FP){
+  if(robot_status.moving && (ABS(cod_status.speed_current)<ABS(cod_status.speed_setpoint)*LIMIT)
+      &&
+      ABS(pid_translation.get_error()>5*robot_status.translation_tolerance)){
     // Init count if first block detection
     if(!wheel_status.blocked){
-      wheel_status.count_blocks = INIT_COUNT;
+      wheel_status.blocked = true; //Start block detection
+      wheel_status.count_blocks = INIT_COUNT; //Countdown init
     }
     // Downcount until 0 is reached : enough block cycles were detected
     if(wheel_status.count_blocks > 0){
       wheel_status.count_blocks --;
     }
-    wheel_status.blocked = true;
   }
   else{
     wheel_status.blocked = false;
+    wheel_status.count_blocks=INIT_COUNT;
   }
-
   return (wheel_status.blocked && (wheel_status.count_blocks == 0));
 }
 
-//Detects if the robot is physically stopped (blocked)
+// Detects if the robot is physically stopped (blocked)
 bool MotionController::is_robot_blocked(){
-  bool left_wheel_blocked = is_wheel_blocked(left_block_status, cod_left);
-  bool right_wheel_blocked = is_wheel_blocked(right_block_status, cod_right);
+  bool left_wheel_blocked  = is_wheel_blocked(left_block_status, cod_left, pid_speed_left);
+  bool right_wheel_blocked = is_wheel_blocked(right_block_status, cod_right, pid_speed_right);
 
-  bool wheels_blocked = left_wheel_blocked || right_wheel_blocked;
-
-  return wheels_blocked;
+  return left_wheel_blocked || right_wheel_blocked;
 }
 
 // Detects if the robot completed its previous movement order
 bool MotionController::has_movement_ended(){
-  const uint8_t INIT_COUNT = 10;
+  const uint8_t INIT_COUNT = 0;
   static uint8_t stop_count = INIT_COUNT;
   static bool done = false;
   uint32_t err_trans = ABS(pid_translation.get_error());
@@ -280,7 +278,6 @@ bool MotionController::has_movement_ended(){
       done = true;
       stop_count = INIT_COUNT;
     }
-
     if(stop_count > 0){
       stop_count--;
     }
@@ -288,20 +285,79 @@ bool MotionController::has_movement_ended(){
   else{
     done = false;
   }
-
   return done && (stop_count == 0);
 }
+
 
 void MotionController::detect_stop(){
   bool status_block; // is the robot physically blocked and should stop?
   bool status_end;   // is the robot at the end of a movement, as expected?
+//  static bool block_started = false;
+//  status_block = is_robot_blocked();
+//  // if done or blocked, stop the robot
+//  if(robot_status.moving && !robot_status.forced_movement && (status_block || status_end)){
+//    stop(status_block && !status_end); //Only count as blocked if the movement is not at its end
+//    status_block=false;
+//  }
+//  static uint8_t count_block = 0;
+//  if(robot_status.moving && !robot_status.forced_movement && ((pid_translation.get_derivative() == 0) && (pid_rotation.get_derivative()==0)) || (ABS(ABS(pid_speed_left.get_error())-ABS(pid_speed_right.get_error()))>robot_status.differential_tolerance)){
+//    if(!block_started){
+//      count_block = 20;
+//      block_started = true;
+//    }
+//  }
+//  else{
+//    block_started = false;
+//    count_block=20;
+//    status_block = false;
+//  }
+//  if(block_started){
+//    count_block--;
+//    if(count_block==0){
+//      block_started=false;
+//      status_block=true;
+//    }
+//  }
+//
+  //status_end = has_movement_ended();
 
-  status_block = is_robot_blocked();
-  status_end   = has_movement_ended();
+  static const uint8_t INIT_BLOCK = 20;
+  static const uint8_t INIT_STOP  = 5;
 
-  // if done or blocked, stop the robot
-  if(robot_status.moving && !robot_status.forced_movement && (status_block || status_end)){
-    stop(status_block && !status_end); //Only count as blocked if the movement is not at its end
+  static uint8_t time_block = INIT_BLOCK;
+  static uint8_t time_stop  = INIT_STOP;
+  bool blocked = false;
+  uint32_t err_trans = ABS(pid_translation.get_error());
+  uint32_t err_rot   = ABS(pid_rotation.get_error());
+
+  if(robot_status.moving && !robot_status.forced_movement
+      && (err_trans <= robot_status.translation_tolerance && err_rot <= robot_status.rotation_tolerance))
+  {
+    if(time_stop > 0){
+      time_stop--;
+    }
+    else{
+      stop(false);
+      blocked = false;
+    }
+  }
+  else if(robot_status.moving && !robot_status.forced_movement &&
+      (((pid_translation.get_derivative() == 0) && (pid_rotation.get_derivative()==0))
+        || (ABS(ABS(pid_speed_left.get_error())-ABS(pid_speed_right.get_error()))>robot_status.differential_tolerance))
+    && (err_trans > 5*robot_status.translation_tolerance || err_rot > 5*robot_status.rotation_tolerance))
+  {
+    if(time_block > 0){
+      time_block--;
+    }
+    else{
+      stop(true);
+      blocked = false;
+    }
+  }
+
+  else{
+    time_block = INIT_BLOCK;
+    time_stop  = INIT_STOP;
   }
 }
 
@@ -330,15 +386,10 @@ void MotionController::stop(bool wheels_blocked){
   cod_left_speed_avg.reset();
   cod_right_speed_avg.reset();
 
-  // If there was a movement order, stop it, and prepare to send status
-  if(robot_status.moving){
-    robot_status.movement_stopped = true;
-    robot_status.moving = false;
-    robot_status.blocked = wheels_blocked;
-  }
-  if(robot_status.forced_movement){
-    robot_status.forced_movement = false;
-  }
+  robot_status.movement_stopped = true;   // Signal a stop event
+  robot_status.moving = false;            // Stop current movement
+  robot_status.blocked = wheels_blocked;  // Signal blocked wheels
+  robot_status.forced_movement = false;   // If there was a forced movement, stop it
 
   LL_TIM_EnableCounter(TIM14);
 }

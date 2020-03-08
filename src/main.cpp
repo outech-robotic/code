@@ -14,14 +14,14 @@
 can_rx_msg rx_msg;
 
 Metro can_timer(10);
-Metro heartbeat_timer(250);
+Metro heartbeat_timer(500);
 
 MotionController mcs;
 Serial serial;
 
 int main(void)
 {
-  MotionController::STOP_STATUS mcs_stop_status;
+  int8_t mcs_stop_status;
   /**********************************************************************
    *                             SETUP
    ********************************s**************************************/
@@ -95,6 +95,8 @@ int main(void)
         mcs.set_kd(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
       }
       else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_LIMITS)){
+        // Limits for motion control are (LSb to MSb, 4x16bit unsigned) :
+        // 0: Translation Speed; 1: Rotation Speed; 2: Wheel Speed(tick/s);3: Wheel Acceleration(tick/s2)
         mcs.set_limits(rx_msg.data.u16[0], rx_msg.data.u16[1], rx_msg.data.u16[2], rx_msg.data.u16[3]);
       }
     }
@@ -116,7 +118,7 @@ int main(void)
         serial.print("ERR: SENDING ENCODER\r\n");
       }
 
-#if 1
+#if 0
       CAN_TX_DEBUG_DATA.data.d32[0] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::INTEGRAL_LSB);
       CAN_TX_DEBUG_DATA.data.d32[1] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::INTEGRAL_MSB);;
       if((CAN_send_packet(&CAN_TX_DEBUG_DATA)) != CAN_ERROR_STATUS::CAN_PKT_OK){
@@ -125,6 +127,8 @@ int main(void)
 #endif
 
     }
+
+    // Periodic Heartbeat message to High Level board, and led toggle
     if(heartbeat_timer.check()){
       digitalWrite(PIN_LED, !digitalRead(PIN_LED));
       if(CAN_send_packet(&CAN_TX_HEARTBEAT) != CAN_ERROR_STATUS::CAN_PKT_OK){
@@ -144,10 +148,9 @@ void TIM14_IRQHandler(void){
   // Control loop
   if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
     LL_TIM_ClearFlag_UPDATE(TIM14);
-
     mcs.update_position();
     mcs.control_motion();
-    if((++i) == 5){ // Evry 10ms
+    if((++i) == 10){ // Evry 10ms
       mcs.detect_stop();
       i = 0;
     }
