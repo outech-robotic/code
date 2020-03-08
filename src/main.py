@@ -3,10 +3,12 @@ Main module.
 """
 import asyncio
 import math
+import os
 
+import can
 import uvloop
 
-from src.robot.can_adapter.adapter import CANAdapter, LoopbackCANAdapter
+from src.robot.can_adapter.adapter import CANAdapter, LoopbackCANAdapter, PyCANAdapter
 from src.robot.controller.localization import LocalizationController
 from src.robot.controller.motion import MotionController
 from src.robot.controller.odometry import OdometryController
@@ -61,13 +63,11 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('motion_gateway', MotionGateway)
 
-    i.provide('can_adapter', LoopbackCANAdapter)
-
     event_loop = asyncio.get_event_loop()
     i.provide('loop', event_loop)
 
 
-def _provide_simulator(i: DependencyContainer) -> None:
+def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
     """
     Provide all the simulation dependencies.
     """
@@ -103,15 +103,29 @@ def _provide_simulator(i: DependencyContainer) -> None:
     i.provide('http_client', HTTPClient)
     i.provide('web_browser_client', WebBrowserClient)
     i.provide('replay_saver', ReplaySaver)
+    i.provide('can_adapter', LoopbackCANAdapter)
 
 
-def _get_container() -> DependencyContainer:
+def _provide_real_life_dependencies(i: DependencyContainer) -> None:
+    """
+    Provide the "real" dependencies to run the robot in real life.
+    """
+    i.provide('can_adapter', PyCANAdapter)
+    i.provide(
+        'can_bus',
+        can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000))
+
+
+def _get_container(simulate: bool) -> DependencyContainer:
     """
     Build the dependency container.
     """
     i = DependencyContainer()
     _provide_robot_components(i)
-    _provide_simulator(i)
+    if simulate:
+        _provide_fake_simulator_dependencies(i)
+    else:
+        _provide_real_life_dependencies(i)
     return i
 
 
@@ -120,10 +134,11 @@ async def main() -> None:
     Main function.
     Launch the simulation and the robot.
     """
-    i = _get_container()
+    is_simulation = os.environ.get('OUTECH_SIMULATION',
+                                   'true').lower() == 'true'
+    i = _get_container(is_simulation)
 
     can_adapter: CANAdapter = i.get('can_adapter')
-    simulation_handler: SimulationHandler = i.get('simulation_handler')
     motion_handler: MotionHandler = i.get('motion_handler')
 
     # Register the CAN bus to call the handlers.
@@ -131,18 +146,23 @@ async def main() -> None:
                                  motion_handler.handle_position_update)
     can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_DONE,
                                  motion_handler.handle_movement_done)
-    can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_ORDER,
-                                 simulation_handler.handle_movement_order)
 
-    simulation_runner = i.get('simulation_runner')
+    if is_simulation:
+        simulation_handler: SimulationHandler = i.get('simulation_handler')
+        can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_ORDER,
+                                     simulation_handler.handle_movement_order)
+
     strategy_controller = i.get('strategy_controller')
-    replay_saver = i.get('replay_saver')
+    coroutines_to_run = {
+        strategy_controller.run(),
+        can_adapter.run(),
+    }
+    if is_simulation:
+        simulation_runner = i.get('simulation_runner')
+        coroutines_to_run.add(simulation_runner.run())
 
-    done, pending = await asyncio.wait(
-        {strategy_controller.run(),
-         simulation_runner.run(),
-         can_adapter.run()},
-        return_when=asyncio.FIRST_COMPLETED)
+    done, pending = await asyncio.wait(coroutines_to_run,
+                                       return_when=asyncio.FIRST_COMPLETED)
 
     # Gather the done coroutines to have proper stacktraces.
     await asyncio.gather(*done)
@@ -155,7 +175,9 @@ async def main() -> None:
     except asyncio.CancelledError:
         pass
 
-    replay_saver.save_replay()
+    if is_simulation:
+        replay_saver = i.get('replay_saver')
+        replay_saver.save_replay()
 
 
 if __name__ == '__main__':

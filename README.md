@@ -32,9 +32,13 @@ pipenv shell # Equivalent to `source ./bin/activate`
 ```
 
 ### Run it!
-##### If you want to run the code:
+##### If you want to run the code in a simulation:
 ```shell
-python -m src.main # Will run the simulator.
+python -m src.main
+```
+##### If you want to run the code in real life:
+```shell
+OUTECH_SIMULATION=false python -m src.main
 ```
 ##### If you want to run the tests:
 ```shell
