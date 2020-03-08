@@ -19,3 +19,10 @@ mypy:
 .PHONY: jenkins
 jenkins: test lint mypy format
 
+
+.PHONY: clean
+clean: 
+	find . -type f -name "outech.log" -exec rm -f {} +
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type d -name ".pytest_cache" -exec rm -rf {} +
+	find . -type d -name ".mypy_cache" -exec rm -rf {} +
