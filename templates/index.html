@@ -8,9 +8,12 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
             integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
             crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
 </head>
 <body>
-Oublie pas de sauvegarder les coeficients...
+    <div class="main">
+<h1>PID Settings</h1>
+<h3 class="sub">N'oublie pas de sauvegarder les coefficients...</h3>
 <form method="POST" action="{{ url_for('pid_view') }}">
     {{ form.hidden_tag() }}
 
@@ -20,32 +23,44 @@ Oublie pas de sauvegarder les coeficients...
         {% if field.errors %}
         <div style="color:red">
             {% endif %}
-
+            
+            <div class="cell">
             {{ field.label }}
             {{ field }}
+            </div>
 
             {% if form.errors %}
         </div>
         {% endif %}
         {% endfor %}
     </div>
+    <input type="submit" value="Submit">
 </form>
 <hr>
 <form method="POST" action="{{ url_for('order_view') }}">
     {{ form.hidden_tag() }}
 
     <div class="block">
-        {% for field in order_form if field.widget.input_type != 'hidden' %}
-        {{ field.label }} {{ field }}<br/>
-        {% endfor %}
+        <table>
+            <tbody>
+                {% for field in order_form if field.widget.input_type != 'hidden' %}
+                <tr>
+                    <th> {{ field.label }} </th>
+                    <td> {{ field }} </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+    <input type="submit" value="Submit">
 </form>
 <hr>
 <button id="startStopButton">Start capture</button>
 
 <hr>
-<div id="left" style="width:49%; height: 500px; display:inline-block"></div>
-<div id="right" style="width:49%; height: 500px; display:inline-block"></div>
+<div id="left" class="graph" ></div>
+<div id="right" class="graph" ></div>
+</div>
 
 <script>
     window.onload = function () {

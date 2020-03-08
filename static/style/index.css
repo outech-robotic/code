@@ -1,0 +1,92 @@
+body {
+    font-size: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    padding: 4rem 2rem;
+    direction: ltr;
+    color: #444;
+    background-color: #444;
+}
+
+.main {
+    border-radius: 5px;
+    background-color: #f7f7ff;
+}
+
+form,
+.block {
+    overflow: auto;
+}
+
+h1 {
+    text-align: center;
+}
+
+hr {
+    margin-right: 15%;
+    margin-left: 15%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    color: #444;
+}
+
+label {
+    margin-bottom: 1%;
+    margin-left: 5%;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+table tbody tr th {
+    width: 3rem;
+    text-align: left;
+}
+
+input[type="submit"],
+button[id="startStopButton"] {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    background-color: #444;
+    border: 0 solid transparent;
+    border-radius: 4px;
+    color: #ffa027;
+    font-size: 1.2em;
+    font-weight: bold;
+    width: 180px;
+    height: 40px;
+    margin-left: 10%;
+}
+
+input[type="text"]:focus {
+    border-color: #f05000;
+    border-radius: 5px;
+}
+
+button[id="startStopButton"]:hover,
+input[type="submit"]:hover
+{
+    color: #444;
+    background-color: #ffa027;
+}
+
+.sub {
+    font-style: italic;
+    color: #f05000;
+    text-align: center;
+}
+
+.block {
+    margin-left: 5%;
+    width: 90%;
+}
+
+.cell {
+    width: 280px;
+    height: 160px;
+    float: left;
+}
+
+.graph {
+    width:49%; 
+    height: 500px; 
+    display:inline-block
+}
