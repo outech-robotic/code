@@ -11,55 +11,55 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
 </head>
 <body>
-    <div class="main">
-<h1>PID Settings</h1>
-<h3 class="sub">N'oublie pas de sauvegarder les coefficients...</h3>
-<form method="POST" action="{{ url_for('pid_view') }}">
-    {{ form.hidden_tag() }}
+<div class="main">
+    <h1>PID Settings</h1>
+    <h3 class="sub">N'oublie pas de sauvegarder les coefficients...</h3>
+    <form method="POST" action="{{ url_for('pid_view') }}">
+        {{ form.hidden_tag() }}
 
-    <div class="block">
-        {% for field in form if field.widget.input_type != 'hidden' %}
+        <div class="block">
+            {% for field in form if field.widget.input_type != 'hidden' %}
 
-        {% if field.errors %}
-        <div style="color:red">
-            {% endif %}
-            
-            <div class="cell">
-            {{ field.label }}
-            {{ field }}
+            {% if field.errors %}
+            <div style="color:red">
+                {% endif %}
+
+                <div class="cell">
+                    {{ field.label }}
+                    {{ field }}
+                </div>
+
+                {% if form.errors %}
             </div>
-
-            {% if form.errors %}
+            {% endif %}
+            {% endfor %}
         </div>
-        {% endif %}
-        {% endfor %}
-    </div>
-    <input type="submit" value="Submit">
-</form>
-<hr>
-<form method="POST" action="{{ url_for('order_view') }}">
-    {{ form.hidden_tag() }}
+        <input type="submit" value="Submit">
+    </form>
+    <hr>
+    <form method="POST" action="{{ url_for('order_view') }}">
+        {{ form.hidden_tag() }}
 
-    <div class="block">
-        <table>
-            <tbody>
+        <div class="block">
+            <table>
+                <tbody>
                 {% for field in order_form if field.widget.input_type != 'hidden' %}
                 <tr>
                     <th> {{ field.label }} </th>
                     <td> {{ field }} </td>
                 </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <input type="submit" value="Submit">
-</form>
-<hr>
-<button id="startStopButton" class="start-button">Start capture</button>
+                </tbody>
+            </table>
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+    <hr>
+    <button id="startStopButton" class="start-button">Start capture</button>
 
-<hr>
-<div id="left" class="graph" ></div>
-<div id="right" class="graph" ></div>
+    <hr>
+    <div id="left" class="graph" ></div>
+    <div id="right" class="graph" ></div>
 </div>
 
 <script>
