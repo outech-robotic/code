@@ -18,11 +18,28 @@ class PID:
     d: float
 
 
+@dataclass
+class Cap:
+    SpeedTranslation: float
+    SpeedRotation   : float
+    SpeedWheel      : float
+    AccelWheel      : float
+
+
 def to_pid(tbl: dict) -> PID:
     return PID(
         p=tbl['P'],
         i=tbl['I'],
         d=tbl['D'],
+    )
+
+
+def to_cap(tbl: dict) -> Cap:
+    return Cap(
+        SpeedTranslation=tbl['cap_speed_translation'],
+        SpeedRotation=tbl['cap_speed_rotation'],
+        SpeedWheel=tbl['cap_speed_wheel'],
+        AccelWheel=tbl['cap_accel_wheel'],
     )
 
 
@@ -45,7 +62,8 @@ class InterfaceAdapter(ABC):
     @abstractmethod
     def on_pid_submission(self,
                           speed_left: PID, speed_right: PID,
-                          pos_left: PID, pos_right: PID) -> None:
+                          translation: PID, rotation: PID,
+                          cap: Cap) -> None:
         """ PID submission. """
 
     @abstractmethod
@@ -55,6 +73,10 @@ class InterfaceAdapter(ABC):
                             angle: Optional[float]):
         """ Order submission. """
 
+    @abstractmethod
+    def on_stop_button(self):
+        """ On stop button pressed."""
+
 
 def get_pid_coefs():
     try:
@@ -62,10 +84,16 @@ def get_pid_coefs():
             return json.loads(f.read())
     except FileNotFoundError:
         return {
-            'PosLeft': {'P': 1.0, 'I': 2.0, 'D': 3.0, },
-            'PosRight': {'P': 4.0, 'I': 5.0, 'D': 6.0, },
+            'Translation': {'P': 1.0, 'I': 2.0, 'D': 3.0, },
+            'Rotation': {'P': 4.0, 'I': 5.0, 'D': 6.0, },
             'SpeedLeft': {'P': 7.0, 'I': 8.0, 'D': 9.0, },
             'SpeedRight': {'P': 10.0, 'I': 11.0, 'D': 12.0, },
+            'CapForm': {
+                'cap_speed_translation': -42,
+                'cap_speed_rotation': -42,
+                'cap_speed_wheel': -42,
+                'cap_accel_wheel': -42,
+            }
         }
 
 
@@ -78,22 +106,6 @@ def get_saved_pid_form():
     return form
 
 
-def get_graph():
-    return {
-        "labels": [],
-        "datasets": [
-            {
-                "label": 'left encoder',
-                "data": [],
-                "borderColor": 'blue',
-                "backgroundColor": 'rgba(0, 0, 0, 0)',
-                "fill": False,
-                "lineTension": 0
-            },
-        ]
-    }
-
-
 def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
     @app.route('/pid', methods=['GET', 'POST'])
     def pid_view():
@@ -103,20 +115,21 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
         form = AllPIDForms()
         if form.validate_on_submit():
             with open(FILE_NAME, "w") as f:
-                f.write(json.dumps(form.data))
+                f.write(json.dumps(form.data, indent=2))
 
             interface.on_pid_submission(
                 speed_left=to_pid(form.data['SpeedLeft']),
                 speed_right=to_pid(form.data['SpeedRight']),
-                pos_right=to_pid(form.data['PosRight']),
-                pos_left=to_pid(form.data['PosLeft']),
+                translation=to_pid(form.data['Translation']),
+                rotation=to_pid(form.data['Rotation']),
+                cap=to_cap(form.data['CapForm']),
             )
 
         return render_template(
             'index.html',
-            graph=get_graph(),
             form=form,
             order_form=OrderForm(),
+            capture=False,
         )
 
     @app.route('/order', methods=['GET', 'POST'])
@@ -134,16 +147,20 @@ def register_views(app: Flask, socketio: SocketIO, interface: InterfaceAdapter):
 
         return render_template(
             'index.html',
-            graph=get_graph(),
             form=get_saved_pid_form(),
             order_form=form,
+            capture=True,
         )
 
     @app.route('/')
     def index():
         return render_template(
             'index.html',
-            graph=get_graph(),
             form=get_saved_pid_form(),
-            order_form=OrderForm()
+            order_form=OrderForm(),
+            capture=False,
         )
+
+    @socketio.on('STOP')
+    def on_stop(_):
+        interface.on_stop_button()

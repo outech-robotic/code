@@ -52,146 +52,151 @@
                 </tbody>
             </table>
         </div>
+
         <input type="submit" value="Submit">
     </form>
     <hr>
-    <button id="startStopButton" class="start-button">Start capture</button>
+    <button id="startStopButton">{{ 'Stop' if capture else 'Start' }} capture</button>
+    <button id="stop_button"><img
+            style="width: 25%"
+            src="https://www.cdiscount.com/pdt2/6/7/5/1/550x550/fie3700804174675/rw/lampe-gyrophare-projecteur-rouge-rotatif-effet-pom.jpg"/>
+    </button>
+    <hr>
+    <span style="color:darkred"><strong>R</strong>ouge (<strong>R</strong>ed) = <strong>R</strong>ight (droite)<br/></span>
+    <span style="color:darkblue">B<strong>l</strong>ue (B<strong>l</strong>eu) = <strong>L</strong>eft (gauche)<br/></span>
+    La consigne est en pointillés.
+    <div id="speed" style="width:99%; height: 500px; display:inline-block"></div>
+    <div id="pos" style="width:99%; height: 500px; display:inline-block"></div>
+    <i>Florian, pour zoomer, maintiens cliqué sur ta souris et selectionne une partie du graphe. Bisous, ton petit fils.</i>
 
     <hr>
-    <div id="left" class="graph" ></div>
-    <div id="right" class="graph" ></div>
 </div>
 
-<script>
-    window.onload = function () {
-        function createGraph(name, color1, color2) {
-            var data = [];
-            var dataSeries1 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: color1,
-                showInLegend: true,
-                name: "speed-"+name,
-                legendMarkerColor: color1,
-            };
-            var speedPoints = [];
-            dataSeries1.dataPoints = speedPoints;
-            data.push(dataSeries1);
-            var dataSeries2 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: "dark" + color1,
-                lineDashType: "longDash",
-            };
-            var speedSetPoints = [];
-            dataSeries2.dataPoints = speedSetPoints;
-            data.push(dataSeries2);
-            //////////////////////////
-            var dataSeries3 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: color2,
-                axisYType: "secondary",
-                showInLegend: true,
-                name: "position-"+name,
-                legendMarkerColor: color2,
-            };
-            var posPoints = [];
-            dataSeries3.dataPoints = posPoints;
-            data.push(dataSeries3);
-            var dataSeries4 = {
-                type: "line",
-                markerSize: 0,
-                lineColor: "dark" + color2,
-                lineDashType: "longDash",
-                axisYType: "secondary",
-            };
-            var posSetPoints = [];
-            dataSeries4.dataPoints = posSetPoints;
-            data.push(dataSeries4);
 
-            var options = {
+<script>
+    var turn = 0;
+    var doABarrelRoll = function () {
+        turn++;
+        document.getElementById("dbr").remove();
+        var a = "-webkit-", b = 'transform:rotate(' + turn + 'turn);', c = 'transition:1s;';
+        document.head.innerHTML += '<style id="dbr">body{' + a + b + a + c + b + c
+    };
+
+    window.onload = function () {
+
+        function buildDataSeries(name, color, lineDashType, secondary) {
+            var dataSeries = {
+                type: "line",
+                markerSize: 0,
+                lineColor: color,
+                lineDashType: lineDashType,
+                name: "speed-" + name,
+                axisYType: secondary ? "secondary" : "primary",
+            };
+            dataSeries.dataPoints = [];
+
+            function addPoint(x, y) {
+                dataSeries.dataPoints.push({
+                    x: x,
+                    y: y,
+                });
+            }
+
+            function clear() {
+                dataSeries.dataPoints.length = 0;
+            }
+
+            return [dataSeries, clear, addPoint];
+        }
+
+        function startOnTimeZero(f) {
+            var firstTimeValue = undefined;
+
+            function g(x, y, setpoint) {
+                if (firstTimeValue === undefined) {
+                    firstTimeValue = x;
+                }
+                return f(x - firstTimeValue, y);
+            }
+
+            return g
+        }
+
+        function createGraph(name, colorLeft, colorRight) {
+            var [dataSeriesLeft, clearLeft, addLeft] = buildDataSeries("left", colorLeft, "solid", false);
+            var [dataSeriesRight, clearRight, addRight] = buildDataSeries("right", colorRight, "solid", false);
+
+            var [dataSeriesSetpointLeft, clearSetpointLeft, addSetpointLeft] = buildDataSeries("setpoint_left", "dark" + colorLeft, "longDash", false);
+            var [dataSeriesSetpointRight, clearSetpointRight, addSetpointRight] = buildDataSeries("setpoint_right", "dark" + colorRight, "longDash", false);
+
+            function clear() {
+                clearLeft();
+                clearRight();
+                clearSetpointLeft();
+                clearSetpointRight();
+                chart.render()
+            }
+
+            addLeft = startOnTimeZero(addLeft);
+            addRight = startOnTimeZero(addRight);
+            addSetpointLeft = startOnTimeZero(addSetpointLeft);
+            addSetpointRight = startOnTimeZero(addSetpointRight);
+
+            function addLeftPoint(x, y, setpoint) {
+                addLeft(x, y);
+                addSetpointLeft(x, setpoint);
+            }
+
+            function addRightPoint(x, y, setpoint) {
+                addRight(x, y);
+                addSetpointRight(x, setpoint);
+            }
+
+            var chart = new CanvasJS.Chart(name, {
                 zoomEnabled: true,
                 animationEnabled: false,
                 title: {
                     text: name,
                 },
-
                 axisY: {
-                    title: "position",
+                    title: "left",
                     includeZero: false,
                     lineThickness: 1
                 },
                 axisY2: {
-                    title: "speed",
+                    title: "right",
                     includeZero: false,
                     lineThickness: 1,
                 },
-                data: data,
-            };
-            var chart = new CanvasJS.Chart(name, options);
+                data: [
+                    dataSeriesLeft,
+                    dataSeriesRight,
+                    dataSeriesSetpointLeft,
+                    dataSeriesSetpointRight,
+                ],
+            });
 
-            var firstSpeedX = undefined;
-
-            function addSpeedPoint(x, y, setpoint) {
-                if (speedPoints.length === 0) {
-                    firstSpeedX = x;
-                }
-                speedSetPoints.push({
-                    x: x - firstSpeedX,
-                    y: setpoint,
-                });
-                speedPoints.push({
-                    x: x - firstSpeedX,
-                    y: y,
-                });
-                if (speedPoints.length % 25 === 0) {
-                    chart.render()
-                }
-            }
-
-            var firstPosX = undefined;
-
-            function addPosPoint(x, y, setpoint) {
-                if (posPoints.length === 0) {
-                    firstPosX = x;
-                }
-                posSetPoints.push({
-                    x: x - firstPosX,
-                    y: setpoint,
-                });
-                posPoints.push({
-                    x: x - firstPosX,
-                    y: y,
-                });
-                if (posPoints.length % 25 === 0) {
-                    chart.render()
-                }
-            }
-
-            function clear() {
-                speedPoints.length = 0;
-                speedSetPoints.length = 0;
-                posPoints.length = 0;
-                posSetPoints.length = 0;
+            setInterval(renderChart, 1000 / 24); // 24 FPS for a cinematic experience.
+            function renderChart() {
                 chart.render()
             }
 
-            return [addSpeedPoint, addPosPoint, clear];
-        }
-        
-        var [addPointLeftSpeedChart, addPointLeftPosChart, clearLeftSpeedChart] = createGraph("left", "blue", "green");
-        var [addPointRightSpeedChart, addPointRightPosChart, clearRightSpeedChart] = createGraph("right", "red", "orange");
 
-        var capture = false;
+            return [addLeftPoint, addRightPoint, clear];
+        }
+
+        var [addLeftPos, addRightPos, clearPos] = createGraph("pos", "blue", "red");
+        var [addLeftSpeed, addRightSpeed, clearSpeed] = createGraph("speed", "blue", "red");
+
+        var capture = {{ 'true' if capture else 'false' }};
         var button = document.getElementById("startStopButton")
         button.onclick = function () {
             capture = !capture;
             if (capture) {
                 button.innerText = "Stop capture";
                 button.className = "stop-button";
-                clearLeftSpeedChart();
-                clearRightSpeedChart();
+                clearSpeed();
+                clearPos();
             } else {
                 button.innerText = "Start capture";
                 button.className = "start-button";
@@ -199,29 +204,37 @@
         };
 
         var socket = io.connect(null, {rememberTransport: false});
+        var stop_button = document.getElementById("stop_button");
+        var soundPath = 'https://www.myinstants.com/media/sounds/peproll1.mp3';
+        var sound = new Audio(soundPath);
+        stop_button.onclick = function () {
+            socket.emit("STOP", null);
+            //doABarrelRoll();
+            //sound.play();
+        };
         socket.on('pos_left', function (msg) {
             if (!capture) {
                 return
             }
-            addPointLeftPosChart(msg[0], msg[1], msg[2])
+            addLeftPos(msg[0], msg[1], msg[2])
         });
         socket.on('pos_right', function (msg) {
             if (!capture) {
                 return
             }
-            addPointRightPosChart(msg[0], msg[1], msg[2])
+            addRightPos(msg[0], msg[1], msg[2])
         });
         socket.on('speed_left', function (msg) {
             if (!capture) {
                 return
             }
-            addPointLeftSpeedChart(msg[0], msg[1], msg[2])
+            addLeftSpeed(msg[0], msg[1], msg[2])
         });
         socket.on('speed_right', function (msg) {
             if (!capture) {
                 return
             }
-            addPointRightSpeedChart(msg[0], msg[1], msg[2])
+            addRightSpeed(msg[0], msg[1], msg[2])
         });
 
     }

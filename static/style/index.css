@@ -89,8 +89,8 @@ input[type="submit"] {
 }
 
 .cell {
-    width: 280px;
-    height: 160px;
+    width: 300px;
+    height: 200px;
     float: left;
 }
 
