@@ -19,6 +19,12 @@ form,
     width: 90%;
 }
 
+.container {
+    margin-left: 5%;
+    margin-right: 5%;
+    font-size: 1.8rem;
+}
+
 h1 {
     text-align: center;
 }
@@ -67,11 +73,10 @@ button[id="startStopButton"] {
     margin-bottom: 6px;
     border: 0 solid transparent;
     border-radius: 4px;
-    font-size: 1.2em;
+    font-size: 1.8rem;
     font-weight: bold;
     width: 180px;
     height: 40px;
-    margin-left: 10%;
 }
 
 .stop-button,
@@ -86,6 +91,15 @@ input[type="submit"]:hover {
 input[type="submit"] {
     color: #ffa027;
     background-color: #444;
+}
+
+.emergency-button {
+    background-color: white;
+    margin-left: 5%;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    border: 5 #444;
+    border-radius: 10px;
 }
 
 .cell {
