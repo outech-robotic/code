@@ -6,9 +6,7 @@ import uuid
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Callable, DefaultDict, Awaitable
-
 import can
-
 from src.logger import LOGGER
 
 

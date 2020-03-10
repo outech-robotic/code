@@ -1,14 +1,24 @@
-from src.robot.controller.sensor.rplidar import LidarController
-from src.simulation.controller.probe import SimulationProbe
-import serial.tools.list_ports as port_list
+# pylint: disable=W0703
+# mypy: ignore-errors
+"""
+Lidar adapter module.
+"""
+
 from math import pi
 import threading
+
 import rplidar
+import serial.tools.list_ports as port_list
+
+from src.robot.controller.sensor.rplidar import LidarController
+from src.simulation.controller.probe import SimulationProbe
 
 
 class RplidarAdapter:
+    """Rplidar adapter is an interface for receiving positions of obstacles from an rplidar."""
 
-    def __init__(self, lidar_controller: LidarController, simulation_probe: SimulationProbe):
+    def __init__(self, lidar_controller: LidarController,
+                 simulation_probe: SimulationProbe):
         self.lidar_controller = lidar_controller
         self.simulation_probe = simulation_probe
         self.lidar = None
@@ -17,6 +27,7 @@ class RplidarAdapter:
         self.__start_thread_lidar_controller()
 
     def __init_lidar(self):
+        """ Start and connect the rplidar. """
         if self.lidar is None:
             try:
                 self.lidar = rplidar.RPLidar(port_list.comports()[0].device)
@@ -26,24 +37,30 @@ class RplidarAdapter:
                 self.lidar = None
 
     def __loop(self):
+        """ Loop to receive the obstacles from the rplidar and save them in the controller. """
         try:
             if self.lidar is not None:
-                for scans in self.lidar.iter_scans(scan_type='express', max_buf_meas=3500):  # boucle infinie
+                for scans in self.lidar.iter_scans(
+                        scan_type='express',
+                        max_buf_meas=3500):  # boucle infinie
                     self.lidar_controller.reset_detection()
-                    for _, a, r in scans:
-                        a = a*pi/180  # to radian
-                        self.lidar_controller.append_detection((a, r))
+                    for _, angle, radius in scans:
+                        angle = angle * pi / 180  # to radian
+                        self.lidar_controller.append_detection((angle, radius))
             else:
                 while True:
-                    self.lidar_controller.set_detection([(500, 500), (1000, 1000)])
+                    self.lidar_controller.set_detection([(500, 500),
+                                                         (1000, 1000)])
         except Exception:
             self.__stop_lidar()
 
     def __start_thread_lidar_controller(self):
+        """ Start a thread to start the rplidar. """
         thread_lidar = threading.Thread(target=self.__loop)
         thread_lidar.start()
 
     def __stop_lidar(self):
+        """ Stop the rplidar. """
         if self.lidar is not None:
             self.lidar.stop()
             self.lidar.stop_motor()

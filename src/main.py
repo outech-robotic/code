@@ -1,3 +1,4 @@
+# pylint: disable=W0612, E0401
 """
 Main module.
 """
@@ -43,7 +44,7 @@ CONFIG = Configuration(
     robot_length=240,
     field_shape=(3000, 2000),
     color=Color.BLUE,
-    wheel_radius=73.8/2,
+    wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
 )
@@ -97,12 +98,11 @@ def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
     i.provide('simulation_runner', SimulationRunner)
     i.provide(
         'simulation_state',
-        SimulationState(
-            time=0,
-            cups=[],
-            left_tick=0,
-            right_tick=0,
-            last_position_update=0))
+        SimulationState(time=0,
+                        cups=[],
+                        left_tick=0,
+                        right_tick=0,
+                        last_position_update=0))
     i.provide('simulation_gateway', SimulationGateway)
 
     i.provide('http_client', HTTPClient)
@@ -191,7 +191,8 @@ async def main() -> None:
 if __name__ == '__main__':
 
     if sys.platform in ('win32', 'cygwin', 'cli'):
-        LOGGER.get().warn("uvloop not installed, running on a unsupported platform")
+        LOGGER.get().warn(
+            "uvloop not installed, running on a unsupported platform")
 
     else:
         import uvloop
