@@ -4,7 +4,7 @@ Test motion handler module.
 import pytest
 from pytest import fixture
 
-from src.robot.handler.can_handler.motion import MotionHandler
+from src.robot.handler.motion.motion import MotionHandler
 from src.util.encoding import packet
 
 
