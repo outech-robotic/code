@@ -3,23 +3,24 @@ Main module.
 """
 import asyncio
 import math
+import sys
 import os
-
 import can
-import uvloop
+from src.logger import LOGGER
 
-from src.robot.can_adapter.adapter import CANAdapter, LoopbackCANAdapter, PyCANAdapter
-from src.robot.controller.localization import LocalizationController
-from src.robot.controller.motion import MotionController
-from src.robot.controller.odometry import OdometryController
-from src.robot.controller.strategy import StrategyController
-from src.robot.controller.symmetry import SymmetryController
-from src.robot.entity.color import Color
-from src.robot.entity.configuration import Configuration
-from src.robot.entity.geometry import Segment
-from src.robot.entity.vector import Vector2
-from src.robot.gateway.motion import MotionGateway
-from src.robot.handler.motion import MotionHandler
+from src.robot.adapter.bus.can import CANAdapter, LoopbackCANAdapter, PyCANAdapter
+from src.robot.controller.motion.localization import LocalizationController
+from src.robot.controller.motion.motion import MotionController
+from src.robot.controller.motion.odometry import OdometryController
+from src.robot.controller.motion.strategy import StrategyController
+from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.entity.motion.color import Color
+from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.motion.geometry import Segment
+from src.robot.entity.motion.vector import Vector2
+from src.robot.gateway.motion.motion import MotionGateway
+from src.robot.handler.motion.motion import MotionHandler
+
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.event_queue import EventQueue
@@ -30,6 +31,8 @@ from src.simulation.entity.simulation_configuration import SimulationConfigurati
 from src.simulation.entity.simulation_state import SimulationState
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
+from src.robot.adapter.sensor.rplidar import RplidarAdapter
+from src.robot.controller.sensor.rplidar import LidarController
 from src.util import can_id
 from src.util.dependency_container import DependencyContainer
 
@@ -40,7 +43,7 @@ CONFIG = Configuration(
     robot_length=240,
     field_shape=(3000, 2000),
     color=Color.BLUE,
-    wheel_radius=70 / 2,
+    wheel_radius=73.8/2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
 )
@@ -63,8 +66,11 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('motion_gateway', MotionGateway)
 
+    i.provide('rplidar_adapter', RplidarAdapter)
+    i.provide('lidar_controller', LidarController)
+
     event_loop = asyncio.get_event_loop()
-    i.provide('loop', event_loop)
+    i.provide('event_loop', event_loop)
 
 
 def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
@@ -96,8 +102,7 @@ def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
             cups=[],
             left_tick=0,
             right_tick=0,
-            last_position_update=0,
-        ))
+            last_position_update=0))
     i.provide('simulation_gateway', SimulationGateway)
 
     i.provide('http_client', HTTPClient)
@@ -137,6 +142,9 @@ async def main() -> None:
     is_simulation = os.environ.get('OUTECH_SIMULATION',
                                    'true').lower() == 'true'
     i = _get_container(is_simulation)
+
+    rplidar_adapter: RplidarAdapter = i.get('rplidar_adapter')
+    lidar_controller: LidarController = i.get('lidar_controller')
 
     can_adapter: CANAdapter = i.get('can_adapter')
     motion_handler: MotionHandler = i.get('motion_handler')
@@ -181,5 +189,13 @@ async def main() -> None:
 
 
 if __name__ == '__main__':
-    uvloop.install()  # Better event loop.
+
+    if sys.platform in ('win32', 'cygwin', 'cli'):
+        LOGGER.get().warn("uvloop not installed, running on a unsupported platform")
+
+    else:
+        import uvloop
+        uvloop.install()  # Better event loop.
+        LOGGER.get().info("uvloop installed")
+
     asyncio.run(main())

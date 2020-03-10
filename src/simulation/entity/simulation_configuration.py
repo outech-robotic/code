@@ -6,8 +6,8 @@ from typing import List
 
 from attr import dataclass
 
-from src.robot.entity.geometry import Segment
-from src.robot.entity.type import RadianPerSec, Hz
+from src.robot.entity.motion.geometry import Segment
+from src.robot.entity.motion.type import RadianPerSec, Hz
 
 
 @dataclass(frozen=True)

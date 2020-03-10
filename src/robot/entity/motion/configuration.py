@@ -5,9 +5,9 @@ from typing import Tuple
 
 from attr import dataclass
 
-from src.robot.entity.color import Color
-from src.robot.entity.type import Radian, Millimeter
-from src.robot.entity.vector import Vector2
+from src.robot.entity.motion.color import Color
+from src.robot.entity.motion.type import Radian, Millimeter
+from src.robot.entity.motion.vector import Vector2
 
 
 # pylint: disable=too-many-instance-attributes

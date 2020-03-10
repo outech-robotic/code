@@ -18,6 +18,7 @@ pytest-cov = "*"
 requests = "*"
 python-can = "*"
 colorama = "*"
+rplidar-roboticia = "*"
 
 [requires]
 python_version = "3.7"

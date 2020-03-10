@@ -1,8 +1,8 @@
 """
 Test for geometry module.
 """
-from src.robot.entity.geometry import Segment, Ray
-from src.robot.entity.vector import Vector2
+from src.robot.entity.motion.geometry import Segment, Ray
+from src.robot.entity.motion.vector import Vector2
 from src.util.geometry.intersection import (ray_segment_intersection,
                                             ray_segments_intersection,
                                             segment_segment_intersection,

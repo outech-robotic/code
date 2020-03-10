@@ -4,7 +4,7 @@ Test for vector.
 import math
 from math import sqrt
 
-from src.robot.entity.vector import Vector2
+from src.robot.entity.motion.vector import Vector2
 
 
 def test_properties():

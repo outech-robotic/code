@@ -4,8 +4,8 @@ Geometry module.
 
 import math
 
-from src.robot.entity.type import Radian
-from src.robot.entity.vector import Vector2
+from src.robot.entity.motion.type import Radian
+from src.robot.entity.motion.vector import Vector2
 
 
 def forward(angle: Radian) -> Vector2:

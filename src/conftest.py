@@ -6,16 +6,16 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from src.robot.can_adapter.adapter import CANAdapter
-from src.robot.controller.localization import LocalizationController
-from src.robot.controller.odometry import OdometryController
-from src.robot.controller.symmetry import SymmetryController
-from src.robot.entity.color import Color
-from src.robot.entity.configuration import Configuration
-from src.robot.entity.geometry import Segment
-from src.robot.entity.vector import Vector2
-from src.robot.gateway.motion import MotionGateway
-from src.robot.handler.motion import MotionHandler
+from src.robot.adapter.bus.can import CANAdapter
+from src.robot.controller.motion.localization import LocalizationController
+from src.robot.controller.motion.odometry import OdometryController
+from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.entity.motion.color import Color
+from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.motion.geometry import Segment
+from src.robot.entity.motion.vector import Vector2
+from src.robot.gateway.motion.motion import MotionGateway
+from src.robot.handler.motion.motion import MotionHandler
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.controller.probe import SimulationProbe
 from src.simulation.controller.replay_saver import ReplaySaver

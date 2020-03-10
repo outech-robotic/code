@@ -3,10 +3,10 @@ Motion controller module.
 """
 import math
 
-from src.robot.controller.localization import LocalizationController
-from src.robot.controller.symmetry import SymmetryController
-from src.robot.entity.vector import Vector2
-from src.robot.gateway.motion import MotionGateway
+from src.robot.controller.motion.localization import LocalizationController
+from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.entity.motion.vector import Vector2
+from src.robot.gateway.motion.motion import MotionGateway
 
 
 class MotionController:

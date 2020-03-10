@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import can
 import pytest
 
-from src.robot.can_adapter.adapter import PyCANAdapter
+from src.robot.adapter.bus.can import PyCANAdapter
 
 
 async def stub_function():

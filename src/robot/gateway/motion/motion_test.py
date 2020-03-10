@@ -3,7 +3,7 @@ Test for motion gateway.
 """
 import pytest
 
-from src.robot.gateway.motion import MotionGateway
+from src.robot.gateway.motion.motion import MotionGateway
 from src.util.can_id import PROPULSION_MOVEMENT_ORDER
 
 

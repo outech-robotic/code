@@ -2,7 +2,7 @@
 Motion gateway module.
 """
 from src.logger import LOGGER
-from src.robot.can_adapter.adapter import CANAdapter
+from src.robot.adapter.bus.can import CANAdapter
 from src.util import can_id
 from src.util.encoding import packet
 

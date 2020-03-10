@@ -4,10 +4,10 @@ Used to symmetrize entities
 """
 from math import pi
 
-from src.robot.entity.color import Color
-from src.robot.entity.configuration import Configuration
-from src.robot.entity.type import Radian
-from src.robot.entity.vector import Vector2
+from src.robot.entity.motion.color import Color
+from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.motion.type import Radian
+from src.robot.entity.motion.vector import Vector2
 
 
 class SymmetryController:

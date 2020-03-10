@@ -3,10 +3,10 @@ Test for symmetry controller
 """
 from math import pi
 
-from src.robot.controller.symmetry import SymmetryController
-from src.robot.entity.color import Color
-from src.robot.entity.configuration import Configuration
-from src.robot.entity.vector import Vector2
+from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.entity.motion.color import Color
+from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.motion.vector import Vector2
 
 
 def get_symmetry_controller(color: Color) -> SymmetryController:

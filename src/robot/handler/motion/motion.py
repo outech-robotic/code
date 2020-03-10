@@ -2,7 +2,7 @@
 Motion handler module.
 """
 from src.logger import LOGGER
-from src.robot.controller.localization import LocalizationController
+from src.robot.controller.motion.localization import LocalizationController
 from src.util.encoding import packet
 
 

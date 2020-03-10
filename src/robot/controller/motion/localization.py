@@ -6,12 +6,12 @@ import math
 from dataclasses import dataclass
 
 from src.logger import LOGGER
-from src.robot.controller.odometry import OdometryController
-from src.robot.controller.symmetry import SymmetryController
-from src.robot.entity.configuration import Configuration
-from src.robot.entity.type import Direction, Radian, Millimeter
-from src.robot.entity.vector import Vector2
-from src.robot.gateway.motion import MotionGateway
+from src.robot.controller.motion.odometry import OdometryController
+from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.motion.type import Direction, Radian, Millimeter
+from src.robot.entity.motion.vector import Vector2
+from src.robot.gateway.motion.motion import MotionGateway
 from src.simulation.controller.probe import SimulationProbe
 from src.util.geometry.direction import right, backward, left, forward
 

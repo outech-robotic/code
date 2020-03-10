@@ -3,7 +3,7 @@ Geometry entities.
 """
 from dataclasses import dataclass
 
-from src.robot.entity.vector import Vector2
+from src.robot.entity.motion.vector import Vector2
 
 
 @dataclass(frozen=True)
