@@ -8,7 +8,7 @@ from src.robot.handler.motion.motion import MotionHandler
 from src.util.encoding import packet
 
 
-@fixture(name='motion')
+@fixture(name='motion_handler')
 def motion_handler_setup(localization_controller_mock):
     """
     Motion handler.
