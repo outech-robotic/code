@@ -22,7 +22,7 @@ form,
 .container {
     margin-left: 5%;
     margin-right: 5%;
-    font-size: 1.8rem;
+    font-size: 20px;
 }
 
 h1 {
@@ -47,7 +47,7 @@ hr {
 label {
     margin-bottom: 1%;
     margin-left: 5%;
-    font-size: 1.5rem;
+    font-size: 20px;
     font-weight: bold;
 }
 
@@ -58,7 +58,7 @@ label::selection {
 }
 
 table tbody tr th {
-    width: 3rem;
+    width: 160px;
     text-align: left;
 }
 
@@ -73,7 +73,7 @@ button[id="startStopButton"] {
     margin-bottom: 6px;
     border: 0 solid transparent;
     border-radius: 4px;
-    font-size: 1.8rem;
+    font-size: 20px;
     font-weight: bold;
     width: 180px;
     height: 40px;
@@ -111,9 +111,6 @@ input[type="submit"] {
 .graph {
     width:49%; 
     height: 500px; 
-    display:inline-block
-}
-
-.canvasjs-chart-canvas {
+    display:inline-block;
     background-color: #f7f7ff;
 }
