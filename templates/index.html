@@ -8,51 +8,72 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"
             integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I="
             crossorigin="anonymous"></script>
-    <style id="dbr"></style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
 </head>
 <body>
-<form method="POST" action="{{ url_for('pid_view') }}">
-    {{ form.hidden_tag() }}
+<div class="main">
+    <h1>PID Settings</h1>
+    <h3 class="sub">N'oublie pas de sauvegarder les coefficients...</h3>
+    <form method="POST" action="{{ url_for('pid_view') }}">
+        {{ form.hidden_tag() }}
 
-    <div class="block">
-        {% for field in form if field.widget.input_type != 'hidden' %}
+        <div class="block">
+            {% for field in form if field.widget.input_type != 'hidden' %}
 
-        {% if field.errors %}
-        <div style="color:red">
+            {% if field.errors %}
+            <div style="color:red">
+                {% endif %}
+
+                <div class="cell">
+                    {{ field.label }}
+                    {{ field }}
+                </div>
+
+                {% if form.errors %}
+            </div>
             {% endif %}
-
-            {{ field.label }}
-            {{ field }}
-
-            {% if form.errors %}
+            {% endfor %}
         </div>
-        {% endif %}
-        {% endfor %}
-    </div>
-</form>
-<hr>
-<form method="POST" action="{{ url_for('order_view') }}">
-    {{ form.hidden_tag() }}
+        <input type="submit" value="Submit">
+    </form>
+    <hr>
+    <form method="POST" action="{{ url_for('order_view') }}">
+        {{ form.hidden_tag() }}
 
-    <div class="block">
-        {% for field in order_form if field.widget.input_type != 'hidden' %}
-        {{ field.label }} {{ field }}<br/>
-        {% endfor %}
+        <div class="block">
+            <table>
+                <tbody>
+                {% for field in order_form if field.widget.input_type != 'hidden' %}
+                <tr>
+                    <th> {{ field.label }} </th>
+                    <td> {{ field }} </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <input type="submit" value="Submit">
+    </form>
+    <hr>
+    <div class="container">
+        <button id="startStopButton" class="start-button">{{ 'Stop' if capture else 'Start' }} capture</button>
+        <button id="stop_button" class="emergency-button"><img
+            style="width: 25%"
+            src="https://www.cdiscount.com/pdt2/6/7/5/1/550x550/fie3700804174675/rw/lampe-gyrophare-projecteur-rouge-rotatif-effet-pom.jpg"/>
+        </button>
     </div>
-</form>
-<hr>
-<button id="startStopButton">{{ 'Stop' if capture else 'Start' }} capture</button>
-<button id="stop_button"><img
-        style="width: 25%"
-        src="https://www.cdiscount.com/pdt2/6/7/5/1/550x550/fie3700804174675/rw/lampe-gyrophare-projecteur-rouge-rotatif-effet-pom.jpg"/>
-</button>
-<hr>
-<span style="color:darkred"><strong>R</strong>ouge (<strong>R</strong>ed) = <strong>R</strong>ight (droite)<br/></span>
-<span style="color:darkblue">B<strong>l</strong>ue (B<strong>l</strong>eu) = <strong>L</strong>eft (gauche)<br/></span>
-La consigne est en pointillés.
-<div id="speed" style="width:99%; height: 500px; display:inline-block"></div>
-<div id="pos" style="width:99%; height: 500px; display:inline-block"></div>
-<i>Florian, pour zoomer, maintiens cliqué sur ta souris et selectionne une partie du graphe. Bisous, ton petit fils.</i>
+    <hr>
+    <div class="container">
+        <span style="color:darkred"><strong>R</strong>ouge (<strong>R</strong>ed) = <strong>R</strong>ight (droite)<br/></span>
+        <span style="color:darkblue">B<strong>l</strong>ue (B<strong>l</strong>eu) = <strong>L</strong>eft (gauche)<br/></span>
+        <p>La consigne est en pointillés.</p>
+        <div id="speed" class="graph"></div>
+        <div id="pos" class="graph"></div>
+        <i>Florian, pour zoomer, maintiens cliqué sur ta souris et selectionne une partie du graphe. Bisous, ton petit fils.</i>
+    </div>
+    <hr>
+</div>
 
 <script>
     var turn = 0;
@@ -136,6 +157,7 @@ La consigne est en pointillés.
             var chart = new CanvasJS.Chart(name, {
                 zoomEnabled: true,
                 animationEnabled: false,
+                backgroundColor: "transparent",
                 title: {
                     text: name,
                 },
@@ -175,10 +197,12 @@ La consigne est en pointillés.
             capture = !capture;
             if (capture) {
                 button.innerText = "Stop capture";
+                button.className = "stop-button";
                 clearSpeed();
                 clearPos();
             } else {
-                button.innerText = "Start capture"
+                button.innerText = "Start capture";
+                button.className = "start-button";
             }
         };
 
