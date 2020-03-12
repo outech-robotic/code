@@ -5,7 +5,7 @@ import json
 
 from pytest import raises
 
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 from src.util.json_encoder import RobotJSONEncoder
 
 

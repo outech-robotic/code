@@ -3,7 +3,7 @@ Strategy module
 """
 from src.logger import LOGGER
 from src.robot.controller.motion.motion import MotionController
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 
 PATH = [
     (Vector2(200, 795), False),

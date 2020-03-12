@@ -7,7 +7,7 @@ from math import pi
 from src.robot.entity.motion.color import Color
 from src.robot.entity.motion.configuration import Configuration
 from src.robot.entity.motion.type import Radian
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 
 
 class SymmetryController:

@@ -3,7 +3,7 @@ JSON encoder module.
 """
 import json
 
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 
 
 class RobotJSONEncoder(json.JSONEncoder):

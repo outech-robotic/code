@@ -8,7 +8,7 @@ from enum import Enum
 from typing import List
 
 from src.robot.entity.motion.type import Millisecond
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 
 
 class RobotID(str, Enum):

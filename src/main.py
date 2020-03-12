@@ -18,8 +18,8 @@ from src.robot.controller.motion.symmetry import SymmetryController
 from src.robot.controller.sensor.rplidar import LidarController
 from src.robot.entity.motion.color import Color
 from src.robot.entity.motion.configuration import Configuration
-from src.robot.entity.motion.geometry import Segment
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.segment import Segment
+from src.util.geometry.vector import Vector2
 from src.robot.gateway.motion.motion import MotionGateway
 from src.robot.handler.motion.motion import MotionHandler
 from src.simulation.client.http import HTTPClient

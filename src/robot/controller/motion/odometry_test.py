@@ -8,7 +8,7 @@ from pytest import fixture
 from src.robot.controller.motion.odometry import OdometryController
 from src.robot.entity.motion.color import Color
 from src.robot.entity.motion.configuration import Configuration
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 
 TICK_PER_REVOLUTION = 100
 WHEEL_RADIUS = 40

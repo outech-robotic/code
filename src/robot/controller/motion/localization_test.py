@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.robot.controller.motion.localization import LocalizationController
-from src.robot.entity.motion.vector import Vector2
+from src.util.geometry.vector import Vector2
 
 
 # pylint: disable=unused-argument,too-many-arguments
