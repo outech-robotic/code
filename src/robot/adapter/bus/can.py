@@ -54,7 +54,8 @@ class PyCANAdapter(CANAdapter):
                     LOGGER.get().debug('can_adapter_received_msg',
                                        id=msg.arbitration_id,
                                        data=str(msg),
-                                       handler_count=len(self._handlers))
+                                       handler_count=len(
+                                           self._handlers[msg.arbitration_id]))
                     for callback in self._handlers[msg.arbitration_id]:
                         await callback(msg)
 
