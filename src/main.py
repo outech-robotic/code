@@ -4,24 +4,24 @@ Main module.
 """
 import asyncio
 import math
-import sys
 import os
+
 import can
-from src.logger import LOGGER
 
 from src.robot.adapter.bus.can import CANAdapter, LoopbackCANAdapter, PyCANAdapter
+from src.robot.adapter.sensor.rplidar import RplidarAdapter
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.motion import MotionController
 from src.robot.controller.motion.odometry import OdometryController
 from src.robot.controller.motion.strategy import StrategyController
 from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.controller.sensor.rplidar import LidarController
 from src.robot.entity.motion.color import Color
 from src.robot.entity.motion.configuration import Configuration
 from src.robot.entity.motion.geometry import Segment
 from src.robot.entity.motion.vector import Vector2
 from src.robot.gateway.motion.motion import MotionGateway
 from src.robot.handler.motion.motion import MotionHandler
-
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.event_queue import EventQueue
@@ -32,8 +32,6 @@ from src.simulation.entity.simulation_configuration import SimulationConfigurati
 from src.simulation.entity.simulation_state import SimulationState
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
-from src.robot.adapter.sensor.rplidar import RplidarAdapter
-from src.robot.controller.sensor.rplidar import LidarController
 from src.util import can_id
 from src.util.dependency_container import DependencyContainer
 
@@ -189,14 +187,4 @@ async def main() -> None:
 
 
 if __name__ == '__main__':
-
-    if sys.platform in ('win32', 'cygwin', 'cli'):
-        LOGGER.get().warn(
-            "uvloop not installed, running on a unsupported platform")
-
-    else:
-        import uvloop
-        uvloop.install()  # Better event loop.
-        LOGGER.get().info("uvloop installed")
-
     asyncio.run(main())
