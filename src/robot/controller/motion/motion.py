@@ -6,7 +6,6 @@ import math
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.symmetry import SymmetryController
 from src.util.geometry.vector import Vector2
-from src.robot.gateway.motion.motion import MotionGateway
 
 
 class MotionController:
@@ -14,11 +13,9 @@ class MotionController:
     Motion controller.
     """
 
-    def __init__(self, motion_gateway: MotionGateway,
-                 localization_controller: LocalizationController,
+    def __init__(self, localization_controller: LocalizationController,
                  symmetry_controller: SymmetryController):
         self.symmetry_controller = symmetry_controller
-        self.motion_gateway = motion_gateway
         self.localization_controller = localization_controller
 
     async def move_to(self, dest_pos: Vector2, reverse: bool = False) -> None:

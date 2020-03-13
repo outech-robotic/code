@@ -103,7 +103,12 @@ def localization_controller_mock():
     """
     Localization controller mock.
     """
-    return MagicMock(spec=LocalizationController)
+    mock = MagicMock(spec=LocalizationController)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.rotate = MagicMock(return_value=future)
+    mock.move_forward = MagicMock(return_value=future)
+    return mock
 
 
 @fixture
