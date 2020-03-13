@@ -1,11 +1,11 @@
-# pylint: disable=W0703
-# mypy: ignore-errors
+# Until we split the adapter in two, we need a way to catch exceptions for the simulation.
+# pylint: disable=broad-except
 """
 Lidar adapter module.
 """
 
-from math import pi
 import threading
+from math import pi
 
 import rplidar
 import serial.tools.list_ports as port_list
@@ -21,12 +21,12 @@ class RPLIDARAdapter:
                  simulation_probe: SimulationProbe):
         self.lidar_controller = lidar_controller
         self.simulation_probe = simulation_probe
-        self.lidar = None
+        self.lidar: rplidar.RPLidar = None
         simulation_probe.attach("lidar", lambda: self.lidar is not None)
         self.__init_lidar()
         self.__start_thread_lidar_controller()
 
-    def __init_lidar(self):
+    def __init_lidar(self) -> None:
         """ Start and connect the rplidar. """
         if self.lidar is None:
             try:
@@ -36,7 +36,7 @@ class RPLIDARAdapter:
             except Exception:
                 self.lidar = None
 
-    def __loop(self):
+    def __loop(self) -> None:
         """ Loop to receive the obstacles from the rplidar and save them in the controller. """
         try:
             if self.lidar is not None:
@@ -54,12 +54,12 @@ class RPLIDARAdapter:
         except Exception:
             self.__stop_lidar()
 
-    def __start_thread_lidar_controller(self):
+    def __start_thread_lidar_controller(self) -> None:
         """ Start a thread to start the rplidar. """
         thread_lidar = threading.Thread(target=self.__loop)
         thread_lidar.start()
 
-    def __stop_lidar(self):
+    def __stop_lidar(self) -> None:
         """ Stop the rplidar. """
         if self.lidar is not None:
             self.lidar.stop()

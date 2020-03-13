@@ -1,4 +1,6 @@
-# pylint: disable=W0612, E0401
+# CAN adapter needs to be fetched with provider.get, until we invert the dependencies, we need to
+# ignore the unused variables.
+# pylint: disable=unused-variable
 """
 Main module.
 """
