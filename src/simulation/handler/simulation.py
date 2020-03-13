@@ -7,7 +7,7 @@ from typing import Iterator, Tuple
 import numpy
 
 from src.logger import LOGGER
-from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.configuration import Configuration
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.entity.event import EventOrder, EventType
 from src.simulation.entity.simulation_configuration import SimulationConfiguration

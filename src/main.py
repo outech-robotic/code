@@ -8,16 +8,17 @@ import os
 
 import can
 
-from src.robot.adapter.bus.can import CANAdapter, LoopbackCANAdapter, PyCANAdapter
-from src.robot.adapter.sensor.rplidar import RplidarAdapter
+from src.robot.adapter.can.pycan import LoopbackCANAdapter, PyCANAdapter
+from src.robot.adapter.can import CANAdapter
+from src.robot.adapter.lidar.rplidar import RPLIDARAdapter
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.motion import MotionController
 from src.robot.controller.motion.odometry import OdometryController
-from src.robot.controller.motion.strategy import StrategyController
-from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.controller.strategy import StrategyController
+from src.robot.controller.symmetry import SymmetryController
 from src.robot.controller.sensor.rplidar import LidarController
-from src.robot.entity.motion.color import Color
-from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.color import Color
+from src.robot.entity.configuration import Configuration
 from src.util.geometry.segment import Segment
 from src.util.geometry.vector import Vector2
 from src.robot.gateway.motion.motion import MotionGateway
@@ -65,7 +66,7 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('motion_gateway', MotionGateway)
 
-    i.provide('rplidar_adapter', RplidarAdapter)
+    i.provide('rplidar_adapter', RPLIDARAdapter)
     i.provide('lidar_controller', LidarController)
 
     event_loop = asyncio.get_event_loop()
@@ -141,7 +142,7 @@ async def main() -> None:
                                    'true').lower() == 'true'
     i = _get_container(is_simulation)
 
-    rplidar_adapter: RplidarAdapter = i.get('rplidar_adapter')
+    rplidar_adapter: RPLIDARAdapter = i.get('rplidar_adapter')
     lidar_controller: LidarController = i.get('lidar_controller')
 
     can_adapter: CANAdapter = i.get('can_adapter')

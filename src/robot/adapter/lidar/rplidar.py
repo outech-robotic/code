@@ -14,7 +14,7 @@ from src.robot.controller.sensor.rplidar import LidarController
 from src.simulation.controller.probe import SimulationProbe
 
 
-class RplidarAdapter:
+class RPLIDARAdapter:
     """Rplidar adapter is an interface for receiving positions of obstacles from an rplidar."""
 
     def __init__(self, lidar_controller: LidarController,

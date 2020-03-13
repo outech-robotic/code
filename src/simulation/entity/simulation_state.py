@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
-from src.robot.entity.motion.type import Millisecond
+from src.robot.entity.type import Millisecond
 from src.util.geometry.vector import Vector2
 
 

@@ -3,28 +3,13 @@ CAN adapter module.
 """
 import asyncio
 import uuid
-from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Callable, DefaultDict, Awaitable
+
 import can
+
 from src.logger import LOGGER
-
-
-class CANAdapter(ABC):
-    """CAN adapter is an interface for sending and receiving messages from a CAN bus."""
-
-    @abstractmethod
-    async def run(self) -> None:
-        """Run the CAN message processing."""
-
-    @abstractmethod
-    async def send(self, arbitration_id: int, data: bytes) -> None:
-        """Send a message on the bus."""
-
-    @abstractmethod
-    def register_handler(self, arbitration_id: int,
-                         handler: Callable[[bytes], Awaitable[None]]) -> None:
-        """Register a handler."""
+from src.robot.adapter.can import CANAdapter
 
 
 class PyCANAdapter(CANAdapter):

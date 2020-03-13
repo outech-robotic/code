@@ -2,7 +2,7 @@
 Simulation gateway module.
 """
 
-from src.robot.adapter.bus.can import CANAdapter
+from src.robot.adapter.can import CANAdapter
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.util import can_id
 from src.util.encoding import packet

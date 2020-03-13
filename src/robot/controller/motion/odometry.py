@@ -4,8 +4,8 @@ Odemetry module
 import math
 from typing import Tuple
 
-from src.robot.entity.motion.configuration import Configuration
-from src.robot.entity.motion.type import Radian, Millimeter
+from src.robot.entity.configuration import Configuration
+from src.robot.entity.type import Radian, Millimeter
 from src.util.geometry.vector import Vector2
 
 

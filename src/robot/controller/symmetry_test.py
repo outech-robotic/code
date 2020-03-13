@@ -3,9 +3,9 @@ Test for symmetry controller
 """
 from math import pi
 
-from src.robot.controller.motion.symmetry import SymmetryController
-from src.robot.entity.motion.color import Color
-from src.robot.entity.motion.configuration import Configuration
+from src.robot.controller.symmetry import SymmetryController
+from src.robot.entity.color import Color
+from src.robot.entity.configuration import Configuration
 from src.util.geometry.vector import Vector2
 
 

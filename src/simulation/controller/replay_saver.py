@@ -5,7 +5,7 @@ import json
 from typing import List
 
 from src.logger import LOGGER
-from src.robot.entity.motion.configuration import Configuration
+from src.robot.entity.configuration import Configuration
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.entity.simulation_configuration import SimulationConfiguration

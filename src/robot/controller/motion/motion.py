@@ -4,7 +4,7 @@ Motion controller module.
 import math
 
 from src.robot.controller.motion.localization import LocalizationController
-from src.robot.controller.motion.symmetry import SymmetryController
+from src.robot.controller.symmetry import SymmetryController
 from src.util.geometry.vector import Vector2
 from src.robot.gateway.motion.motion import MotionGateway
 

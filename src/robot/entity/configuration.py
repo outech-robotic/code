@@ -5,8 +5,8 @@ from typing import Tuple
 
 from attr import dataclass
 
-from src.robot.entity.motion.color import Color
-from src.robot.entity.motion.type import Radian, Millimeter
+from src.robot.entity.color import Color
+from src.robot.entity.type import Radian, Millimeter
 from src.util.geometry.vector import Vector2
 
 
