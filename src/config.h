@@ -16,8 +16,8 @@
 // TIMER PWM
 #define CONST_PWM_PRESCALER  2
 #define CONST_PWM_AUTORELOAD 1000
-#define CONST_PWM_REPETITION 2
-#define CONST_PWM_MAX        1000
+#define CONST_PWM_REPETITION 1
+#define CONST_PWM_MAX        CONST_PWM_AUTORELOAD
 
 // ASSERVISSEMENT
 #define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
@@ -52,6 +52,7 @@
 #define CAN_BOARD_ID_WIDTH   (4)
 #define CAN_BOARD_ID_MASK     MAKE_MASK(CAN_BOARD_ID_WIDTH)
 
+
 //MESSAGE IDs
 //PROPULSION MESSAGES
 #define CAN_MSG_MOT_STOP        (0b00000)
@@ -59,8 +60,7 @@
 #define CAN_MSG_MOT_MOVE        (0b00010)
 #define CAN_MSG_MOT_COD_POS     (0b00011)
 
-
- //propulsion debugs
+//PROPULSION DEBUG/SETTINGS
 #define CAN_MSG_MOT_COD_SPEED   (0b10000)
 #define CAN_MSG_MOT_LIMITS      (0b10011)
 #define CAN_MSG_MOT_SET_KP      (0b10100)
@@ -68,13 +68,19 @@
 #define CAN_MSG_MOT_SET_KD      (0b10110)
 #define CAN_MSG_MOT_MODE        (0b10111)
 
+
 //HL MESSAGES
 #define CAN_MSG_DEBUG_DATA      (0b10001)
 #define CAN_MSG_HEARTBEAT       (0b10010)
 
+
 //SERVO MESSAGES
-#define CAN_MSG_SERVO_POS       (0b0000)
-#define CAN_MSG_SERVO_POS_WIDTH (5)
+#define CAN_MSG_SERVO_POS       (0b00000)
+
+
+//SENSOR MESSAGES
+#define CAN_MSG_SENSOR          (0b00000)
+
 
 
 /**

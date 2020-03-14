@@ -37,8 +37,6 @@ void MX_CAN_Init(void);
 int CAN_send_packet(uint16_t std_id, uint8_t* data=nullptr, uint8_t size=0, bool remote = false);
 int CAN_send_packet(can_tx_msg* msg);
 int CAN_receive_packet(can_rx_msg* msg);
-void CAN_print_rx_pkt(can_rx_msg* msg);
-int CAN_send_encoder_pos(int32_t left, int32_t right);
 
 /*
  * CAN TX MESSAGE TEMPLATES

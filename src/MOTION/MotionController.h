@@ -34,14 +34,14 @@ class MotionController {
     volatile int32_t translation_total;
     volatile int32_t translation_speed;
     volatile int32_t translation_setpoint;
-    uint32_t         translation_tolerance;
+    int32_t         translation_tolerance;
     volatile int32_t rotation_total;
     volatile int32_t rotation_speed;
     volatile int32_t rotation_setpoint;
-    uint32_t         rotation_tolerance;
+    int32_t         rotation_tolerance;
 
-    uint32_t derivative_tolerance;
-    uint32_t differential_tolerance;
+    int32_t derivative_tolerance;
+    int32_t differential_tolerance;
 
     int32_t accel_max;
     int32_t speed_max_translation;

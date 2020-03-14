@@ -269,8 +269,8 @@ bool MotionController::has_movement_ended(){
   const uint8_t INIT_COUNT = 0;
   static uint8_t stop_count = INIT_COUNT;
   static bool done = false;
-  uint32_t err_trans = ABS(pid_translation.get_error());
-  uint32_t err_rot   = ABS(pid_rotation.get_error());
+  int32_t err_trans = ABS(pid_translation.get_error());
+  int32_t err_rot   = ABS(pid_rotation.get_error());
 
   if(err_trans <= robot_status.translation_tolerance && err_rot <= robot_status.rotation_tolerance){
     //Approximately at destination
@@ -326,9 +326,8 @@ void MotionController::detect_stop(){
 
   static uint8_t time_block = INIT_BLOCK;
   static uint8_t time_stop  = INIT_STOP;
-  bool blocked = false;
-  uint32_t err_trans = ABS(pid_translation.get_error());
-  uint32_t err_rot   = ABS(pid_rotation.get_error());
+  int32_t err_trans = ABS(pid_translation.get_error());
+  int32_t err_rot   = ABS(pid_rotation.get_error());
 
   if(robot_status.moving && !robot_status.forced_movement
       && (err_trans <= robot_status.translation_tolerance && err_rot <= robot_status.rotation_tolerance))
@@ -338,7 +337,6 @@ void MotionController::detect_stop(){
     }
     else{
       stop(false);
-      blocked = false;
     }
   }
   else if(robot_status.moving && !robot_status.forced_movement &&
@@ -351,7 +349,6 @@ void MotionController::detect_stop(){
     }
     else{
       stop(true);
-      blocked = false;
     }
   }
 
@@ -451,6 +448,8 @@ int32_t MotionController::get_pid_data(uint8_t id, uint8_t requested_data){
     case PID_ID::PID_ROTATION:
       ret_val = get_data_from_pid(pid_rotation, requested_data);
       break;
+    default:
+      while(1);
   }
   return ret_val;
 }
