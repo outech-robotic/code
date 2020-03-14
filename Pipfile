@@ -18,6 +18,7 @@ requests = "*"
 python-can = "*"
 colorama = "*"
 rplidar-roboticia = "*"
+websockets = "*"
 
 [requires]
 python_version = "3.7"

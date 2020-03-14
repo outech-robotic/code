@@ -60,7 +60,7 @@ class StrategyController:
         Run the strategy.
         """
         for vec, reverse in PATH:
-            LOGGER.get().info("Simulate move robot", destination=vec)
+            LOGGER.get().info("move robot", destination=vec)
             await self.motion_controller.move_to(Vector2(vec.x, 2000 - vec.y),
                                                  reverse)
 

@@ -12,8 +12,8 @@ from src.simulation.entity.simulation_configuration import SimulationConfigurati
 from src.simulation.entity.simulation_state import RobotID
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
-# REPLAY_VIEWER_URL = 'https://nicolasbon.net/replay/'
-REPLAY_VIEWER_URL = 'http://127.0.0.1:8000/'
+REPLAY_VIEWER_URL = 'https://nicolasbon.net/replay/'
+# REPLAY_VIEWER_URL = 'http://127.0.0.1:8000/'
 
 
 class ReplaySaver:

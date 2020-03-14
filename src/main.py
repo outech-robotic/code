@@ -10,19 +10,18 @@ import os
 
 import can
 
-from src.robot.adapter.can.pycan import LoopbackCANAdapter, PyCANAdapter
 from src.robot.adapter.can import CANAdapter
+from src.robot.adapter.can.pycan import LoopbackCANAdapter, PyCANAdapter
 from src.robot.adapter.lidar.rplidar import RPLIDARAdapter
+from src.robot.controller.debug import DebugController
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.motion import MotionController
 from src.robot.controller.motion.odometry import OdometryController
+from src.robot.controller.sensor.rplidar import LidarController
 from src.robot.controller.strategy import StrategyController
 from src.robot.controller.symmetry import SymmetryController
-from src.robot.controller.sensor.rplidar import LidarController
 from src.robot.entity.color import Color
-from src.robot.entity.configuration import Configuration
-from src.util.geometry.segment import Segment
-from src.util.geometry.vector import Vector2
+from src.robot.entity.configuration import Configuration, DebugConfiguration
 from src.robot.gateway.motion.motion import MotionGateway
 from src.robot.handler.motion.motion import MotionHandler
 from src.simulation.client.http import HTTPClient
@@ -37,6 +36,8 @@ from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
 from src.util import can_id
 from src.util.dependency_container import DependencyContainer
+from src.util.geometry.segment import Segment
+from src.util.geometry.vector import Vector2
 
 CONFIG = Configuration(
     initial_position=Vector2(200, 1200),
@@ -48,6 +49,7 @@ CONFIG = Configuration(
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
+    debug=DebugConfiguration(),
 )
 
 
@@ -70,6 +72,8 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('rplidar_adapter', RPLIDARAdapter)
     i.provide('lidar_controller', LidarController)
+
+    i.provide('debug_controller', DebugController)
 
     event_loop = asyncio.get_event_loop()
     i.provide('event_loop', event_loop)
@@ -162,9 +166,11 @@ async def main() -> None:
                                      simulation_handler.handle_movement_order)
 
     strategy_controller = i.get('strategy_controller')
+    debug_controller = i.get('debug_controller')
     coroutines_to_run = {
         strategy_controller.run(),
         can_adapter.run(),
+        debug_controller.run(),
     }
     if is_simulation:
         simulation_runner = i.get('simulation_runner')

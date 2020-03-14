@@ -40,6 +40,10 @@ python -m src.main
 ```shell
 OUTECH_SIMULATION=false python -m src.main
 ```
+Go to `https://nicolasbon.net/replay/?replay=ws://localhost:8080` to see what the robot "sees".
+
+Replace localhost with your IP if you are not running it locally.
+
 ##### If you want to run the tests:
 ```shell
 make jenkins
