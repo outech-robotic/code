@@ -17,6 +17,7 @@ PID_FP::PID_FP() {
 }
 
 void PID_FP::reset(){
+  last_setpoint = 0;
   last_error = 0;
   comp_integral = 0;
 }
@@ -88,16 +89,16 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint){
 
   //Derivative component
   comp_derivative = (int64_t)kd * (int64_t)derivative_error;
-  if(comp_derivative>integral_max)
-    comp_derivative = integral_max;
-  else if(comp_derivative < integral_min)
-    comp_derivative = integral_min;
+  if(comp_derivative>derivative_max)
+    comp_derivative = derivative_max;
+  else if(comp_derivative < derivative_min)
+    comp_derivative = derivative_min;
 
   //Complete scaled output
   res = comp_proportional + comp_integral + comp_derivative;
 
   // Saturation
-  if(res>max)
+  if(res > max)
     res = max;
   else if(res<min)
     res = min;

@@ -114,7 +114,8 @@ public:
     PROPORTIONAL = 0,
     INTEGRAL_MSB = 1,
     INTEGRAL_LSB = 2,
-    DERIVATIVE = 3
+    DERIVATIVE   = 3,
+    ERROR        = 4
   };
 
 	MotionController();

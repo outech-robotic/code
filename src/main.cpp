@@ -36,7 +36,7 @@ int main(void)
   MX_TIM3_Init(); // Right Encoder
 
   pinMode(PIN_LED,OUTPUT); // Heartbeat Led
-  digitalWrite(PIN_LED, GPIO_HIGH);
+  digitalWrite(PIN_LED, GPIO_LOW);
 
   LL_RCC_ClocksTypeDef clocks;
   LL_RCC_GetSystemClocksFreq(&clocks);
@@ -64,7 +64,7 @@ int main(void)
         // Movement messages : first byte == 0 => translation, 1 => rotation, ticks = next 32 bits
         uint8_t movement_type = rx_msg.data.u8[0];
         int32_t movement_ticks = rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1];
-        digitalWrite(PIN_LED, 1);
+        digitalWrite(PIN_LED, GPIO_HIGH);
         switch(movement_type){
           case 0:
             mcs.translate_ticks(movement_ticks);
@@ -108,7 +108,7 @@ int main(void)
       if(CAN_send_packet(&CAN_TX_MOV_END) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING MOV END\r\n");
       }
-      digitalWrite(PIN_LED, 0);
+      digitalWrite(PIN_LED, GPIO_LOW);
     }
 
     // Periodic Encoder Position Report Message to HL
@@ -119,9 +119,9 @@ int main(void)
         serial.print("ERR: SENDING ENCODER\r\n");
       }
 
-#if 0
-      CAN_TX_DEBUG_DATA.data.d32[0] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::INTEGRAL_LSB);
-      CAN_TX_DEBUG_DATA.data.d32[1] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::INTEGRAL_MSB);;
+#if 1
+      CAN_TX_DEBUG_DATA.data.d32[0] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::ERROR);
+      CAN_TX_DEBUG_DATA.data.d32[1] = mcs.get_pid_data(MotionController::PID_ID::PID_ROTATION, MotionController::ERROR);
       if((CAN_send_packet(&CAN_TX_DEBUG_DATA)) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING DEBUG DATA\r\n");
       }

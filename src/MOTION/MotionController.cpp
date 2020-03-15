@@ -32,11 +32,11 @@ void MotionController::init() {
   pid_speed_right.set_anti_windup(CONST_PWM_MAX);
   pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
 
-  pid_translation.set_coefficients(3.0, 0.0, 0.2, MOTION_CONTROL_FREQ);
+  pid_translation.set_coefficients(3.0, 0.1, 0.2, MOTION_CONTROL_FREQ);
   pid_translation.set_output_limit(MAX_SPEED_TRANSLATION_TICK);
   pid_translation.set_anti_windup(MAX_SPEED_TRANSLATION_TICK);
   pid_translation.set_derivative_limit(MAX_SPEED_TRANSLATION_TICK);
-  pid_rotation.set_coefficients(4.9, 0.0, 0.8, MOTION_CONTROL_FREQ);
+  pid_rotation.set_coefficients(4.9, 0.2, 0.8, MOTION_CONTROL_FREQ);
   pid_rotation.set_output_limit(MAX_SPEED_ROTATION_TICK);
   pid_rotation.set_anti_windup(MAX_SPEED_ROTATION_TICK);
   pid_rotation.set_derivative_limit(MAX_SPEED_ROTATION_TICK);
@@ -322,7 +322,7 @@ void MotionController::detect_stop(){
   //status_end = has_movement_ended();
 
   static const uint8_t INIT_BLOCK = 20;
-  static const uint8_t INIT_STOP  = 5;
+  static const uint8_t INIT_STOP  = 10;
 
   static uint8_t time_block = INIT_BLOCK;
   static uint8_t time_stop  = INIT_STOP;
@@ -422,6 +422,8 @@ int32_t MotionController::get_data_from_pid(PID_FP& pid, uint8_t requested_data)
     case PID_DATA_ID::DERIVATIVE:
       ret_data = pid.get_derivative();
       break;
+    case PID_DATA_ID::ERROR:
+      ret_data = pid.get_error();
     default:
       ret_data = 0;
       break;
