@@ -424,8 +424,9 @@ int32_t MotionController::get_data_from_pid(PID_FP& pid, uint8_t requested_data)
       break;
     case PID_DATA_ID::ERROR:
       ret_data = pid.get_error();
+      break;
     default:
-      ret_data = 0;
+      ret_data = -1;
       break;
   }
   return ret_data;
@@ -451,7 +452,8 @@ int32_t MotionController::get_pid_data(uint8_t id, uint8_t requested_data){
       ret_val = get_data_from_pid(pid_rotation, requested_data);
       break;
     default:
-      while(1);
+      ret_val = -1;
+      break;
   }
   return ret_val;
 }
