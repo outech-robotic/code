@@ -55,8 +55,8 @@ fmt_motor_set_pid = struct.Struct('<Bi')  # 8b + 32b non signes
 fmt_motor_lim = struct.Struct('<HHHH')
 
 # Physical constants of the robot
-WHEEL_DIAMETER = 73.7  # en mm ; 2400 ticks par tour donc par 2*pi*74 mm
-DISTANCE_BETWEEN_WHEELS = 365.0  # en mm
+WHEEL_DIAMETER = 73.6  # en mm ; 2400 ticks par tour donc par 2*pi*74 mm
+DISTANCE_BETWEEN_WHEELS = 363.0  # en mm
 TICKS_PER_TURN = 2400.0
 MM_TO_TICK = TICKS_PER_TURN / (pi * WHEEL_DIAMETER)
 TICK_TO_MM = (pi * WHEEL_DIAMETER) / TICKS_PER_TURN
@@ -89,8 +89,8 @@ class CANAdapter(InterfaceAdapter):
         self.setpoint_speed = 0.0
         self.setpoint_pos = None
         self.setpoint_angle = None
-        self.avg_left = [0.0 for i in range(5)]
-        self.avg_right = [0.0 for i in range(5)]
+        self.avg_left = [0.0 for i in range(10)]
+        self.avg_right = [0.0 for i in range(10)]
         self.cod_start_left = 0
         self.cod_start_right = 0
         self.cod_last_left = 0
@@ -132,7 +132,7 @@ class CANAdapter(InterfaceAdapter):
 
                     # Stop message received
                     elif (message.arbitration_id>>CAN_BOARD_ID_WIDTH) == 0b0000001:
-                        print("############# MESSAGE :", message.arbitration_id, " ", message.data, "#############") 
+                        print("#############\n\n\n MESSAGE :", message.arbitration_id, " ", message.data, "\n\n\n#############") 
 
 
         Thread(target=f).start()
