@@ -23,12 +23,8 @@ class AllPIDForms(FlaskForm):
     SpeedRight = FormField(PIDForm)
     CapForm = FormField(CapForm)
 
-    Submit = SubmitField()
-
 
 class OrderForm(FlaskForm):
     Speed = FloatField('Speed', validators=[Optional()])
     Position = FloatField('Position', validators=[Optional()])
     Angle = FloatField('Angle', validators=[Optional()])
-
-    Submit = SubmitField()
