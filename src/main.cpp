@@ -64,7 +64,7 @@ int main(void)
         // Movement messages : first byte == 0 => translation, 1 => rotation, ticks = next 32 bits
         uint8_t movement_type = rx_msg.data.u8[0];
         int32_t movement_ticks = rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1];
-
+        digitalWrite(PIN_LED, 1);
         switch(movement_type){
           case 0:
             mcs.translate_ticks(movement_ticks);
@@ -108,6 +108,7 @@ int main(void)
       if(CAN_send_packet(&CAN_TX_MOV_END) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING MOV END\r\n");
       }
+      digitalWrite(PIN_LED, 0);
     }
 
     // Periodic Encoder Position Report Message to HL
@@ -130,7 +131,6 @@ int main(void)
 
     // Periodic Heartbeat message to High Level board, and led toggle
     if(heartbeat_timer.check()){
-      digitalWrite(PIN_LED, !digitalRead(PIN_LED));
       if(CAN_send_packet(&CAN_TX_HEARTBEAT) != CAN_ERROR_STATUS::CAN_PKT_OK){
         serial.print("ERR: SENDING HEARTBEAT\r\n");
       }
