@@ -57,6 +57,12 @@ class SimulationRunner:
                 await self.simulation_gateway.encoder_position(
                     self.state.left_tick, self.state.right_tick)
 
+            # Send the LIDAR positions periodically.
+            interval = 1 / self.simulation_configuration.lidar_position_rate * 1000
+            if self.state.time - self.state.last_lidar_update > interval:
+                self.state.last_lidar_update = self.state.time
+                await self.simulation_gateway.push_lidar_readings()
+
             # Send the feedback to the subscribers.
             if current_tick % (
                     self.simulation_configuration.tickrate //

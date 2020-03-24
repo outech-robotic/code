@@ -47,6 +47,7 @@ class SimulationState:
     left_tick: int
     right_tick: int
     last_position_update: float
+    last_lidar_update: float = 0
 
     def clone(self) -> SimulationState:
         """

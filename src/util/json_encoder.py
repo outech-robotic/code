@@ -14,5 +14,5 @@ class RobotJSONEncoder(json.JSONEncoder):
     # pylint: disable=method-hidden
     def default(self, o):
         if isinstance(o, Vector2):
-            return [float(o.x), float(o.y)]
+            return {"x": float(o.x), "y": float(o.y)}
         return json.JSONEncoder.default(self, o)

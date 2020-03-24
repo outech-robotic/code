@@ -1,67 +1,46 @@
-# Until we split the adapter in two, we need a way to catch exceptions for the simulation.
-# pylint: disable=broad-except
 """
 Lidar adapter module.
 """
-
-import threading
+import asyncio
 from math import pi
+from typing import List
 
 import rplidar
-import serial.tools.list_ports as port_list
 
-from src.robot.controller.sensor.rplidar import LidarController
-from src.simulation.controller.probe import SimulationProbe
+from src.robot.adapter.lidar import Callback, LIDARAdapter
 
 
-class RPLIDARAdapter:
-    """Rplidar adapter is an interface for receiving positions of obstacles from an rplidar."""
+class RPLIDARAdapter(LIDARAdapter):
+    """Rplidar adapter receives positions of obstacles from a rplidar."""
 
-    def __init__(self, lidar_controller: LidarController,
-                 simulation_probe: SimulationProbe):
-        self.lidar_controller = lidar_controller
-        self.simulation_probe = simulation_probe
-        self.lidar: rplidar.RPLidar = None
-        simulation_probe.attach("lidar", lambda: self.lidar is not None)
-        self.__init_lidar()
-        self.__start_thread_lidar_controller()
+    def __init__(self, rplidar_obj: rplidar.RPLidar):
+        self._rplidar = rplidar_obj
+        self._handlers: List[Callback] = []
 
-    def __init_lidar(self) -> None:
-        """ Start and connect the rplidar. """
-        if self.lidar is None:
-            try:
-                self.lidar = rplidar.RPLidar(port_list.comports()[0].device)
-                self.lidar.stop()  # stop lidar if running
-                self.lidar.stop_motor()
-            except Exception:
-                self.lidar = None
+    def register_handler(self, handler: Callback) -> None:
+        """
+        Register a handler to be called with the LIDAR readings.
+        """
+        self._handlers.append(handler)
 
-    def __loop(self) -> None:
-        """ Loop to receive the obstacles from the rplidar and save them in the controller. """
+    async def run(self):
+        """
+        Run the LIDAR.
+        """
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._loop)
+
+    def _loop(self) -> None:
+        """ Loop to receive the obstacles from the rplidar and dispatch them to the hanler. """
         try:
-            if self.lidar is not None:
-                for scans in self.lidar.iter_scans(
-                        scan_type='express',
-                        max_buf_meas=3500):  # boucle infinie
-                    self.lidar_controller.reset_detection()
-                    for _, angle, radius in scans:
-                        angle = angle * pi / 180  # to radian
-                        self.lidar_controller.append_detection((angle, radius))
-            else:
-                while True:
-                    self.lidar_controller.set_detection([(500, 500),
-                                                         (1000, 1000)])
-        except Exception:
-            self.__stop_lidar()
+            for scans in self._rplidar.iter_scans(scan_type='express',
+                                                  max_buf_meas=3500):
 
-    def __start_thread_lidar_controller(self) -> None:
-        """ Start a thread to start the rplidar. """
-        thread_lidar = threading.Thread(target=self.__loop)
-        thread_lidar.start()
-
-    def __stop_lidar(self) -> None:
-        """ Stop the rplidar. """
-        if self.lidar is not None:
-            self.lidar.stop()
-            self.lidar.stop_motor()
-            self.lidar.disconnect()
+                readings = tuple((angle * pi / 180, distance)
+                                 for _, angle, distance in scans)
+                for handler in self._handlers:
+                    handler(readings)
+        finally:
+            self._rplidar.stop()
+            self._rplidar.stop_motor()
+            self._rplidar.disconnect()

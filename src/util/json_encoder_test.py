@@ -17,7 +17,7 @@ def test_json_encoder_vector2():
     to_encode = {'a': Vector2(2, 3)}
 
     dump = json.dumps(to_encode, cls=RobotJSONEncoder, indent=None)
-    assert dump == '{"a": [2.0, 3.0]}'
+    assert dump == '{"a": {"x": 2.0, "y": 3.0}}'
 
 
 def test_json_encoder_not_serializable():

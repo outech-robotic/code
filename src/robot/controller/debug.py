@@ -11,6 +11,7 @@ from websockets.protocol import State
 from src.logger import LOGGER
 from src.robot.entity.configuration import Configuration
 from src.simulation.controller.probe import SimulationProbe
+from src.util.json_encoder import RobotJSONEncoder
 
 
 class DebugController:
@@ -33,7 +34,7 @@ class DebugController:
         LOGGER.get().info("new_debug_connection")
         while websocket.state in (State.CONNECTING, State.OPEN):
             data = self._simulation_probe.probe()
-            json_data = json.dumps(data)
+            json_data = json.dumps(data, cls=RobotJSONEncoder)
             await websocket.send(json_data)
             await asyncio.sleep(1 / self._configuration.debug.refresh_rate)
 

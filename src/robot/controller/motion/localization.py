@@ -10,10 +10,10 @@ from src.robot.controller.motion.odometry import OdometryController
 from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.type import Direction, Radian, Millimeter
-from src.util.geometry.vector import Vector2
 from src.robot.gateway.motion.motion import MotionGateway
 from src.simulation.controller.probe import SimulationProbe
 from src.util.geometry.direction import right, backward, left, forward
+from src.util.geometry.vector import Vector2
 
 DIRECTION_FUNCTION = {
     Direction.FORWARD: forward,
@@ -60,11 +60,8 @@ class LocalizationController:
 
         simulation_probe.attach("angle",
                                 lambda: float(self._state.odometry_angle))
-        simulation_probe.attach(
-            "position", lambda: {
-                'x': float(self._state.odometry_position.x),
-                'y': float(self._state.odometry_position.y),
-            })
+        simulation_probe.attach("position",
+                                lambda: self._state.odometry_position)
 
     def update_odometry_position(self, left_tick: int, right_tick: int) -> None:
         """

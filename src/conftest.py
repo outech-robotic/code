@@ -7,13 +7,12 @@ from unittest.mock import MagicMock
 from pytest import fixture
 
 from src.robot.adapter.can import CANAdapter
+from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.odometry import OdometryController
 from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.color import Color
 from src.robot.entity.configuration import Configuration
-from src.util.geometry.segment import Segment
-from src.util.geometry.vector import Vector2
 from src.robot.gateway.motion.motion import MotionGateway
 from src.robot.handler.motion.motion import MotionHandler
 from src.simulation.controller.event_queue import EventQueue
@@ -22,6 +21,8 @@ from src.simulation.controller.replay_saver import ReplaySaver
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.simulation_state import SimulationState
 from src.simulation.gateway.simulation import SimulationGateway
+from src.util.geometry.segment import Segment
+from src.util.geometry.vector import Vector2
 
 
 async def stub_function():
@@ -184,3 +185,11 @@ def can_adapter_mock():
     future.set_result(None)
     mock.send = MagicMock(return_value=future)
     return mock
+
+
+@fixture
+def simulated_lidar_adapter_mock():
+    """
+    Simulated lidar adapter.
+    """
+    return MagicMock(spec=SimulatedLIDARAdapter)

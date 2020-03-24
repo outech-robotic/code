@@ -1,6 +1,3 @@
-# CAN adapter needs to be fetched with provider.get, until we invert the dependencies, we need to
-# ignore the unused variables.
-# pylint: disable=unused-variable
 """
 Main module.
 """
@@ -9,10 +6,14 @@ import math
 import os
 
 import can
+import rplidar
+from serial.tools import list_ports
 
 from src.robot.adapter.can import CANAdapter
 from src.robot.adapter.can.pycan import LoopbackCANAdapter, PyCANAdapter
+from src.robot.adapter.lidar import LIDARAdapter
 from src.robot.adapter.lidar.rplidar import RPLIDARAdapter
+from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
 from src.robot.controller.debug import DebugController
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.motion import MotionController
@@ -21,7 +22,8 @@ from src.robot.controller.sensor.rplidar import LidarController
 from src.robot.controller.strategy import StrategyController
 from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.color import Color
-from src.robot.entity.configuration import Configuration, DebugConfiguration
+from src.robot.entity.configuration import Configuration
+from src.robot.entity.configuration import DebugConfiguration
 from src.robot.gateway.motion.motion import MotionGateway
 from src.robot.handler.motion.motion import MotionHandler
 from src.simulation.client.http import HTTPClient
@@ -70,7 +72,6 @@ def _provide_robot_components(i: DependencyContainer) -> None:
 
     i.provide('motion_gateway', MotionGateway)
 
-    i.provide('rplidar_adapter', RPLIDARAdapter)
     i.provide('lidar_controller', LidarController)
 
     i.provide('debug_controller', DebugController)
@@ -107,13 +108,16 @@ def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
                         cups=[],
                         left_tick=0,
                         right_tick=0,
-                        last_position_update=0))
+                        last_position_update=0,
+                        last_lidar_update=0))
     i.provide('simulation_gateway', SimulationGateway)
 
     i.provide('http_client', HTTPClient)
     i.provide('web_browser_client', WebBrowserClient)
     i.provide('replay_saver', ReplaySaver)
     i.provide('can_adapter', LoopbackCANAdapter)
+
+    i.provide('lidar_adapter', SimulatedLIDARAdapter)
 
 
 def _provide_real_life_dependencies(i: DependencyContainer) -> None:
@@ -124,6 +128,10 @@ def _provide_real_life_dependencies(i: DependencyContainer) -> None:
     i.provide(
         'can_bus',
         can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000))
+
+    i.provide('lidar_adapter', RPLIDARAdapter)
+    i.provide('rplidar_object',
+              rplidar.RPLidar(list_ports.comports()[0].device))
 
 
 def _get_container(simulate: bool) -> DependencyContainer:
@@ -148,8 +156,9 @@ async def main() -> None:
                                    'true').lower() == 'true'
     i = _get_container(is_simulation)
 
-    rplidar_adapter: RPLIDARAdapter = i.get('rplidar_adapter')
+    lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     lidar_controller: LidarController = i.get('lidar_controller')
+    lidar_adapter.register_handler(lidar_controller.set_detection)
 
     can_adapter: CANAdapter = i.get('can_adapter')
     motion_handler: MotionHandler = i.get('motion_handler')

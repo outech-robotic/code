@@ -10,6 +10,7 @@ from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.simulation_state import RobotID
+from src.util.json_encoder import RobotJSONEncoder
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
 REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/replay/index.html'
@@ -51,7 +52,7 @@ class ReplaySaver:
         Save the replay.
         """
 
-        dump = json.dumps(self.result)
+        dump = json.dumps(self.result, cls=RobotJSONEncoder)
         LOGGER.get().info("saving_replay", size=len(dump))
 
         replay_id = self.http_client.post_file(REPLAY_API_URL, dump)['id']
