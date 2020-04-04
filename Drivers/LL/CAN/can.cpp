@@ -45,6 +45,9 @@ int CAN_send_packet(uint16_t std_id, const uint8_t* data, uint8_t size, bool rem
 	msg.header.StdId=std_id;
 	msg.header.RTR=remote ? CAN_RTR_REMOTE : CAN_RTR_DATA;
 	msg.header.IDE = CAN_ID_STD;
+	for(uint8_t i = 0; i < size; i++){
+	  msg.data.u8[i]=data[i];
+	}
 	return CAN_send_packet(&msg);
 }
 

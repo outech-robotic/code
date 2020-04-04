@@ -7,7 +7,7 @@
 #include "config.h"
 #include "COM/serial.hpp"
 
-//#include "COM/isotp.h"
+#include "COM/isotp.h"
 
 
 /**********************************************************************
@@ -24,9 +24,9 @@ Serial serial;
 static constexpr size_t C_RX_ID = 0x7F1;
 static constexpr size_t C_TX_ID = 0x7F2;
 static constexpr size_t C_ISOTP_BUFF_SIZE = 512;
-//static IsoTpLink g_link;
-//static uint8_t g_isotpRecvBuf[C_ISOTP_BUFF_SIZE];
-//static uint8_t g_isotpSendBuf[C_ISOTP_BUFF_SIZE];
+static IsoTpLink g_link;
+static uint8_t g_isotpRecvBuf[C_ISOTP_BUFF_SIZE];
+static uint8_t g_isotpSendBuf[C_ISOTP_BUFF_SIZE];
 
 /**********************************************************************
  *                             ISO-TP FUNCTIONS
@@ -47,24 +47,24 @@ static constexpr size_t C_ISOTP_BUFF_SIZE = 512;
 
       /* optional, provide to receive debugging log messages */
   void isotp_user_debug(const char* message, ...) {
-      // ...
+
   }
-//
-//  bool isotp_is_tx_available(IsoTpLink *link){
-//    return link->send_status == ISOTP_SEND_STATUS_IDLE;
-//  }
+
+  bool isotp_is_tx_available(IsoTpLink *link){
+    return link->send_status == ISOTP_SEND_STATUS_IDLE;
+  }
 
 int main(void)
 {
   /**********************************************************************
    *                             SETUP
    ********************************s**************************************/
-//  int ret;
-//  const size_t payload_rx_max = 512;
-//  uint8_t payload_rx[payload_rx_max];
-//  uint16_t payload_rx_size;
-//  const uint8_t payload_tx[64] = {0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF};
-//  const uint16_t payload_tx_size = sizeof(payload_tx);
+  int ret;
+  const size_t payload_rx_max = 512;
+  uint8_t payload_rx[payload_rx_max];
+  uint16_t payload_rx_size;
+  const uint8_t payload_tx[] = {0x01, 0x23, 0x45, 0x67};
+  const uint16_t payload_tx_size = sizeof(payload_tx);
 
   // Initialize timing utility functions (delay, millis...)
   Timing_init();
@@ -78,46 +78,31 @@ int main(void)
   serial.init(115200);
   serial.print("Setup done \r\n");
 
-//  isotp_init_link(&g_link, C_TX_ID, g_isotpSendBuf, sizeof(g_isotpSendBuf), g_isotpRecvBuf, sizeof(g_isotpRecvBuf));
+  isotp_init_link(&g_link, C_TX_ID, g_isotpSendBuf, sizeof(g_isotpSendBuf), g_isotpRecvBuf, sizeof(g_isotpRecvBuf));
   /**********************************************************************
    *                             MAIN LOOP
    **********************************************************************/
   while (1)
   {
-//    if((CAN_receive_packet(&rx_msg)) == HAL_OK){
-//      if(rx_msg.header.IDE == C_RX_ID){
-//        isotp_on_can_message(&g_link,  rx_msg.data.u8, rx_msg.header.DLC);
-//      }
-//    }
-//
-//    isotp_poll(&g_link);
-//    ret = isotp_receive(&g_link, payload_rx, payload_rx_max, &payload_rx_size);
-//    if(ret == ISOTP_RET_OK){
-//      asm volatile("nop");
-//    }
+    if((CAN_receive_packet(&rx_msg)) == HAL_OK){
+      if(rx_msg.header.StdId == C_RX_ID){
+        isotp_on_can_message(&g_link,  rx_msg.data.u8, rx_msg.header.DLC);
+      }
+    }
 
+    isotp_poll(&g_link);
+    ret = isotp_receive(&g_link, payload_rx, payload_rx_max, &payload_rx_size);
+    if(ret == ISOTP_RET_OK){
+      asm volatile("nop");
+    }
 
-
-//    // Periodic Encoder Position Report Message to HL
-//    if(can_timer.check()){
-////      if(isotp_is_tx_available(&g_link)){
-////        ret = isotp_send(&g_link, payload_tx, payload_tx_size);
-////        asm volatile("nop");
-////      }
-//      CAN_TX_COD_POS.data.d32[0]=0x01234567;
-//      CAN_TX_COD_POS.data.d32[1]=0x89ABCDEF;
-//      if((CAN_send_packet(&CAN_TX_COD_POS)) != CAN_ERROR_STATUS::CAN_PKT_OK){
-//        serial.print("ERR: SENDING ENCODER\r\n");
-//      }
-//    }
-
-    // Periodic Heartbeat message to High Level board, and led toggle
-    if(heartbeat_timer.check()){
-       togglePin(PIN_LED);
-       CAN_TX_COD_POS.data.d32[0]=0x01234567;
-       CAN_TX_COD_POS.data.d32[1]=0x89ABCDEF;
-       if(CAN_send_packet(&CAN_TX_COD_POS) != CAN_ERROR_STATUS::CAN_PKT_OK){
-        serial.print("ERR: SENDING HEARTBEAT\r\n");
+    // Periodic Encoder Position Report Message to HL
+    if(can_timer.check()){
+      togglePin(PIN_LED);
+      continue;
+      if(isotp_is_tx_available(&g_link)){
+        ret = isotp_send(&g_link, payload_tx, payload_tx_size);
+        asm volatile("nop");
       }
     }
   }
