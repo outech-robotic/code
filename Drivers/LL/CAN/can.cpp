@@ -39,11 +39,12 @@ void CAN_IRQ_TX_Empty_disable(CAN_HandleTypeDef* can){
     CLEAR_BIT(can->Instance->IER, CAN_IER_TMEIE);
 }
 
-int CAN_send_packet(uint16_t std_id, uint8_t* data, uint8_t size, bool remote){
+int CAN_send_packet(uint16_t std_id, const uint8_t* data, uint8_t size, bool remote){
 	can_tx_msg msg;
 	msg.header.DLC=size;
 	msg.header.StdId=std_id;
 	msg.header.RTR=remote ? CAN_RTR_REMOTE : CAN_RTR_DATA;
+	msg.header.IDE = CAN_ID_STD;
 	return CAN_send_packet(&msg);
 }
 

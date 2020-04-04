@@ -34,7 +34,7 @@ enum CAN_ERROR_STATUS{
 };
 
 void MX_CAN_Init(void);
-int CAN_send_packet(uint16_t std_id, uint8_t* data=nullptr, uint8_t size=0, bool remote = false);
+int CAN_send_packet(uint16_t std_id, const uint8_t* data=nullptr, uint8_t size=0, bool remote = false);
 int CAN_send_packet(can_tx_msg* msg);
 int CAN_receive_packet(can_rx_msg* msg);
 
