@@ -5,6 +5,8 @@ RemoteSystemsTempFiles
 Debug
 Release
 *.launch
+cmake_build
+.metadata
 
 
 
