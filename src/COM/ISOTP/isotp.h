@@ -10,9 +10,9 @@
 extern "C" {
 #endif
 
-#include "isotp_defines.h"
-#include "isotp_config.h"
-#include "isotp_user.h"
+#include <COM/ISOTP/isotp_defines.h>
+#include <COM/ISOTP/isotp_config.h>
+#include <COM/ISOTP/isotp_user.h>
 
 /**
  * @brief Struct containing the data for linking an application to a CAN instance.

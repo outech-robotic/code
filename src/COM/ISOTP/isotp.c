@@ -1,6 +1,6 @@
+#include <COM/ISOTP/isotp.h>
 #include <stdint.h>
 #include "assert.h"
-#include "isotp.h"
 
 ///////////////////////////////////////////////////////
 ///                 STATIC FUNCTIONS                ///
