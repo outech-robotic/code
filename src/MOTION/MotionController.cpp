@@ -290,8 +290,8 @@ bool MotionController::has_movement_ended(){
 
 
 void MotionController::detect_stop(){
-  bool status_block; // is the robot physically blocked and should stop?
-  bool status_end;   // is the robot at the end of a movement, as expected?
+//  bool status_block; // is the robot physically blocked and should stop?
+//  bool status_end;   // is the robot at the end of a movement, as expected?
 //  static bool block_started = false;
 //  status_block = is_robot_blocked();
 //  // if done or blocked, stop the robot
