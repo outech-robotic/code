@@ -10,7 +10,7 @@ from src.util.geometry.vector import Vector2
 
 
 class LidarController:
-    """Lidar controller is an controller for saving positions of obstacles."""
+    """Lidar controller is a controller for saving positions of obstacles."""
 
     def __init__(self, simulation_probe: SimulationProbe):
         self.seen_polar: Tuple[Tuple[Radian, Millimeter], ...] = ()
