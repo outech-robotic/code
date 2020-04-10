@@ -1,155 +1,177 @@
-#include <COM/ISOTP/isotp.h>
-#include <COM/serial.hpp>
-#include "UTILITY/timing.h"
-#include "TIMER/tim.h"
-#include "CAN/can.h"
-#include "GPIO/gpio.h"
-#include "UTILITY/Metro.hpp"
-#include "UTILITY/macros.h"
-#include "MOTION/MotionController.h"
+#include "com/can_pb.hpp"
+#include "utility/timing.h"
+#include "com/serial.hpp"
+#include "motion/MotionController.h"
+#include "utility/Metro.hpp"
 #include "config.h"
 
 
-
-#include "COM/ISOTP/isotp.h"
-
-#include <proto/pb_encode.h>
-#include <proto/pb_decode.h>
-#include "proto/proto.pb.h"
-
 #define STR(x)  #x
 #define XSTR(x) STR(x)
-/**********************************************************************
- *                             GLOBAL OBJECTS
- **********************************************************************/
-Metro can_timer(10);
-Metro heartbeat_timer(10);
+
+
+Metro position_timer(10);
+Metro heartbeat_timer(500);
 
 Serial serial;
 MotionController mcs;
-static constexpr size_t C_RX_ID = 0x7F1;
-static constexpr size_t C_TX_ID = 0x7F2;
-static constexpr size_t C_ISOTP_BUFF_SIZE = 1024;
-static IsoTpLink g_link;
-static uint8_t g_isotpRecvBuf[C_ISOTP_BUFF_SIZE];
-static uint8_t g_isotpSendBuf[C_ISOTP_BUFF_SIZE];
-
-
-/**********************************************************************
- *                             ISO-TP FUNCTIONS
- **********************************************************************/
-
-/* required, this must send a single CAN message with the given arbitration
-   * ID (i.e. the CAN message ID) and data. The size will never be more than 8
-   * bytes. */
-  int  isotp_user_send_can(const uint32_t arbitration_id,
-                           const uint8_t* data, const uint8_t size) {
-      return CAN_send_packet(arbitration_id, data, size, false);
-  }
-
-  /* required, return system tick, unit is millisecond */
-  uint32_t isotp_user_get_ms(void) {
-      return millis();
-  }
-
-      /* optional, provide to receive debugging log messages */
-  void isotp_user_debug(const char* message, ...) {
-
-  }
-
-  bool isotp_is_tx_available(IsoTpLink *link){
-    return link->send_status == ISOTP_SEND_STATUS_IDLE;
-  }
+Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
 
 int main(void)
 {
-  /**********************************************************************
-   *                             SETUP
-   **********************************************************************/
   int ret;
-  bool status;
-  can_rx_msg can_rx_packet;
-  const size_t payload_rx_max = 128;
-  uint8_t payload_rx[payload_rx_max];
-  uint16_t payload_rx_size;
+  MotionController::STOP_STATUS mcs_stop_status;
 
-  uint8_t payload_tx[64];
+  can_rx_msg can_raw_msg;
 
-  pb_ostream_t ostream = pb_ostream_from_buffer(payload_tx, sizeof(payload_tx));
-  pb_istream_t istream;
+  // Proto Buffers Messages
   BusMessage msg_rx = BusMessage_init_zero;
-  BusMessage msg_tx = BusMessage_init_zero;
-  msg_tx.message.encoderPosition = EncoderPositionMsg_init_zero;
+  BusMessage msg_move_end = BusMessage_init_zero;
+  BusMessage msg_heartbeat = BusMessage_init_zero;
+  BusMessage msg_encoder = BusMessage_init_zero;
+
+  msg_encoder.message_content.encoderPosition = EncoderPositionMsg_init_zero;
+  msg_encoder.which_message_content = BusMessage_encoderPosition_tag;
+
+  msg_move_end.message_content.movementEnded = MovementEndedMsg_init_zero;
+  msg_move_end.message_content.movementEnded.blocked = false;
+  msg_move_end.which_message_content = BusMessage_movementEnded_tag;
+
+  msg_heartbeat.message_content.heartbeat = HeartbeatMsg_init_zero;
+  msg_heartbeat.which_message_content = BusMessage_heartbeat_tag;
 
 
-
-
-  // Initialize timing utility functions (delay, millis...)
-  Timing_init();
-  // Initialize all peripherals
-  //MX_USART2_UART_Init();
+  // peripherals init
   MX_CAN_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
 
-//  mcs.init();
-  pinMode(PIN_LED,OUTPUT); // Heartbeat Led
-  digitalWrite(PIN_LED, GPIO_LOW);
+  mcs.init();
+
+  pinMode(PIN_LED, PinDirection::OUTPUT);
+  setPin(PIN_LED);
+  PWM_write(PA10,  0);
+  PWM_write(PA8,  0);
 
   serial.init(115200);
-
   serial.print("Setup done \r\n");
 
-  msg_tx.message.encoderPosition.left_tick  = 0;
-  msg_tx.message.encoderPosition.right_tick = -1;
-  msg_tx.which_message = BusMessage_encoderPosition_tag;
-
-  isotp_init_link(&g_link, C_TX_ID, g_isotpSendBuf, sizeof(g_isotpSendBuf), g_isotpRecvBuf, sizeof(g_isotpRecvBuf));
-  /**********************************************************************
-   *                             MAIN LOOP
-   **********************************************************************/
   while (1)
   {
-	mcs.update_position();
-	mcs.control_motion();
-	mcs.detect_stop();
-    if((CAN_receive_packet(&can_rx_packet)) == HAL_OK){
-      if(can_rx_packet.header.StdId == C_RX_ID){
-        isotp_on_can_message(&g_link,  can_rx_packet.data.u8, can_rx_packet.header.DLC);
+    // Update ISOTP server
+    if(CAN_receive_packet(&can_raw_msg) == HAL_OK){
+      if(canpb.match_id(can_raw_msg.header.StdId)){
+        canpb.update_rx_msg(can_raw_msg);
       }
     }
+    canpb.update();
 
-    isotp_poll(&g_link);
 
-    ret = isotp_receive(&g_link, payload_rx, payload_rx_max, &payload_rx_size);
-    if(ret == ISOTP_RET_OK){
-      istream= pb_istream_from_buffer(payload_rx, payload_rx_size);
-      status = pb_decode(&istream, BusMessage_fields, &msg_rx);
-      if(!status){
-        while(true){
-           serial.print("ERROR: pb_encode failed\r\n");
-           delay_ms(500);
+    // Order reception
+    if(canpb.is_rx_available()){
+      ret = canpb.receive_msg(msg_rx);
+      if(ret == Can_PB::CAN_PB_RET_OK){
+        switch(msg_rx.which_message_content){
+          case BusMessage_stopMoving_tag:
+            serial.println("Packet Received: StopMoving");
+            mcs.stop(false);
+            break;
+
+          case BusMessage_translate_tag:
+            serial.println("Packet Received: Translate");
+            mcs.translate_ticks(msg_rx.message_content.translate.ticks);
+            break;
+
+          case BusMessage_rotate_tag:
+            serial.println("Packet Received: Rotate");
+            mcs.rotate_ticks(msg_rx.message_content.rotate.ticks);
+            break;
+
+          case BusMessage_moveWheelAtSpeed_tag:
+            serial.println("Packet Received: MoveWheelAtSpeed");
+            mcs.set_target_speed(Motor::Side::LEFT, msg_rx.message_content.moveWheelAtSpeed.left_tick_per_sec);
+            mcs.set_target_speed(Motor::Side::RIGHT, msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
+            break;
+
+          case BusMessage_setMotionControlMode_tag:
+            serial.println("Packet Received: SetMotionControlMode");
+            mcs.set_control(msg_rx.message_content.setMotionControlMode.speed, msg_rx.message_content.setMotionControlMode.translation, msg_rx.message_content.setMotionControlMode.rotation);
+            break;
+
+          case BusMessage_pidConfig_tag:
+            serial.println("Packet Received: PID Config");
+            mcs.set_kp(msg_rx.message_content.pidConfig.pid_id ,msg_rx.message_content.pidConfig.kp);
+            mcs.set_ki(msg_rx.message_content.pidConfig.pid_id ,msg_rx.message_content.pidConfig.ki);
+            mcs.set_kd(msg_rx.message_content.pidConfig.pid_id ,msg_rx.message_content.pidConfig.kd);
+            break;
+
+          case BusMessage_motionLimit_tag:
+            serial.println("Packet Received: Motion Limits");
+            mcs.set_limits(
+              msg_rx.message_content.motionLimit.translation_speed,
+              msg_rx.message_content.motionLimit.rotation_speed,
+              msg_rx.message_content.motionLimit.wheel_speed,
+              msg_rx.message_content.motionLimit.wheel_acceleration
+            );
+            break;
+
+          default:
+            break;
         }
       }
-      serial.printf("Packet Received:%s", XSTR(BusMessage_message_translate_MSGTYPE));
     }
 
-    // Periodic Encoder Position Report Message to HL
-    if(can_timer.check()){
-      togglePin(PIN_LED);
-      if(isotp_is_tx_available(&g_link)){
-         msg_tx.message.encoderPosition.left_tick++;
-         msg_tx.message.encoderPosition.right_tick--;
-         ostream = pb_ostream_from_buffer(payload_tx, sizeof(msg_tx));
-         status = pb_encode(&ostream, BusMessage_fields, &msg_tx);
-         if(!status){
-            while(true){
-               serial.print("ERROR: pb_encode failed\r\n");
-               delay_ms(500);
-            }
-         }
-        ret = isotp_send(&g_link, payload_tx, ostream.bytes_written);
-        asm volatile("nop");
+
+    mcs_stop_status = mcs.has_stopped();
+    //If the robot has stopped or cannot move normally
+    if(mcs_stop_status != MotionController::STOP_STATUS::NONE){
+      msg_move_end.message_content.movementEnded.blocked = (mcs_stop_status == MotionController::STOP_STATUS::BLOCKED);
+      if(canpb.send_msg(msg_move_end) != Can_PB::CAN_PB_RET_OK){
+        serial.print("ERROR: SENDING MOVEMENT END\r\n");
+      }
+    }
+
+    //Periodic encoder position message
+    if(position_timer.check()){
+      if(canpb.is_tx_available()){
+        msg_encoder.message_content.encoderPosition.left_tick  = mcs.get_COD_left();
+        msg_encoder.message_content.encoderPosition.right_tick = mcs.get_COD_right();
+        if(canpb.send_msg(msg_encoder) != Can_PB::CAN_PB_RET_OK){
+          serial.print("ERROR: SENDING ENCODER POS\r\n");
+        }
+      }
+    }
+
+    //Periodic Heartbeat
+    if(heartbeat_timer.check()){
+      if(canpb.is_tx_available()){
+        togglePin(PIN_LED);
+        if(canpb.send_msg(msg_heartbeat) != Can_PB::CAN_PB_RET_OK){
+          serial.print("ERROR: SENDING HEARTBEAT\r\n");
+        }
       }
     }
   }
-  return 0;
 }
+
+
+#ifdef __cplusplus
+extern "C"{
+#endif
+void TIM14_IRQHandler(void){
+  static uint8_t i = 0;
+  // Control loop
+  if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
+    LL_TIM_ClearFlag_UPDATE(TIM14);
+    mcs.update_position();
+    mcs.control_motion();
+    if((++i) == 10){ // Evry 10ms
+      mcs.detect_stop();
+      i = 0;
+    }
+  }
+}
+#ifdef __cplusplus
+}
+#endif

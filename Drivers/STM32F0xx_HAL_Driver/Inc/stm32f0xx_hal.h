@@ -27,7 +27,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "../../../LL/SYSTEM/stm32f0xx_hal_conf.h"
+#include "system/stm32f0xx_hal_conf.h"
 
 /** @addtogroup STM32F0xx_HAL_Driver
   * @{

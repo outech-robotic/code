@@ -3,9 +3,9 @@
  * 2011 Petteri Aimonen <jpa@kapsi.fi>
  */
 
-#include <COM/proto/pb.h>
-#include <COM/proto/pb_common.h>
-#include <COM/proto/pb_encode.h>
+#include "pb.h"
+#include "pb_encode.h"
+#include "pb_common.h"
 
 /* Use the GCC warn_unused_result attribute to check that all return values
  * are propagated correctly. On other compilers and gcc before 3.4.0 just

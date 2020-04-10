@@ -5,7 +5,7 @@
  *      Author: ticta
  */
 
-#include <MOTION/PIDFP.h>
+#include <motion/PIDFP.h>
 
 #define COEFF_SHIFT       (16)
 #define COEFF_SIZE        (32)

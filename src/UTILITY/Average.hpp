@@ -1,7 +1,7 @@
 #ifndef UTILITY_AVERAGE_HPP_
 #define UTILITY_AVERAGE_HPP_
 
-#include "UTILITY/macros.h"
+#include <utility/macros.h>
 
 template<typename T, const unsigned int BUFFER_SIZE>
 class Average

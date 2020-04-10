@@ -1,6 +1,6 @@
-#include "MOTION/MotionController.h"
+#include <motion/MotionController.h>
+#include <utility/timing.h>
 #include "config.h"
-#include "UTILITY/timing.h"
 MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_right(Motor::Side::RIGHT){
 
 }
@@ -107,7 +107,7 @@ void MotionController::update_position() {
 
 
 void MotionController::control_motion() {
-  int16_t left_pwm, right_pwm;
+  int16_t left_pwm=0, right_pwm=0;
   int16_t speed_sp_translation, speed_sp_rotation;
   if(robot_status.controlled_position || robot_status.controlled_rotation || robot_status.controlled_speed){
 

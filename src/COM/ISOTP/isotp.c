@@ -1,4 +1,4 @@
-#include <COM/ISOTP/isotp.h>
+#include <com/isotp/isotp.h>
 #include <stdint.h>
 #include "assert.h"
 

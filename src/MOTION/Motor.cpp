@@ -5,11 +5,11 @@
  *      Author: ticta
  */
 
-#include "MOTION/Motor.h"
-#include "TIMER/tim.h"
-#include "UTILITY/macros.h"
+#include "peripheral/gpio.h"
+#include "peripheral/tim.h"
+#include "Motor.h"
+#include "utility/macros.h"
 #include "config.h"
-#include "GPIO/gpio.h"
 
 Motor::Motor(const Side new_side) : side(new_side), dir((new_side == Side::LEFT) ? (Direction::FORWARD) : (Direction::BACKWARD)){}
 

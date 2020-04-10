@@ -2,8 +2,7 @@
 #define GPIO_GPIO_C_
 
 #include <stm32f0xx_ll_bus.h>
-#include "GPIO/gpio_pins.h"
-
+#include "peripheral/gpio_pins.h"
 
 typedef enum{
 	GPIO_HIGH=1,

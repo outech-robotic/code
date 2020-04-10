@@ -6,7 +6,7 @@
  */
 
 
-#include "GPIO/gpio_pins.h"
+#include "peripheral/gpio_pins.h"
 
 #define GPIO_Pin_Def(port, number) GPIO_Pin P##port##number = {GPIO##port, LL_GPIO_PIN_##number, #port#number}
 

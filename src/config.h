@@ -33,7 +33,15 @@
 #define CONST_USART_BAUDRATE (115200)
 
 //BUFFER SIZE USED IN ISR
-#define CONST_CAN_BUFFER_SIZE (4)
+// IDs used by board on CAN interface
+#define CONST_CAN_BOARD_ID    ((uint16_t)0)                   // 10 bits  unique board ID
+#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID << 1 | 1)   // 11 bits ID, LSb is a 1 for (Master) ->  (This)  transfers
+#define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID << 1)       // 11 bits ID, LSb is a 0 for  (This)  -> (Master) transfers
+
+//BUFFER SIZE USED IN ISR
+#define CONST_CAN_BUFFER_SIZE ((uint16_t)16)
+#define CONST_ISOTP_BUFF_SIZE ((size_t)512)
+#define CONST_PB_BUFF_SIZE    ((size_t)8)
 
 //CAN IDS
 #define CAN_PIPE_WIDTH        (2)
@@ -80,7 +88,6 @@
 
 //SENSOR MESSAGES
 #define CAN_MSG_SENSOR          (0b00000)
-
 
 
 /**

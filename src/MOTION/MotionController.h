@@ -7,10 +7,10 @@
 
 #ifndef MOTION_MOTIONCONTROLLER_H_
 #define MOTION_MOTIONCONTROLLER_H_
-#include <MOTION/PIDFP.h>
-#include "MOTION/Motor.h"
-#include "TIMER/tim.h"
-#include "UTILITY/Average.hpp"
+#include "motion/Motor.h"
+#include "motion/PIDFP.h"
+#include "peripheral/tim.h"
+#include "utility/Average.hpp"
 
 class MotionController {
 

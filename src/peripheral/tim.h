@@ -1,8 +1,8 @@
 #ifndef __tim_H
 #define __tim_H
 #include "stm32f0xx_ll_tim.h"
+#include "peripheral/gpio_pins.h"
 
-#include "GPIO/gpio_pins.h"
 #ifdef __cplusplus
  extern "C" {
 #endif

@@ -1,8 +1,8 @@
-#include <CAN/can.h>
-#include <GPIO/gpio.h>
+#include "peripheral/can.h"
+#include "peripheral/gpio.h"
+#include "utility/macros.h"
+#include "utility/ring_buffer.hpp"
 #include "config.h"
-#include "UTILITY/macros.h"
-#include "UTILITY/ring_buffer.hpp"
 
 /*
  * CAN TX MESSAGE TEMPLATES
