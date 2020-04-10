@@ -147,9 +147,9 @@ void MX_CAN_Init(void)
   filterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
   filterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
 
-  filterConfig.FilterIdHigh = CAN_PKT_ID(CAN_PIPE_MOTOR, 0) << CAN_STDID_SHIFT;
+  filterConfig.FilterIdHigh = CONST_CAN_RX_ID << CAN_STDID_SHIFT; // The 5 LSbs are not for the Standard ID
   filterConfig.FilterIdLow = 0x0000;
-  filterConfig.FilterMaskIdHigh = CAN_PKT_ID(CAN_PIPE_MASK, 0) << CAN_STDID_SHIFT; // ACCEPT ALL PROPULSION MESSAGES
+  filterConfig.FilterMaskIdHigh = 0x7FF;
   filterConfig.FilterMaskIdLow = 0x0000;
 
   filterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
@@ -157,36 +157,6 @@ void MX_CAN_Init(void)
   if((res = HAL_CAN_ConfigFilter(&hcan, &filterConfig)) != HAL_OK){
       while(1);
   }
-
-
-  /*
-   * INITIALIZE MESSAGE TEMPLATES
-   */
-
-  CAN_TX_HEARTBEAT.header.DLC   = 0;
-  CAN_TX_HEARTBEAT.header.IDE   = CAN_ID_STD;
-  CAN_TX_HEARTBEAT.header.RTR   = CAN_RTR_DATA;
-  CAN_TX_HEARTBEAT.header.StdId = CAN_PKT_ID(CAN_PIPE_HL, (CAN_MSG_HEARTBEAT<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
-
-  CAN_TX_MOV_END.header.DLC     = 1;
-  CAN_TX_MOV_END.header.IDE     = CAN_ID_STD;
-  CAN_TX_MOV_END.header.RTR     = CAN_RTR_DATA;
-  CAN_TX_MOV_END.header.StdId   = CAN_PKT_ID(CAN_PIPE_MOTOR, (CAN_MSG_MOT_MOVE_END<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
-  CAN_TX_MOV_END.data.u8[0]     = 0;
-
-  CAN_TX_COD_POS.header.DLC     = 8;
-  CAN_TX_COD_POS.header.IDE     = CAN_ID_STD;
-  CAN_TX_COD_POS.header.RTR     = CAN_RTR_DATA;
-  CAN_TX_COD_POS.header.StdId   = CAN_PKT_ID(CAN_PIPE_MOTOR, (CAN_MSG_MOT_COD_POS<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
-  CAN_TX_COD_POS.data.d32[0]    = 0;
-  CAN_TX_COD_POS.data.d32[1]    = 0;
-
-  CAN_TX_DEBUG_DATA.header.DLC  = 8;
-  CAN_TX_DEBUG_DATA.header.IDE  = CAN_ID_STD;
-  CAN_TX_DEBUG_DATA.header.RTR  = CAN_RTR_DATA;
-  CAN_TX_DEBUG_DATA.header.StdId= CAN_PKT_ID(CAN_PIPE_HL, (CAN_MSG_DEBUG_DATA<<CAN_BOARD_ID_WIDTH) | CAN_BOARD_ID);
-  CAN_TX_DEBUG_DATA.data.d32[0] = 0;
-  CAN_TX_DEBUG_DATA.data.d32[1] = 0;
 
   /*
    * INITIALIZE INTERRUPT SYSTEM FOR CAN
@@ -249,7 +219,6 @@ extern "C"{
 
 void CEC_CAN_IRQHandler(void){
 	HAL_StatusTypeDef res;
-	int8_t free_mailbox = 0;
 	uint32_t used_mailbox;
 	can_tx_msg tx_msg;
 	can_rx_msg rx_msg;
@@ -266,12 +235,7 @@ void CEC_CAN_IRQHandler(void){
 	}
 
 	/* ************** TX ************** */
-	if((free_mailbox = CAN_check_request_done(&hcan)) != -1){
-		if((free_mailbox == (CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1)) ||
-		   (free_mailbox == (CAN_TX_MAILBOX0 | CAN_TX_MAILBOX2)) ||
-		   (free_mailbox == (CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2))){
-			while(1);
-		}
+	if(CAN_check_request_done(&hcan) != -1){
 		// A TX mailbox completed a transmit or abort request, it is now free
 		if(!messages_tx.is_empty()){
 			tx_msg = messages_tx.pop();
