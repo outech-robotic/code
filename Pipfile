@@ -24,6 +24,7 @@ python-can = "*"
 colorama = "*"
 rplidar-roboticia = "*"
 websockets = "*"
+protobuf = "*"
 
 [requires]
 python_version = "3.7"

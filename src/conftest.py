@@ -8,6 +8,7 @@ from pytest import fixture
 
 from src.robot.adapter.can import CANAdapter
 from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
+from src.robot.controller.match_action import MatchActionController
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.odometry import OdometryController
 from src.robot.controller.symmetry import SymmetryController
@@ -193,3 +194,16 @@ def simulated_lidar_adapter_mock():
     Simulated lidar adapter.
     """
     return MagicMock(spec=SimulatedLIDARAdapter)
+
+
+@fixture
+def match_action_controller_mock():
+    """
+    Match action controller.
+    """
+    mock = MagicMock(spec=MatchActionController)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.set_laser_distances = MagicMock(return_value=future)
+    mock.set_pressures = MagicMock(return_value=future)
+    return mock

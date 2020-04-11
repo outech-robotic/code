@@ -54,6 +54,11 @@ Replace localhost with your IP if you are not running it locally.
 make jenkins
 ```
 
+##### If you want to re-generate the protobuf files:
+```shell
+make protoc
+```
+
 
 You are done! (see [pipenv documentation](https://github.com/pypa/pipenv/blob/master/README.md) for how to do other stuff.)
 

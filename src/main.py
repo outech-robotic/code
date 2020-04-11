@@ -11,6 +11,7 @@ from serial.tools import list_ports
 
 from src.robot.adapter.can import CANAdapter
 from src.robot.adapter.can.pycan import LoopbackCANAdapter, PyCANAdapter
+from src.robot.adapter.can.socket_can import SocketCANAdapter
 from src.robot.adapter.lidar import LIDARAdapter
 from src.robot.adapter.lidar.rplidar import RPLIDARAdapter
 from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
@@ -21,11 +22,13 @@ from src.robot.controller.motion.odometry import OdometryController
 from src.robot.controller.sensor.rplidar import LidarController
 from src.robot.controller.strategy import StrategyController
 from src.robot.controller.symmetry import SymmetryController
+from src.robot.controller.match_action import MatchActionController
 from src.robot.entity.color import Color
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.configuration import DebugConfiguration
 from src.robot.gateway.motion.motion import MotionGateway
 from src.robot.handler.motion.motion import MotionHandler
+from src.robot.handler.protobuf import ProtobufHandler
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
 from src.simulation.controller.event_queue import EventQueue
@@ -116,6 +119,9 @@ def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
     i.provide('web_browser_client', WebBrowserClient)
     i.provide('replay_saver', ReplaySaver)
     i.provide('can_adapter', LoopbackCANAdapter)
+    i.provide('match_action_controller', MatchActionController)
+    i.provide('protobuf_handler', ProtobufHandler)
+    i.provide('socket_can_adapter', SocketCANAdapter, card_id=1)
 
     i.provide('lidar_adapter', SimulatedLIDARAdapter)
 
@@ -125,6 +131,9 @@ def _provide_real_life_dependencies(i: DependencyContainer) -> None:
     Provide the "real" dependencies to run the robot in real life.
     """
     i.provide('can_adapter', PyCANAdapter)
+    i.provide('match_action_controller', SocketCANAdapter)
+    i.provide('protobuf_handler', ProtobufHandler)
+    i.provide('socket_can_adapter', SocketCANAdapter)
     i.provide(
         'can_bus',
         can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000))
@@ -147,6 +156,7 @@ def _get_container(simulate: bool) -> DependencyContainer:
     return i
 
 
+# pylint: disable=too-many-locals
 async def main() -> None:
     """
     Main function.
@@ -161,6 +171,7 @@ async def main() -> None:
     lidar_adapter.register_handler(lidar_controller.set_detection)
 
     can_adapter: CANAdapter = i.get('can_adapter')
+    socket_can_adapter: SocketCANAdapter = i.get('socket_can_adapter')
     motion_handler: MotionHandler = i.get('motion_handler')
 
     # Register the CAN bus to call the handlers.
@@ -180,7 +191,9 @@ async def main() -> None:
         strategy_controller.run(),
         can_adapter.run(),
         debug_controller.run(),
+        socket_can_adapter.run(),
     }
+
     if is_simulation:
         simulation_runner = i.get('simulation_runner')
         coroutines_to_run.add(simulation_runner.run())
