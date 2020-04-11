@@ -30,3 +30,11 @@ clean:
 .PHONY: protoc
 protoc: 
 	protoc -I=./proto --python_out=./proto/gen outech.proto
+
+.PHONY: run-simulation
+run-simulation:
+	OUTECH_SIMULATION=true python -m src.main
+
+.PHONY: run
+run:
+	OUTECH_SIMULATION=false python -m src.main

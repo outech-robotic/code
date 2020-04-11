@@ -39,11 +39,11 @@ pipenv shell # Equivalent to `source ./bin/activate`
 ### Run it!
 ##### If you want to run the code in a simulation:
 ```shell
-python -m src.main
+make run-simulation
 ```
 ##### If you want to run the code in real life:
 ```shell
-OUTECH_SIMULATION=false python -m src.main
+make run
 ```
 Go to `https://nicolasbon.net/replay/?replay=ws://localhost:8080` to see what the robot "sees".
 
