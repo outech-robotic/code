@@ -26,6 +26,11 @@ cd hl-flowing-clean-arch
 pipenv install # Equivalent to `pip install -r requirements.txt`
 ```
 
+On Raspberry Pi you might have to: 
+```
+sudo apt-get install libatlas-base-dev
+```
+
 ### Enter into the virtual environment:
 ```shell
 pipenv shell # Equivalent to `source ./bin/activate`
