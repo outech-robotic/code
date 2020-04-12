@@ -21,7 +21,6 @@ int main(void)
   MotionController::STOP_STATUS mcs_stop_status;
 
   can_msg can_raw_msg;
-volatile static constexpr uint32_t a = sizeof(can_msg);
 
   // Proto Buffers Messages
   BusMessage msg_rx = BusMessage_init_zero;
@@ -163,7 +162,6 @@ volatile static constexpr uint32_t a = sizeof(can_msg);
 extern "C"{
 #endif
 void TIM14_IRQHandler(void){
-  static uint8_t i = 0;
   // Control loop
   if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
     LL_TIM_ClearFlag_UPDATE(TIM14);

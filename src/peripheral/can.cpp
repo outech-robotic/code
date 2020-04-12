@@ -1,5 +1,5 @@
 #include "stm32f0xx_ll_bus.h"
-#include "stm32f0xx_ll_gpio.h".h"
+#include "stm32f0xx_ll_gpio.h"
 #include "peripheral/can.h"
 #include "utility/macros.h"
 #include "utility/ring_buffer.hpp"
@@ -32,7 +32,7 @@ void CAN_IRQ_TX_Empty_disable(CAN_HandleTypeDef* can){
 
 int CAN_receive_packet(can_msg* msg){
   CAN_RxHeaderTypeDef header;
-  int res;
+  int res = HAL_ERROR;
   if(!messages_rx.is_empty()){
     *msg = messages_rx.pop();
     res = HAL_OK;
