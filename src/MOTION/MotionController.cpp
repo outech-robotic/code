@@ -290,73 +290,34 @@ bool MotionController::has_movement_ended(){
 
 
 void MotionController::detect_stop(){
-  bool status_block; // is the robot physically blocked and should stop?
-  bool status_end;   // is the robot at the end of a movement, as expected?
-//  static bool block_started = false;
-//  status_block = is_robot_blocked();
-//  // if done or blocked, stop the robot
-//  if(robot_status.moving && !robot_status.forced_movement && (status_block || status_end)){
-//    stop(status_block && !status_end); //Only count as blocked if the movement is not at its end
-//    status_block=false;
-//  }
-//  static uint8_t count_block = 0;
-//  if(robot_status.moving && !robot_status.forced_movement && ((pid_translation.get_derivative() == 0) && (pid_rotation.get_derivative()==0)) || (ABS(ABS(pid_speed_left.get_error())-ABS(pid_speed_right.get_error()))>robot_status.differential_tolerance)){
-//    if(!block_started){
-//      count_block = 20;
-//      block_started = true;
-//    }
-//  }
-//  else{
-//    block_started = false;
-//    count_block=20;
-//    status_block = false;
-//  }
-//  if(block_started){
-//    count_block--;
-//    if(count_block==0){
-//      block_started=false;
-//      status_block=true;
-//    }
-//  }
-//
-  //status_end = has_movement_ended();
+  static const uint8_t INIT_STOP  = 20;
 
-  static const uint8_t INIT_BLOCK = 20;
-  static const uint8_t INIT_STOP  = 10;
-
-  static uint8_t time_block = INIT_BLOCK;
   static uint8_t time_stop  = INIT_STOP;
   int32_t err_trans = ABS(pid_translation.get_error());
   int32_t err_rot   = ABS(pid_rotation.get_error());
 
-  if(robot_status.moving && !robot_status.forced_movement
-      && (err_trans <= robot_status.translation_tolerance && err_rot <= robot_status.rotation_tolerance))
-  {
+  // If not moving
+  if((robot_status.moving && !robot_status.forced_movement) && (pid_translation.get_derivative() == 0) && (pid_rotation.get_derivative() == 0)){
     if(time_stop > 0){
       time_stop--;
     }
     else{
-      stop(false);
+      // Close enough to setpoints
+      if((err_trans <= robot_status.translation_tolerance) && (err_rot <= robot_status.rotation_tolerance)){
+        stop(false);
+      }
+      // Probably blocked
+      else{
+        stop(true);
+      }
+      time_stop  = INIT_STOP;
     }
   }
-  else if(robot_status.moving && !robot_status.forced_movement &&
-      (((pid_translation.get_derivative() == 0) && (pid_rotation.get_derivative()==0))
-        || (ABS(ABS(pid_speed_left.get_error())-ABS(pid_speed_right.get_error()))>robot_status.differential_tolerance))
-    && (err_trans > 5*robot_status.translation_tolerance || err_rot > 5*robot_status.rotation_tolerance))
-  {
-    if(time_block > 0){
-      time_block--;
-    }
-    else{
-      stop(true);
-    }
-  }
-
   else{
-    time_block = INIT_BLOCK;
-    time_stop  = INIT_STOP;
+    time_stop = INIT_STOP;
   }
 }
+
 
 // Stops the robot at its current position
 void MotionController::stop(bool wheels_blocked){

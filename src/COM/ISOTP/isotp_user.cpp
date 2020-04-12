@@ -20,7 +20,7 @@ extern "C" {
    * bytes. */
   int  isotp_user_send_can(const uint32_t arbitration_id,
                            const uint8_t* data, const uint8_t size) {
-      return CAN_send_packet(arbitration_id, data, size, false);
+      return CAN_send_packet(arbitration_id, data, size);
   }
 
   /* required, return system tick, unit is millisecond */

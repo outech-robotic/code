@@ -12,7 +12,7 @@
 #include "com/isotp/isotp.h"
 #include "com/proto/pb_encode.h"
 #include "com/proto/pb_decode.h"
-#include "com/proto/roboto.pb.h"
+#include "com/proto/outech.pb.h"
 #include "utility/ring_buffer.hpp"
 #include "config.h"
 
@@ -40,9 +40,11 @@ public:
     CAN_PB_RET_ERROR_RECEIVE  = -2,
     CAN_PB_RET_ERROR_TX_FULL  = -3,
     CAN_PB_RET_ERROR_RX_EMPTY = -4,
+    CAN_PB_RET_ERROR_RX_FULL  = -5,
     CAN_PB_RET_ERROR_ENCODE   = -10,
     CAN_PB_RET_ERROR_DECODE   = -11,
   };
+
 
   // Initializes the Link struct, and addresses
   Can_PB(uint16_t rx_addr, uint16_t tx_addr) : isotp_rx_addr(rx_addr), isotp_tx_addr(tx_addr){
@@ -55,17 +57,23 @@ public:
     return id == isotp_rx_addr;
   }
 
+
   // Updates the current reception state, returns true if the message id is for this instance of Can_PB
-  void update_rx_msg(can_rx_msg& msg){
-    isotp_on_can_message(&isotp_link, msg.data.u8, msg.header.DLC);
+  void update_rx_msg(can_msg& msg){
+    isotp_on_can_message(&isotp_link, msg.data.u8, msg.size);
   }
 
 
   int update(){
+    BusMessage msg_rx;
+    uint16_t rx_size;
+    pb_istream_t istream;
+
     // Update Iso-TP status and packets
     isotp_poll(&isotp_link);
 
-    // If there is no transfer going on, and there are packets to send
+
+    // If there is no transfer going on, and there are BusMessages to send
     if(is_tx_available() && !pb_msg_tx_buffer.is_empty()){
       //Get the oldest message to send and encode it
       BusMessage msg = pb_msg_tx_buffer.pop();
@@ -80,31 +88,21 @@ public:
       }
     }
 
-    return CAN_PB_RET_OK;
-  }
+    // If there is an available packet to read, and the reception buffer isn't full of BusMessages
+    if(isotp_link.receive_status == ISOTP_RECEIVE_STATUS_FULL){
+      if(pb_msg_rx_buffer.is_full()){
+        return CAN_PB_RET_ERROR_RX_FULL;
+      }
+      if(isotp_receive(&isotp_link, pb_data_rx, sizeof(pb_data_rx), &rx_size) == ISOTP_RET_OK){
+        istream = pb_istream_from_buffer(pb_data_rx,  rx_size);
+        if(!pb_decode(&istream, BusMessage_fields, &msg_rx)){
+          return CAN_PB_RET_ERROR_DECODE;
+        }
 
-
-  bool is_rx_available(){
-    return isotp_link.receive_status == ISOTP_RECEIVE_STATUS_FULL;
-  }
-
-
-  bool is_tx_available(){
-    return isotp_link.send_status == ISOTP_SEND_STATUS_IDLE || isotp_link.send_status == ISOTP_SEND_STATUS_ERROR;
-  }
-
-
-  int receive_msg(BusMessage& msg){
-    uint16_t rx_size;
-    bool status;
-    pb_istream_t istream;
-
-    int ret = isotp_receive(&isotp_link, pb_data_rx, sizeof(pb_data_rx), &rx_size);
-    if(ret == ISOTP_RET_OK){
-      istream = pb_istream_from_buffer(pb_data_rx,  rx_size);
-      status = pb_decode(&istream, BusMessage_fields, &msg);
-      if(!status){
-        return CAN_PB_RET_ERROR_DECODE;
+        pb_msg_rx_buffer.push(msg_rx);
+      }
+      else{
+        return CAN_PB_RET_ERROR_RECEIVE;
       }
     }
 
@@ -112,16 +110,34 @@ public:
   }
 
 
+  bool receive_msg(BusMessage& msg){
+    if(!pb_msg_rx_buffer.is_empty()){
+      msg = pb_msg_rx_buffer.pop();
+      return true;
+    }
+
+    return false;
+  }
+
+
   int send_msg(const BusMessage& msg){
     if(pb_msg_tx_buffer.is_full()){
       return CAN_PB_RET_ERROR_TX_FULL;
     }
-    else{
-      pb_msg_tx_buffer.push(msg);
-      return CAN_PB_RET_OK;
-    }
+
+    pb_msg_tx_buffer.push(msg);
+    return CAN_PB_RET_OK;
   }
 
+
+  bool is_rx_available(){
+    return !pb_msg_rx_buffer.is_empty();
+  }
+
+
+  bool is_tx_available(){
+    return isotp_link.send_status == ISOTP_SEND_STATUS_IDLE || isotp_link.send_status == ISOTP_SEND_STATUS_ERROR;
+  }
 };
 
 #endif /* COM_CAN_PB_HPP_ */

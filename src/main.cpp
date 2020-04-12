@@ -6,23 +6,22 @@
 #include "config.h"
 
 
-#define STR(x)  #x
-#define XSTR(x) STR(x)
-
-
 Metro position_timer(10);
 Metro heartbeat_timer(500);
 
 Serial serial;
 MotionController mcs;
+
 Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
+
 
 int main(void)
 {
-  int ret;
+  volatile uint32_t rx_packet = 0;
   MotionController::STOP_STATUS mcs_stop_status;
 
-  can_rx_msg can_raw_msg;
+  can_msg can_raw_msg;
+volatile static constexpr uint32_t a = sizeof(can_msg);
 
   // Proto Buffers Messages
   BusMessage msg_rx = BusMessage_init_zero;
@@ -54,6 +53,8 @@ int main(void)
   PWM_write(PA10,  0);
   PWM_write(PA8,  0);
 
+  mcs.set_control(true,  true,  true);
+
   serial.init(115200);
   serial.print("Setup done \r\n");
 
@@ -61,7 +62,7 @@ int main(void)
   {
     // Update ISOTP server
     if(CAN_receive_packet(&can_raw_msg) == HAL_OK){
-      if(canpb.match_id(can_raw_msg.header.StdId)){
+      if(canpb.match_id(can_raw_msg.id)){
         canpb.update_rx_msg(can_raw_msg);
       }
     }
@@ -70,8 +71,8 @@ int main(void)
 
     // Order reception
     if(canpb.is_rx_available()){
-      ret = canpb.receive_msg(msg_rx);
-      if(ret == Can_PB::CAN_PB_RET_OK){
+      rx_packet++;
+      if(canpb.receive_msg(msg_rx)){
         switch(msg_rx.which_message_content){
           case BusMessage_stopMoving_tag:
             serial.println("Packet Received: StopMoving");
@@ -122,16 +123,6 @@ int main(void)
       }
     }
 
-
-    mcs_stop_status = mcs.has_stopped();
-    //If the robot has stopped or cannot move normally
-    if(mcs_stop_status != MotionController::STOP_STATUS::NONE){
-      msg_move_end.message_content.movementEnded.blocked = (mcs_stop_status == MotionController::STOP_STATUS::BLOCKED);
-      if(canpb.send_msg(msg_move_end) != Can_PB::CAN_PB_RET_OK){
-        serial.print("ERROR: SENDING MOVEMENT END\r\n");
-      }
-    }
-
     //Periodic encoder position message
     if(position_timer.check()){
       if(canpb.is_tx_available()){
@@ -139,6 +130,18 @@ int main(void)
         msg_encoder.message_content.encoderPosition.right_tick = mcs.get_COD_right();
         if(canpb.send_msg(msg_encoder) != Can_PB::CAN_PB_RET_OK){
           serial.print("ERROR: SENDING ENCODER POS\r\n");
+        }
+      }
+
+      // Update block status
+      mcs.detect_stop();
+
+      mcs_stop_status = mcs.has_stopped();
+      //If the robot has stopped or cannot move normally
+      if(mcs_stop_status != MotionController::STOP_STATUS::NONE){
+        msg_move_end.message_content.movementEnded.blocked = (mcs_stop_status == MotionController::STOP_STATUS::BLOCKED);
+        if(canpb.send_msg(msg_move_end) != Can_PB::CAN_PB_RET_OK){
+          serial.print("ERROR: SENDING MOVEMENT END\r\n");
         }
       }
     }
@@ -166,10 +169,6 @@ void TIM14_IRQHandler(void){
     LL_TIM_ClearFlag_UPDATE(TIM14);
     mcs.update_position();
     mcs.control_motion();
-    if((++i) == 10){ // Evry 10ms
-      mcs.detect_stop();
-      i = 0;
-    }
   }
 }
 #ifdef __cplusplus
