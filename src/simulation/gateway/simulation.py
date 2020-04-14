@@ -1,12 +1,10 @@
 """
 Simulation gateway module.
 """
-
-from src.robot.adapter.socket import CANAdapter
+from proto.gen.outech_pb2 import MovementEndedMsg, BusMessage, EncoderPositionMsg
 from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
+from src.robot.adapter.socket import SocketAdapter
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
-from src.util import can_id
-from src.util.encoding import packet
 
 
 class SimulationGateway:
@@ -16,31 +14,30 @@ class SimulationGateway:
     """
 
     def __init__(self, simulation_configuration: SimulationConfiguration,
-                 can_adapter: CANAdapter, lidar_adapter: SimulatedLIDARAdapter):
+                 motor_board_adapter: SocketAdapter,
+                 lidar_adapter: SimulatedLIDARAdapter):
+        self.motor_board_adapter = motor_board_adapter
         self.simulation_configuration = simulation_configuration
-        self.can_adapter = can_adapter
         self.lidar_adapter = lidar_adapter
 
     async def movement_done(self) -> None:
         """
         Send the "movement done" signal to the robot.
         """
-        await self.can_adapter.send(
-            can_id.PROPULSION_MOVEMENT_DONE,
-            packet.encode_propulsion_movement_done(
-                packet.PropulsionMovementDonePacket(blocked=False,)))
+        bus_message = BusMessage(movementEnded=MovementEndedMsg(blocked=False))
+        msg_bytes = bus_message.SerializeToString()
+        await self.motor_board_adapter.send(msg_bytes)
 
     async def encoder_position(self, left_tick: int, right_tick: int) -> None:
         """
         Send encoder positions.
         """
-        await self.can_adapter.send(
-            can_id.PROPULSION_ENCODER_POSITION,
-            packet.encode_propulsion_encoder_position(
-                packet.PropulsionEncoderPositionPacket(
-                    left_tick=left_tick,
-                    right_tick=right_tick,
-                )))
+        bus_message = BusMessage(encoderPosition=EncoderPositionMsg(
+            left_tick=left_tick,
+            right_tick=right_tick,
+        ))
+        msg_bytes = bus_message.SerializeToString()
+        await self.motor_board_adapter.send(msg_bytes)
 
     async def push_lidar_readings(self) -> None:
         """

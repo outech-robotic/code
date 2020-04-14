@@ -61,7 +61,7 @@ class TestLocalizationController:
             stop movement after 10ms.
             """
             await asyncio.sleep(0.1)
-            localization_controller.movement_done()
+            localization_controller.movement_done(False)
 
         start_time = time.time()
         asyncio.create_task(stop_movement())
@@ -81,7 +81,7 @@ class TestLocalizationController:
             stop movement after 10ms.
             """
             await asyncio.sleep(0.1)
-            localization_controller.movement_done()
+            localization_controller.movement_done(False)
 
         start_time = time.time()
         asyncio.create_task(stop_movement())

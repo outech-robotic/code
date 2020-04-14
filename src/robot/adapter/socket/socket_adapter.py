@@ -7,7 +7,7 @@ from asyncio import StreamWriter, StreamReader
 from typing import Callable, Awaitable, List
 
 from src.logger import LOGGER
-from src.robot.adapter.can import SocketAdapter
+from src.robot.adapter.socket import SocketAdapter
 
 
 class TCPSocketAdapter(SocketAdapter):
@@ -37,13 +37,18 @@ class TCPSocketAdapter(SocketAdapter):
             raw_payload = binascii.unhexlify(msg_str)
 
             LOGGER.get().debug('socket_adapter_received',
-                               raw_payload=raw_payload)
+                               raw_payload=raw_payload,
+                               hex_payload=msg_str)
 
             for handler in self.handlers:
                 await handler(raw_payload)
 
     async def send(self, data: bytes) -> None:
-        self.writer.write(data)
+        hex_payload = binascii.hexlify(data)
+        LOGGER.get().debug('socket_can_adapter_send',
+                           raw_payload=data,
+                           hex_payload=hex_payload)
+        self.writer.write(b'<' + hex_payload + b'>\n')
         await self.writer.drain()
 
     def register_handler(self, handler: Callable[[bytes],
@@ -51,18 +56,22 @@ class TCPSocketAdapter(SocketAdapter):
         self.handlers.append(handler)
 
 
-class StubSocketAdapter(SocketAdapter):
+class LoopbackSocketAdapter(SocketAdapter):
     """
     No-op adapter.
     """
+
+    def __init__(self):
+        self.handlers: List[Callable[[bytes], Awaitable[None]]] = []
 
     async def run(self) -> None:
         while True:
             await asyncio.sleep(100)
 
     async def send(self, data: bytes) -> None:
-        pass
+        for handler in self.handlers:
+            await handler(data)
 
     def register_handler(self, handler: Callable[[bytes],
                                                  Awaitable[None]]) -> None:
-        pass
+        self.handlers.append(handler)

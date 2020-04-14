@@ -39,11 +39,9 @@ class OdometryController:
             # Cannot calculate the delta of the ticks.
             self.intialized = True
             return pos, angle
-
         d_left = self._tick_to_millimeter(left_tick - self.previous_left_tick)
         d_right = self._tick_to_millimeter(right_tick -
                                            self.previous_right_tick)
-
         if d_left == d_right == 0:
             # Robot did not move.
             return pos, angle

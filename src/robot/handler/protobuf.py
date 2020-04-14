@@ -1,15 +1,18 @@
 """
 Protobuf message handler module.
 """
-from proto.gen.pb_pb2 import BusMessage
+from proto.gen.outech_pb2 import BusMessage
 from src.logger import LOGGER
 from src.robot.controller.match_action import MatchActionController
+from src.robot.controller.motion.localization import LocalizationController
 
 
 class ProtobufHandler:
     """ Protobuf handler : take bytes and decode to BusMessage """
 
-    def __init__(self, match_action_controller: MatchActionController):
+    def __init__(self, match_action_controller: MatchActionController,
+                 localization_controller: LocalizationController):
+        self.localization_controller = localization_controller
         self.match_action = match_action_controller
 
     async def translate_message(self, msg: bytes) -> None:
@@ -24,12 +27,17 @@ class ProtobufHandler:
         type_msg = bus_message.WhichOneof("message_content")
         if type_msg == "heartbeat":
             pass
+        elif type_msg == "movementEnded":
+            self.localization_controller.movement_done(
+                bus_message.movementEnded.blocked)
         elif type_msg == "encoderPosition":
-            if bus_message.encoderPosition.right_tick and bus_message.encoderPosition.left_tick:
-                pass
+            self.localization_controller.update_odometry_position(
+                bus_message.encoderPosition.left_tick,
+                bus_message.encoderPosition.right_tick)
         elif type_msg == "laserSensor":
             await self.match_action.set_laser_distances()
         elif type_msg == "pressureSensor":
             await self.match_action.set_pressures()
         else:
-            LOGGER.get().error("wrong_protobuf_field")
+            LOGGER.get().error("unhandled_protobuf_message",
+                               message_type=type_msg)

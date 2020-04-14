@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from src.robot.adapter.socket import CANAdapter
 from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
+from src.robot.adapter.socket import SocketAdapter
 from src.robot.controller.match_action import MatchActionController
 from src.robot.controller.motion.localization import LocalizationController
 from src.robot.controller.motion.odometry import OdometryController
@@ -15,7 +15,6 @@ from src.robot.controller.symmetry import SymmetryController
 from src.robot.entity.color import Color
 from src.robot.entity.configuration import Configuration
 from src.robot.gateway.motion.motion import MotionGateway
-from src.robot.handler.motion.motion import MotionHandler
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.controller.probe import SimulationProbe
 from src.simulation.controller.replay_saver import ReplaySaver
@@ -144,14 +143,6 @@ def simulation_gateway_mock():
 
 
 @fixture
-def motion_handler_mock():
-    """
-    Motion handler mock.
-    """
-    return MagicMock(spec=MotionHandler)
-
-
-@fixture
 def motion_gateway_mock():
     """
     Motion gateway mock.
@@ -177,18 +168,6 @@ def simulation_probe_mock():
 
 
 @fixture
-def can_adapter_mock():
-    """
-    CAN adapter mock.
-    """
-    mock = MagicMock(spec=CANAdapter)
-    future = asyncio.Future()
-    future.set_result(None)
-    mock.send = MagicMock(return_value=future)
-    return mock
-
-
-@fixture
 def simulated_lidar_adapter_mock():
     """
     Simulated lidar adapter.
@@ -206,4 +185,16 @@ def match_action_controller_mock():
     future.set_result(None)
     mock.set_laser_distances = MagicMock(return_value=future)
     mock.set_pressures = MagicMock(return_value=future)
+    return mock
+
+
+@fixture
+def socket_adapter_mock():
+    """
+    Socket adapter.
+    """
+    mock = MagicMock(spec=SocketAdapter)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.send = MagicMock(return_value=future)
     return mock

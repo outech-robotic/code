@@ -6,13 +6,13 @@ from typing import Iterator, Tuple
 
 import numpy
 
+from proto.gen.outech_pb2 import BusMessage
 from src.logger import LOGGER
 from src.robot.entity.configuration import Configuration
 from src.simulation.controller.event_queue import EventQueue
 from src.simulation.entity.event import EventOrder, EventType
 from src.simulation.entity.simulation_configuration import SimulationConfiguration
 from src.simulation.entity.simulation_state import SimulationState
-from src.util.encoding import packet
 
 
 def _spread_delta_on_ticks(delta: int, ticks: int) -> Iterator[Tuple[int, int]]:
@@ -38,12 +38,22 @@ class SimulationHandler:
         """
         Handle move wheels packets.
         """
-        msg = packet.decode_propulsion_movement_order(data)
-        LOGGER.get().info('simulation_handler_received_movement_order',
-                          ticks=msg.ticks,
-                          type=msg.type)
+        bus_message = BusMessage()
+        bus_message.ParseFromString(data)
+        if bus_message.WhichOneof("message_content") == "translate":
+            rotate = False
+            msg_ticks = bus_message.translate.ticks  # pylint: disable=no-member
+        elif bus_message.WhichOneof("message_content") == "rotate":
+            rotate = True
+            msg_ticks = bus_message.rotate.ticks  # pylint: disable=no-member
+        else:
+            return
 
-        if msg.ticks == 0:
+        LOGGER.get().info('simulation_handler_received_movement_order',
+                          ticks=msg_ticks,
+                          type='ROTATE' if rotate else 'TRANSLATE')
+
+        if msg_ticks == 0:
             self.event_queue.push(EventOrder(type=EventType.MOVEMENT_DONE), 0)
             return
 
@@ -51,16 +61,15 @@ class SimulationHandler:
         rotation_speed = self.simulation_configuration.rotation_speed
         tickrate = self.simulation_configuration.tickrate
 
-        revolution_to_rotate = msg.ticks / ticks_per_revolution
+        revolution_to_rotate = msg_ticks / ticks_per_revolution
         angle_to_rotate = revolution_to_rotate * 2 * math.pi
         time_to_rotate = abs(angle_to_rotate) / rotation_speed
         time_ticks_to_rotate = round(time_to_rotate * tickrate)
 
-        for k, ticks_to_move in _spread_delta_on_ticks(msg.ticks,
+        for k, ticks_to_move in _spread_delta_on_ticks(msg_ticks,
                                                        time_ticks_to_rotate):
             if ticks_to_move == 0:
                 continue
-            rotate = msg.type == packet.PropulsionMovementOrderPacket.MovementType.ROTATION
 
             self.event_queue.push(
                 EventOrder(

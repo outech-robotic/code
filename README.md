@@ -44,7 +44,6 @@ make run-simulation
 ##### If you want to run the code in real life:
 ```shell
 export STUB_LIDAR=true # If you don't have a LIDAR connected.
-export STUB_CAN=true # If you don't have a CAN bus connected.
 export STUB_SOCKET_CAN=true # If you don't have ISO-TP server online.
 
 make run

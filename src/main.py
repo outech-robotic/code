@@ -5,17 +5,14 @@ import asyncio
 import math
 import os
 
-import can
 import rplidar
 from serial.tools import list_ports
 
-from src.robot.adapter.can import SocketAdapter
-from src.robot.adapter.can.pycan import LoopbackCANAdapter, PyCANAdapter
 from src.robot.adapter.lidar import LIDARAdapter
 from src.robot.adapter.lidar.rplidar import RPLIDARAdapter
 from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
-from src.robot.adapter.socket import CANAdapter
-from src.robot.adapter.socket.socket_adapter import TCPSocketAdapter, StubSocketAdapter
+from src.robot.adapter.socket import SocketAdapter
+from src.robot.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
 from src.robot.controller.debug import DebugController
 from src.robot.controller.match_action import MatchActionController
 from src.robot.controller.motion.localization import LocalizationController
@@ -28,7 +25,6 @@ from src.robot.entity.color import Color
 from src.robot.entity.configuration import Configuration
 from src.robot.entity.configuration import DebugConfiguration
 from src.robot.gateway.motion.motion import MotionGateway
-from src.robot.handler.motion.motion import MotionHandler
 from src.robot.handler.protobuf import ProtobufHandler
 from src.simulation.client.http import HTTPClient
 from src.simulation.client.web_browser import WebBrowserClient
@@ -40,11 +36,10 @@ from src.simulation.entity.simulation_configuration import SimulationConfigurati
 from src.simulation.entity.simulation_state import SimulationState
 from src.simulation.gateway.simulation import SimulationGateway
 from src.simulation.handler.simulation import SimulationHandler
-from src.util import can_id
+from src.util import tcp
 from src.util.dependency_container import DependencyContainer
 from src.util.geometry.segment import Segment
 from src.util.geometry.vector import Vector2
-from src.util.tcp import get_reader_writer
 
 CONFIG = Configuration(
     initial_position=Vector2(200, 1200),
@@ -71,7 +66,7 @@ SIMULATION_CONFIG = SimulationConfiguration(
     ])
 
 
-async def _get_container(simulation: bool, stub_lidar: bool, stub_can: bool,
+async def _get_container(simulation: bool, stub_lidar: bool,
                          stub_socket_can: bool) -> DependencyContainer:
     """
     Build the dependency container.
@@ -81,7 +76,6 @@ async def _get_container(simulation: bool, stub_lidar: bool, stub_can: bool,
 
     i.provide('configuration', CONFIG)
 
-    i.provide('motion_handler', MotionHandler)
     i.provide('protobuf_handler', ProtobufHandler)
 
     i.provide('odometry_controller', OdometryController)
@@ -118,15 +112,6 @@ async def _get_container(simulation: bool, stub_lidar: bool, stub_can: bool,
         i.provide('web_browser_client', WebBrowserClient)
         i.provide('replay_saver', ReplaySaver)
 
-    if simulation or stub_can:
-        i.provide('can_adapter', LoopbackCANAdapter)
-    else:
-        bus = can.interface.Bus(channel='can0',
-                                bustype='socketcan',
-                                bitrate=1000000)
-        i.provide('can_bus', bus)
-        i.provide('can_adapter', PyCANAdapter)
-
     if simulation or stub_lidar:
         i.provide('lidar_adapter', SimulatedLIDARAdapter)
     else:
@@ -135,10 +120,11 @@ async def _get_container(simulation: bool, stub_lidar: bool, stub_can: bool,
         i.provide('lidar_adapter', RPLIDARAdapter)
 
     if simulation or stub_socket_can:
-        i.provide('socket_adapter', StubSocketAdapter)
+        i.provide('socket_adapter', LoopbackSocketAdapter)
+        i.provide('motor_board_adapter', LoopbackSocketAdapter)
     else:
-        reader, writer = await get_reader_writer('localhost', 1200)
-        i.provide('socket_adapter',
+        reader, writer = await tcp.get_reader_writer('localhost', 32000)
+        i.provide('motor_board_adapter',
                   TCPSocketAdapter,
                   reader=reader,
                   writer=writer)
@@ -155,38 +141,33 @@ async def main() -> None:
     is_simulation = os.environ.get('OUTECH_SIMULATION',
                                    'true').lower() == 'true'
     stub_lidar = os.environ.get('STUB_LIDAR', 'false').lower() == 'true'
-    stub_can = os.environ.get('STUB_CAN', 'false').lower() == 'true'
     stub_socket_can = os.environ.get('STUB_SOCKET_CAN',
                                      'false').lower() == 'true'
-    i = await _get_container(is_simulation, stub_lidar, stub_can,
-                             stub_socket_can)
+    i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     lidar_controller: LidarController = i.get('lidar_controller')
     lidar_adapter.register_handler(lidar_controller.set_detection)
 
-    can_adapter: CANAdapter = i.get('can_adapter')
     socket_adapter: SocketAdapter = i.get('socket_adapter')
-    motion_handler: MotionHandler = i.get('motion_handler')
+    motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
 
     # Register the CAN bus to call the handlers.
-    can_adapter.register_handler(can_id.PROPULSION_ENCODER_POSITION,
-                                 motion_handler.handle_position_update)
-    can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_DONE,
-                                 motion_handler.handle_movement_done)
+    protobuf_handler: ProtobufHandler = i.get('protobuf_handler')
+    motor_board_adapter.register_handler(protobuf_handler.translate_message)
 
     if is_simulation:
         simulation_handler: SimulationHandler = i.get('simulation_handler')
-        can_adapter.register_handler(can_id.PROPULSION_MOVEMENT_ORDER,
-                                     simulation_handler.handle_movement_order)
+        motor_board_adapter.register_handler(
+            simulation_handler.handle_movement_order)
 
     strategy_controller = i.get('strategy_controller')
     debug_controller = i.get('debug_controller')
     coroutines_to_run = {
         strategy_controller.run(),
-        can_adapter.run(),
         debug_controller.run(),
         socket_adapter.run(),
+        motor_board_adapter.run(),
     }
 
     if is_simulation:

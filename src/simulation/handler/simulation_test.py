@@ -3,9 +3,9 @@ Test for simulation handler module.
 """
 import pytest
 
+from proto.gen.outech_pb2 import BusMessage, TranslateMsg, RotateMsg
 from src.simulation.entity.event import EventType, EventOrder
 from src.simulation.handler.simulation import SimulationHandler
-from src.util.encoding import packet
 
 
 @pytest.fixture(name='simulation_handler')
@@ -28,12 +28,9 @@ async def test_move_backward(simulation_handler, event_queue_mock):
     """
     Happy path for translation.
     """
-    await simulation_handler.handle_movement_order(
-        packet.encode_propulsion_movement_order(
-            packet.PropulsionMovementOrderPacket(
-                type=packet.PropulsionMovementOrderPacket.MovementType.
-                TRANSLATION,
-                ticks=-3)))
+    bus_message = BusMessage(translate=TranslateMsg(ticks=-3))
+    msg_bytes = bus_message.SerializeToString()
+    await simulation_handler.handle_movement_order(msg_bytes)
     event_queue_mock.push.assert_any_call(
         EventOrder(type=EventType.MOVE_WHEEL, payload={
             'left': -1,
@@ -62,11 +59,9 @@ async def test_move_rotation(simulation_handler, event_queue_mock):
     """
     Happy path for rotation.
     """
-    await simulation_handler.handle_movement_order(
-        packet.encode_propulsion_movement_order(
-            packet.PropulsionMovementOrderPacket(
-                type=packet.PropulsionMovementOrderPacket.MovementType.ROTATION,
-                ticks=3)))
+    bus_message = BusMessage(rotate=RotateMsg(ticks=3))
+    msg_bytes = bus_message.SerializeToString()
+    await simulation_handler.handle_movement_order(msg_bytes)
     event_queue_mock.push.assert_any_call(
         EventOrder(type=EventType.MOVE_WHEEL, payload={
             'left': -1,
@@ -95,10 +90,9 @@ async def test_move_wheels_zero_unit(simulation_handler, event_queue_mock):
     """
     If we receive a packet to move wheels by 0 unit, do nothing.
     """
-    translation = packet.PropulsionMovementOrderPacket.MovementType.TRANSLATION
-    await simulation_handler.handle_movement_order(
-        packet.encode_propulsion_movement_order(
-            packet.PropulsionMovementOrderPacket(ticks=0, type=translation)))
+    bus_message = BusMessage(translate=TranslateMsg(ticks=0))
+    msg_bytes = bus_message.SerializeToString()
+    await simulation_handler.handle_movement_order(msg_bytes)
 
     event_queue_mock.push.assert_called_with(
         EventOrder(type=EventType.MOVEMENT_DONE, payload=None), 0)

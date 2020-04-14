@@ -85,7 +85,7 @@ class LocalizationController:
         self._state.last_right_tick = right_tick
         self._state.last_left_tick = left_tick
 
-    def movement_done(self) -> None:
+    def movement_done(self, _: bool) -> None:
         """"
         Set the a flag to indicate that the robot is not moving anymore.
         """
