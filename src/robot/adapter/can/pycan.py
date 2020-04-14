@@ -9,7 +9,7 @@ from typing import Callable, DefaultDict, Awaitable
 import can
 
 from src.logger import LOGGER
-from src.robot.adapter.can import CANAdapter
+from src.robot.adapter.socket import CANAdapter
 
 
 class PyCANAdapter(CANAdapter):

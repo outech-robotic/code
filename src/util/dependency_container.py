@@ -65,7 +65,8 @@ class DependencyContainer:
             return self.instances[name]
 
         if name not in self.factories:
-            return None
+            raise RuntimeError(
+                f"'{name}' never provided, add i.provide('{name}') in main.py")
 
         cls = self.factories[name]
 

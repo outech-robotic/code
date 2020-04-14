@@ -5,18 +5,20 @@ from abc import ABC, abstractmethod
 from typing import Callable, Awaitable
 
 
-class CANAdapter(ABC):
-    """CAN adapter is an interface for sending and receiving messages from a CAN bus."""
+class SocketAdapter(ABC):
+    """
+    Socket adapter is an interface for sending and receiving messages from a socket.
+    """
 
     @abstractmethod
     async def run(self) -> None:
-        """Run the CAN message processing."""
+        """Run the message processing."""
 
     @abstractmethod
-    async def send(self, arbitration_id: int, data: bytes) -> None:
-        """Send a message on the bus."""
+    async def send(self, data: bytes) -> None:
+        """Send a message."""
 
     @abstractmethod
-    def register_handler(self, arbitration_id: int,
-                         handler: Callable[[bytes], Awaitable[None]]) -> None:
+    def register_handler(self, handler: Callable[[bytes],
+                                                 Awaitable[None]]) -> None:
         """Register a handler."""

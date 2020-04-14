@@ -86,10 +86,11 @@ def test_injector_abstract_class():
 
 def test_injector_not_provided():
     """
-    Should return None if not provided.
+    Should return an exception if not provided.
     """
     i = DependencyContainer()
-    assert i.get('test') is None
+    with pytest.raises(Exception):
+        i.get('test')
 
 
 def test_injector_missing_dependencies():

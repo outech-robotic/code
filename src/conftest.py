@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from src.robot.adapter.can import CANAdapter
+from src.robot.adapter.socket import CANAdapter
 from src.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
 from src.robot.controller.match_action import MatchActionController
 from src.robot.controller.motion.localization import LocalizationController
