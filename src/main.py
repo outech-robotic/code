@@ -59,104 +59,90 @@ CONFIG = Configuration(
     debug=DebugConfiguration(),
 )
 
+SIMULATION_CONFIG = SimulationConfiguration(
+    speed_factor=math.inf,  # Run the simulation as fast as possible.
+    obstacles=[
+        Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
+        Segment(start=Vector2(0, 0), end=Vector2(CONFIG.field_shape[0], 0)),
+        Segment(start=Vector2(*CONFIG.field_shape),
+                end=Vector2(0, CONFIG.field_shape[1])),
+        Segment(start=Vector2(*CONFIG.field_shape),
+                end=Vector2(CONFIG.field_shape[0], 0)),
+    ])
 
-def _provide_robot_components(i: DependencyContainer) -> None:
+
+async def _get_container(simulation: bool, stub_lidar: bool, stub_can: bool,
+                         stub_socket_can: bool) -> DependencyContainer:
     """
-    Provide all the robot dependencies.
+    Build the dependency container.
     """
+
+    i = DependencyContainer()
+
     i.provide('configuration', CONFIG)
 
     i.provide('motion_handler', MotionHandler)
+    i.provide('protobuf_handler', ProtobufHandler)
 
     i.provide('odometry_controller', OdometryController)
     i.provide('localization_controller', LocalizationController)
     i.provide('motion_controller', MotionController)
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
-    i.provide('simulation_probe', SimulationProbe)
+    i.provide('lidar_controller', LidarController)
+    i.provide('debug_controller', DebugController)
+    i.provide('match_action_controller', MatchActionController)
 
     i.provide('motion_gateway', MotionGateway)
 
-    i.provide('lidar_controller', LidarController)
+    i.provide('simulation_probe', SimulationProbe)
+    i.provide('event_loop', asyncio.get_event_loop())
 
-    i.provide('debug_controller', DebugController)
+    if simulation:
+        i.provide('simulation_configuration', SIMULATION_CONFIG)
+        i.provide('event_queue', EventQueue())
 
-    event_loop = asyncio.get_event_loop()
-    i.provide('event_loop', event_loop)
+        i.provide('simulation_handler', SimulationHandler)
+        i.provide('simulation_runner', SimulationRunner)
+        i.provide(
+            'simulation_state',
+            SimulationState(time=0,
+                            cups=[],
+                            left_tick=0,
+                            right_tick=0,
+                            last_position_update=0,
+                            last_lidar_update=0))
+        i.provide('simulation_gateway', SimulationGateway)
 
+        i.provide('http_client', HTTPClient)
+        i.provide('web_browser_client', WebBrowserClient)
+        i.provide('replay_saver', ReplaySaver)
 
-def _provide_fake_simulator_dependencies(i: DependencyContainer) -> None:
-    """
-    Provide all the simulation dependencies.
-    """
-    i.provide(
-        'simulation_configuration',
-        SimulationConfiguration(
-            speed_factor=math.inf,  # Run the simulation as fast as possible.
-            obstacles=[
-                Segment(start=Vector2(0, 0),
-                        end=Vector2(0, CONFIG.field_shape[1])),
-                Segment(start=Vector2(0, 0),
-                        end=Vector2(CONFIG.field_shape[0], 0)),
-                Segment(start=Vector2(*CONFIG.field_shape),
-                        end=Vector2(0, CONFIG.field_shape[1])),
-                Segment(start=Vector2(*CONFIG.field_shape),
-                        end=Vector2(CONFIG.field_shape[0], 0)),
-            ]))
-    i.provide('event_queue', EventQueue())
-
-    i.provide('simulation_handler', SimulationHandler)
-    i.provide('simulation_runner', SimulationRunner)
-    i.provide(
-        'simulation_state',
-        SimulationState(time=0,
-                        cups=[],
-                        left_tick=0,
-                        right_tick=0,
-                        last_position_update=0,
-                        last_lidar_update=0))
-    i.provide('simulation_gateway', SimulationGateway)
-
-    i.provide('http_client', HTTPClient)
-    i.provide('web_browser_client', WebBrowserClient)
-    i.provide('replay_saver', ReplaySaver)
-    i.provide('can_adapter', LoopbackCANAdapter)
-
-    i.provide('lidar_adapter', SimulatedLIDARAdapter)
-    i.provide('socket_adapter', StubSocketAdapter)
-
-
-async def _provide_real_life_dependencies(i: DependencyContainer) -> None:
-    """
-    Provide the "real" dependencies to run the robot in real life.
-    """
-    i.provide('can_adapter', PyCANAdapter)
-
-    i.provide(
-        'can_bus',
-        can.interface.Bus(channel='can0', bustype='socketcan', bitrate=1000000))
-
-    i.provide('lidar_adapter', RPLIDARAdapter)
-    i.provide('rplidar_object',
-              rplidar.RPLidar(list_ports.comports()[0].device))
-
-    reader, writer = await get_reader_writer('localhost', 1200)
-    i.provide('socket_adapter', TCPSocketAdapter, reader=reader, writer=writer)
-    i.provide('protobuf_handler', ProtobufHandler)
-    i.provide('match_action_controller', MatchActionController)
-
-
-async def _get_container(simulate: bool) -> DependencyContainer:
-    """
-    Build the dependency container.
-    """
-    i = DependencyContainer()
-
-    _provide_robot_components(i)
-    if simulate:
-        _provide_fake_simulator_dependencies(i)
+    if simulation or stub_can:
+        i.provide('can_adapter', LoopbackCANAdapter)
     else:
-        await _provide_real_life_dependencies(i)
+        bus = can.interface.Bus(channel='can0',
+                                bustype='socketcan',
+                                bitrate=1000000)
+        i.provide('can_bus', bus)
+        i.provide('can_adapter', PyCANAdapter)
+
+    if simulation or stub_lidar:
+        i.provide('lidar_adapter', SimulatedLIDARAdapter)
+    else:
+        rplidar_obj = rplidar.RPLidar(list_ports.comports()[0].device)
+        i.provide('rplidar_object', rplidar_obj)
+        i.provide('lidar_adapter', RPLIDARAdapter)
+
+    if simulation or stub_socket_can:
+        i.provide('socket_adapter', StubSocketAdapter)
+    else:
+        reader, writer = await get_reader_writer('localhost', 1200)
+        i.provide('socket_adapter',
+                  TCPSocketAdapter,
+                  reader=reader,
+                  writer=writer)
+
     return i
 
 
@@ -168,7 +154,12 @@ async def main() -> None:
     """
     is_simulation = os.environ.get('OUTECH_SIMULATION',
                                    'true').lower() == 'true'
-    i = await _get_container(is_simulation)
+    stub_lidar = os.environ.get('STUB_LIDAR', 'false').lower() == 'true'
+    stub_can = os.environ.get('STUB_CAN', 'false').lower() == 'true'
+    stub_socket_can = os.environ.get('STUB_SOCKET_CAN',
+                                     'false').lower() == 'true'
+    i = await _get_container(is_simulation, stub_lidar, stub_can,
+                             stub_socket_can)
 
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     lidar_controller: LidarController = i.get('lidar_controller')
