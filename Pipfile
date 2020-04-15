@@ -24,6 +24,10 @@ colorama = "*"
 rplidar-roboticia = "*"
 websockets = "*"
 protobuf = "*"
+flask = "*"
+flask-socketio = "*"
+flask-wtf = "*"
+python-can = "*"
 
 [requires]
 python_version = "3.7"
