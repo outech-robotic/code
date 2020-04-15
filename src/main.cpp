@@ -1,163 +1,171 @@
-#include "UTILITY/timing.h"
-#include "TIMER/tim.h"
-#include "CAN/can.h"
-#include "GPIO/gpio.h"
-#include "UTILITY/Metro.hpp"
-#include "USART/usart.hpp"
-#include "UTILITY/macros.h"
+#include "com/can_pb.hpp"
+#include "utility/timing.h"
+#include "com/serial.hpp"
+#include "motion/MotionController.h"
+#include "utility/Metro.hpp"
 #include "config.h"
-#include "MOTION/MotionController.h"
-#include "COM/serial.hpp"
 
-#define CMP_CAN_MSG(rxmsg, msg_id) (CAN_PKT_MESSAG_ID(rxmsg.header.StdId) == (msg_id<<CAN_BOARD_ID_WIDTH | CAN_BOARD_ID))
 
-can_rx_msg rx_msg;
-
-Metro can_timer(10);
+Metro position_timer(10);
 Metro heartbeat_timer(500);
 
-MotionController mcs;
 Serial serial;
+MotionController mcs;
+
+Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
 
 int main(void)
 {
-   //(DBGMCU)->APB1FZ = 0x7E01BFF;
-   //(DBGMCU)->APB2FZ = 0x70003;
+  volatile uint32_t rx_packet = 0;
+  MotionController::STOP_STATUS mcs_stop_status;
 
-   int8_t mcs_stop_status;
-   /**********************************************************************
-   *                             SETUP
-   ********************************s**************************************/
-   // Initialize timing utility functions (delay, millis...)
-   Timing_init();
+  can_msg can_raw_msg;
 
-   // Initialize all peripherals
-   //MX_USART2_UART_Init();
-   MX_CAN_Init();
-   MX_TIM1_Init(); // Motion control PWM generators
-   MX_TIM2_Init(); // Left Encoder
-   MX_TIM3_Init(); // Right Encoder
+  // Proto Buffers Messages
+  BusMessage msg_rx = BusMessage_init_zero;
+  BusMessage msg_move_end = BusMessage_init_zero;
+  BusMessage msg_heartbeat = BusMessage_init_zero;
+  BusMessage msg_encoder = BusMessage_init_zero;
 
-   pinMode(PIN_LED,OUTPUT); // Heartbeat Led
-   digitalWrite(PIN_LED, GPIO_HIGH);
-   LL_RCC_ClocksTypeDef clocks;
-   LL_RCC_GetSystemClocksFreq(&clocks);
-   //mcs.init();
-   mcs.set_control(false, false, false); //Everything disabed, by default
+  msg_encoder.message_content.encoderPosition = EncoderPositionMsg_init_zero;
+  msg_encoder.which_message_content = BusMessage_encoderPosition_tag;
 
-   serial.init(115200);
-   serial.print("Setup done \r\n");
+  msg_move_end.message_content.movementEnded = MovementEndedMsg_init_zero;
+  msg_move_end.message_content.movementEnded.blocked = false;
+  msg_move_end.which_message_content = BusMessage_movementEnded_tag;
 
-   //mcs.set_raw_pwm(Motor::Side::LEFT, 150);
-   //mcs.set_raw_pwm(Motor::Side::RIGHT, 150);
+  msg_heartbeat.message_content.heartbeat = HeartbeatMsg_init_zero;
+  msg_heartbeat.which_message_content = BusMessage_heartbeat_tag;
 
 
-  /**********************************************************************
-   *                             MAIN LOOP
-   **********************************************************************/
-   while (1)
-   {
-      if((CAN_receive_packet(&rx_msg)) == HAL_OK){
-         if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_STOP)){
-           // Stop order. blocked boolean is set to false since it's an order, not regular end of movement
-           mcs.stop(false);
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MOVE)) {
-            // Movement messages : first byte == 0 => translation, 1 => rotation, ticks = next 32 bits
-            uint8_t movement_type = rx_msg.data.u8[0];
-            int32_t movement_ticks =
-                  rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1];
-            digitalWrite(PIN_LED, GPIO_LOW);
-            switch (movement_type) {
-               case 0:
-                  mcs.translate_ticks(movement_ticks);
-                  break;
-               case 1:
-                  mcs.rotate_ticks(movement_ticks);
-                  break;
-               default:
-                  break;
-            }
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_COD_SPEED)){
-           //Order to move encoders at a specific speed (in ticks/s)
-           int32_t left_tick = rx_msg.data.d32[0];
-           int32_t right_tick = rx_msg.data.d32[1];
-           mcs.set_target_speed(Motor::Side::LEFT, left_tick);
-           mcs.set_target_speed(Motor::Side::RIGHT, right_tick);
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_MODE)){
-           //MCS mode : 3 bits : 0: speed, 1: translation, 2 : rotation
-           mcs.set_control(rx_msg.data.u8[0]&0b001, rx_msg.data.u8[0]&0b010, rx_msg.data.u8[0]&0b100);
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KP)){
-           mcs.set_kp(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KI)){
-           mcs.set_ki(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_SET_KD)){
-           mcs.set_kd(rx_msg.data.u8[0], rx_msg.data.u8[4] << 24 | rx_msg.data.u8[3] << 16 | rx_msg.data.u8[2] << 8 | rx_msg.data.u8[1]);
-         }
-         else if(CMP_CAN_MSG(rx_msg, CAN_MSG_MOT_LIMITS)){
-           // Limits for motion control are (LSb to MSb, 4x16bit unsigned) :
-           // 0: Translation Speed; 1: Rotation Speed; 2: Wheel Speed(tick/s);3: Wheel Acceleration(tick/s2)
-           mcs.set_limits(rx_msg.data.u16[0], rx_msg.data.u16[1], rx_msg.data.u16[2], rx_msg.data.u16[3]);
-         }
+  // peripherals init
+  MX_CAN_Init();
+  MX_TIM1_Init();
+  MX_TIM2_Init();
+  MX_TIM3_Init();
+
+  mcs.init();
+
+  pinMode(PIN_LED, PinDirection::OUTPUT);
+  setPin(PIN_LED);
+  PWM_write(PA10,  0);
+  PWM_write(PA8,  0);
+
+  mcs.set_control(true,  true,  true);
+
+  serial.init(115200);
+  serial.print("Setup done \r\n");
+
+  while (1)
+  {
+    // Update ISOTP server
+    if(CAN_receive_packet(&can_raw_msg) == HAL_OK){
+      if(canpb.match_id(can_raw_msg.id)){
+        canpb.update_rx_msg(can_raw_msg);
       }
+    }
+    canpb.update();
+
+
+    // Order reception
+    if(canpb.is_rx_available()){
+      rx_packet++;
+      if(canpb.receive_msg(msg_rx)){
+        switch(msg_rx.which_message_content){
+          case BusMessage_stopMoving_tag:
+            serial.println("Packet Received: StopMoving");
+            mcs.stop(false);
+            break;
+
+          case BusMessage_translate_tag:
+            serial.println("Packet Received: Translate");
+            mcs.translate_ticks(msg_rx.message_content.translate.ticks);
+            break;
+
+          case BusMessage_rotate_tag:
+            serial.println("Packet Received: Rotate");
+            mcs.rotate_ticks(msg_rx.message_content.rotate.ticks);
+            break;
+
+          case BusMessage_moveWheelAtSpeed_tag:
+            serial.println("Packet Received: MoveWheelAtSpeed");
+            mcs.set_target_speed(Motor::Side::LEFT, msg_rx.message_content.moveWheelAtSpeed.left_tick_per_sec);
+            mcs.set_target_speed(Motor::Side::RIGHT, msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
+            break;
+
+          case BusMessage_setMotionControlMode_tag:
+            serial.println("Packet Received: SetMotionControlMode");
+            mcs.set_control(msg_rx.message_content.setMotionControlMode.speed, msg_rx.message_content.setMotionControlMode.translation, msg_rx.message_content.setMotionControlMode.rotation);
+            break;
+
+          case BusMessage_pidConfig_tag:
+            serial.println("Packet Received: PID Config");
+            mcs.set_kp(msg_rx.message_content.pidConfig.pid_id ,msg_rx.message_content.pidConfig.kp);
+            mcs.set_ki(msg_rx.message_content.pidConfig.pid_id ,msg_rx.message_content.pidConfig.ki);
+            mcs.set_kd(msg_rx.message_content.pidConfig.pid_id ,msg_rx.message_content.pidConfig.kd);
+            break;
+
+          case BusMessage_motionLimit_tag:
+            serial.println("Packet Received: Motion Limits");
+            mcs.set_limits(
+              msg_rx.message_content.motionLimit.translation_speed,
+              msg_rx.message_content.motionLimit.rotation_speed,
+              msg_rx.message_content.motionLimit.wheel_speed,
+              msg_rx.message_content.motionLimit.wheel_acceleration
+            );
+            break;
+
+          default:
+            break;
+        }
+      }
+    }
+
+    //Periodic encoder position message
+    if(position_timer.check()){
+      if(canpb.is_tx_available()){
+        msg_encoder.message_content.encoderPosition.left_tick  = mcs.get_COD_left();
+        msg_encoder.message_content.encoderPosition.right_tick = mcs.get_COD_right();
+        if(canpb.send_msg(msg_encoder) != Can_PB::CAN_PB_RET_OK){
+          serial.print("ERROR: SENDING ENCODER POS\r\n");
+        }
+      }
+
+      // Update block status
+      mcs.detect_stop();
 
       mcs_stop_status = mcs.has_stopped();
       //If the robot has stopped or cannot move normally
       if(mcs_stop_status != MotionController::STOP_STATUS::NONE){
-         CAN_TX_MOV_END.data.u8[0] = ((mcs_stop_status==MotionController::STOP_STATUS::BLOCKED)?1:0); // 1 if blocked, 0 if just end of movement
-         if(CAN_send_packet(&CAN_TX_MOV_END) != CAN_ERROR_STATUS::CAN_PKT_OK){
-           serial.print("ERR: SENDING MOV END\r\n");
-         }
-         digitalWrite(PIN_LED, GPIO_HIGH);
+        msg_move_end.message_content.movementEnded.blocked = (mcs_stop_status == MotionController::STOP_STATUS::BLOCKED);
+        if(canpb.send_msg(msg_move_end) != Can_PB::CAN_PB_RET_OK){
+          serial.print("ERROR: SENDING MOVEMENT END\r\n");
+        }
       }
+    }
 
-      // Periodic Encoder Position Report Message to HL
-      if(can_timer.check()){
-         CAN_TX_COD_POS.data.d32[0]=mcs.get_COD_left();
-         CAN_TX_COD_POS.data.d32[1]=mcs.get_COD_right();
-         if((CAN_send_packet(&CAN_TX_COD_POS)) != CAN_ERROR_STATUS::CAN_PKT_OK){
-           serial.print("ERR: SENDING ENCODER\r\n");
-         }
-
-         #if 1
-         CAN_TX_DEBUG_DATA.data.d32[0] = mcs.get_pid_data(MotionController::PID_ID::PID_TRANSLATION, MotionController::ERROR);
-         CAN_TX_DEBUG_DATA.data.d32[1] = mcs.get_pid_data(MotionController::PID_ID::PID_ROTATION, MotionController::ERROR);
-         if((CAN_send_packet(&CAN_TX_DEBUG_DATA)) != CAN_ERROR_STATUS::CAN_PKT_OK){
-           serial.print("ERR: SENDING DEBUG DATA\r\n");
-         }
-         #endif
+    //Periodic Heartbeat
+    if(heartbeat_timer.check()){
+      if(canpb.is_tx_available()){
+        togglePin(PIN_LED);
+        if(canpb.send_msg(msg_heartbeat) != Can_PB::CAN_PB_RET_OK){
+          serial.print("ERROR: SENDING HEARTBEAT\r\n");
+        }
       }
-
-      // Periodic Heartbeat message to High Level board, and led toggle
-      if(heartbeat_timer.check()){
-         if(CAN_send_packet(&CAN_TX_HEARTBEAT) != CAN_ERROR_STATUS::CAN_PKT_OK){
-           serial.print("ERR: SENDING HEARTBEAT\r\n");
-         }
-      }
-   }
-   return 0;
+    }
+  }
 }
+
 
 #ifdef __cplusplus
 extern "C"{
 #endif
 void TIM14_IRQHandler(void){
-  static uint8_t i = 0;
-
   // Control loop
   if(LL_TIM_IsActiveFlag_UPDATE(TIM14)){
     LL_TIM_ClearFlag_UPDATE(TIM14);
     mcs.update_position();
     mcs.control_motion();
-    if((++i) == 10){ // Evry 10ms
-      mcs.detect_stop();
-      i = 0;
-    }
   }
 }
 #ifdef __cplusplus

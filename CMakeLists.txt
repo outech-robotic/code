@@ -28,18 +28,28 @@ add_definitions(-DSTM32F042x6)
 add_definitions(-DUSE_FULL_LL_DRIVER)
 
 
-include_directories(Drivers/ST/STM32F0xx_HAL_Driver/Inc)
-include_directories(src/COM)
-include_directories(Drivers/LL)
+include_directories(Drivers/STM32F0xx_HAL_Driver/Inc)
+include_directories(src/com)
+include_directories(src/motion)
+include_directories(src/system)
+include_directories(src/utility)
 include_directories(src)
-include_directories(Drivers/ST/CMSIS/Include)
-include_directories(STM32F0xx_HAL_Driver/Inc/Legacy)
-include_directories(Drivers/ST/CMSIS/Device/ST/STM32F0xx/Include)
+include_directories(Drivers/CMSIS/Include)
+#include_directories(STM32F0xx_HAL_Driver/Inc/Legacy)
+include_directories(Drivers/CMSIS/Device/ST/STM32F0xx/Include)
 
-set_property(SOURCE Drivers/LL/SYSTEM/startup_stm32f042k6tx.s PROPERTY LANGUAGE C)
+set_property(SOURCE system/startup_stm32f042k6tx.s PROPERTY LANGUAGE C)
 
-
-file(GLOB_RECURSE SOURCES "src/*.c" "src/*.h" "src/*.cpp" "src/*.hpp" "Drivers/*.cpp" "Drivers/*.hpp" "Drivers/*.h" "Drivers/*.c" "Drivers/*.s")
+file(GLOB_RECURSE SOURCES
+        "src/*.c"
+        "src/*.h"
+        "src/*.cpp"
+        "src/*.hpp"
+        "Drivers/*.cpp"
+        "Drivers/*.hpp"
+        "Drivers/*.h"
+        "Drivers/*.c"
+        "Drivers/*.s")
 
 # The binary that will be uploaded
 add_executable(build_lowlevel ${SOURCES})
