@@ -1,0 +1,29 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[[source]]
+url = "https://www.piwheels.org/simple"
+name = "piwheels"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+numpy = "*"
+structlog = "*"
+mypy = "*"
+pylint = "*"
+yapf = "*"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+requests = "*"
+colorama = "*"
+rplidar-roboticia = "*"
+websockets = "*"
+protobuf = "*"
+
+[requires]
+python_version = "3.7"
