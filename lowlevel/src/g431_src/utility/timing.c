@@ -5,7 +5,8 @@
  *      Author: Tic-Tac
  */
 
-#include "timing.h"
+#include "utility/timing.h"
+
 #define cycles_per_us ((F_CPU/1000000))
 #define ticks_freq  (1000)
 #define cycles_per_tick (F_CPU/ticks_freq)
