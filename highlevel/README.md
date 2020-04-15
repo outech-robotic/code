@@ -6,7 +6,7 @@ The high level code running on the raspberry pi on the robot.
 
 ### Diagram
 
-[![arch](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/highlevel/docs/img/archi_robot.png)](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/highlevel/docs/img/archi_robot.png)
+[![arch](https://raw.githubusercontent.com/outech-robotic/code/master/highlevel/docs/img/archi_robot.png)](https://raw.githubusercontent.com/outech-robotic/code/master/highlevel/docs/img/archi_robot.png)
 
 ## Scripts run on CI
 
@@ -33,7 +33,7 @@ Simulating the robot behaviour must be taken into consideration seriously when b
 
 We can use the same design pattern as the robot's code. 
 
-![simulation arch](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/highlevel/docs/img/simulation.png)
+![simulation arch](https://raw.githubusercontent.com/outech-robotic/code/master/highlevel/docs/img/simulation.png)
 
 ### Simulation components.
 
@@ -49,7 +49,7 @@ The *SimulationRunner* would execute them sequentially, tick after tick, until t
 
 > The **input** of the simulator is the **output** of the robot. The **output** of the simulator is the **input** of the robot.
 
-![simulation arch](https://raw.githubusercontent.com/outech-robotic/hl-flowing-clean-arch/master/highlevel/docs/img/simulation_is_independant.png)
+![simulation arch](https://raw.githubusercontent.com/outech-robotic/code/master/highlevel/docs/img/simulation_is_independant.png)
 
 The simulation is built with the same pattern than the robot's code (handler/controller/gateway). 
 
