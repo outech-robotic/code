@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+message HeartbeatMsg {
+}
+
+message StopMovingMsg {
+}
+
+message MovementEndedMsg {
+  bool blocked = 1;
+}
+
+message EncoderPositionMsg {
+  sint32 left_tick = 1;
+  sint32 right_tick = 2;
+}
+
+message MotionLimitMsg {
+  uint32 translation_speed = 2;
+  uint32 rotation_speed = 3;
+  uint32 wheel_speed = 4;
+  uint32 wheel_acceleration = 5;
+}
+
+message PIDConfigMsg {
+  uint32 pid_id = 1;
+  uint32 kp = 6;
+  uint32 ki = 7;
+  uint32 kd = 8;
+}
+
+message SetMotionControlModeMsg {
+  bool speed = 1;
+  bool translation = 2;
+  bool rotation = 3;
+}
+
+message MoveWheelAtSpeedMsg {
+  sint32 left_tick_per_sec = 1;
+  sint32 right_tick_per_sec = 2;
+}
+
+message TranslateMsg {
+  sint32 ticks = 1;
+}
+
+message RotateMsg {
+  sint32 ticks = 1;
+}
+
+message ServoMsg {
+  uint32 id = 1;
+  sint32 angle = 2;
+}
+
+message PumpAndValveMsg {
+  uint32 id = 1;
+  bool on = 2;
+}
+
+message LaserSensorMsg {
+  uint32 distance_front_left = 1;
+  uint32 distance_front_right = 2;
+  uint32 distance_back_left = 3;
+  uint32 distance_back_right = 4;
+}
+
+message PressureSensorMsg {
+  bool on_left = 1;
+  bool on_center_left = 2;
+  bool on_center = 3;
+  bool on_center_right = 4;
+  bool on_right = 5;
+}
+
+message BusMessage {
+  oneof message_content {
+    HeartbeatMsg heartbeat = 1;
+    StopMovingMsg stopMoving = 2;
+    MovementEndedMsg movementEnded = 3;
+    EncoderPositionMsg encoderPosition = 4;
+    PIDConfigMsg pidConfig = 5;
+    MotionLimitMsg motionLimit = 6;
+    SetMotionControlModeMsg setMotionControlMode = 7;
+    MoveWheelAtSpeedMsg moveWheelAtSpeed = 8;
+    TranslateMsg translate = 9;
+    RotateMsg rotate = 10;
+    ServoMsg servo = 11;
+    PumpAndValveMsg pumpAndValve = 12;
+    LaserSensorMsg laserSensor = 13;
+    PressureSensorMsg pressureSensor = 14;
+  }
+}
