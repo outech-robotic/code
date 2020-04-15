@@ -2,19 +2,19 @@
 
 .PHONY: test
 test:
-	pytest src -vv
+	pytest highlevel -vv
 
 .PHONY: lint
 lint:
-	pylint src
+	pylint highlevel
 
 .PHONY: format
 format:
-	yapf -i -p -r src
+	yapf -e google -i -p -r highlevel
 
 .PHONY: mypy
 mypy:
-	mypy --disallow-untyped-calls --ignore-missing-imports --disallow-incomplete-defs src
+	mypy --disallow-untyped-calls --ignore-missing-imports --disallow-incomplete-defs highlevel
 
 .PHONY: jenkins
 jenkins: test lint mypy format
@@ -29,12 +29,12 @@ clean:
 
 .PHONY: protoc
 protoc: 
-	protoc -I=./proto --python_out=./proto/gen outech.proto
+	protoc -I=./proto --python_out=./proto/gen/python outech.proto
 
 .PHONY: run-simulation
 run-simulation:
-	OUTECH_SIMULATION=true python -m src.main
+	OUTECH_SIMULATION=true python -m highlevel.main
 
 .PHONY: run
 run:
-	OUTECH_SIMULATION=false python -m src.main
+	OUTECH_SIMULATION=false python -m highlevel.main

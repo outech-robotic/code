@@ -15,7 +15,7 @@ pipeline {
         stage('unit-tests') {
             steps {
                 sh 'mkdir reports'
-                sh 'pipenv run pytest --cov=src --junitxml reports/junit.xml --cov-report xml:reports/coverage.xml src'
+                sh 'pipenv run pytest --cov=highlevel --junitxml reports/junit.xml --cov-report xml:reports/coverage.xml highlevel'
             }
             post {
                 always {
@@ -36,17 +36,17 @@ pipeline {
         }
         stage('ensure code is yapf formatted') {
             steps {
-                sh 'pipenv run yapf -p -d -r src || (echo "!!!!!!!!!!! Please run yapf -i -r src/ on your code"; exit 1)'
+                sh 'pipenv run yapf -p -d -r highlevel || (echo "!!!!!!!!!!! Please run yapf -i -r highlevel/ on your code"; exit 1)'
             }
         }
         stage('lint') {
             steps {
-                sh 'pipenv run pylint src'
+                sh 'pipenv run pylint highlevel'
             }
         }
         stage('mypy') {
             steps {
-                sh 'pipenv run mypy --disallow-untyped-calls --ignore-missing-imports --disallow-incomplete-defs src'
+                sh 'pipenv run mypy --disallow-untyped-calls --ignore-missing-imports --disallow-incomplete-defs highlevel'
             }
         }
     }
