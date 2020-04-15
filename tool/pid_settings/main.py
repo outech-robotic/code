@@ -12,7 +12,7 @@ import can
 from flask import Flask
 from flask_socketio import SocketIO
 
-from views import register_views, InterfaceAdapter, PID, Cap
+from tool.pid_settings.views import register_views, InterfaceAdapter, PID, Cap
 
 CAN_BOARD_ID_WIDTH  = 4
 CAN_MSG_WIDTH       = 9

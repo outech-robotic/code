@@ -6,7 +6,7 @@ from typing import Optional
 from flask import request, redirect, render_template, Flask
 from flask_socketio import SocketIO
 
-from forms import AllPIDForms, OrderForm
+from tool.pid_settings.forms import AllPIDForms, OrderForm
 
 FILE_NAME = 'pid_coef.json'
 
