@@ -1,5 +1,0 @@
-flask
-flask-socketio
-flask-wtf
-python-can
-
