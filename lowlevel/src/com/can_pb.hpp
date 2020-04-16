@@ -9,10 +9,10 @@
 #define COM_CAN_PB_HPP_
 
 #include "peripheral/can.h"
-#include "common/com/isotp/isotp.h"
-#include "common/com/proto/pb_encode.h"
-#include "common/com/proto/pb_decode.h"
-#include "common/com/proto/outech.pb.h"
+#include "com/isotp/isotp.h"
+#include "nanopb/pb_encode.h"
+#include "nanopb/pb_decode.h"
+#include "proto/outech.pb.h"
 #include "utility/ring_buffer.hpp"
 #include "config.h"
 

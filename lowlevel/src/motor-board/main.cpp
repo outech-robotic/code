@@ -1,10 +1,9 @@
-#include "common/com/can_pb.hpp"
+#include "com/can_pb.hpp"
 #include "utility/timing.h"
-#include "common/com/serial.hpp"
-#include "common/motion/MotionController.h"
+#include "com/serial.hpp"
+#include "motion/MotionController.h"
 #include "utility/Metro.hpp"
 #include "config.h"
-
 
 Metro position_timer(10);
 Metro heartbeat_timer(500);
