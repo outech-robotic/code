@@ -44,7 +44,7 @@ void Error_Handler(void);
 
 //BUFFER SIZE USED IN ISR
 #define CONST_CAN_BUFFER_SIZE (32)
-#define CONST_ISOTP_BUFF_SIZE (4096)
+#define CONST_ISOTP_BUFF_SIZE (40)
 #define CONST_PB_BUFF_SIZE    (64)
 
 
@@ -68,6 +68,7 @@ void Error_Handler(void);
 // DEBUG USART2 PORT
 #define PIN_USART_TX PA2
 #define PIN_USART_RX PA3
+#define PIN_USART_AF LL_GPIO_AF_7
 
 // MOTOR CONTROL PINS (cf L298 IC)
 #define PIN_PWM_L PA8

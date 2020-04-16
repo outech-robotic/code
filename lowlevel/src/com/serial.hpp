@@ -8,9 +8,13 @@
 #ifndef COM_SERIAL_HPP_
 #define COM_SERIAL_HPP_
 
-
+#ifdef STM32F042x6
 #include <stm32f0xx_ll_bus.h>
 #include <stm32f0xx_ll_usart.h>
+#elif STM32G431xx
+#include <stm32g4xx_ll_bus.h>
+#include <stm32g4xx_ll_usart.h>
+#endif
 #include "utility/macros.h"
 #include "utility/ring_buffer.hpp"
 #include "utility/timing.h"
@@ -47,7 +51,7 @@ class Serial{
         gpio_port_enable_clock(tx.port);
         //GPIO COnfig
         LL_GPIO_StructInit(&gpio_init_struct);
-        gpio_init_struct.Alternate=LL_GPIO_AF_1; //Only works if not pins PB6/7
+        gpio_init_struct.Alternate=PIN_USART_AF; //Only works if not pins PB6/7
         gpio_init_struct.Mode=LL_GPIO_MODE_ALTERNATE;
         gpio_init_struct.Speed=LL_GPIO_SPEED_FREQ_HIGH;
         gpio_init_struct.Pull=LL_GPIO_PULL_NO;

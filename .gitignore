@@ -3,3 +3,7 @@ venv
 .idea
 .mypy_cache
 **/outech.log
+
+# Low Level boards ignores
+lowlevel/cmake-build-debug/
+!lowlevel/.idea/workspace.xml

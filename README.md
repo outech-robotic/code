@@ -62,3 +62,16 @@ make jenkins
 
 You are done! 
 
+## Building
+### Low Level
+WIP
+
+Install cmake, arm-none-eabi-{gcc, gdb, newlib, binutils}, or equivalents on your distro (this assumes arch)
+
+Follow the installation procedure for openocd :
+https://sourceforge.net/p/openocd/code/ci/master/tree/
+
+In the lowlevel directory, run the following to setup the make files and commands:
+```shell script
+cmake -B cmake-build-debug .
+```

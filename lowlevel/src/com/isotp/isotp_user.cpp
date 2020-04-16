@@ -7,8 +7,13 @@
  *      Set of functions used for ISO-TP
  */
 
-#include "peripheral/can.h"
+#ifdef STM32F042x6
 #include "stm32f042x6.h"
+#elif STM32G431xx
+#include "stm32g431xx.h"
+#endif
+
+#include "peripheral/can.h"
 #include "timing.h"
 
 #ifdef __cplusplus

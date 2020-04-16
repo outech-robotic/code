@@ -1,4 +1,4 @@
-#include <peripheral/fdcan.h>
+#include "can.h"
 #include "config.h"
 #include "utility/macros.h"
 #include "utility/ring_buffer.hpp"

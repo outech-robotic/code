@@ -8,7 +8,11 @@
 #ifndef LL_TIME_TIMING_H_
 #define LL_TIME_TIMING_H_
 
+#ifdef STM32F042x6
 #include <stm32f0xx_ll_rcc.h>
+#elif STM32G431xx
+#include "stm32g4xx_ll_rcc.h"
+#endif
 
 #ifdef __cplusplus
 extern "C"{

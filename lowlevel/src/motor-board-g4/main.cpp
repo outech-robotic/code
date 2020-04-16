@@ -22,7 +22,6 @@ int main(void)
 {
   int ret;
   MotionController::STOP_STATUS mcs_stop_status;
-
   // Proto Buffers Messages
   BusMessage msg_rx = BusMessage_init_zero;
   BusMessage msg_move_end = BusMessage_init_zero;
@@ -50,6 +49,7 @@ int main(void)
 
   pinMode(PIN_LED, PinDirection::OUTPUT);
   setPin(PIN_LED);
+
   PWM_write(PA10,  0);
   PWM_write(PA8,  0);
 
@@ -132,6 +132,7 @@ int main(void)
           serial.print("ERROR: SENDING ENCODER POS\r\n");
         }
       }
+
 
       // Update block status
       mcs.detect_stop();

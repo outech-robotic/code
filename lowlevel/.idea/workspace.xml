@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="outech_motor" targetName="flash_motor" />
+      <config projectName="outech_motor" targetName="erase_board" />
+      <config projectName="outech_motor" targetName="flash_motor_g4" />
+      <config projectName="outech_motor" targetName="build_motor_g4" />
+      <config projectName="outech_motor" targetName="build_motor" />
+      <config projectName="outech_motor" targetName="clean_board" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f9d1e42d-6494-4b14-8bd2-e7826cdbb216" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/motor-board-g4/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/motor-board/CMakeLists.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/servo-board/system/startup_stm32f042c6tx.s" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/can_pb.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/isotp/isotp.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/isotp/isotp.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/isotp/isotp_config.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/isotp/isotp_defines.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/isotp/isotp_user.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/isotp/isotp_user.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/outech.pb.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/outech.pb.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/outech.proto" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb_common.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb_common.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb_decode.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb_decode.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb_encode.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/proto/pb_encode.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/com/serial.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/MotionController.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/MotionController.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/MotionController.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/MotionController.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/Motor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/Motor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/Motor.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/Motor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/PID.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/PID.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/PID.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/PID.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/motion/TEST_HEADER.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/motion/TEST_HEADER.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/fdcan.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/can.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/fdcan.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/can.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/gpio.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/gpio.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/gpio.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/gpio.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/gpio_pins.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/gpio_pins.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/gpio_pins.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/gpio_pins.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/tim.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/tim.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/peripheral/tim.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/peripheral/tim.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/startup_stm32g431kbtx.s" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/startup_stm32g431kbtx.s" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/stm32_assert.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/stm32_assert.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/stm32g4xx_hal_conf.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/stm32g4xx_hal_conf.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/stm32g4xx_hal_msp.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/stm32g4xx_hal_msp.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/stm32g4xx_it.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/stm32g4xx_it.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/stm32g4xx_it.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/stm32g4xx_it.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/syscalls.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/syscalls.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/sysmem.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/sysmem.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/system/system_stm32g4xx.c" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/system/system_stm32g4xx.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/Average.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/Metro.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/macros.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/macros.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/ring_buffer.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/timing.c" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/g431_src/utility/timing.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gdb_cmd.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/isotp/isotp_user.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/isotp/isotp_user.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/serial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/serial.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/motor-board/STM32G431KBTX_FLASH.ld" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board-g4/STM32G431KBTX_FLASH.ld" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/motor-board/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/motor-board/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utility/timing.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/utility/timing.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MacroExpansionManager">
+    <option name="directoryName" value="kcr4tetf" />
+  </component>
+  <component name="ProjectId" id="1adTi9ZFdDk8RCCUglFkoRHuor1" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="RunManager" selected="CMake Application.flash_motor">
+    <configuration name="build_motor" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="build_motor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="outech_motor" RUN_TARGET_NAME="build_motor">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="build_motor_g4" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="build_motor_g4" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="outech_motor" RUN_TARGET_NAME="build_motor_g4">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="clean_board" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="clean_board" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="erase_board" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="erase_board" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="flash_motor" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="flash_motor" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="flash_motor_g4" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="flash_motor_g4" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gdb_serv_build_motor" type="com.jetbrains.cidr.embedded.customgdbserver.type" factoryName="com.jetbrains.cidr.embedded.customgdbserver.factory" PROGRAM_PARAMS="-f interface/stlink.cfg -f board/st_nucleo_f0.cfg" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="build_motor" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="outech_motor" RUN_TARGET_NAME="build_motor">
+      <custom-gdb-server version="1" gdb-connect="localhost:3333" executable="openocd" warmup-ms="0" download-type="ALWAYS" reset-cmd="monitor reset" />
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gdb_serv_build_motor_g4" type="com.jetbrains.cidr.embedded.customgdbserver.type" factoryName="com.jetbrains.cidr.embedded.customgdbserver.factory" PROGRAM_PARAMS="-f interface/stlink.cfg -f board/st_nucleo_g4.cfg" PASS_PARENT_ENVS_2="true" PROJECT_NAME="outech_motor" TARGET_NAME="build_motor_g4" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="outech_motor" RUN_TARGET_NAME="build_motor_g4">
+      <custom-gdb-server version="1" gdb-connect="localhost:3333" executable="openocd" warmup-ms="0" download-type="ALWAYS" reset-cmd="monitor reset" />
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.clean_board" />
+      <item itemvalue="CMake Application.erase_board" />
+      <item itemvalue="CMake Application.build_motor_g4" />
+      <item itemvalue="CMake Application.flash_motor_g4" />
+      <item itemvalue="CMake Application.build_motor" />
+      <item itemvalue="CMake Application.flash_motor" />
+      <item itemvalue="Embedded GDB Server.gdb_serv_build_motor_g4" />
+      <item itemvalue="Embedded GDB Server.gdb_serv_build_motor" />
+    </list>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="f9d1e42d-6494-4b14-8bd2-e7826cdbb216" name="Default Changelist" comment="" />
+      <created>1587064595266</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1587064595266</updated>
+      <workItem from="1587064596468" duration="193000" />
+      <workItem from="1587064796098" duration="89000" />
+      <workItem from="1587064894160" duration="648000" />
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="0" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1587064781563">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="0" y="178" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1587064781563" />
+    <state x="256" y="278" width="426" height="489" key="FileChooserDialogImpl" timestamp="1587064600793">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="256" y="278" width="426" height="489" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1587064600793" />
+    <state width="1433" height="338" key="GridCell.Tab.0.bottom" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.0.center" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.0.left" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.0.right" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.1.bottom" timestamp="1587064788433">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788433" />
+    <state width="1433" height="338" key="GridCell.Tab.1.center" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.1.left" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.1.right" timestamp="1587064788432">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788432" />
+    <state width="1433" height="338" key="GridCell.Tab.2.bottom" timestamp="1587064788434">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.2.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788434" />
+    <state width="1433" height="338" key="GridCell.Tab.2.center" timestamp="1587064788433">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.2.center/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788433" />
+    <state width="1433" height="338" key="GridCell.Tab.2.left" timestamp="1587064788433">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.2.left/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788433" />
+    <state width="1433" height="338" key="GridCell.Tab.2.right" timestamp="1587064788434">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1433" height="338" key="GridCell.Tab.2.right/0.0.1920.1040@0.0.1920.1040" timestamp="1587064788434" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/motor-board-g4/main.cpp</url>
+          <line>151</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
