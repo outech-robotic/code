@@ -58,7 +58,6 @@ file(GLOB_RECURSE SRC_DRIVERS_ST_G4
 # The binary that will be uploaded
 add_executable(build_motor_g4 ${SRC_MOTOR_BOARD} ${SRC_DRIVERS_ST_G4} ${SRC_NANOPB})
 
-message("ROOT:")
 # Uploads to stm32
 add_custom_target(flash_motor_g4 COMMAND openocd -f ${PROJECT_SOURCE_DIR}/scripts/board/st_nucleo_g4.cfg -c "program ${CMAKE_CURRENT_BINARY_DIR}/build_motor_g4 verify reset" -c shutdown)
 add_dependencies(flash_motor_g4 build_motor_g4)
