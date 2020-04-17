@@ -6,4 +6,3 @@ venv
 
 # Low Level boards ignores
 lowlevel/cmake-build-debug/
-!lowlevel/.idea/workspace.xml

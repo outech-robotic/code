@@ -49,7 +49,7 @@ file(GLOB_RECURSE SRC_MOTOR_BOARD
         "system/*.s"
         )
 
-file (GLOB_RECURSE SRC_DRIVERS_ST_F0
+file(GLOB_RECURSE SRC_DRIVERS_ST_F0
         "${DRIVERS_DIR}/CMSIS/*.c"
         "${DRIVERS_DIR}/STM32F0xx_HAL_Driver/*.c"
         )
@@ -59,6 +59,5 @@ file (GLOB_RECURSE SRC_DRIVERS_ST_F0
 add_executable(build_motor ${SRC_MOTOR_BOARD} ${SRC_DRIVERS_ST_F0} ${SRC_NANOPB})
 
 # Uploads to stm32
-add_custom_target(flash_motor COMMAND openocd -f interface/stlink.cfg -f board/st_nucleo_f0.cfg -c "program ${CMAKE_CURRENT_BINARY_DIR}/build_motor verify reset" -c shutdown)
-
-
+add_custom_target(flash_motor COMMAND openocd -f ${PROJECT_SOURCE_DIR}/scripts/board/st_nucleo_f0.cfg -c "program ${CMAKE_CURRENT_BINARY_DIR}/build_motor verify reset" -c shutdown)
+add_dependencies(flash_motor build_motor)

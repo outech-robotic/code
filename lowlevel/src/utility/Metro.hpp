@@ -12,31 +12,30 @@
 #include "timing.h"
 
 
-class Metro{
+class Metro {
 public:
 
     uint32_t current;
     uint32_t last_check;
     uint32_t interval;
 
-    Metro(uint32_t interval_ms){
+    Metro(uint32_t interval_ms) {
         this->last_check = millis();
         this->interval = interval_ms;
     }
 
-    bool check(){
+    bool check() {
         this->current = millis();
-        if(this->current-this->last_check>=this->interval){
-            this->last_check=this->current;
+        if (this->current - this->last_check >= this->interval) {
+            this->last_check = this->current;
             return true;
-        }
-        else{
+        } else {
             return false;
         }
     }
 
-    void reset(){
-        last_check=millis();
+    void reset() {
+        last_check = millis();
     }
 };
 

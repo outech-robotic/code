@@ -21,39 +21,39 @@ extern "C" {
  */
 typedef struct IsoTpLink {
     /* sender paramters */
-    uint32_t                    send_arbitration_id; /* used to reply consecutive frame */
+    uint32_t send_arbitration_id; /* used to reply consecutive frame */
     /* message buffer */
-    uint8_t*                    send_buffer;
-    uint16_t                    send_buf_size;
-    uint16_t                    send_size;
-    uint16_t                    send_offset;
+    uint8_t *send_buffer;
+    uint16_t send_buf_size;
+    uint16_t send_size;
+    uint16_t send_offset;
     /* multi-frame flags */
-    uint8_t                     send_sn;
-    uint16_t                    send_bs_remain; /* Remaining block size */
-    uint8_t                     send_st_min;    /* Separation Time between consecutive frames, unit millis */
-    uint8_t                     send_wtf_count; /* Maximum number of FC.Wait frame transmissions  */
-    uint32_t                    send_timer_st;  /* Last time send consecutive frame */    
-    uint32_t                    send_timer_bs;  /* Time until reception of the next FlowControl N_PDU
+    uint8_t send_sn;
+    uint16_t send_bs_remain; /* Remaining block size */
+    uint8_t send_st_min;    /* Separation Time between consecutive frames, unit millis */
+    uint8_t send_wtf_count; /* Maximum number of FC.Wait frame transmissions  */
+    uint32_t send_timer_st;  /* Last time send consecutive frame */
+    uint32_t send_timer_bs;  /* Time until reception of the next FlowControl N_PDU
                                                    start at sending FF, CF, receive FC
                                                    end at receive FC */
-    int                         send_protocol_result;
-    uint8_t                     send_status;
+    int send_protocol_result;
+    uint8_t send_status;
 
     /* receiver paramters */
-    uint32_t                    receive_arbitration_id;
+    uint32_t receive_arbitration_id;
     /* message buffer */
-    uint8_t*                    receive_buffer;
-    uint16_t                    receive_buf_size;
-    uint16_t                    receive_size;
-    uint16_t                    receive_offset;
+    uint8_t *receive_buffer;
+    uint16_t receive_buf_size;
+    uint16_t receive_size;
+    uint16_t receive_offset;
     /* multi-frame control */
-    uint8_t                     receive_sn;
-    uint8_t                     receive_bs_count; /* Maximum number of FC.Wait frame transmissions  */
-    uint32_t                    receive_timer_cr; /* Time until transmission of the next ConsecutiveFrame N_PDU
+    uint8_t receive_sn;
+    uint8_t receive_bs_count; /* Maximum number of FC.Wait frame transmissions  */
+    uint32_t receive_timer_cr; /* Time until transmission of the next ConsecutiveFrame N_PDU
                                                      start at sending FC, receive CF 
                                                      end at receive FC */
-    int                         receive_protocol_result;
-    uint8_t                     receive_status;                                                     
+    int receive_protocol_result;
+    uint8_t receive_status;
 } IsoTpLink;
 
 /**
@@ -66,7 +66,7 @@ typedef struct IsoTpLink {
  * @param recvbuf A pointer to an area in memory which can be used as a buffer for data to be received.
  * @param recvbufsize The size of the buffer area.
  */
-void isotp_init_link(IsoTpLink *link, uint32_t sendid, 
+void isotp_init_link(IsoTpLink *link, uint32_t sendid,
                      uint8_t *sendbuf, uint16_t sendbufsize,
                      uint8_t *recvbuf, uint16_t recvbufsize);
 

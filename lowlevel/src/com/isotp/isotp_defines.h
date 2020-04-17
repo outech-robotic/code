@@ -41,7 +41,7 @@
 #define ISOTP_RET_LENGTH       -7
 
 /* return logic true if 'a' is after 'b' */
-#define IsoTpTimeAfter(a,b) ((int32_t)((int32_t)(b) - (int32_t)(a)) < 0)
+#define IsoTpTimeAfter(a, b) ((int32_t)((int32_t)(b) - (int32_t)(a)) < 0)
 
 /*  invalid bs */
 #define ISOTP_INVALID_BS       0xFFFF
@@ -178,12 +178,12 @@ typedef struct {
 
 typedef struct {
     union {
-        IsoTpPciType          common;
-        IsoTpSingleFrame      single_frame;
-        IsoTpFirstFrame       first_frame;
+        IsoTpPciType common;
+        IsoTpSingleFrame single_frame;
+        IsoTpFirstFrame first_frame;
         IsoTpConsecutiveFrame consecutive_frame;
-        IsoTpFlowControl      flow_control;
-        IsoTpDataArray        data_array;
+        IsoTpFlowControl flow_control;
+        IsoTpDataArray data_array;
     } as;
 } IsoTpCanMessage;
 
@@ -194,9 +194,9 @@ typedef struct {
 /* Private: Protocol Control Information (PCI) types, for identifying each frame of an ISO-TP message.
  */
 typedef enum {
-    ISOTP_PCI_TYPE_SINGLE             = 0x0,
-    ISOTP_PCI_TYPE_FIRST_FRAME        = 0x1,
-    TSOTP_PCI_TYPE_CONSECUTIVE_FRAME  = 0x2,
+    ISOTP_PCI_TYPE_SINGLE = 0x0,
+    ISOTP_PCI_TYPE_FIRST_FRAME = 0x1,
+    TSOTP_PCI_TYPE_CONSECUTIVE_FRAME = 0x2,
     ISOTP_PCI_TYPE_FLOW_CONTROL_FRAME = 0x3
 } IsoTpProtocolControlInformation;
 
@@ -204,7 +204,7 @@ typedef enum {
  */
 typedef enum {
     PCI_FLOW_STATUS_CONTINUE = 0x0,
-    PCI_FLOW_STATUS_WAIT     = 0x1,
+    PCI_FLOW_STATUS_WAIT = 0x1,
     PCI_FLOW_STATUS_OVERFLOW = 0x2
 } IsoTpFlowStatus;
 
