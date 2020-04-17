@@ -15,10 +15,3 @@ set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 
 add_subdirectory(src/motor-board)
 add_subdirectory(src/motor-board-g4)
-
-# Erases chip
-add_custom_target(erase_board COMMAND st-flash erase)
-
-# Always clean before build
-add_custom_target(clean_board COMMAND make clean)
-
