@@ -29,8 +29,8 @@ clean:
 
 .PHONY: run-simulation
 run-simulation:
-	OUTECH_SIMULATION=true python -m highlevel.main
+	PYTHONPATH=${CURDIR}/.. OUTECH_SIMULATION=true python -m highlevel.main
 
 .PHONY: run
 run:
-	OUTECH_SIMULATION=false python -m highlevel.main
+	PYTHONPATH=${CURDIR}/.. OUTECH_SIMULATION=false python -m highlevel.main
