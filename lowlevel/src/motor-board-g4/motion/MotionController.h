@@ -79,11 +79,6 @@ class MotionController {
     Average<volatile int32_t, 8> cod_right_speed_avg;
 
     /**
-     * Detects if a wheel seems to be blocked (actual speed relatively far from the setpoint).
-     */
-    bool is_wheel_blocked(wheel_block_status &wheel_status, const encoder_status &cod_status, PID &pid_status);
-
-    /**
      * Checks if the robot is blocked
      */
     bool is_robot_blocked();

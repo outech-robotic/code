@@ -97,7 +97,7 @@ int CAN_send_packet(uint16_t std_id, const uint8_t *data, uint8_t size) {
 }
 
 
-void MX_FDCAN1_Init(void) {
+void MX_FDCAN1_Init() {
     int res;
     //FDCAN CONFIG
     hcan.Instance = FDCAN1;
@@ -141,7 +141,7 @@ void MX_FDCAN1_Init(void) {
     filterConfig.FilterID1 = CONST_CAN_RX_ID; //ID to check
     filterConfig.FilterID2 = 0x7FF; //Bits of ID1 that must match
     if ((res = HAL_FDCAN_ConfigFilter(&hcan, &filterConfig)) != HAL_OK) {
-        while (1);
+        while (true);
     }
 
     HAL_FDCAN_ConfigInterruptLines(&hcan, FDCAN_IT_GROUP_RX_FIFO0 | FDCAN_IT_GROUP_SMSG, FDCAN_INTERRUPT_LINE0);

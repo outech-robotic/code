@@ -8,91 +8,66 @@
 #ifndef UTILITY_CONFIG_H_
 #define UTILITY_CONFIG_H_
 
-#define MAKE_MASK(length) ((1<<length)-1)
 /*
  * MOTOR CONTROL
  */
 // TIMER PWM
-#define CONST_PWM_PRESCALER  240 // 5us resolution : 48MHz/240
-#define CONST_PWM_AUTORELOAD 4000 // 20ms PWM period : 4000*5us
-#define CONST_PWM_REPETITION 1
-#define CONST_PWM_MAX        4000
-#define CONST_PWM_PERIOD_US  20000
+#define CONST_PWM_PRESCALER  (240)  // 5us resolution : 48MHz/240
+#define CONST_PWM_AUTORELOAD (4000) // 20ms PWM period : 4000*5us
+#define CONST_PWM_REPETITION (1)
+#define CONST_PWM_MAX        (CONST_PWM_AUTORELOAD)
+#define CONST_US_PER_S       (1000000)
+#define CONST_PWM_PERIOD_US  ((CONST_US_PER_S)/(F_CPU/(CONST_PWM_PRESCALER*CONST_PWM_AUTORELOAD*CONST_PWM_REPETITION)))
+
+#define CONST_PWM_WIDTH_MIN  600
+#define CONST_PWM_WIDTH_MAX  2200
 
 /*
  * COMMUNICATIONS
  */
 //CAN CONFIG
-//#define CONST_CAN_MODE_LOOPBACK
-//#define CONST_CAN_SPEED_100K
-#define CONST_CAN_SPEED_1M
+
+// IDs used by board on CAN interface
+
+#ifndef SERVO_BOARD_ID
+#error "ERROR : SERVO_BOARD_NUM is not defined. Please define it."
+#define SERVO_BOARD_ID 0
+#endif
+
+#define CONST_CAN_BOARD_ID    ((uint16_t)0x010 + SERVO_BOARD_ID)            // 10 bits  unique board ID
+#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID | 0x400) // 11 bits ID, MSb is a 1 for (Master) ->  (This)  transfers
+#define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID)         // 11 bits ID, MSb is a 0 for  (This)  -> (Master) transfers, with a higher priority
+#define CONST_CAN_STD_SHIFT   (5)
+
+#define CONST_CAN_BUFFER_SIZE ((uint16_t)32)
+#define CONST_ISOTP_BUFF_SIZE ((size_t)64)
+#define CONST_PB_BUFF_SIZE    ((size_t)64)
+
+//#define CONST_CAN_MODE_LOOPBACK // Loopback mode ON for CAN
+//#define CONST_CAN_SPEED_100K    // Configures CAN for 100kb/s
+#define CONST_CAN_SPEED_1M        // Configures CAN for 1 Mb/s
 
 //USART CONFIG
 #define CONST_USART_BAUDRATE (9600)
-
-//BUFFER SIZE USED IN ISR
-#define CONST_CAN_BUFFER_SIZE (16)
-
-//CAN IDS
-#define CAN_PIPE_WIDTH        (2)
-#define CAN_MESSAGE_WIDTH     (9)
-#define CAN_PIPE_MASK         (MAKE_MASK(CAN_PIPE_WIDTH)<<CAN_MESSAGE_WIDTH)
-#define CAN_MESSAGE_MASK       MAKE_MASK(CAN_MESSAGE_WIDTH)
-#define CAN_STDID_SHIFT       (5)
-
-//PIPE IDs
-#define CAN_PIPE_MOTOR       (0b00)
-#define CAN_PIPE_HL          (0b01)
-#define CAN_PIPE_SENSOR      (0b10)
-#define CAN_PIPE_SERVO       (0b11)
-
-#define CAN_BOARD_ID         (3) // used with message id (5 LSb out of 9)
-#define CAN_BOARD_ID_WIDTH   (4)
-#define CAN_BOARD_ID_MASK     MAKE_MASK(CAN_BOARD_ID_WIDTH)
-
-
-//MESSAGE IDs
-//PROPULSION MESSAGES
-#define CAN_MSG_MOT_STOP        (0b00000)
-#define CAN_MSG_MOT_MOVE_END    (0b00001)
-#define CAN_MSG_MOT_MOVE        (0b00010)
-#define CAN_MSG_MOT_COD_POS     (0b00011)
-
-//PROPULSION DEBUG/SETTINGS
-#define CAN_MSG_MOT_COD_SPEED   (0b10000)
-#define CAN_MSG_MOT_LIMITS      (0b10011)
-#define CAN_MSG_MOT_SET_KP      (0b10100)
-#define CAN_MSG_MOT_SET_KI      (0b10101)
-#define CAN_MSG_MOT_SET_KD      (0b10110)
-#define CAN_MSG_MOT_MODE        (0b10111)
-
-
-//HL MESSAGES
-#define CAN_MSG_DEBUG_DATA      (0b10001)
-#define CAN_MSG_HEARTBEAT       (0b1010)
-
-
-//SERVO MESSAGES
-#define CAN_MSG_SERVO_POS       (0b00000)
-#define CAN_MSG_SERVO_POS_WIDTH (5)
-
-
-//SENSOR MESSAGES
-#define CAN_MSG_SENSOR          (0b00000)
-
 
 
 /**
  * Project Specific Pins
  */
-
 // CAN BUS
 #define PIN_CAN_RX PA11
 #define PIN_CAN_TX PA12
 
 // DEBUG USART1 PORT
-#define PIN_USART1_TX PA9
-#define PIN_USART1_RX PA10
+#ifdef NUCLEO
+#define PIN_USART_TX PA2
+#define PIN_USART_RX PA15
+#define PIN_USART_AF LL_GPIO_AF_1
+#else
+#define PIN_USART_TX PA9
+#define PIN_USART_RX PA10
+#define PIN_USART_AF LL_GPIO_AF_1
+#endif
 
 // PA6 - TIM3_CH1
 // PA7 - TIM3_CH2

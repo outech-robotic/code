@@ -17,3 +17,4 @@ set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 
 add_subdirectory(src/motor-board)
 add_subdirectory(src/motor-board-g4)
+add_subdirectory(src/servo-board)

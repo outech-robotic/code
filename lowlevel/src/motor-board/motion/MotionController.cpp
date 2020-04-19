@@ -15,7 +15,7 @@ MotionController::MotionController() : motor_left(Motor::Side::LEFT), motor_righ
 #define MAX_SPEED_ROTATION_MM (400)
 #define MAX_SPEED_TRANSLATION_TICK (MAX_SPEED_TRANSLATION_MM*MM_TO_TICK)
 #define MAX_SPEED_ROTATION_TICK (MAX_SPEED_ROTATION_MM*MM_TO_TICK)
-#define MAX_ACCEL_MM (1200/MOTION_CONTROL_FREQ)
+#define MAX_ACCEL_MM (1200.0/MOTION_CONTROL_FREQ)
 #define MAX_ACCEL_TICK (MAX_ACCEL_MM*MM_TO_TICK)
 
 void MotionController::init() {

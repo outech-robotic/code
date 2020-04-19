@@ -95,7 +95,7 @@ int CAN_send_packet(uint16_t std_id, const uint8_t *data, uint8_t size) {
 
 
 /* CAN init function */
-void MX_CAN_Init(void) {
+void MX_CAN_Init() {
     HAL_StatusTypeDef res = HAL_OK;
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_CAN);
     hcan.State = HAL_CAN_STATE_RESET;
@@ -126,11 +126,11 @@ void MX_CAN_Init(void) {
     hcan.Init.ReceiveFifoLocked = ENABLE;
     hcan.Init.TransmitFifoPriority = DISABLE;
     if ((res = HAL_CAN_Init(&hcan)) != HAL_OK) {
-        while (1);
+        while (true);
     }
 
     if ((res = HAL_CAN_Start(&hcan)) != HAL_OK) {
-        while (1);
+        while (true);
     }
 
     /*
@@ -150,7 +150,7 @@ void MX_CAN_Init(void) {
     filterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
     filterConfig.FilterActivation = ENABLE;
     if ((res = HAL_CAN_ConfigFilter(&hcan, &filterConfig)) != HAL_OK) {
-        while (1);
+        while (true);
     }
 
     /*
@@ -186,7 +186,7 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef *canHandle) {
         res = LL_GPIO_Init(GPIOA, &gpioConfig);
         gpioConfig.Pin = LL_GPIO_PIN_11;
         if (LL_GPIO_Init(GPIOA, &gpioConfig) != SUCCESS || (res != SUCCESS)) {
-            while (1);
+            while (true);
         }
     }
 }

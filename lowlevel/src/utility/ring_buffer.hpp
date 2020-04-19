@@ -10,7 +10,7 @@
 #define UTILITY_RING_BUFFER_HPP_
 
 
-#include <stdint.h>
+#include <cstdint>
 
 template<uint16_t buffer_size, typename T = uint8_t>
 class ring_buffer {

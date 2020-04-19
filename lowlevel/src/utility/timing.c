@@ -16,27 +16,27 @@
 volatile uint32_t milliseconds;
 
 void Timing_init(void) {
-  if (SysTick_Config(SystemCoreClock / ticks_freq)) {
-    while (1);
-  }
-  NVIC_SetPriority(SysTick_IRQn, 0);
-  milliseconds = 0;
+    if (SysTick_Config(SystemCoreClock / ticks_freq)) {
+        while (1);
+    }
+    NVIC_SetPriority(SysTick_IRQn, 0);
+    milliseconds = 0;
 }
 
 uint32_t millis(void) {
-  return milliseconds;
+    return milliseconds;
 }
 
 uint32_t micros(void) {
-  return milliseconds * 1000 + (us_per_tick - (SysTick->VAL) / cycles_per_us);
+    return milliseconds * 1000 + (us_per_tick - (SysTick->VAL) / cycles_per_us);
 }
 
 void delay_ms(uint32_t ms) {
-  uint32_t start = millis();
-  while (millis() - start < ms);
+    uint32_t start = millis();
+    while (millis() - start < ms);
 }
 
 void delay_us(uint32_t us) {
-  uint32_t start = micros();
-  while (micros() - start < us);
+    uint32_t start = micros();
+    while (micros() - start < us);
 }

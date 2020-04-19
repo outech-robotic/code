@@ -95,10 +95,10 @@ From CLion, you can just use Build configurations, and use the build hammer on t
 #### Build the projects on CLI
 From the command line, still in the root directory, you can now make the following targets:
 
-```make -C lowlevel/cmake-build-debug build_motor/build_motor_g4```\
+```make -C lowlevel/cmake-build-debug build_motor/motor_g4/servo/servo_nucleo```\
 Builds the Motor Board project, for Nucleo-F042K6 or the Nucleo-F042K6
 
-```make -C lowlevel/cmake-build-debug flash_motor/flash_motor_g4```\
+```make -C lowlevel/cmake-build-debug flash_motor/motor_g4/servo/servo_nuclo```\
 Uploads the corresponding program to the board, using ```openocd```.
 
 The  flash_ targets should automatically detect modifications and rebuild if needed, as they have their respective build_ target as a dependency.

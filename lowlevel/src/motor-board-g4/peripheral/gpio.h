@@ -41,7 +41,6 @@ void resetPins(GPIO_TypeDef *port, uint32_t pins);
 
 void resetPin(GPIO_Pin &pin);
 
-void togglePin(GPIO_Pin &pin);
 
 #endif // GPIO_GPIO_C_
 

@@ -13,7 +13,7 @@ MotionController mcs;
 
 Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
 
-int main(void) {
+int main() {
     volatile uint32_t rx_packet = 0;
     MotionController::STOP_STATUS mcs_stop_status;
 
@@ -54,7 +54,7 @@ int main(void) {
     serial.init(115200);
     serial.print("Setup done \r\n");
 
-    while (1) {
+    while (true) {
         // Update ISOTP server
         if (CAN_receive_packet(&can_raw_msg) == HAL_OK) {
             if (canpb.match_id(can_raw_msg.id)) {

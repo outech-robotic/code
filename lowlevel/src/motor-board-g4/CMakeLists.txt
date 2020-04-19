@@ -7,11 +7,9 @@ set(CMAKE_ASM_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/STM32G431KBTX_FLASH.ld -mcpu
 
 set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -Wl,-Map='build_motor_g4.map' -Wl,--gc-sections -static -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
 
-add_definitions(-DCARTE_MOTEUR)
 add_definitions(-DUSE_HAL_DRIVER)
 add_definitions(-DHSE_VALUE=24000000)
 add_definitions(-DHSI_VALUE=8000000)
-add_definitions(-DDEBUG)
 add_definitions(-DF_CPU=160000000)
 add_definitions(-DSTM32G431xx)
 add_definitions(-DUSE_FULL_LL_DRIVER)

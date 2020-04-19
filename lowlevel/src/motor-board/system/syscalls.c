@@ -65,13 +65,7 @@ extern int errno;
 
 extern int __io_getchar(void) __attribute__((weak));
 
-int __io_putchar(int ch) {
-#ifdef DEBUG
-    while (!LL_USART_IsActiveFlag_TXE(USART2));
-    LL_USART_TransmitData8(USART2, ch);
-#endif
-    return ch;
-}
+extern int __io_putchar(int ch) __attribute__((weak));
 
 register char *stack_ptr asm("sp");
 

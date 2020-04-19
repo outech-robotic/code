@@ -9,8 +9,10 @@
 #define COM_SERIAL_HPP_
 
 #ifdef STM32F042x6
+
 #include <stm32f0xx_ll_bus.h>
 #include <stm32f0xx_ll_usart.h>
+
 #elif STM32G431xx
 #include <stm32g4xx_ll_bus.h>
 #include <stm32g4xx_ll_usart.h>

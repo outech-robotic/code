@@ -33,7 +33,7 @@ int CAN_send_packet(can_msg *msg);
 
 int CAN_receive_packet(can_msg *msg);
 
-void MX_FDCAN1_Init(void);
+void MX_FDCAN1_Init();
 
 
 #endif /*__ fdcan_H */

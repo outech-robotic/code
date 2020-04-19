@@ -9,10 +9,10 @@
 #define UTILITY_CONFIG_H_
 
 
-void Error_Handler(void);
+void Error_Handler();
 
 
-#define MAKE_MASK(length) ((1<<length)-1)
+#define MAKE_MASK(length) ((1<<(length))-1)
 
 /*
  * MOTOR CONTROL

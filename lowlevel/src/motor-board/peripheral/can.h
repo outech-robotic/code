@@ -27,7 +27,7 @@ enum CAN_ERROR_STATUS {
     CAN_PKT_OK = 0
 };
 
-void MX_CAN_Init(void);
+void MX_CAN_Init();
 
 int CAN_send_packet(uint16_t std_id, const uint8_t *data = nullptr, uint8_t size = 0);
 

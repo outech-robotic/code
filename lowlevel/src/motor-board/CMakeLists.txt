@@ -7,11 +7,9 @@ set(CMAKE_ASM_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/STM32F042K6TX_FLASH.ld -mcpu
 
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map='build_motor.map' -Wl,--gc-sections -static -mthumb -mcpu=cortex-m0 -mfloat-abi=soft  --specs=nano.specs -Wl,--start-group -lc -lm -lsupc++ -lstdc++ -Wl,--end-group")
 
-add_definitions(-DCARTE_MOTEUR)
 add_definitions(-DUSE_HAL_DRIVER)
 add_definitions(-DHSE_VALUE=8000000)
 add_definitions(-DHSI_VALUE=8000000)
-add_definitions(-DDEBUG)
 add_definitions(-DF_CPU=48000000)
 add_definitions(-DSTM32F042x6)
 add_definitions(-DUSE_FULL_LL_DRIVER)

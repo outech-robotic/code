@@ -10,7 +10,7 @@
 
 
 #define TRY(fn_call, expected) \
-if(fn_call != expected) {      \
+if((fn_call) != (expected)) {      \
     return false;              \
 }
 
