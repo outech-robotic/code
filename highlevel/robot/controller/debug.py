@@ -41,7 +41,7 @@ class DebugController:
         """
         Run the debug server.
         """
-        LOGGER.get().info("websocket_debug_serve")
+        LOGGER.get().info("websocket_debug_serve", port=self._configuration.debug.port)
 
         async with websockets.serve(self._callback,
                                     host=self._configuration.debug.host,
