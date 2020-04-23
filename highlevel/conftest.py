@@ -16,20 +16,14 @@ from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.gateway.motion.motion import MotionGateway
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.util.clock import Clock
-from highlevel.util.probe import Probe
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
+from highlevel.util.clock import Clock
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
-
-
-async def stub_function():
-    """
-    Stub function
-    """
+from highlevel.util.probe import Probe
 
 
 @fixture
@@ -127,7 +121,7 @@ def event_queue_mock():
     Event queue.
     """
     mock = MagicMock(spec=EventQueue)
-    mock.emit = MagicMock(return_value=stub_function)
+    mock.emit = MagicMock()
     return mock
 
 
