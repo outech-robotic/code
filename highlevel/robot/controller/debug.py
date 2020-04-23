@@ -18,7 +18,6 @@ class DebugController:
     """
     Class that sends periodically the state of the robot on a websocket.
     """
-
     def __init__(self, configuration: Configuration, probe: Probe,
                  event_loop: asyncio.AbstractEventLoop):
         self._configuration = configuration
@@ -33,8 +32,8 @@ class DebugController:
         LOGGER.get().info("new_debug_connection")
         cursor = None
         while websocket.state in (State.CONNECTING, State.OPEN):
-            data, cursor = self._probe.poll(cursor=cursor,
-                                            rate=self._configuration.debug.refresh_rate)
+            data, cursor = self._probe.poll(
+                cursor=cursor, rate=self._configuration.debug.refresh_rate)
             json_data = json.dumps(data, cls=RobotJSONEncoder)
             await websocket.send(json_data)
             await asyncio.sleep(1 / self._configuration.debug.refresh_rate)

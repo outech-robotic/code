@@ -27,6 +27,9 @@ def setup_probe(clock_mock):
 
 
 class TestProbe:
+    """
+    Test the probe method.
+    """
     @staticmethod
     def test_poll(probe, clock_mock):
         """
@@ -69,7 +72,7 @@ class TestProbe:
         """
         Make sure downrating event works.
         """
-        got, _ = probe.poll(rate=1/20)
+        got, _ = probe.poll(rate=1 / 20)
         assert got == [
             DebugEvent(
                 time=0,

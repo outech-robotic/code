@@ -37,7 +37,8 @@ class ReplaySaver:
         """
         Save the replay.
         """
-        frames, _ = self.probe.poll(rate=self.simulation_configuration.replay_fps)
+        frames, _ = self.probe.poll(
+            rate=self.simulation_configuration.replay_fps)
         result = {
             'configuration': asdict(self.configuration),
             'simulation_configuration': asdict(self.simulation_configuration),

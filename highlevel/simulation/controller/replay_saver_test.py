@@ -27,22 +27,21 @@ def test_happy_path(simulation_configuration_test, configuration_test,
         probe=probe_mock,
     )
 
-    probe_mock.poll = MagicMock(return_value=(
-        [
-            DebugEvent(
-                key="position",
-                time=0,
-                value={
-                    "x": 0,
-                    "y": 0,
-                },
-            ),
-            DebugEvent(
-                key="angle",
-                time=0,
-                value=42,
-            ),
-        ], 42))
+    probe_mock.poll = MagicMock(return_value=([
+        DebugEvent(
+            key="position",
+            time=0,
+            value={
+                "x": 0,
+                "y": 0,
+            },
+        ),
+        DebugEvent(
+            key="angle",
+            time=0,
+            value=42,
+        ),
+    ], 42))
     replay_saver.save_replay()
 
     http_client.post_file.assert_called_once()
@@ -50,15 +49,15 @@ def test_happy_path(simulation_configuration_test, configuration_test,
     # Make sure the 2nd argument of the call is a valid JSON string and that it conforms to the
     # JSON expected output.
     data = http_client.post_file.call_args_list[0][0][1]
-    assert json.loads(data)['frames'] == [
-        {
-            'time': 0,
-            'key': 'position',
-            'value': {'x': 0, 'y': 0},
+    assert json.loads(data)['frames'] == [{
+        'time': 0,
+        'key': 'position',
+        'value': {
+            'x': 0,
+            'y': 0
         },
-        {
-            'time': 0,
-            'key': 'angle',
-            'value': 42,
-        }
-    ]
+    }, {
+        'time': 0,
+        'key': 'angle',
+        'value': 42,
+    }]
