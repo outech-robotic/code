@@ -7,47 +7,42 @@ from unittest.mock import MagicMock
 from highlevel.simulation.client.http import HTTPClient
 from highlevel.simulation.client.web_browser import WebBrowserClient
 from highlevel.simulation.controller.replay_saver import ReplaySaver
-from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
+from highlevel.util.probe import DebugEvent
 
 
-def test_happy_path(configuration_test):
+def test_happy_path(simulation_configuration_test, configuration_test,
+                    probe_mock):
     """
     Happy path.
     """
 
     http_client = MagicMock(spec=HTTPClient)
     http_client.post_file = MagicMock(return_value={'id': 'test_id'})
+
     replay_saver = ReplaySaver(
         configuration=configuration_test,
-        simulation_configuration=SimulationConfiguration(obstacles=[]),
+        simulation_configuration=simulation_configuration_test,
         http_client=http_client,
-        web_browser_client=MagicMock(spec=WebBrowserClient))
+        web_browser_client=MagicMock(spec=WebBrowserClient),
+        probe=probe_mock,
+    )
 
-    replay_saver.on_tick({
-        "time": 0,
-        "robots": {
-            "ROBOT_A": {
-                "angle": 0.0,
-                "position": {
+    probe_mock.poll = MagicMock(return_value=(
+        [
+            DebugEvent(
+                key="position",
+                time=0,
+                value={
                     "x": 0,
                     "y": 0,
-                }
-            }
-        }
-    })
-    replay_saver.on_tick({
-        "time": 1,
-        "robots": {
-            "ROBOT_A": {
-                "angle": 3,
-                "position": {
-                    "x": 1,
-                    "y": 2,
-                }
-            }
-        }
-    })
-
+                },
+            ),
+            DebugEvent(
+                key="angle",
+                time=0,
+                value=42,
+            ),
+        ], 42))
     replay_saver.save_replay()
 
     http_client.post_file.assert_called_once()
@@ -55,33 +50,15 @@ def test_happy_path(configuration_test):
     # Make sure the 2nd argument of the call is a valid JSON string and that it conforms to the
     # JSON expected output.
     data = http_client.post_file.call_args_list[0][0][1]
-    assert json.loads(data) == {
-        'initial_configuration': {
-            'sizes': {
-                'ROBOT_A': [10, 10]
-            }
+    assert json.loads(data)['frames'] == [
+        {
+            'time': 0,
+            'key': 'position',
+            'value': {'x': 0, 'y': 0},
         },
-        'frames': [{
-            "time": 0,
-            "robots": {
-                "ROBOT_A": {
-                    "angle": 0.0,
-                    "position": {
-                        "x": 0,
-                        "y": 0,
-                    }
-                }
-            }
-        }, {
-            "time": 1,
-            "robots": {
-                "ROBOT_A": {
-                    "angle": 3,
-                    "position": {
-                        "x": 1,
-                        "y": 2,
-                    }
-                }
-            }
-        }]
-    }
+        {
+            'time': 0,
+            'key': 'angle',
+            'value': 42,
+        }
+    ]

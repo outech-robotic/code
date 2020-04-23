@@ -2,7 +2,6 @@
 Main module.
 """
 import asyncio
-import math
 import os
 
 import rplidar
@@ -29,7 +28,6 @@ from highlevel.robot.handler.protobuf import ProtobufHandler
 from highlevel.simulation.client.http import HTTPClient
 from highlevel.simulation.client.web_browser import WebBrowserClient
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.probe import SimulationProbe
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.controller.runner import SimulationRunner
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
@@ -37,9 +35,11 @@ from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
 from highlevel.simulation.handler.simulation import SimulationHandler
 from highlevel.util import tcp
+from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
+from highlevel.util.probe import Probe
 
 CONFIG = Configuration(
     initial_position=Vector2(200, 1200),
@@ -55,7 +55,7 @@ CONFIG = Configuration(
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(
-    speed_factor=math.inf,  # Run the simulation as fast as possible.
+    speed_factor=1e100,  # Run the simulation as fast as possible.
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
         Segment(start=Vector2(0, 0), end=Vector2(CONFIG.field_shape[0], 0)),
@@ -89,7 +89,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
 
     i.provide('motion_gateway', MotionGateway)
 
-    i.provide('simulation_probe', SimulationProbe)
+    i.provide('probe', Probe)
     i.provide('event_loop', asyncio.get_event_loop())
 
     if simulation:
@@ -111,6 +111,10 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         i.provide('http_client', HTTPClient)
         i.provide('web_browser_client', WebBrowserClient)
         i.provide('replay_saver', ReplaySaver)
+        i.provide('clock', FakeClock)
+
+    else:
+        i.provide('clock', RealClock)
 
     if simulation or stub_lidar:
         i.provide('lidar_adapter', SimulatedLIDARAdapter)

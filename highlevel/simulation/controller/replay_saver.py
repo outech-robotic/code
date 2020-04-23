@@ -2,15 +2,15 @@
 Replay saver module.
 """
 import json
-from typing import List
+from dataclasses import asdict
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.simulation.client.http import HTTPClient
 from highlevel.simulation.client.web_browser import WebBrowserClient
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
-from highlevel.simulation.entity.simulation_state import RobotID
 from highlevel.util.json_encoder import RobotJSONEncoder
+from highlevel.util.probe import Probe
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
 REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/replay/index.html'
@@ -21,39 +21,30 @@ class ReplaySaver:
     """
     Save simulation state for future replay.
     """
+
+    # pylint: disable=too-many-arguments
     def __init__(self, configuration: Configuration,
                  simulation_configuration: SimulationConfiguration,
-                 http_client: HTTPClient,
-                 web_browser_client: WebBrowserClient):
-        size = (int(configuration.robot_length),
-                int(configuration.robot_width))
-
-        self.frames: List[dict] = []
-        self.result = {
-            'initial_configuration': {
-                'sizes': {
-                    RobotID.RobotA: size,
-                }
-            },
-            'frames': self.frames,
-        }
+                 http_client: HTTPClient, web_browser_client: WebBrowserClient,
+                 probe: Probe):
         self.configuration = configuration
         self.simulation_configuration = simulation_configuration
         self.http_client = http_client
         self.web_browser_client = web_browser_client
-
-    def on_tick(self, state: dict) -> None:
-        """
-        Should be called to append the state to the result to be saved.
-        """
-        self.frames.append(state)
+        self.probe = probe
 
     def save_replay(self):
         """
         Save the replay.
         """
+        frames, _ = self.probe.poll(rate=self.simulation_configuration.replay_fps)
+        result = {
+            'configuration': asdict(self.configuration),
+            'simulation_configuration': asdict(self.simulation_configuration),
+            'frames': frames,
+        }
 
-        dump = json.dumps(self.result, cls=RobotJSONEncoder)
+        dump = json.dumps(result, cls=RobotJSONEncoder)
         LOGGER.get().info("saving_replay", size=len(dump))
 
         replay_id = self.http_client.post_file(REPLAY_API_URL, dump)['id']

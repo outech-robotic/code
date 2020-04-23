@@ -23,7 +23,7 @@ def event_queue_setup():
 @fixture(name='simulation_runner')
 def simulation_runner_factory(event_queue, simulation_gateway_mock,
                               simulation_configuration_test, replay_saver_mock,
-                              simulation_state_mock, simulation_probe_mock):
+                              simulation_state_mock, probe_mock, clock_mock):
     """
     Simulation runner.
     """
@@ -33,7 +33,8 @@ def simulation_runner_factory(event_queue, simulation_gateway_mock,
         simulation_configuration=simulation_configuration_test,
         replay_saver=replay_saver_mock,
         simulation_state=simulation_state_mock,
-        simulation_probe=simulation_probe_mock,
+        probe=probe_mock,
+        clock=clock_mock,
     )
 
 

@@ -5,12 +5,13 @@ import asyncio
 
 from highlevel.logger import LOGGER
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.probe import SimulationProbe
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.entity.event import EventType, EventOrder
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
-from highlevel.simulation.entity.simulation_state import SimulationState, RobotID
+from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
+from highlevel.util.clock import FakeClock
+from highlevel.util.probe import Probe
 
 
 class SimulationRunner:
@@ -25,15 +26,16 @@ class SimulationRunner:
                  simulation_gateway: SimulationGateway,
                  replay_saver: ReplaySaver,
                  simulation_configuration: SimulationConfiguration,
-                 simulation_state: SimulationState,
-                 simulation_probe: SimulationProbe):
+                 simulation_state: SimulationState, probe: Probe,
+                 clock: FakeClock):
 
+        self.clock = clock
         self.event_queue = event_queue
         self.simulation_gateway = simulation_gateway
         self.replay_saver = replay_saver
         self.simulation_configuration = simulation_configuration
         self.state = simulation_state
-        self.simulation_probe = simulation_probe
+        self.probe = probe
 
         self.tick = 0
         self.running = True
@@ -63,16 +65,10 @@ class SimulationRunner:
                 self.state.last_lidar_update = self.state.time
                 await self.simulation_gateway.push_lidar_readings()
 
-            # Send the feedback to the subscribers.
-            if current_tick % (
-                    self.simulation_configuration.tickrate //
-                    self.simulation_configuration.simulation_notify_rate) == 0:
-                # Notify subscribers at 60 FPS.
-                self._notify_subscribers()
-
             self.tick = current_tick + 1
             self.state.time = int(
                 self.tick / self.simulation_configuration.tickrate * 1000)
+            self.clock.fake_time = self.state.time / 1000
             await asyncio.sleep(1 / self.simulation_configuration.tickrate /
                                 self.simulation_configuration.speed_factor)
 
@@ -98,16 +94,3 @@ class SimulationRunner:
 
         else:
             raise RuntimeError(f"cannot handle event {event}")
-
-    def _notify_subscribers(self) -> None:
-        """
-        Notify the subscribers of state change.
-        """
-
-        state = self.simulation_probe.probe()
-        self.replay_saver.on_tick({
-            'time': self.state.time,
-            'robots': {
-                RobotID.RobotA: state
-            },
-        })

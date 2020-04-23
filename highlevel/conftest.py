@@ -16,7 +16,8 @@ from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.gateway.motion.motion import MotionGateway
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.probe import SimulationProbe
+from highlevel.util.clock import Clock
+from highlevel.util.probe import Probe
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
@@ -64,7 +65,7 @@ def simulation_configuration_test():
         speed_factor=10000,
         tickrate=200,
         rotation_speed=10,
-        simulation_notify_rate=60,
+        replay_fps=60,
         encoder_position_rate=100,
     )
 
@@ -126,7 +127,7 @@ def event_queue_mock():
     Event queue.
     """
     mock = MagicMock(spec=EventQueue)
-    mock.push = MagicMock(return_value=stub_function)
+    mock.emit = MagicMock(return_value=stub_function)
     return mock
 
 
@@ -160,11 +161,11 @@ def motion_gateway_mock():
 
 
 @fixture
-def simulation_probe_mock():
+def probe_mock():
     """
     Simulation probe mock.
     """
-    return MagicMock(spec=SimulationProbe)
+    return MagicMock(spec=Probe)
 
 
 @fixture
@@ -198,3 +199,11 @@ def socket_adapter_mock():
     future.set_result(None)
     mock.send = MagicMock(return_value=future)
     return mock
+
+
+@fixture
+def clock_mock():
+    """
+    Clock.
+    """
+    return MagicMock(spec=Clock)
