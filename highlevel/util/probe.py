@@ -22,7 +22,7 @@ class Probe:
     the robot at any time.
     
     For instance, you can push values to a probe in your robot's controller like this:
-      probe.push_value("angle", self.angle)
+      probe.emit("angle", self.angle)
       
     And the debugging controller could then "probe" the angle whenever it wants by calling:
       state = probe.poll()
