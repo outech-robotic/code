@@ -11,9 +11,9 @@ from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Direction, Radian, Millimeter
 from highlevel.robot.gateway.motion.motion import MotionGateway
-from highlevel.simulation.controller.probe import SimulationProbe
 from highlevel.util.geometry.direction import right, backward, left, forward
 from highlevel.util.geometry.vector import Vector2
+from highlevel.util.probe import Probe
 
 DIRECTION_FUNCTION = {
     Direction.FORWARD: forward,
@@ -43,11 +43,12 @@ class LocalizationController:
     def __init__(self, symmetry_controller: SymmetryController,
                  odometry_controller: OdometryController,
                  configuration: Configuration, motion_gateway: MotionGateway,
-                 simulation_probe: SimulationProbe):
+                 probe: Probe):
         self.odometry_controller = odometry_controller
         self.symmetry_controller = symmetry_controller
         self.configuration = configuration
         self.motion_gateway = motion_gateway
+        self.probe = probe
 
         self._state = State(
             odometry_position=configuration.initial_position,
@@ -56,11 +57,6 @@ class LocalizationController:
             last_left_tick=0,
             movement_done_event=asyncio.Event(),
         )
-
-        simulation_probe.attach("angle",
-                                lambda: float(self._state.odometry_angle))
-        simulation_probe.attach("position",
-                                lambda: self._state.odometry_position)
 
     def update_odometry_position(self, left_tick: int,
                                  right_tick: int) -> None:
@@ -84,6 +80,9 @@ class LocalizationController:
 
         self._state.last_right_tick = right_tick
         self._state.last_left_tick = left_tick
+
+        self.probe.emit("position", self._state.odometry_position)
+        self.probe.emit("angle", float(self._state.odometry_angle))
 
     def movement_done(self, _: bool) -> None:
         """"

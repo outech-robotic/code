@@ -3,6 +3,7 @@ Debug module for live debugging.
 """
 import asyncio
 import json
+from dataclasses import asdict
 
 import websockets
 from websockets.http import Headers
@@ -10,8 +11,9 @@ from websockets.protocol import State
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.simulation.controller.probe import SimulationProbe
+from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.util.json_encoder import RobotJSONEncoder
+from highlevel.util.probe import Probe, DebugEvent
 
 
 class DebugController:
@@ -19,10 +21,11 @@ class DebugController:
     Class that sends periodically the state of the robot on a websocket.
     """
     def __init__(self, configuration: Configuration,
-                 simulation_probe: SimulationProbe,
-                 event_loop: asyncio.AbstractEventLoop):
+                 simulation_configuration: SimulationConfiguration,
+                 probe: Probe, event_loop: asyncio.AbstractEventLoop):
         self._configuration = configuration
-        self._simulation_probe = simulation_probe
+        self._simulation_configuration = simulation_configuration
+        self._probe = probe
         self._event_loop = event_loop
 
     async def _callback(self, websocket: websockets.WebSocketServerProtocol,
@@ -31,8 +34,25 @@ class DebugController:
         Function executed for each new incoming connection.
         """
         LOGGER.get().info("new_debug_connection")
+        cursor = None
+
+        configuration_event = DebugEvent(
+            key='configuration',
+            time=0,
+            value=asdict(self._configuration),
+        )
+        simulation_configuration_event = DebugEvent(
+            key='simulation_configuration',
+            time=0,
+            value=asdict(self._simulation_configuration),
+        )
+        data = [configuration_event, simulation_configuration_event]
+        json_data = json.dumps(data, cls=RobotJSONEncoder)
+        await websocket.send(json_data)
+
         while websocket.state in (State.CONNECTING, State.OPEN):
-            data = self._simulation_probe.probe()
+            data, cursor = self._probe.poll(
+                cursor=cursor, rate=self._configuration.debug.refresh_rate)
             json_data = json.dumps(data, cls=RobotJSONEncoder)
             await websocket.send(json_data)
             await asyncio.sleep(1 / self._configuration.debug.refresh_rate)
