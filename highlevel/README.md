@@ -97,37 +97,6 @@ The simulation result is a big JSON string that contains the state of the game f
 
 ##### Example
 ```json
-
-{
-  "time": 0,
-  "key": "configuration",
-  "value": {
-    "initial_position": {
-      "x": 200,
-      "y": 1200
-    },
-    "initial_angle": 0,
-    "color": "BLUE",
-    "robot_width": 380,
-    "robot_length": 240,
-    "field_shape": [
-      3000,
-      2000
-    ],
-    "wheel_radius": 36.9,
-    "encoder_ticks_per_revolution": 2400,
-    "distance_between_wheels": 357,
-    "debug": {
-      "port": 8080,
-      "host": "0.0.0.0",
-      "refresh_rate": 10
-    }
-  }
-}
-➜  replay git:(master) curl https://replay-api.outech.fr/replay/dee9ab3a-7417-4297-9dbb-8a17c26a7964 | jq '.events[:10]'
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  471k  100  471k    0     0   238k      0  0:00:01  0:00:01 --:--:--  237k
 [
   {
     "time": 0,
