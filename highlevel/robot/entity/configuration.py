@@ -1,10 +1,8 @@
 """
 InitialConfiguration module.
 """
-from dataclasses import field
+from dataclasses import field, dataclass
 from typing import Tuple
-
-from attr import dataclass
 
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.type import Radian, Millimeter

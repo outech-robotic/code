@@ -5,17 +5,16 @@ from math import cos, sin
 from typing import Tuple
 
 from highlevel.robot.entity.type import Millimeter, Radian
-from highlevel.simulation.controller.probe import SimulationProbe
+from highlevel.util.probe import Probe
 from highlevel.util.geometry.vector import Vector2
 
 
 class LidarController:
     """Lidar controller is a controller for saving positions of obstacles."""
-    def __init__(self, simulation_probe: SimulationProbe):
+    def __init__(self, probe: Probe):
         self.seen_polar: Tuple[Tuple[Radian, Millimeter], ...] = ()
         self.seen_cartesian: Tuple[Vector2, ...] = ()
-        simulation_probe.attach("position_obstacles",
-                                lambda: self.seen_cartesian)
+        self.probe = probe
 
     def set_detection(
             self, seen_polar: Tuple[Tuple[Radian, Millimeter], ...]) -> None:
@@ -24,3 +23,4 @@ class LidarController:
         self.seen_cartesian = tuple(
             Vector2(radius * cos(angle), radius * sin(angle))
             for radius, angle in seen_polar)
+        self.probe.emit('position_obstacles', self.seen_cartesian)

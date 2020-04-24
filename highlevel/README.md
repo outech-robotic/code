@@ -69,15 +69,15 @@ For instance, we can inspect where the robot think it is (odometry output), by l
 In order to do that cleanly, we use **probes**. 
 _You can picture it as if you would attach a probe to an electronic circuit to get the voltage on a particular point on a circuit (ie. capacitor...)._
 
-Just use the `simulation_proble.attach()` function, which takes as a first argument **the name of the probe**, and as a second argument a **function ([closure](https://en.wikipedia.org/wiki/Closure_\(computer_programming\))) that returns the value of the inspected variable**.
+Just use the `proble.emit()` function, which takes as a first argument **the name of the probe**, and as a second argument the value of the inspected variable.
 
 #### Example:
 ```python
-# Require a simulation_probe from the dependency injection container.
+# Require a probe from the dependency injection container.
 
-simulation_probe.attach("angle", lambda: float(my_angle))
-simulation_probe.attach(
-    "position", lambda: {
+probe.emit("angle", float(my_angle))
+probe.emit(
+    "position", {
         'x': float(my_position.x),
         'y': float(my_position.y),
     })
@@ -97,55 +97,60 @@ The simulation result is a big JSON string that contains the state of the game f
 
 ##### Example
 ```json
-{
-  "initial_configuration": {
-    "sizes": {
-      "ROBOT_A": [
-        240,
-        380
-      ]
+[
+  {
+    "time": 0,
+    "key": "configuration",
+    "value": {
+      "color": "BLUE",
+      "robot_width": 380,
+      "robot_length": 240,
+      // [...]
     }
   },
-  "frames": [
-    {
-      "time": 0,
-      "robots": {
-        "ROBOT_A": {
-          "angle": 0,
-          "position": {
-            "x": 200,
-            "y": 1200
-          }
-        }
-      }
-    },
-    {
-      "time": 15,
-      "robots": {
-        "ROBOT_A": {
-          "angle": 0,
-          "position": {
-            "x": 200,
-            "y": 1200
-          }
-        }
-      }
-    },
-    {...},
-    {...},
-    {...},
-    {...},
-  }
-}
+  {
+    "time": 0,
+    "key": "simulation_configuration",
+    "value": {
+      "speed_factor": 1e+100,
+      "tickrate": 60,
+      "rotation_speed": 28.569643591745578,
+      "encoder_position_rate": 100,
+      "replay_fps": 60,
+      "lidar_position_rate": 11
+    }
+  },
+  {
+    "time": 0.016,
+    "key": "position",
+    "value": {
+      "x": 200,
+      "y": 1200
+    }
+  },
+  {
+    "time": 0.016,
+    "key": "angle",
+    "value": 0
+  },
+  {
+    "time": 0.033,
+    "key": "position",
+    "value": {
+      "x": 200,
+      "y": 1200
+    }
+  },
+  // [...]
+]
     
 ```
 
-Time is in milliseconds.
+Time is in seconds.
 
-The content of "ROBOT_A" is actually the result of all the probes at a certain instant. 
+Every time a probe emits an event, it is added to the stream.
 ```json
 {
-  "angle": 0,
   "position": {
     "x": 200,
     "y": 1200

@@ -2,12 +2,11 @@
 Simulation configuration module.
 """
 import math
+from dataclasses import dataclass
 from typing import List
 
-from attr import dataclass
-
-from highlevel.util.geometry.segment import Segment
 from highlevel.robot.entity.type import RadianPerSec, Hz
+from highlevel.util.geometry.segment import Segment
 
 
 @dataclass(frozen=True)
@@ -21,5 +20,5 @@ class SimulationConfiguration:
     tickrate: int = 60  # FPS.
     rotation_speed: RadianPerSec = math.pi * 2 * 4.547
     encoder_position_rate: Hz = 100  # Frequency to send the encoder wheel positions.
-    simulation_notify_rate: Hz = 60  # Notify the subscriber at this rate.
+    replay_fps: Hz = 60  # Downsample the replay file at this rate.
     lidar_position_rate: Hz = 11  # Frequency to send the LIDAR positions.

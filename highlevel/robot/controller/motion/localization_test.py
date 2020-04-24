@@ -16,7 +16,7 @@ from highlevel.util.geometry.vector import Vector2
 @pytest.fixture(name='localization_controller')
 def localization_controller_setup(event_loop, odometry_controller_mock,
                                   symmetry_controller_mock, configuration_test,
-                                  motion_gateway_mock, simulation_probe_mock):
+                                  motion_gateway_mock, probe_mock):
     """
     Localization controller.
     """
@@ -25,7 +25,7 @@ def localization_controller_setup(event_loop, odometry_controller_mock,
         odometry_controller=odometry_controller_mock,
         configuration=configuration_test,
         motion_gateway=motion_gateway_mock,
-        simulation_probe=simulation_probe_mock,
+        probe=probe_mock,
     )
 
 

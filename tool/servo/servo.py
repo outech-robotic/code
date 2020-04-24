@@ -60,8 +60,6 @@ def send_orders_servos(sockets, servo_id, angles):
 
 
 def main():
-    board = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    board.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     boards = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for _ in range(5)]
 
     for i, sock in enumerate(boards):
@@ -108,7 +106,10 @@ def main():
 
     except KeyboardInterrupt:
         print("Stopping, close socket")
-        board.close()
+        for b in boards:
+            b.close()
+        system("killall isotpserver")
+
 
 
 if __name__ == "__main__":

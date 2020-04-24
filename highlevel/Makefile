@@ -6,7 +6,7 @@ test:
 
 .PHONY: lint
 lint:
-	pylint .
+	pylint highlevel
 
 .PHONY: format
 format:
