@@ -12,7 +12,7 @@
 #include "com/isotp/isotp.h"
 #include "nanopb/pb_encode.h"
 #include "nanopb/pb_decode.h"
-#include "proto/outech.pb.h"
+#include "outech.pb.h"
 #include "utility/ring_buffer.hpp"
 #include "config.h"
 

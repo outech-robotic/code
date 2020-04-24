@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"t\n\x0eMotionLimitMsg\x12\x19\n\x11translation_speed\x18\x02 \x01(\r\x12\x16\n\x0erotation_speed\x18\x03 \x01(\r\x12\x13\n\x0bwheel_speed\x18\x04 \x01(\r\x12\x1a\n\x12wheel_acceleration\x18\x05 \x01(\r\"B\n\x0cPIDConfigMsg\x12\x0e\n\x06pid_id\x18\x01 \x01(\r\x12\n\n\x02kp\x18\x06 \x01(\r\x12\n\n\x02ki\x18\x07 \x01(\r\x12\n\n\x02kd\x18\x08 \x01(\r\"O\n\x17SetMotionControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x13\n\x0btranslation\x18\x02 \x01(\x08\x12\x10\n\x08rotation\x18\x03 \x01(\x08\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\xdb\x04\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12&\n\x0bmotionLimit\x18\x06 \x01(\x0b\x32\x0f.MotionLimitMsgH\x00\x12\x38\n\x14setMotionControlMode\x18\x07 \x01(\x0b\x32\x18.SetMotionControlModeMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
+  serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"t\n\x0eMotionLimitMsg\x12\x19\n\x11translation_speed\x18\x02 \x01(\r\x12\x16\n\x0erotation_speed\x18\x03 \x01(\r\x12\x13\n\x0bwheel_speed\x18\x04 \x01(\r\x12\x1a\n\x12wheel_acceleration\x18\x05 \x01(\r\"B\n\x0cPIDConfigMsg\x12\x0e\n\x06pid_id\x18\x01 \x01(\r\x12\n\n\x02kp\x18\x06 \x01(\r\x12\n\n\x02ki\x18\x07 \x01(\r\x12\n\n\x02kd\x18\x08 \x01(\r\"O\n\x17SetMotionControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x13\n\x0btranslation\x18\x02 \x01(\x08\x12\x10\n\x08rotation\x18\x03 \x01(\x08\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\x1b\n\x08\x44\x65\x62ugLog\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\"\xfa\x04\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12&\n\x0bmotionLimit\x18\x06 \x01(\x0b\x32\x0f.MotionLimitMsgH\x00\x12\x38\n\x14setMotionControlMode\x18\x07 \x01(\x0b\x32\x18.SetMotionControlModeMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x12\x1d\n\x08\x64\x65\x62ugLog\x18\x0f \x01(\x0b\x32\t.DebugLogH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
 )
 
 
@@ -577,6 +577,37 @@ _PRESSURESENSORMSG = _descriptor.Descriptor(
 )
 
 
+_DEBUGLOG = _descriptor.Descriptor(
+  name='DebugLog',
+  full_name='DebugLog',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='content', full_name='DebugLog.content', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=892,
+  serialized_end=919,
+)
+
+
 _BUSMESSAGE = _descriptor.Descriptor(
   name='BusMessage',
   full_name='BusMessage',
@@ -682,6 +713,13 @@ _BUSMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='debugLog', full_name='BusMessage.debugLog', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -697,8 +735,8 @@ _BUSMESSAGE = _descriptor.Descriptor(
       name='message_content', full_name='BusMessage.message_content',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=893,
-  serialized_end=1496,
+  serialized_start=922,
+  serialized_end=1556,
 )
 
 _BUSMESSAGE.fields_by_name['heartbeat'].message_type = _HEARTBEATMSG
@@ -715,6 +753,7 @@ _BUSMESSAGE.fields_by_name['servo'].message_type = _SERVOMSG
 _BUSMESSAGE.fields_by_name['pumpAndValve'].message_type = _PUMPANDVALVEMSG
 _BUSMESSAGE.fields_by_name['laserSensor'].message_type = _LASERSENSORMSG
 _BUSMESSAGE.fields_by_name['pressureSensor'].message_type = _PRESSURESENSORMSG
+_BUSMESSAGE.fields_by_name['debugLog'].message_type = _DEBUGLOG
 _BUSMESSAGE.oneofs_by_name['message_content'].fields.append(
   _BUSMESSAGE.fields_by_name['heartbeat'])
 _BUSMESSAGE.fields_by_name['heartbeat'].containing_oneof = _BUSMESSAGE.oneofs_by_name['message_content']
@@ -757,6 +796,9 @@ _BUSMESSAGE.fields_by_name['laserSensor'].containing_oneof = _BUSMESSAGE.oneofs_
 _BUSMESSAGE.oneofs_by_name['message_content'].fields.append(
   _BUSMESSAGE.fields_by_name['pressureSensor'])
 _BUSMESSAGE.fields_by_name['pressureSensor'].containing_oneof = _BUSMESSAGE.oneofs_by_name['message_content']
+_BUSMESSAGE.oneofs_by_name['message_content'].fields.append(
+  _BUSMESSAGE.fields_by_name['debugLog'])
+_BUSMESSAGE.fields_by_name['debugLog'].containing_oneof = _BUSMESSAGE.oneofs_by_name['message_content']
 DESCRIPTOR.message_types_by_name['HeartbeatMsg'] = _HEARTBEATMSG
 DESCRIPTOR.message_types_by_name['StopMovingMsg'] = _STOPMOVINGMSG
 DESCRIPTOR.message_types_by_name['MovementEndedMsg'] = _MOVEMENTENDEDMSG
@@ -771,6 +813,7 @@ DESCRIPTOR.message_types_by_name['ServoMsg'] = _SERVOMSG
 DESCRIPTOR.message_types_by_name['PumpAndValveMsg'] = _PUMPANDVALVEMSG
 DESCRIPTOR.message_types_by_name['LaserSensorMsg'] = _LASERSENSORMSG
 DESCRIPTOR.message_types_by_name['PressureSensorMsg'] = _PRESSURESENSORMSG
+DESCRIPTOR.message_types_by_name['DebugLog'] = _DEBUGLOG
 DESCRIPTOR.message_types_by_name['BusMessage'] = _BUSMESSAGE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -871,6 +914,13 @@ PressureSensorMsg = _reflection.GeneratedProtocolMessageType('PressureSensorMsg'
   # @@protoc_insertion_point(class_scope:PressureSensorMsg)
   })
 _sym_db.RegisterMessage(PressureSensorMsg)
+
+DebugLog = _reflection.GeneratedProtocolMessageType('DebugLog', (_message.Message,), {
+  'DESCRIPTOR' : _DEBUGLOG,
+  '__module__' : 'outech_pb2'
+  # @@protoc_insertion_point(class_scope:DebugLog)
+  })
+_sym_db.RegisterMessage(DebugLog)
 
 BusMessage = _reflection.GeneratedProtocolMessageType('BusMessage', (_message.Message,), {
   'DESCRIPTOR' : _BUSMESSAGE,

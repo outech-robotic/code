@@ -25,7 +25,6 @@ include_directories(${DRIVERS_DIR}/CMSIS/Device/ST/STM32F0xx/Include)
 include_directories(${DRIVERS_DIR}/CMSIS/Include)
 include_directories(${DRIVERS_DIR}/STM32F0xx_HAL_Driver/Inc/Legacy)
 
-include_directories(${PROTO_DIR}/gen/cpp/proto/)
 include_directories(${PROTO_DIR}/gen/cpp/)
 include_directories(${PROTO_DIR}/nanopb/)
 include_directories(${PROTO_DIR}/)
@@ -40,7 +39,7 @@ set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/system/startup_stm32f042c6tx.s P
 
 file(GLOB SRC_NANOPB
         "${PROTO_DIR}/nanopb/*.c"
-        "${PROTO_DIR}/gen/cpp/proto/*.c"
+        "${PROTO_DIR}/gen/cpp/*.c"
         )
 
 file(GLOB_RECURSE SRC_MOTOR_BOARD

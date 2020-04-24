@@ -73,6 +73,12 @@ message PressureSensorMsg {
   bool on_right = 5;
 }
 
+
+message DebugLog {
+  string content = 1;
+}
+
+
 message BusMessage {
   oneof message_content {
     HeartbeatMsg heartbeat = 1;
@@ -89,5 +95,6 @@ message BusMessage {
     PumpAndValveMsg pumpAndValve = 12;
     LaserSensorMsg laserSensor = 13;
     PressureSensorMsg pressureSensor = 14;
+    DebugLog debugLog = 15;
   }
 }

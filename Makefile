@@ -7,7 +7,7 @@ jenkins:
 	make -C highlevel jenkins
 
 proto/gen/cpp/proto/outech.pb.c: proto/outech.proto
-	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=./proto/gen/cpp proto/outech.proto
+	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=./proto/gen/cpp proto/outech.proto -I=./proto
 
 proto/gen/python/outech_pb2.py: proto/outech.proto
 	$(PROTOC) -I=./proto --python_out=./proto/gen/python proto/outech.proto
