@@ -14,3 +14,7 @@ proto/gen/python/outech_pb2.py: proto/outech.proto
 
 .PHONY: protoc
 protoc: proto/gen/cpp/proto/outech.pb.c proto/gen/python/outech_pb2.py
+
+.PHONY: clean
+clean:
+	make -C highlevel clean
