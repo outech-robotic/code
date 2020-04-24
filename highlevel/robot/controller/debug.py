@@ -21,10 +21,10 @@ class DebugController:
     Class that sends periodically the state of the robot on a websocket.
     """
     def __init__(self, configuration: Configuration,
-                 simulation_configuration: SimulationConfiguration, probe: Probe,
-                 event_loop: asyncio.AbstractEventLoop):
+                 simulation_configuration: SimulationConfiguration,
+                 probe: Probe, event_loop: asyncio.AbstractEventLoop):
         self._configuration = configuration
-        self._simulation_configuration = configuration
+        self._simulation_configuration = simulation_configuration
         self._probe = probe
         self._event_loop = event_loop
 
@@ -39,17 +39,14 @@ class DebugController:
         configuration_event = DebugEvent(
             key='configuration',
             time=0,
-            value=self._configuration,
+            value=asdict(self._configuration),
         )
         simulation_configuration_event = DebugEvent(
             key='simulation_configuration',
             time=0,
-            value=self._simulation_configuration,
+            value=asdict(self._simulation_configuration),
         )
-        data = [
-            asdict(configuration_event),
-            asdict(simulation_configuration_event)
-        ]
+        data = [configuration_event, simulation_configuration_event]
         json_data = json.dumps(data, cls=RobotJSONEncoder)
         await websocket.send(json_data)
 

@@ -2,7 +2,6 @@
 Replay saver module.
 """
 import json
-from dataclasses import asdict
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
@@ -14,6 +13,7 @@ from highlevel.util.probe import Probe, DebugEvent
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
 REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/replay/index.html'
+
 # REPLAY_VIEWER_URL = 'http://127.0.0.1:8000/'
 
 
@@ -40,7 +40,6 @@ class ReplaySaver:
         frames, _ = self.probe.poll(
             rate=self.simulation_configuration.replay_fps)
 
-
         configuration_event = DebugEvent(
             key='configuration',
             time=0,
@@ -52,7 +51,8 @@ class ReplaySaver:
             value=self.simulation_configuration,
         )
         result = {
-            'events': [configuration_event, simulation_configuration_event] + frames,
+            'events':
+            [configuration_event, simulation_configuration_event] + frames,
         }
 
         dump = json.dumps(result, cls=RobotJSONEncoder)
