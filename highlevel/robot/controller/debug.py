@@ -3,6 +3,7 @@ Debug module for live debugging.
 """
 import asyncio
 import json
+from dataclasses import asdict
 
 import websockets
 from websockets.http import Headers
@@ -10,17 +11,20 @@ from websockets.protocol import State
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
+from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.util.json_encoder import RobotJSONEncoder
-from highlevel.util.probe import Probe
+from highlevel.util.probe import Probe, DebugEvent
 
 
 class DebugController:
     """
     Class that sends periodically the state of the robot on a websocket.
     """
-    def __init__(self, configuration: Configuration, probe: Probe,
+    def __init__(self, configuration: Configuration,
+                 simulation_configuration: SimulationConfiguration, probe: Probe,
                  event_loop: asyncio.AbstractEventLoop):
         self._configuration = configuration
+        self._simulation_configuration = configuration
         self._probe = probe
         self._event_loop = event_loop
 
@@ -31,6 +35,24 @@ class DebugController:
         """
         LOGGER.get().info("new_debug_connection")
         cursor = None
+
+        configuration_event = DebugEvent(
+            key='configuration',
+            time=0,
+            value=self._configuration,
+        )
+        simulation_configuration_event = DebugEvent(
+            key='simulation_configuration',
+            time=0,
+            value=self._simulation_configuration,
+        )
+        data = [
+            asdict(configuration_event),
+            asdict(simulation_configuration_event)
+        ]
+        json_data = json.dumps(data, cls=RobotJSONEncoder)
+        await websocket.send(json_data)
+
         while websocket.state in (State.CONNECTING, State.OPEN):
             data, cursor = self._probe.poll(
                 cursor=cursor, rate=self._configuration.debug.refresh_rate)

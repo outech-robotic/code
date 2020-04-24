@@ -10,7 +10,7 @@ from highlevel.simulation.client.http import HTTPClient
 from highlevel.simulation.client.web_browser import WebBrowserClient
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.util.json_encoder import RobotJSONEncoder
-from highlevel.util.probe import Probe
+from highlevel.util.probe import Probe, DebugEvent
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
 REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/replay/index.html'
@@ -39,10 +39,20 @@ class ReplaySaver:
         """
         frames, _ = self.probe.poll(
             rate=self.simulation_configuration.replay_fps)
+
+
+        configuration_event = DebugEvent(
+            key='configuration',
+            time=0,
+            value=self.configuration,
+        )
+        simulation_configuration_event = DebugEvent(
+            key='simulation_configuration',
+            time=0,
+            value=self.simulation_configuration,
+        )
         result = {
-            'configuration': asdict(self.configuration),
-            'simulation_configuration': asdict(self.simulation_configuration),
-            'frames': frames,
+            'events': [configuration_event, simulation_configuration_event] + frames,
         }
 
         dump = json.dumps(result, cls=RobotJSONEncoder)
