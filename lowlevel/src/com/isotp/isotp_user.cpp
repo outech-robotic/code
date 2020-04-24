@@ -37,7 +37,7 @@ uint32_t isotp_user_get_ms(void) {
 
 /* optional, provide to receive debugging log messages */
 void isotp_user_debug(const char *message, ...) {
-
+    (void)(message);
 }
 
 
