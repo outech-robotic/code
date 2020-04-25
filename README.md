@@ -78,13 +78,10 @@ Open the root ```code``` directory as the root of the project.\
 In the project hierarchy, right-click on ```lowlevel/CMakeLists.txt``` and "Load Cmake project".
 
 Add the following CMake Options (```File```>```Settings```>```Build, Execution, Deployment```>```CMake```):\
-```-DCMAKE_C_FLAGS=--specs=nosys.specs -DCMAKE_CXX_FLAGS=--specs=nosys.specs```\
-This is because CLion does pre-checks on the compilers, and defaults to using the standard library, but doesn't link the one for ARM.
+```-DCMAKE_SYSTEM_NAME=Generic```\
+This is because CLion uses a default system name for CMake that makes it use the full standard library, but we don't want any of that.
 
-In the same settings, on ```Toolchains```, set C/C++ compilers to ```arm-none-eabi-gcc/g++```.
-This allows it to use the correct compilers on those pre-checks.
-
-#### Run CMake
+#### Run CMake from CLI
 In the root directory, run the following to setup the make files and commands:
 ```shell script
 cmake -B lowlevel/cmake-build-debug lowlevel
@@ -96,7 +93,7 @@ From CLion, you can just use Build configurations, and use the build hammer on t
 From the command line, still in the root directory, you can now make the following targets:
 
 ```make -C lowlevel/cmake-build-debug build_motor/motor_g4/servo/servo_nucleo```\
-Builds the Motor Board project, for Nucleo-F042K6 or the Nucleo-F042K6
+Builds the required project.
 
 ```make -C lowlevel/cmake-build-debug flash_motor/motor_g4/servo/servo_nuclo```\
 Uploads the corresponding program to the board, using ```openocd```.
@@ -107,21 +104,13 @@ The  flash_ targets should automatically detect modifications and rebuild if nee
 
 We will be using ```arm-none-eabi-gdb``` as a client, and ```openocd``` as a server.
 In CLion:
-* In the previous ```Build```>```Toolchains``` settings, set the Debugger to ```arm-none-eabi-gdb```.
 * Go to your ```Configurations``` (next to the build hammer/run button).
 * ```Edit Configurations```
-* Click ```+``` to add a new configuration > ```Embedded GDB Server```
-* Give it the name you want.
-* Select the build target executable you want.
-* ```'target remote' args``` : ```localhost:PORT```
-  * Choose the ```PORT```, preferably high (The default ```3333``` doesn't work on windows).
-  * It is also possible to debug on a remote host.
-* ```GDB Server``` : ```openocd```
-* ```GDB Server args``` : We need to give it a path to a configuration file and also an alternative port (if needed, on windows)
-  * ```-f "path_to_a_file_in_lowlevel/scripts/board or target" -c "gdb_port PORT"```
-* Go to ```Advanced GDB Server options```.
-  * Set the ```Working directory``` to the path of the Code project.
-  
+* Click ```+``` to add a new configuration > ```OpenOCD Download & Run```
+* Give it the name you want, preferably different than other targets.
+* Select the build target & executable you want.
+* Board config file : Choose a path to the correct .cfg file (in lowlevel/scripts/board)
+
 If the project is already buit, press the ```Debug``` button next to configurations, while the new configuration is selected.
 
 Automation of this setup is a WIP.
