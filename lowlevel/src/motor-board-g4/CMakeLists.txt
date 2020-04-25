@@ -1,41 +1,55 @@
-set(PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../proto")
-set(DRIVERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../Drivers")
+# BOARD SELECTION
+set(BOARD_NAME "motor_g4")
+set(FLASH_TARGET "flash_${BOARD_NAME}")
+set(BUILD_TARGET "build_${BOARD_NAME}")
+set(BUILD_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${BUILD_TARGET}")
 
-set(CMAKE_C_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/STM32G431KBTX_FLASH.ld -mcpu=cortex-m4 -std=gnu11 -g3 -O0 -ffunction-sections -fdata-sections -Wall -Wextra -fstack-usage -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb")
-set(CMAKE_CXX_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/STM32G431KBTX_FLASH.ld -mcpu=cortex-m4 -std=gnu++14 -g3 -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit -Wall -Wextra -fstack-usage -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb")
-set(CMAKE_ASM_FLAGS "-T ${CMAKE_CURRENT_SOURCE_DIR}/STM32G431KBTX_FLASH.ld -mcpu=cortex-m4 -g3 -c -x assembler-with-cpp -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o ${CMAKE_CURRENT_SOURCE_DIR}/system/startup_stm32g431kbtx.o ${CMAKE_CURRENT_SOURCE_DIR}/system/startup_stm32g431kbtx.s")
+# STARTUP FILE SELECTION
+set(STARTUP_NAME "startup_stm32g431kbtx")
+set(STARTUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/system/${STARTUP_NAME}.s")
+set(STARTUP_OUT "${CMAKE_CURRENT_SOURCE_DIR}/system/${STARTUP_NAME}.o")
 
-set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -Wl,-Map='build_motor_g4.map' -Wl,--gc-sections -static -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
+# LINKER SCRIPT
+set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/STM32G431KBTX_FLASH.ld")
 
-add_definitions(-DUSE_HAL_DRIVER)
+# OPENOCD FILE
+set(OPENOCD_CFG "board/st_nucleo_g4.cfg")
+
+# GCC FLAGS
+set(CMAKE_C_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m4 -std=gnu11 -g3 -O0 -ffunction-sections -fdata-sections -Wall -Wextra -fstack-usage -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb")
+set(CMAKE_CXX_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m4 -std=gnu++14 -g3 -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit -Wall -Wextra -fstack-usage -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb")
+set(CMAKE_ASM_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m4 -g3 -c -x assembler-with-cpp -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o ${STARTUP_OUT} ${STARTUP_FILE}")
+
+set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -Wl,-Map='${BUILD_TARGET}.map' -Wl,--gc-sections -static -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
+
+
+# DEFINES
 add_definitions(-DHSE_VALUE=24000000)
 add_definitions(-DHSI_VALUE=8000000)
 add_definitions(-DF_CPU=160000000)
 add_definitions(-DSTM32G431xx)
-add_definitions(-DUSE_FULL_LL_DRIVER)
 
+
+# INCLUDE DIRECTORIES
+# # ST DRIVERS
 include_directories(${DRIVERS_DIR}/STM32G4xx_HAL_Driver/Inc)
 include_directories(${DRIVERS_DIR}/CMSIS/Device/ST/STM32G4xx/Include)
 include_directories(${DRIVERS_DIR}/CMSIS/Include)
 include_directories(${DRIVERS_DIR}/STM32G4xx_HAL_Driver/Inc/Legacy)
 
-include_directories(${PROTO_DIR}/gen/cpp/)
-include_directories(${PROTO_DIR}/nanopb/)
-include_directories(${PROTO_DIR}/)
 
+
+# # PROJECT HEADER DIRECTORIES
 include_directories(../system/)
 include_directories(../utility)
 include_directories(../com/)
 include_directories(../)
 include_directories(./)
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/system/startup_stm32g431kbtx.s PROPERTY LANGUAGE C)
+# ALLOW COMPILATION OF THE ASM FILE
+set_property(SOURCE ${STARTUP_FILE} PROPERTY LANGUAGE C)
 
-file(GLOB SRC_NANOPB
-        "${PROTO_DIR}/nanopb/*.c"
-        "${PROTO_DIR}/gen/cpp/*.c"
-        )
-
+# PROJECT SOURCES
 file(GLOB_RECURSE SRC_MOTOR_BOARD
         "../com/*.c"
         "../com/*.cpp"
@@ -43,18 +57,20 @@ file(GLOB_RECURSE SRC_MOTOR_BOARD
         "../utility/*.cpp"
         "./*.c"
         "./*.cpp"
-        "./system/*.s"
         )
 
-file(GLOB_RECURSE SRC_DRIVERS_ST_G4
-        "${DRIVERS_DIR}/CMSIS/*.c"
-        "${DRIVERS_DIR}/STM32G4xx_HAL_Driver/*.c"
+# TARGETS
+# # The binary that will be uploaded
+add_executable(${BUILD_TARGET}
+        ${SRC_MOTOR_BOARD}
+        ${SRC_DRIVERS_ST_G4}
+        ${SRC_NANOPB}
+        ${STARTUP_FILE}
         )
 
+# # Uploads to stm32
+add_custom_target(${FLASH_TARGET} COMMAND openocd -f ${PROJECT_SOURCE_DIR}/scripts/${OPENOCD_CFG} -c "program ${BUILD_OUTPUT} verify reset" -c shutdown)
+add_dependencies(${FLASH_TARGET} ${BUILD_TARGET})
 
-# The binary that will be uploaded
-add_executable(build_motor_g4 ${SRC_MOTOR_BOARD} ${SRC_DRIVERS_ST_G4} ${SRC_NANOPB})
-
-# Uploads to stm32
-add_custom_target(flash_motor_g4 COMMAND openocd -f ${PROJECT_SOURCE_DIR}/scripts/board/st_nucleo_g4.cfg -c "program ${CMAKE_CURRENT_BINARY_DIR}/build_motor_g4 verify reset" -c shutdown)
-add_dependencies(flash_motor_g4 build_motor_g4)
+# # Displays size after each build
+add_custom_command(TARGET ${BUILD_TARGET} POST_BUILD COMMAND arm-none-eabi-size "${BUILD_TARGET}")

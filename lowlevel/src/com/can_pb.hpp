@@ -12,8 +12,8 @@
 #include "com/isotp/isotp.h"
 #include "nanopb/pb_encode.h"
 #include "nanopb/pb_decode.h"
-#include "outech.pb.h"
 #include "utility/ring_buffer.hpp"
+#include "outech.pb.h"
 #include "config.h"
 
 

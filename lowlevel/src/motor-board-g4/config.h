@@ -38,8 +38,8 @@ void Error_Handler();
 #define CONST_USART_BAUDRATE (115200)
 
 // IDs used by board on CAN interface
-#define CONST_CAN_BOARD_ID    ((uint16_t)0x000)            // 10 bits  unique board ID
-#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID | 0x400) // 11 bits ID, MSb is a 1 for (Master) ->  (This)  transfers
+#define CONST_CAN_BOARD_ID    ((uint16_t)0x000u)            // 10 bits  unique board ID
+#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID | 0x400u) // 11 bits ID, MSb is a 1 for (Master) ->  (This)  transfers
 #define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID)         // 11 bits ID, MSb is a 0 for  (This)  -> (Master) transfers, with a higher priority
 
 //BUFFER SIZE USED IN ISR

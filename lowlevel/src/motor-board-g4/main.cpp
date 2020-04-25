@@ -5,6 +5,7 @@
 #include "utility/Metro.hpp"
 #include "config.h"
 
+
 can_msg can_raw_msg;
 
 Metro position_timer(10);
@@ -60,6 +61,7 @@ int main() {
                 canpb.update_rx_msg(can_raw_msg);
             }
         }
+
         canpb.update();
 
 
