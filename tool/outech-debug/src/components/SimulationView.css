@@ -1,0 +1,11 @@
+#robotField {
+    width: 1200px;
+    height: 800px;
+
+    border: 1px solid white;
+    margin: 0 auto;
+    display: block;
+
+    background-color: black;
+}
+
