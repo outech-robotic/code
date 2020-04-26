@@ -28,6 +28,8 @@ flask = "*"
 flask-socketio = "*"
 flask-wtf = "*"
 python-can = "*"
+aiohttp = "*"
+aiohttp-cors = "*"
 
 [requires]
 python_version = "3.7"

@@ -14,9 +14,10 @@ class DebugConfiguration:
     """
     Hold the configuration for the debug websocket.
     """
-    port: int = 8080
+    websocket_port: int = 8080
+    http_port: int = 9090
     host: str = '0.0.0.0'
-    refresh_rate: int = 10  # FPS
+    refresh_rate: int = 30  # FPS
 
 
 # pylint: disable=too-many-instance-attributes
