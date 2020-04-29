@@ -12,7 +12,8 @@ from highlevel.util.json_encoder import RobotJSONEncoder
 from highlevel.util.probe import Probe, DebugEvent
 
 REPLAY_API_URL = 'https://replay-api.outech.fr/replay/'
-REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/replay/index.html'
+# REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/replay/index.html'
+REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/code/'
 
 # REPLAY_VIEWER_URL = 'http://127.0.0.1:8000/'
 

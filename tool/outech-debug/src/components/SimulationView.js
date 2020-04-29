@@ -184,8 +184,6 @@ function drawRobot(ctx, pos, angle, robot_width, robot_height, img) {
 //     ctx.restore();
 // }
 //
-let plateau = new Image();
-plateau.src = "../plateau.svg";
 
 
 export default function SimulationView({robotPositionEvent, robotAngleEvent, configuration}) {

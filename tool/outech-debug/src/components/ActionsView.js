@@ -76,6 +76,7 @@ export default function ActionsView({actionURL}) {
         })
     }
 
+
     useEffect(() => {
         async function fetchActions(url) {
             const result = await fetch(url)
@@ -84,9 +85,17 @@ export default function ActionsView({actionURL}) {
             setActions(data.functions)
         }
 
-        fetchActions(actionURL)
+        if (actionURL) {
+            fetchActions(actionURL)
+        }
     }, [actionURL])
 
+    if (!actionURL) {
+        return <div>
+            <p>Set the action link in the URL to be able to perform actions.</p>
+            <p>Example: http://localhost:3000/code/actions?live=ws://localhost:8080<strong>&action=http://localhost:9090</strong></p>
+        </div>
+    }
 
     return <div>
         <ul>
@@ -98,7 +107,8 @@ export default function ActionsView({actionURL}) {
                     <ul>
                         <li><strong>Name</strong>: {action.name}</li>
                         <li><strong>Documentation</strong>: {action.documentation}</li>
-                        <li><strong>Arguments:</strong><ActionForm args={action.args} lastArgs={action.last_args_sent} onSubmit={onSubmit}/></li>
+                        <li><strong>Arguments:</strong><ActionForm args={action.args} lastArgs={action.last_args_sent}
+                                                                   onSubmit={onSubmit}/></li>
                     </ul>
                 </li>);
             })}

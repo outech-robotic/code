@@ -1,5 +1,5 @@
 import React, {useMemo} from "react";
-import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
+import {HashRouter, Link, Redirect, Route, Switch} from "react-router-dom";
 import EncoderGraphView from "./EncoderGraphView";
 import useEventStream from "../hooks/stream";
 import ActionsView from "./ActionsView";
@@ -32,18 +32,18 @@ function DebugInterface({event$, actionURL}) {
     const robotAngleEvent = useFilterEvent(event$, "angle")
 
     return (
-        <Router>
+        <HashRouter>
             <div>
                 <nav>
                     <ul>
                         <li>
-                            <Link to={"/actions" + window.location.search}>Actions</Link>
+                            <Link to="/actions">Actions</Link>
                         </li>
                         <li>
-                            <Link to={"/encoder_graph" + window.location.search}>Encoder graph</Link>
+                            <Link to="/encoder_graph">Encoder graph</Link>
                         </li>
                         <li>
-                            <Link to={"/simulation" + window.location.search}>Simulation</Link>
+                            <Link to="/simulation">Simulation</Link>
                         </li>
                     </ul>
                 </nav>
@@ -67,9 +67,12 @@ function DebugInterface({event$, actionURL}) {
                             speedRight={speedRight}
                         />
                     </Route>
+                    <Route path="/">
+                        <Redirect to="/simulation"/>
+                    </Route>
                 </Switch>
             </div>
-        </Router>
+        </HashRouter>
     );
 }
 
