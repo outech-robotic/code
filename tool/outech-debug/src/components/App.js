@@ -1,5 +1,5 @@
 import React, {useMemo} from "react";
-import {BrowserRouter as Router, Link, Redirect, Route, Switch} from "react-router-dom";
+import {HashRouter, Link, Redirect, Route, Switch} from "react-router-dom";
 import EncoderGraphView from "./EncoderGraphView";
 import useEventStream from "../hooks/stream";
 import ActionsView from "./ActionsView";
@@ -32,34 +32,34 @@ function DebugInterface({event$, actionURL}) {
     const robotAngleEvent = useFilterEvent(event$, "angle")
 
     return (
-        <Router>
+        <HashRouter>
             <div>
                 <nav>
                     <ul>
                         <li>
-                            <Link to={"/code/actions" + window.location.search}>Actions</Link>
+                            <Link to="/actions">Actions</Link>
                         </li>
                         <li>
-                            <Link to={"/code/encoder_graph" + window.location.search}>Encoder graph</Link>
+                            <Link to="/encoder_graph">Encoder graph</Link>
                         </li>
                         <li>
-                            <Link to={"/code/simulation" + window.location.search}>Simulation</Link>
+                            <Link to="/simulation">Simulation</Link>
                         </li>
                     </ul>
                 </nav>
 
                 <Switch>
-                    <Route path="/code/simulation">
+                    <Route path="/simulation">
                         <SimulationView
                             robotPositionEvent={robotPositionEvent}
                             robotAngleEvent={robotAngleEvent}
                             configuration={configuration}
                         />
                     </Route>
-                    <Route path="/code/actions">
+                    <Route path="/actions">
                         <ActionsView actionURL={actionURL}/>
                     </Route>
-                    <Route path="/code/encoder_graph">
+                    <Route path="/encoder_graph">
                         <EncoderGraphView
                             encoderLeft={encoderLeft}
                             encoderRight={encoderRight}
@@ -68,11 +68,11 @@ function DebugInterface({event$, actionURL}) {
                         />
                     </Route>
                     <Route path="/">
-                        <Redirect to={"/code/simulation" + window.location.search}/>
+                        <Redirect to="/simulation"/>
                     </Route>
                 </Switch>
             </div>
-        </Router>
+        </HashRouter>
     );
 }
 
