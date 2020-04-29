@@ -86,7 +86,7 @@ probe.emit(
 
 ### Replaying the simulation 
 
-If you launch the simulator, you will see that a webpage in your browser opens ([example here](https://nicolasbon.net/replay/?replay=https://replay-api.outech.fr/replay/e6f5f9ed-a5c9-40f8-9b98-fca56a0f9a2a)). It actually replays the state of the simulation so we can see what is going on.
+If you launch the simulator, you will see that a webpage in your browser opens. It actually replays the state of the simulation so we can see what is going on.
 
 
 #### How does it work?
@@ -162,11 +162,11 @@ Every time a probe emits an event, it is added to the stream.
 
 #### Displaying this JSON
 
-We have a small javascript code that fetches this JSON and read it frame by frame in the browser.
+We have javascript code that fetches this JSON and read it frame by frame in the browser.
+
+See, in this repo, `tool/outech-debug/src/components/SimulationView.js`.
 
 If you are adding new probes and want to see the result in the browser, modify this code.
-
-See: https://github.com/bonnetn/replay
 
 ## Testing
 
