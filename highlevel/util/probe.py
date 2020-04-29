@@ -49,6 +49,8 @@ class Probe:
         """
         Get the latest readings of the probe.
         """
+        if cursor is not None and cursor >= len(self._event_log):
+            return [], len(self._event_log)
 
         event_log = self._event_log[cursor:]
         if rate is not None:

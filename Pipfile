@@ -29,6 +29,7 @@ flask-wtf = "*"
 python-can = "*"
 colorama = "*"
 psutil = "*"
+aiohttp = "*"
 
 [requires]
 python_version = "3.7"

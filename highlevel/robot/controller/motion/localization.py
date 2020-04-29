@@ -10,7 +10,7 @@ from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Direction, Radian, Millimeter
-from highlevel.robot.gateway.motion.motion import MotionGateway
+from highlevel.robot.gateway.motion import MotionGateway
 from highlevel.util.geometry.direction import right, backward, left, forward
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.probe import Probe
@@ -63,6 +63,9 @@ class LocalizationController:
         """
         Update the position received from odometry.
         """
+        self.probe.emit("encoder_left", left_tick)
+        self.probe.emit("encoder_right", right_tick)
+
         pos, angle = self.odometry_controller.odometry(
             left_tick,
             right_tick,

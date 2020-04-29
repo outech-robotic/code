@@ -14,7 +14,7 @@ from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.gateway.motion.motion import MotionGateway
+from highlevel.robot.gateway.motion import MotionGateway
 from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
