@@ -1,5 +1,5 @@
 import React, {useMemo} from "react";
-import {BrowserRouter as Router, Link, Route, Switch} from "react-router-dom";
+import {BrowserRouter as Router, Link, Redirect, Route, Switch} from "react-router-dom";
 import EncoderGraphView from "./EncoderGraphView";
 import useEventStream from "../hooks/stream";
 import ActionsView from "./ActionsView";
@@ -37,35 +37,38 @@ function DebugInterface({event$, actionURL}) {
                 <nav>
                     <ul>
                         <li>
-                            <Link to={"/actions" + window.location.search}>Actions</Link>
+                            <Link to={"/code/actions" + window.location.search}>Actions</Link>
                         </li>
                         <li>
-                            <Link to={"/encoder_graph" + window.location.search}>Encoder graph</Link>
+                            <Link to={"/code/encoder_graph" + window.location.search}>Encoder graph</Link>
                         </li>
                         <li>
-                            <Link to={"/simulation" + window.location.search}>Simulation</Link>
+                            <Link to={"/code/simulation" + window.location.search}>Simulation</Link>
                         </li>
                     </ul>
                 </nav>
 
                 <Switch>
-                    <Route path="/simulation">
+                    <Route path="/code/simulation">
                         <SimulationView
                             robotPositionEvent={robotPositionEvent}
                             robotAngleEvent={robotAngleEvent}
                             configuration={configuration}
                         />
                     </Route>
-                    <Route path="/actions">
+                    <Route path="/code/actions">
                         <ActionsView actionURL={actionURL}/>
                     </Route>
-                    <Route path="/encoder_graph">
+                    <Route path="/code/encoder_graph">
                         <EncoderGraphView
                             encoderLeft={encoderLeft}
                             encoderRight={encoderRight}
                             speedLeft={speedLeft}
                             speedRight={speedRight}
                         />
+                    </Route>
+                    <Route path="/">
+                        <Redirect to={"/code/simulation" + window.location.search}/>
                     </Route>
                 </Switch>
             </div>
