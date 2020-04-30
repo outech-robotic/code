@@ -78,7 +78,7 @@ Open the root ```code``` directory as the root of the project.\
 In the project hierarchy, right-click on ```lowlevel/CMakeLists.txt``` and "Load Cmake project".
 
 Add the following CMake Options (```File```>```Settings```>```Build, Execution, Deployment```>```CMake```):\
-```-DCMAKE_SYSTEM_NAME=Generic```\
+```-DCMAKE_C_FLAGS=--specs=nosys.specs -DCMAKE_CXX_FLAGS=--specs=nosys.specs```\
 This is because CLion uses a default system name for CMake that makes it use the full standard library, but we don't want any of that.
 
 #### Run CMake from CLI
