@@ -22,3 +22,7 @@ sudo systemctl enable isotp@servo_board_7
 sudo systemctl enable isotp@servo_board_8
 sudo systemctl enable isotp@sensor_board_0
 ```
+
+**Restart.**
+
+All the isotp services will launch and the CAN interface will be brought up.
