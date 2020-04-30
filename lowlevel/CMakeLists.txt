@@ -3,10 +3,14 @@ cmake_minimum_required(VERSION 3.13)
 project(outech_ll)
 
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_SYSTEM_PROCESSOR arm)
 
+
+add_subdirectory(tests)
+
+
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
 
 set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)

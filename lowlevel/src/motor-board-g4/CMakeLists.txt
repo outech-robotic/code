@@ -15,12 +15,20 @@ set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/STM32G431KBTX_FLASH.ld")
 # OPENOCD FILE
 set(OPENOCD_CFG "board/st_nucleo_g4.cfg")
 
-# GCC FLAGS
-set(CMAKE_C_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m4 -std=gnu11 -g3 -O0 -ffunction-sections -fdata-sections -Wall -Wextra -fstack-usage -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb")
-set(CMAKE_CXX_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m4 -std=gnu++14 -g3 -O0 -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit -Wall -Wextra -fstack-usage -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb")
-set(CMAKE_ASM_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m4 -g3 -c -x assembler-with-cpp -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o ${STARTUP_OUT} ${STARTUP_FILE}")
+# Optimizations
+set(OPTIM_FLAGS "-O0 -g3")
 
-set(CMAKE_EXE_LINKER_FLAGS "-mcpu=cortex-m4 -Wl,-Map='${BUILD_TARGET}.map' -Wl,--gc-sections -static -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard --specs=nano.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
+# MCU
+set(CPU "cortex-m4")
+set(FPU "-mfpu=fpv4-sp-d16")
+set(FLOAT_ABI "hard")
+
+# GCC FLAGS
+set(CMAKE_C_FLAGS "-T ${LINKER_SCRIPT} -mcpu=${CPU} -std=gnu11 ${OPTIM_FLAGS} -ffunction-sections -fdata-sections -Wall -Wextra -fstack-usage ${FPU} -mfloat-abi=${FLOAT_ABI} -mthumb")
+set(CMAKE_CXX_FLAGS "-T ${LINKER_SCRIPT} -mcpu=${CPU} -std=gnu++14 ${OPTIM_FLAGS} -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fno-threadsafe-statics -fno-use-cxa-atexit -Wall -Wextra -fstack-usage ${FPU} -mfloat-abi=${FLOAT_ABI} -mthumb")
+set(CMAKE_ASM_FLAGS "-T ${LINKER_SCRIPT} -mcpu=${CPU} ${OPTIM_FLAGS} -c -x assembler-with-cpp ${FPU} -mfloat-abi=${FLOAT_ABI} -mthumb -o ${STARTUP_OUT} ${STARTUP_FILE}")
+
+set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map='${BUILD_TARGET}.map' -Wl,--gc-sections -static -mthumb -mcpu=${CPU} ${FPU} -mfloat-abi=${FLOAT_ABI} --specs=nano.specs -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group")
 
 
 # DEFINES
