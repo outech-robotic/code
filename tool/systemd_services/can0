@@ -1,0 +1,6 @@
+# Put me in /etc/network/interfaces.d/can0
+auto can0
+iface can0 inet manual
+    pre-up /sbin/ip link set can0 type can bitrate 1000000 && /sbin/ip link set can0 type can restart-ms 50
+    up /sbin/ifconfig can0 up
+    down /sbin/ifconfig can0 down

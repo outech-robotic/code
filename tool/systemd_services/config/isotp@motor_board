@@ -1,0 +1,4 @@
+# motor_board
+CAN_RX_PORT=1
+CAN_TX_PORT=0
+TCP_PORT=14000

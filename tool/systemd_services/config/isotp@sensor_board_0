@@ -1,0 +1,4 @@
+# sensor_board_0
+CAN_RX_PORT=a1
+CAN_TX_PORT=a0
+TCP_PORT=14080
