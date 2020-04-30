@@ -1,0 +1,4 @@
+# servo_board_5
+CAN_RX_PORT=2b
+CAN_TX_PORT=2a
+TCP_PORT=14021

@@ -1,0 +1,13 @@
+# Put me in /etc/systemd/system/isotp@.service
+[Unit]
+Description=Start an isotpserver
+
+[Service]
+EnvironmentFile=/etc/default/isotp@%i
+ExecStart=/usr/bin/isotpserver -l ${TCP_PORT} -s "${CAN_TX_PORT}" -d "${CAN_RX_PORT}" can0
+
+RestartSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
