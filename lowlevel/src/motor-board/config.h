@@ -32,9 +32,9 @@
 
 //BUFFER SIZE USED IN ISR
 // IDs used by board on CAN interface
-#define CONST_CAN_BOARD_ID    ((uint16_t)0x000)            // 10 bits  unique board ID
-#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID | 0x400) // 11 bits ID, MSb is a 1 for (Master) ->  (This)  transfers
-#define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID)         // 11 bits ID, MSb is a 0 for  (This)  -> (Master) transfers, with a higher priority
+#define CONST_CAN_BOARD_ID    ((uint16_t)0x000)               // 10 bits unique board ID
+#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID << 1u | 0u) // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers
+#define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID << 1u | 1u) // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
 #define CONST_CAN_STD_SHIFT   (5)
 
 //BUFFER SIZE USED IN ISR
