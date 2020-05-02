@@ -13,29 +13,29 @@
 class Motor {
  public:
   enum Side {
-      LEFT,
-      RIGHT
+    LEFT,
+    RIGHT
   };
   enum Direction {
-      FORWARD,
-      BACKWARD,
-      BRAKE
+    FORWARD,
+    BACKWARD,
+    BRAKE
   };
 
-  Motor (const Side new_side);
+  Motor(const Side new_side);
 
-  void init ();
+  void init();
 
-  Direction get_direction ();
+  Direction get_direction();
 
-  void set_pwm (int16_t pwm);
+  void set_pwm(int16_t pwm);
 
-  void stop ();
+  void stop();
 
-  void brake ();
+  void brake();
 
  private:
-  void set_direction (Direction new_dir);
+  void set_direction(Direction new_dir);
 
   volatile const Side side;
   volatile Direction dir;

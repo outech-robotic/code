@@ -41,6 +41,8 @@
 #define CONST_CAN_BUFFER_SIZE ((uint16_t)16)
 #define CONST_ISOTP_BUFF_SIZE ((size_t)40)
 #define CONST_PB_BUFF_SIZE    ((size_t)8)
+#define CONST_LOG_SIZE        (64)
+#define CONST_LOG_POOL_SIZE   (8)
 
 /**
  * Project Pin Mapping

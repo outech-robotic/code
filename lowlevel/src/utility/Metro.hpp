@@ -15,29 +15,23 @@ class Metro {
   uint32_t last_check;
   uint32_t interval;
 
-  explicit Metro (uint32_t interval_ms)
-  {
-    this->last_check = millis ();
+  explicit Metro(uint32_t interval_ms) {
+    this->last_check = millis();
     this->interval = interval_ms;
   }
 
-  bool check ()
-  {
-    uint32_t current = millis ();
-    if (current - this->last_check >= this->interval)
-      {
-        this->last_check = current;
-        return true;
-      }
-    else
-      {
-        return false;
-      }
+  bool check() {
+    uint32_t current = millis();
+    if (current - this->last_check >= this->interval) {
+      this->last_check = current;
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  void reset ()
-  {
-    last_check = millis ();
+  void reset() {
+    last_check = millis();
   }
 };
 

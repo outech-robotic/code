@@ -20,15 +20,15 @@
 extern "C"{
 #endif
 
-void Timing_init (void);
+void Timing_init(void);
 
-uint32_t micros ();
+uint32_t micros();
 
-uint32_t millis ();
+uint32_t millis();
 
-void delay_ms (uint32_t ms);
+void delay_ms(uint32_t ms);
 
-void delay_us (uint32_t us);
+void delay_us(uint32_t us);
 
 #ifdef __cplusplus
 };

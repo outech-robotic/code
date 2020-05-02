@@ -8,7 +8,7 @@
 #ifndef UTILITY_CONFIG_H_
 #define UTILITY_CONFIG_H_
 
-void Error_Handler ();
+void Error_Handler();
 
 #define MAKE_MASK(length) ((1<<(length))-1)
 

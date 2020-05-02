@@ -16,28 +16,23 @@ class ring_buffer {
   T buffer[buffer_size];
   volatile uint32_t nr_read = 0, nr_write = 0;
  public:
-  ring_buffer ()
-  {
-    static_assert (!(buffer_size & (buffer_size - 1)), "Buffer size should be a power of 2");
+  ring_buffer() {
+    static_assert(!(buffer_size & (buffer_size - 1)), "Buffer size should be a power of 2");
   }
 
-  uint16_t get_capacity ()
-  {
+  uint16_t get_capacity() {
     return buffer_size;
   }
 
-  uint16_t get_size ()
-  {
+  uint16_t get_size() {
     return (nr_write - nr_read);
   }
 
-  bool is_full ()
-  {
-    return get_size () == buffer_size;
+  bool is_full() {
+    return get_size() == buffer_size;
   }
 
-  bool is_empty ()
-  {
+  bool is_empty() {
     return nr_write == nr_read;
   }
 
@@ -48,12 +43,10 @@ class ring_buffer {
    * @return true if the buffer was not full before the push
    * @return false else
    */
-  bool push (T val)
-  {
-    if (is_full ())
-      {
-        return false;
-      }
+  bool push(T val) {
+    if (is_full()) {
+      return false;
+    }
     buffer[(nr_write++) & (buffer_size - 1)] = val;
     return true;
   }
@@ -63,8 +56,7 @@ class ring_buffer {
    *
    * @return T oldest value to return
    */
-  T pop ()
-  {
+  T pop() {
     return buffer[(nr_read++) & (buffer_size - 1)];
   }
 };

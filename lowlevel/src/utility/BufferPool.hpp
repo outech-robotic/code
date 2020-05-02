@@ -14,9 +14,8 @@ class BufferPool {
 
  public:
 
-  BufferPool () : elem_status (MASK_EMPTY)
-  {
-    static_assert (NB_BUFFERS <= 32, "Error: BufferPool only accepts up to 32 allocations");
+  BufferPool() : elem_status(MASK_EMPTY) {
+    static_assert(NB_BUFFERS <= 32, "Error: BufferPool only accepts up to 32 allocations");
   }
 
   /**
@@ -24,14 +23,12 @@ class BufferPool {
   * Uses GCC function __builtin_ffs.
   * @return Pointer of template type T*. If T is char[N], receiver is char (*name)[N]
   */
-  T *alloc ()
-  {
-    uint32_t index = __builtin_ffs (elem_status);
+  T *alloc() {
+    uint32_t index = __builtin_ffs(elem_status);
 
-    if (index == 0 || index > NB_BUFFERS)
-      {
-        return nullptr;
-      }
+    if (index == 0 || index > NB_BUFFERS) {
+      return nullptr;
+    }
 
     elem_status ^= 1u << (index - 1);
     return &buffer[index - 1];
@@ -41,24 +38,19 @@ class BufferPool {
    * @brief Marks the given area in the internal buffer as free
    * @param ptr a memory address previously given by alloc
    */
-  void free (T *ptr)
-  {
+  void free(T *ptr) {
     uint32_t index = ptr - buffer;
 
-    if (ptr < buffer || index > NB_BUFFERS - 1)
-      {
-        while (true)
-          {
-            asm volatile("nop");
-          }
+    if (ptr < buffer || index > NB_BUFFERS - 1) {
+      while (true) {
+        asm volatile("nop");
       }
-    if (elem_status & (1u << index))
-      {
-        while (true)
-          {
-            asm volatile("nop");
-          }
+    }
+    if (elem_status & (1u << index)) {
+      while (true) {
+        asm volatile("nop");
       }
+    }
 
     elem_status ^= 1u << index;
   }

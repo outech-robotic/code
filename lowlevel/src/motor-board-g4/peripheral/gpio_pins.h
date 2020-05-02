@@ -11,9 +11,9 @@
 #include "stm32g4xx_ll_gpio.h"
 
 typedef struct {
-    GPIO_TypeDef *port;
-    uint32_t pin;
-    char name[4];
+  GPIO_TypeDef *port;
+  uint32_t pin;
+  char name[4];
 } GPIO_Pin;
 
 #define GPIO_Pin_Extern_Def(port, number) extern GPIO_Pin P##port##number

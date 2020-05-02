@@ -48,51 +48,51 @@
 
 /* ISOTP sender status */
 typedef enum {
-    ISOTP_SEND_STATUS_IDLE,
-    ISOTP_SEND_STATUS_INPROGRESS,
-    ISOTP_SEND_STATUS_ERROR,
+  ISOTP_SEND_STATUS_IDLE,
+  ISOTP_SEND_STATUS_INPROGRESS,
+  ISOTP_SEND_STATUS_ERROR,
 } IsoTpSendStatusTypes;
 
 /* ISOTP receiver status */
 typedef enum {
-    ISOTP_RECEIVE_STATUS_IDLE,
-    ISOTP_RECEIVE_STATUS_INPROGRESS,
-    ISOTP_RECEIVE_STATUS_FULL,
+  ISOTP_RECEIVE_STATUS_IDLE,
+  ISOTP_RECEIVE_STATUS_INPROGRESS,
+  ISOTP_RECEIVE_STATUS_FULL,
 } IsoTpReceiveStatusTypes;
 
 /* can fram defination */
 #if defined(ISOTP_BYTE_ORDER_LITTLE_ENDIAN)
 typedef struct {
-    uint8_t reserve_1:4;
-    uint8_t type:4;
-    uint8_t reserve_2[7];
+  uint8_t reserve_1: 4;
+  uint8_t type: 4;
+  uint8_t reserve_2[7];
 } IsoTpPciType;
 
 typedef struct {
-    uint8_t SF_DL:4;
-    uint8_t type:4;
-    uint8_t data[7];
+  uint8_t SF_DL: 4;
+  uint8_t type: 4;
+  uint8_t data[7];
 } IsoTpSingleFrame;
 
 typedef struct {
-    uint8_t FF_DL_high:4;
-    uint8_t type:4;
-    uint8_t FF_DL_low;
-    uint8_t data[6];
+  uint8_t FF_DL_high: 4;
+  uint8_t type: 4;
+  uint8_t FF_DL_low;
+  uint8_t data[6];
 } IsoTpFirstFrame;
 
 typedef struct {
-    uint8_t SN:4;
-    uint8_t type:4;
-    uint8_t data[7];
+  uint8_t SN: 4;
+  uint8_t type: 4;
+  uint8_t data[7];
 } IsoTpConsecutiveFrame;
 
 typedef struct {
-    uint8_t FS:4;
-    uint8_t type:4;
-    uint8_t BS;
-    uint8_t STmin;
-    uint8_t reserve[5];
+  uint8_t FS: 4;
+  uint8_t type: 4;
+  uint8_t BS;
+  uint8_t STmin;
+  uint8_t reserve[5];
 } IsoTpFlowControl;
 
 #else
@@ -173,18 +173,18 @@ typedef struct {
 #endif
 
 typedef struct {
-    uint8_t ptr[8];
+  uint8_t ptr[8];
 } IsoTpDataArray;
 
 typedef struct {
-    union {
-        IsoTpPciType common;
-        IsoTpSingleFrame single_frame;
-        IsoTpFirstFrame first_frame;
-        IsoTpConsecutiveFrame consecutive_frame;
-        IsoTpFlowControl flow_control;
-        IsoTpDataArray data_array;
-    } as;
+  union {
+    IsoTpPciType common;
+    IsoTpSingleFrame single_frame;
+    IsoTpFirstFrame first_frame;
+    IsoTpConsecutiveFrame consecutive_frame;
+    IsoTpFlowControl flow_control;
+    IsoTpDataArray data_array;
+  } as;
 } IsoTpCanMessage;
 
 /**************************************************************
@@ -194,18 +194,18 @@ typedef struct {
 /* Private: Protocol Control Information (PCI) types, for identifying each frame of an ISO-TP message.
  */
 typedef enum {
-    ISOTP_PCI_TYPE_SINGLE = 0x0,
-    ISOTP_PCI_TYPE_FIRST_FRAME = 0x1,
-    TSOTP_PCI_TYPE_CONSECUTIVE_FRAME = 0x2,
-    ISOTP_PCI_TYPE_FLOW_CONTROL_FRAME = 0x3
+  ISOTP_PCI_TYPE_SINGLE = 0x0,
+  ISOTP_PCI_TYPE_FIRST_FRAME = 0x1,
+  TSOTP_PCI_TYPE_CONSECUTIVE_FRAME = 0x2,
+  ISOTP_PCI_TYPE_FLOW_CONTROL_FRAME = 0x3
 } IsoTpProtocolControlInformation;
 
 /* Private: Protocol Control Information (PCI) flow control identifiers.
  */
 typedef enum {
-    PCI_FLOW_STATUS_CONTINUE = 0x0,
-    PCI_FLOW_STATUS_WAIT = 0x1,
-    PCI_FLOW_STATUS_OVERFLOW = 0x2
+  PCI_FLOW_STATUS_CONTINUE = 0x0,
+  PCI_FLOW_STATUS_WAIT = 0x1,
+  PCI_FLOW_STATUS_OVERFLOW = 0x2
 } IsoTpFlowStatus;
 
 /* Private: network layer resault code.

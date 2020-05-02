@@ -20,40 +20,40 @@ extern "C" {
  * using this library.
  */
 typedef struct IsoTpLink {
-    /* sender paramters */
-    uint32_t send_arbitration_id; /* used to reply consecutive frame */
-    /* message buffer */
-    uint8_t *send_buffer;
-    uint16_t send_buf_size;
-    uint16_t send_size;
-    uint16_t send_offset;
-    /* multi-frame flags */
-    uint8_t send_sn;
-    uint16_t send_bs_remain; /* Remaining block size */
-    uint8_t send_st_min;    /* Separation Time between consecutive frames, unit millis */
-    uint8_t send_wtf_count; /* Maximum number of FC.Wait frame transmissions  */
-    uint32_t send_timer_st;  /* Last time send consecutive frame */
-    uint32_t send_timer_bs;  /* Time until reception of the next FlowControl N_PDU
+  /* sender paramters */
+  uint32_t send_arbitration_id; /* used to reply consecutive frame */
+  /* message buffer */
+  uint8_t *send_buffer;
+  uint16_t send_buf_size;
+  uint16_t send_size;
+  uint16_t send_offset;
+  /* multi-frame flags */
+  uint8_t send_sn;
+  uint16_t send_bs_remain; /* Remaining block size */
+  uint8_t send_st_min;    /* Separation Time between consecutive frames, unit millis */
+  uint8_t send_wtf_count; /* Maximum number of FC.Wait frame transmissions  */
+  uint32_t send_timer_st;  /* Last time send consecutive frame */
+  uint32_t send_timer_bs;  /* Time until reception of the next FlowControl N_PDU
                                                    start at sending FF, CF, receive FC
                                                    end at receive FC */
-    int send_protocol_result;
-    uint8_t send_status;
+  int send_protocol_result;
+  uint8_t send_status;
 
-    /* receiver paramters */
-    uint32_t receive_arbitration_id;
-    /* message buffer */
-    uint8_t *receive_buffer;
-    uint16_t receive_buf_size;
-    uint16_t receive_size;
-    uint16_t receive_offset;
-    /* multi-frame control */
-    uint8_t receive_sn;
-    uint8_t receive_bs_count; /* Maximum number of FC.Wait frame transmissions  */
-    uint32_t receive_timer_cr; /* Time until transmission of the next ConsecutiveFrame N_PDU
+  /* receiver paramters */
+  uint32_t receive_arbitration_id;
+  /* message buffer */
+  uint8_t *receive_buffer;
+  uint16_t receive_buf_size;
+  uint16_t receive_size;
+  uint16_t receive_offset;
+  /* multi-frame control */
+  uint8_t receive_sn;
+  uint8_t receive_bs_count; /* Maximum number of FC.Wait frame transmissions  */
+  uint32_t receive_timer_cr; /* Time until transmission of the next ConsecutiveFrame N_PDU
                                                      start at sending FC, receive CF 
                                                      end at receive FC */
-    int receive_protocol_result;
-    uint8_t receive_status;
+  int receive_protocol_result;
+  uint8_t receive_status;
 } IsoTpLink;
 
 /**
@@ -66,16 +66,16 @@ typedef struct IsoTpLink {
  * @param recvbuf A pointer to an area in memory which can be used as a buffer for data to be received.
  * @param recvbufsize The size of the buffer area.
  */
-void isotp_init_link (IsoTpLink *link, uint32_t sendid,
-                      uint8_t *sendbuf, uint16_t sendbufsize,
-                      uint8_t *recvbuf, uint16_t recvbufsize);
+void isotp_init_link(IsoTpLink *link, uint32_t sendid,
+                     uint8_t *sendbuf, uint16_t sendbufsize,
+                     uint8_t *recvbuf, uint16_t recvbufsize);
 
 /**
  * @brief Polling function; call this function periodically to handle timeouts, send consecutive frames, etc.
  *
  * @param link The @code IsoTpLink @endcode instance used.
  */
-void isotp_poll (IsoTpLink *link);
+void isotp_poll(IsoTpLink *link);
 
 /**
  * @brief Handles incoming CAN messages.
@@ -85,7 +85,7 @@ void isotp_poll (IsoTpLink *link);
  * @param data The data received via CAN.
  * @param len The length of the data received.
  */
-void isotp_on_can_message (IsoTpLink *link, uint8_t *data, uint8_t len);
+void isotp_on_can_message(IsoTpLink *link, uint8_t *data, uint8_t len);
 
 /**
  * @brief Sends ISO-TP frames via CAN, using the ID set in the initialising function.
@@ -103,12 +103,12 @@ void isotp_on_can_message (IsoTpLink *link, uint8_t *data, uint8_t len);
  *  - @code ISOTP_RET_OK @endcode
  *  - The return value of the user shim function isotp_user_send_can().
  */
-int isotp_send (IsoTpLink *link, const uint8_t payload[], uint16_t size);
+int isotp_send(IsoTpLink *link, const uint8_t payload[], uint16_t size);
 
 /**
  * @brief See @link isotp_send @endlink, with the exception that this function is used only for functional addressing.
  */
-int isotp_send_with_id (IsoTpLink *link, uint32_t id, const uint8_t payload[], uint16_t size);
+int isotp_send_with_id(IsoTpLink *link, uint32_t id, const uint8_t payload[], uint16_t size);
 
 /**
  * @brief Receives and parses the received data and copies the parsed data in to the internal buffer.
@@ -121,7 +121,7 @@ int isotp_send_with_id (IsoTpLink *link, uint32_t id, const uint8_t payload[], u
  *      - @link ISOTP_RET_OK @endlink
  *      - @link ISOTP_RET_NO_DATA @endlink
  */
-int isotp_receive (IsoTpLink *link, uint8_t *payload, const uint16_t payload_size, uint16_t *out_size);
+int isotp_receive(IsoTpLink *link, uint8_t *payload, const uint16_t payload_size, uint16_t *out_size);
 
 #ifdef __cplusplus
 }
