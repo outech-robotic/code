@@ -19,7 +19,6 @@ typedef struct {
 
 #define GPIO_Pin_Extern_Def(port, number) extern GPIO_Pin P##port##number
 
-
 GPIO_Pin_Extern_Def(A, 0);
 GPIO_Pin_Extern_Def(A, 1);
 GPIO_Pin_Extern_Def(A, 2);

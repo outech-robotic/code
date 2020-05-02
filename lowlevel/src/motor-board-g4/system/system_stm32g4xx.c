@@ -53,7 +53,7 @@ uint32_t SystemCoreClock = HSI_VALUE;
 const uint8_t AHBPrescTable[16] = {0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 1U, 2U, 3U, 4U, 6U, 7U, 8U, 9U};
 const uint8_t APBPrescTable[8] = {0U, 0U, 0U, 0U, 1U, 2U, 3U, 4U};
 
-void Error_Handler(void);
+void Error_Handler (void);
 
 /**
   * @brief  Update SystemCoreClock variable according to Clock Register Values.
@@ -91,91 +91,97 @@ void Error_Handler(void);
   * @param  None
   * @retval None
   */
-void SystemCoreClockUpdate(void) {
-    uint32_t tmp, pllvco, pllr, pllsource, pllm;
+void SystemCoreClockUpdate (void)
+{
+  uint32_t tmp, pllvco, pllr, pllsource, pllm;
 
-    /* Get SYSCLK source -------------------------------------------------------*/
-    switch (RCC->CFGR & RCC_CFGR_SWS) {
-        case 0x04:  /* HSI used as system clock source */
-            SystemCoreClock = HSI_VALUE;
-            break;
+  /* Get SYSCLK source -------------------------------------------------------*/
+  switch (RCC->CFGR & RCC_CFGR_SWS)
+    {
+      case 0x04:  /* HSI used as system clock source */
+        SystemCoreClock = HSI_VALUE;
+      break;
 
-        case 0x08:  /* HSE used as system clock source */
-            SystemCoreClock = HSE_VALUE;
-            break;
+      case 0x08:  /* HSE used as system clock source */
+        SystemCoreClock = HSE_VALUE;
+      break;
 
-        case 0x0C:  /* PLL used as system clock  source */
-            /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLLM) * PLLN
-               SYSCLK = PLL_VCO / PLLR
-               */
-            pllsource = (RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC);
-            pllm = ((RCC->PLLCFGR & RCC_PLLCFGR_PLLM) >> 4) + 1U;
-            if (pllsource == 0x02UL) /* HSI used as PLL clock source */
-            {
-                pllvco = (HSI_VALUE / pllm);
-            } else                   /* HSE used as PLL clock source */
-            {
-                pllvco = (HSE_VALUE / pllm);
-            }
-            pllvco = pllvco * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 8);
-            pllr = (((RCC->PLLCFGR & RCC_PLLCFGR_PLLR) >> 25) + 1U) * 2U;
-            SystemCoreClock = pllvco / pllr;
-            break;
+      case 0x0C:  /* PLL used as system clock  source */
+        /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLLM) * PLLN
+           SYSCLK = PLL_VCO / PLLR
+           */
+        pllsource = (RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC);
+      pllm = ((RCC->PLLCFGR & RCC_PLLCFGR_PLLM) >> 4) + 1U;
+      if (pllsource == 0x02UL) /* HSI used as PLL clock source */
+        {
+          pllvco = (HSI_VALUE / pllm);
+        }
+      else                   /* HSE used as PLL clock source */
+        {
+          pllvco = (HSE_VALUE / pllm);
+        }
+      pllvco = pllvco * ((RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> 8);
+      pllr = (((RCC->PLLCFGR & RCC_PLLCFGR_PLLR) >> 25) + 1U) * 2U;
+      SystemCoreClock = pllvco / pllr;
+      break;
 
-        default:
-            break;
+      default:
+        break;
     }
-    /* Compute HCLK clock frequency --------------------------------------------*/
-    /* Get HCLK prescaler */
-    tmp = AHBPrescTable[((RCC->CFGR & RCC_CFGR_HPRE) >> 4)];
-    /* HCLK clock frequency */
-    SystemCoreClock >>= tmp;
+  /* Compute HCLK clock frequency --------------------------------------------*/
+  /* Get HCLK prescaler */
+  tmp = AHBPrescTable[((RCC->CFGR & RCC_CFGR_HPRE) >> 4)];
+  /* HCLK clock frequency */
+  SystemCoreClock >>= tmp;
 }
 
 /**
  * @brief Initializes the core clock, selecting the right sources and settings for the PLL
  */
-void SystemClock_Config(void) {
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_7);
+void SystemClock_Config (void)
+{
+  LL_FLASH_SetLatency (LL_FLASH_LATENCY_7);
 
-    if (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_7) {
-        while (1);
+  if (LL_FLASH_GetLatency () != LL_FLASH_LATENCY_7)
+    {
+      while (1);
     }
-    LL_PWR_EnableRange1BoostMode();
-    LL_RCC_HSE_Enable();
+  LL_PWR_EnableRange1BoostMode ();
+  LL_RCC_HSE_Enable ();
 
-    /* Wait till HSE is ready */
-    while (LL_RCC_HSE_IsReady() != 1);
-    LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_3, 40, LL_RCC_PLLR_DIV_2);
-    LL_RCC_PLL_EnableDomain_SYS();
-    LL_RCC_PLL_Enable();
+  /* Wait till HSE is ready */
+  while (LL_RCC_HSE_IsReady () != 1);
+  LL_RCC_PLL_ConfigDomain_SYS (LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_3, 40, LL_RCC_PLLR_DIV_2);
+  LL_RCC_PLL_EnableDomain_SYS ();
+  LL_RCC_PLL_Enable ();
 
-    /* Wait till PLL is ready */
-    while (LL_RCC_PLL_IsReady() != 1);
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
+  /* Wait till PLL is ready */
+  while (LL_RCC_PLL_IsReady () != 1);
+  LL_RCC_SetSysClkSource (LL_RCC_SYS_CLKSOURCE_PLL);
+  LL_RCC_SetAHBPrescaler (LL_RCC_SYSCLK_DIV_2);
 
-    /* Wait till System clock is ready */
-    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
+  /* Wait till System clock is ready */
+  while (LL_RCC_GetSysClkSource () != LL_RCC_SYS_CLKSOURCE_STATUS_PLL);
 
-    // Enable the debug counter
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-    DWT->CYCCNT = 0;
-    while (DWT->CYCCNT < 100);
+  // Enable the debug counter
+  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+  DWT->CYCCNT = 0;
+  while (DWT->CYCCNT < 100);
 
-    /* Set AHB prescaler*/
-    LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-    LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-    LL_RCC_SetAPB2Prescaler(LL_RCC_APB1_DIV_1);
-    LL_SetSystemCoreClock(160000000);
+  /* Set AHB prescaler*/
+  LL_RCC_SetAHBPrescaler (LL_RCC_SYSCLK_DIV_1);
+  LL_RCC_SetAPB1Prescaler (LL_RCC_APB1_DIV_1);
+  LL_RCC_SetAPB2Prescaler (LL_RCC_APB1_DIV_1);
+  LL_SetSystemCoreClock (160000000);
 
-    /* Update the time base */
-    if (HAL_InitTick(TICK_INT_PRIORITY) != HAL_OK) {
-        while (1);
+  /* Update the time base */
+  if (HAL_InitTick (TICK_INT_PRIORITY) != HAL_OK)
+    {
+      while (1);
     };
-    LL_RCC_SetFDCANClockSource(LL_RCC_FDCAN_CLKSOURCE_PCLK1);
-    LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
+  LL_RCC_SetFDCANClockSource (LL_RCC_FDCAN_CLKSOURCE_PCLK1);
+  LL_RCC_SetUSARTClockSource (LL_RCC_USART2_CLKSOURCE_PCLK1);
 }
 
 /**
@@ -183,26 +189,27 @@ void SystemClock_Config(void) {
   * @param  None
   * @retval None
   */
-void SystemInit(void) {
-    /* FPU settings ------------------------------------------------------------*/
+void SystemInit (void)
+{
+  /* FPU settings ------------------------------------------------------------*/
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-    SCB->CPACR |= ((3UL << (10 * 2)) | (3UL << (11 * 2)));  /* set CP10 and CP11 Full Access */
+  SCB->CPACR |= ((3UL << (10 * 2)) | (3UL << (11 * 2)));  /* set CP10 and CP11 Full Access */
 #endif
 
-    /* Configure the Vector Table location add offset address ------------------*/
+  /* Configure the Vector Table location add offset address ------------------*/
 #ifdef VECT_TAB_SRAM
-    SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+  SCB->VTOR = SRAM_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
 #else
-    SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
+  SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
 #endif
 
-    HAL_Init();
+  HAL_Init ();
 
-    LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+  LL_APB2_GRP1_EnableClock (LL_APB2_GRP1_PERIPH_SYSCFG);
+  LL_APB1_GRP1_EnableClock (LL_APB1_GRP1_PERIPH_PWR);
 
-    SystemClock_Config();
+  SystemClock_Config ();
 
-    Timing_init();
+  Timing_init ();
 }
 

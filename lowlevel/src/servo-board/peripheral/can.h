@@ -28,14 +28,14 @@ enum CAN_ERROR_STATUS {
     CAN_PKT_OK = 0
 };
 
-void MX_CAN_Init();
+void MX_CAN_Init ();
 
-int CAN_send_packet(uint16_t std_id, const uint8_t *data = nullptr, uint8_t size = 0);
+int CAN_send_packet (uint16_t std_id, const uint8_t *data = nullptr, uint8_t size = 0);
 
-int CAN_poll_TX();
+int CAN_poll_TX ();
 
-int CAN_send_packet(can_msg *msg);
+int CAN_send_packet (can_msg *msg);
 
-int CAN_receive_packet(can_msg *msg);
+int CAN_receive_packet (can_msg *msg);
 
 #endif // LL_CAN_CAN_H_

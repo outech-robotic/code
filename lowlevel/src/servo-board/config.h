@@ -34,9 +34,9 @@
 #define SERVO_BOARD_ID 0
 #endif
 
-#define CONST_CAN_BOARD_ID    ((uint16_t)0x010 + SERVO_BOARD_ID) // 10 bits unique board ID
-#define CONST_CAN_RX_ID       (CONST_CAN_BOARD_ID << 1u | 0u)    // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers
-#define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID << 1u | 1u)    // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
+#define CONST_CAN_BOARD_ID    ((uint16_t)0x010 + SERVO_BOARD_ID)          // 10 bits unique board ID
+#define CONST_CAN_RX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 0u) // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers
+#define CONST_CAN_TX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 1u) // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
 #define CONST_CAN_STD_SHIFT   (5)
 
 #define CONST_CAN_BUFFER_SIZE ((uint16_t)16)

@@ -8,9 +8,7 @@
 #ifndef UTILITY_CONFIG_H_
 #define UTILITY_CONFIG_H_
 
-
-void Error_Handler();
-
+void Error_Handler ();
 
 #define MAKE_MASK(length) ((1<<(length))-1)
 
@@ -38,7 +36,7 @@ void Error_Handler();
 #define CONST_USART_BAUDRATE (115200)
 
 // IDs used by board on CAN interface
-#define CONST_CAN_BOARD_ID    ((uint16_t)0x000u)              // 10 bits unique board ID
+#define CONST_CAN_BOARD_ID    ((uint16_t)0x000u)                          // 10 bits unique board ID
 #define CONST_CAN_RX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 0u) // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers
 #define CONST_CAN_TX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 1u) // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
 

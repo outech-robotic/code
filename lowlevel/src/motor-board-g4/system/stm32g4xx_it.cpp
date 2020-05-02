@@ -9,10 +9,12 @@
 
 extern Serial serial;
 
-void Error_Handler(void) {
-    while (1) {
-        serial.println("Error Handler\r\n");
-        delay_ms(1000);
+void Error_Handler (void)
+{
+  while (1)
+    {
+      serial.println ("Error Handler\r\n");
+      delay_ms (1000);
     }
 }
 
@@ -23,45 +25,50 @@ extern "C" {
 /**
   * @brief This function handles Non maskable interrupt.
   */
-void NMI_Handler(void) {
-    Error_Handler();
+void NMI_Handler (void)
+{
+  Error_Handler ();
 }
 
 /**
   * @brief This function handles Hard fault interrupt.
   */
-void HardFault_Handler(void) {
-    Error_Handler();
+void HardFault_Handler (void)
+{
+  Error_Handler ();
 }
 
 /**
   * @brief This function handles Memory management fault.
   */
-void MemManage_Handler(void) {
-    Error_Handler();
+void MemManage_Handler (void)
+{
+  Error_Handler ();
 }
 
 /**
   * @brief This function handles Prefetch fault, memory access fault.
   */
-void BusFault_Handler(void) {
-    Error_Handler();
+void BusFault_Handler (void)
+{
+  Error_Handler ();
 }
 
 /**
   * @brief This function handles Undefined instruction or illegal state.
   */
-void UsageFault_Handler(void) {
-    Error_Handler();
+void UsageFault_Handler (void)
+{
+  Error_Handler ();
 }
-
 
 extern volatile uint32_t milliseconds;
 /**
   * @brief This function handles Periodic increments of the milliseconds counter.
   */
-void SysTick_Handler(void) {
-    milliseconds++;
+void SysTick_Handler (void)
+{
+  milliseconds++;
 }
 
 #ifdef __cplusplus

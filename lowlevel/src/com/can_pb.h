@@ -22,25 +22,25 @@
 using LogMessage = char[64];
 
 class Can_PB {
-   IsoTpLink isotp_link;
+  IsoTpLink isotp_link;
 
-   uint8_t isotp_rx_buffer[CONST_ISOTP_BUFF_SIZE];
-   uint8_t isotp_tx_buffer[CONST_ISOTP_BUFF_SIZE];
+  uint8_t isotp_rx_buffer[CONST_ISOTP_BUFF_SIZE];
+  uint8_t isotp_tx_buffer[CONST_ISOTP_BUFF_SIZE];
 
-   uint8_t pb_data_rx[sizeof(BusMessage)];
-   uint8_t pb_data_tx[sizeof(BusMessage)];
+  uint8_t pb_data_rx[sizeof (BusMessage)];
+  uint8_t pb_data_tx[sizeof (BusMessage)];
 
-   ring_buffer<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_rx_buffer;
-   ring_buffer<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_tx_buffer;
+  ring_buffer<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_rx_buffer;
+  ring_buffer<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_tx_buffer;
 
-   const uint16_t isotp_rx_addr;
-   const uint16_t isotp_tx_addr;
+  const uint16_t isotp_rx_addr;
+  const uint16_t isotp_tx_addr;
 
-   ring_buffer<16, LogMessage*> logs_tx;
+  ring_buffer<16, LogMessage *> logs_tx;
 
-public:
+ public:
 
-   enum CAN_PB_ERRORS {
+  enum CAN_PB_ERRORS {
       CAN_PB_RET_OK = 0,
       CAN_PB_RET_ERROR_SEND = -1,
       CAN_PB_RET_ERROR_RECEIVE = -2,
@@ -49,27 +49,28 @@ public:
       CAN_PB_RET_ERROR_RX_FULL = -5,
       CAN_PB_RET_ERROR_ENCODE = -10,
       CAN_PB_RET_ERROR_DECODE = -11,
-   };
+  };
 
-   // Initializes the Link struct, and addresses
-   Can_PB(uint16_t rx_addr, uint16_t tx_addr);
+  // Initializes the Link struct, and addresses
+  Can_PB (uint16_t rx_addr, uint16_t tx_addr);
 
-   // Returns true if the given ID is this instance's reception ID
-   bool match_id(uint16_t id);
+  // Returns true if the given ID is this instance's reception ID
+  bool match_id (uint16_t id);
 
-   // Updates the current reception state, returns true if the message id is for this instance of Can_PB
-   void update_rx_msg(can_msg &msg);
+  // Updates the current reception state, returns true if the message id is for this instance of Can_PB
+  void update_rx_msg (can_msg &msg);
 
-   int update();
+  int update ();
 
-   bool receive_msg(BusMessage &msg);
+  bool receive_msg (BusMessage &msg);
 
-   bool send_msg(const BusMessage &msg);
+  bool send_msg (const BusMessage &msg);
 
-   bool send_log(const char *log);
+  bool send_log (const char *log);
 
-   bool is_rx_available();
-   bool is_tx_available();
+  bool is_rx_available ();
+
+  bool is_tx_available ();
 };
 
 #endif /* COM_CAN_PB_HPP_ */

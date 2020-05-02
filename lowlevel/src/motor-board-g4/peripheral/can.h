@@ -27,15 +27,14 @@ enum CAN_ERROR_STATUS {
     CAN_PKT_OK = 0
 };
 
-int CAN_send_packet(uint16_t std_id, const uint8_t *data = nullptr, uint8_t size = 0);
+int CAN_send_packet (uint16_t std_id, const uint8_t *data = nullptr, uint8_t size = 0);
 
-int CAN_send_packet(can_msg *msg);
+int CAN_send_packet (can_msg *msg);
 
-int CAN_poll_TX();
+int CAN_poll_TX ();
 
-int CAN_receive_packet(can_msg *msg);
+int CAN_receive_packet (can_msg *msg);
 
-void MX_FDCAN1_Init();
-
+void MX_FDCAN1_Init ();
 
 #endif /*__ fdcan_H */

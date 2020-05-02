@@ -11,35 +11,35 @@
 #include "stm32f042x6.h"
 
 class Motor {
-public:
-    enum Side {
-        LEFT,
-        RIGHT
-    };
-    enum Direction {
-        FORWARD,
-        BACKWARD,
-        BRAKE
-    };
+ public:
+  enum Side {
+      LEFT,
+      RIGHT
+  };
+  enum Direction {
+      FORWARD,
+      BACKWARD,
+      BRAKE
+  };
 
-    Motor(const Side new_side);
+  Motor (const Side new_side);
 
-    void init();
+  void init ();
 
-    Direction get_direction();
+  Direction get_direction ();
 
-    void set_pwm(int16_t pwm);
+  void set_pwm (int16_t pwm);
 
-    void stop();
+  void stop ();
 
-    void brake();
+  void brake ();
 
-private:
-    void set_direction(Direction new_dir);
+ private:
+  void set_direction (Direction new_dir);
 
-    volatile const Side side;
-    volatile Direction dir;
-    volatile uint16_t pwm;
+  volatile const Side side;
+  volatile Direction dir;
+  volatile uint16_t pwm;
 };
 
 #endif /* MOTION_MOTOR_H_ */

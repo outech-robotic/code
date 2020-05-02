@@ -8,7 +8,6 @@
 #ifndef MOTION_TEST_HEADER_H_
 #define MOTION_TEST_HEADER_H_
 
-
 constexpr int test = 0;
 
 #endif /* MOTION_TEST_HEADER_H_ */
