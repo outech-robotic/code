@@ -16,7 +16,7 @@
 #endif
 
 #include "peripheral/can.h"
-#include "timing.h"
+#include "utility/timing.h"
 
 #ifdef __cplusplus
 extern "C" {

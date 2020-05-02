@@ -1,10 +1,11 @@
-#include "peripheral/can.h"
-#include "peripheral/gpio.h"
-#include "utility/macros.h"
+#include "can.h"
+#include "gpio.h"
 #include "utility/ring_buffer.hpp"
 #include "config.h"
+
 #include <algorithm>
 
+CAN_HandleTypeDef hcan;
 
 // Buffer storing packets waiting for the peripheral to send them
 ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_tx;
@@ -13,7 +14,6 @@ ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_tx;
 ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_rx;
 
 
-CAN_HandleTypeDef hcan;
 
 void CAN_IRQ_RX_Pending_enable(CAN_HandleTypeDef *can, uint32_t fifo) {
     SET_BIT(can->Instance->IER, fifo == CAN_RX_FIFO0 ? CAN_IER_FMPIE0 : CAN_IER_FMPIE1);
@@ -31,47 +31,6 @@ void CAN_IRQ_TX_Empty_disable(CAN_HandleTypeDef *can) {
     CLEAR_BIT(can->Instance->IER, CAN_IER_TMEIE);
 }
 
-int CAN_send_packet(uint16_t std_id, const uint8_t *data, uint8_t size) {
-    can_msg msg;
-    msg.size = size;
-    msg.id = std_id;
-    std::copy(&data[0], &data[size], msg.data.u8);
-
-    return CAN_send_packet(&msg);
-}
-
-int CAN_send_packet(can_msg *msg) {
-    int res = CAN_ERROR_STATUS::CAN_PKT_OK;
-
-    CAN_TxHeaderTypeDef header;
-    header.DLC = msg->size;
-    header.StdId = msg->id;
-    header.IDE = CAN_ID_STD;
-    header.RTR = CAN_RTR_DATA;
-
-    uint32_t mailbox;
-    if (header.DLC > 8) {
-        res = CAN_ERROR_STATUS::PACKET_DLC_TOO_LARGE;
-    }
-    if (header.StdId > 0x7FF) {
-        res = CAN_ERROR_STATUS::PACKET_ID_TOO_LARGE;
-    }
-    if (!msg->data.u8) {
-        res = CAN_ERROR_STATUS::DATA_NPE;
-    }
-    if (res >= 0) {
-        if (HAL_CAN_IsTxMessagePending(&hcan, CAN_TX_MAILBOX0 | CAN_TX_MAILBOX1 | CAN_TX_MAILBOX2)) {
-            messages_tx.push(*msg);
-            res = CAN_ERROR_STATUS::CAN_PKT_OK;
-        } else {
-            if ((res = HAL_CAN_AddTxMessage(&hcan, &header, msg->data.u8, &mailbox)) != HAL_OK) {
-                return CAN_ERROR_STATUS::PACKET_TX_ERROR;
-            }
-            CAN_IRQ_TX_Empty_enable(&hcan);
-        }
-    }
-    return res;
-}
 
 int CAN_receive_packet(can_msg *msg) {
     CAN_RxHeaderTypeDef header;
@@ -86,6 +45,63 @@ int CAN_receive_packet(can_msg *msg) {
             msg->id = header.StdId;
             msg->size = header.DLC;
         }
+    }
+    return res;
+}
+
+
+int CAN_send_packet(uint16_t std_id, const uint8_t *data, uint8_t size) {
+    can_msg msg;
+    msg.size = size;
+    msg.id = std_id;
+    std::copy(&data[0], &data[size], msg.data.u8);
+
+    return CAN_send_packet(&msg);
+}
+
+
+int CAN_poll_TX() {
+    if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) > 0) { // Free buffers in hardware, send
+        if (!messages_tx.is_empty()) {
+            uint32_t mailbox;
+            can_msg msg = messages_tx.pop();
+            CAN_TxHeaderTypeDef header;
+            header.DLC = msg.size;
+            header.StdId = msg.id;
+            header.IDE = CAN_ID_STD;
+            header.RTR = CAN_RTR_DATA;
+
+            if (HAL_CAN_AddTxMessage(&hcan, &header, msg.data.u8, &mailbox) != HAL_OK) {
+                return CAN_ERROR_STATUS::PACKET_TX_ERROR;
+            }
+        }
+    }
+
+    return CAN_ERROR_STATUS::CAN_PKT_OK;
+}
+
+
+int CAN_send_packet(can_msg *msg) {
+    int res = CAN_ERROR_STATUS::CAN_PKT_OK;
+
+    CAN_TxHeaderTypeDef header;
+    header.DLC = msg->size;
+    header.StdId = msg->id;
+    header.IDE = CAN_ID_STD;
+    header.RTR = CAN_RTR_DATA;
+
+    if (header.DLC > 8) {
+        res = CAN_ERROR_STATUS::PACKET_DLC_TOO_LARGE;
+    }
+    if (header.StdId > 0x7FF) {
+        res = CAN_ERROR_STATUS::PACKET_ID_TOO_LARGE;
+    }
+    if (!msg->data.u8) {
+        res = CAN_ERROR_STATUS::DATA_NPE;
+    }
+    if (res >= 0) {
+        messages_tx.push(*msg);
+        res = CAN_ERROR_STATUS::CAN_PKT_OK;
     }
     return res;
 }
@@ -155,7 +171,8 @@ void MX_CAN_Init() {
      */
     CAN_IRQ_RX_Pending_enable(&hcan, CAN_RX_FIFO0);
     //CAN_IRQ_RX_Pending_enable(&hcan, CAN_RX_FIFO1);
-    CAN_IRQ_TX_Empty_enable(&hcan);
+    //CAN_IRQ_TX_Empty_enable(&hcan);
+    CAN_IRQ_TX_Empty_disable(&hcan);
     //hcan.Instance->IER |= CAN_IER_FMPIE0 | CAN_IER_FMPIE1;
     NVIC_SetPriority(CEC_CAN_IRQn, 100);
     NVIC_EnableIRQ(CEC_CAN_IRQn);
@@ -221,22 +238,6 @@ void CEC_CAN_IRQHandler(void) {
                 msg.size = rx_header.DLC;
                 messages_rx.push(msg);
             }
-        }
-    }
-
-    /* ************** TX ************** */
-    if (CAN_check_request_done(&hcan) != -1) {
-        // A TX mailbox completed a transmit or abort request, it is now free
-        if (!messages_tx.is_empty()) {
-            msg = messages_tx.pop();
-            tx_header.DLC = msg.size;
-            tx_header.StdId = msg.id;
-            tx_header.IDE = CAN_ID_STD;
-            tx_header.RTR = CAN_RTR_DATA;
-
-            HAL_CAN_AddTxMessage(&hcan, &tx_header, msg.data.u8, &used_mailbox);
-        } else {
-            CAN_IRQ_TX_Empty_disable(&hcan);
         }
     }
 

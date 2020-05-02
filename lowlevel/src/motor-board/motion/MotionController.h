@@ -11,7 +11,7 @@
 #include "Motor.h"
 #include "PIDFP.h"
 #include "peripheral/tim.h"
-#include "Average.hpp"
+#include "utility/Average.hpp"
 
 class MotionController {
 

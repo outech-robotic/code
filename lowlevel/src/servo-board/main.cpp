@@ -1,5 +1,5 @@
 #include "peripheral/tim.h"
-#include "com/can_pb.hpp"
+#include "com/can_pb.h"
 #include "com/serial.hpp"
 #include "utility/timing.h"
 #include "utility/macros.h"
@@ -92,10 +92,10 @@ int main() {
          *                   CAN INTERFACE
          **********************************************************************/
         //Heartbeat to HL
-        if (wait_heartbeat.check()) {
+        if (true || wait_heartbeat.check()) {
             if (canpb.is_tx_available()) {
                 togglePin(PB3);
-                if (canpb.send_msg(msg_heartbeat) != Can_PB::CAN_PB_RET_OK) {
+                if (!canpb.send_msg(msg_heartbeat) != Can_PB::CAN_PB_RET_OK) {
                     serial.print("ERROR: SENDING HEARTBEAT\r\n");
                 }
             }

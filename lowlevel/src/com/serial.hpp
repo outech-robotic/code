@@ -93,7 +93,7 @@ public:
      * @return true if successful
      * @return false else
      */
-    bool init(uint32_t baudrate = 115200) {
+    bool init(uint32_t baudrate) {
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
         this->usart_x = USART2;
         this->mPin_rx = &PIN_USART_RX;

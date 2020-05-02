@@ -39,9 +39,9 @@
 #define CONST_CAN_TX_ID       (CONST_CAN_BOARD_ID << 1u | 1u)    // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
 #define CONST_CAN_STD_SHIFT   (5)
 
-#define CONST_CAN_BUFFER_SIZE ((uint16_t)32)
-#define CONST_ISOTP_BUFF_SIZE ((size_t)64)
-#define CONST_PB_BUFF_SIZE    ((size_t)64)
+#define CONST_CAN_BUFFER_SIZE ((uint16_t)16)
+#define CONST_ISOTP_BUFF_SIZE ((size_t)40)
+#define CONST_PB_BUFF_SIZE    ((size_t)8)
 
 //#define CONST_CAN_MODE_LOOPBACK // Loopback mode ON for CAN
 //#define CONST_CAN_SPEED_100K    // Configures CAN for 100kb/s

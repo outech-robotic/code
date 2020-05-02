@@ -77,8 +77,9 @@ https://sourceforge.net/p/openocd/code/ci/master/tree/
 Open the root ```code``` directory as the root of the project.\
 In the project hierarchy, right-click on ```lowlevel/CMakeLists.txt``` and "Load Cmake project".
 
+For Windows only:\
 Add the following CMake Options (```File```>```Settings```>```Build, Execution, Deployment```>```CMake```):\
-```-DCMAKE_C_FLAGS=--specs=nosys.specs -DCMAKE_CXX_FLAGS=--specs=nosys.specs```\
+```-DCMAKE_SYSTEM_NAME=Generic -DCMAKE_C_FLAGS=--specs=nosys.specs -DCMAKE_CXX_FLAGS=--specs=nosys.specs```\
 This is because CLion uses a default system name for CMake that makes it use the full standard library, but we don't want any of that.
 
 #### Run CMake from CLI
@@ -106,10 +107,14 @@ We will be using ```arm-none-eabi-gdb``` as a client, and ```openocd``` as a ser
 In CLion:
 * Go to your ```Configurations``` (next to the build hammer/run button).
 * ```Edit Configurations```
-* Click ```+``` to add a new configuration > ```OpenOCD Download & Run```
-* Give it the name you want, preferably different than other targets.
+* Click ```+``` to add a new configuration > ```Embedded GDB Server```
+* Give it the name you want, preferably different than the existing targets.
 * Select the build target & executable you want.
-* Board config file : Choose a path to the correct .cfg file (in lowlevel/scripts/board)
+* 'target remote' args: ```localhost:PORT``` (PORT being the port that will be used for GDB)
+* GDB Server: ```openocd```
+* GDB Server args: ```-f lowlevel/scripts/board/BOARD.cfg -c "gdb_port PORT"``` (BOARD being one of the board files used)
+* In Advanced GDB Server options:
+  * Working directory: Set it to the root directory of the project (code)
 
 If the project is already buit, press the ```Debug``` button next to configurations, while the new configuration is selected.
 

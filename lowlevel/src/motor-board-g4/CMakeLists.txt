@@ -46,12 +46,7 @@ include_directories(${DRIVERS_DIR}/CMSIS/Include)
 include_directories(${DRIVERS_DIR}/STM32G4xx_HAL_Driver/Inc/Legacy)
 
 
-
 # # PROJECT HEADER DIRECTORIES
-include_directories(../system/)
-include_directories(../utility)
-include_directories(../com/)
-include_directories(../)
 include_directories(./)
 
 # ALLOW COMPILATION OF THE ASM FILE

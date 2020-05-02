@@ -1,5 +1,5 @@
 if (NOT BOARD_ID)
-    message("BOARD_ID not defined, give it as a parameter to CMAKE. Default 0 is assumed.")
+    message(WARNING "BOARD_ID offset not defined for servos, give it as a parameter to CMAKE. Default offset of 0 is assumed.")
     set(BOARD_ID 0)
 endif ()
 
@@ -47,10 +47,6 @@ include_directories(${PROTO_DIR}/nanopb/)
 include_directories(${PROTO_DIR}/)
 
 # # PROJECT HEADER DIRECTORIES
-include_directories(../system/)
-include_directories(../utility)
-include_directories(../com/)
-include_directories(../)
 include_directories(./)
 
 # ALLOW COMPILATION OF THE ASM FILE

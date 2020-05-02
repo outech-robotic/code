@@ -51,11 +51,8 @@ include_directories(${PROTO_DIR}/nanopb/)
 include_directories(${PROTO_DIR}/)
 
 # # PROJECT HEADER DIRECTORIES
-include_directories(../system/)
-include_directories(../utility)
-include_directories(../com/)
-include_directories(../)
-include_directories(./)
+
+include_directories(.)
 
 
 # ALLOW COMPILATION OF THE ASM FILE
