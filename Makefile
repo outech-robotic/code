@@ -45,11 +45,3 @@ endif
 candump:
 	python -m tool.script.read_bus $(port)
 
-
-### Dump the parsed CAN messages
-
-```
-make candump port=14000
-```
-
-With `14000` being the TCP port of the `isotpserver`.

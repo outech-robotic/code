@@ -120,3 +120,11 @@ If the project is already buit, press the ```Debug``` button next to configurati
 
 Automation of this setup is a WIP.
 
+
+### Dump the parsed CAN messages
+
+```
+make candump port=14000
+```
+
+With `14000` being the TCP port of the `isotpserver`.
