@@ -43,5 +43,5 @@ endif
 
 .PHONY: candump
 candump:
-	python -m tool.script.read_bus $(port)
+	@pipenv run python -m tool.script.read_bus $(port)
 

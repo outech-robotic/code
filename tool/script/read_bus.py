@@ -1,5 +1,7 @@
 import argparse
 import asyncio
+import json
+import sys
 
 from google.protobuf import json_format
 
@@ -21,7 +23,10 @@ async def main():
     async def callback(bytes, _):
         bus_message = BusMessage()
         bus_message.ParseFromString(bytes)
-        print(json_format.MessageToDict(bus_message, including_default_value_fields=True))
+        printable_data = json_format.MessageToDict(bus_message, including_default_value_fields=True)
+        json_data = json.dumps(printable_data)
+        sys.stdout.write(json_data + '\n')
+        sys.stdout.flush()
 
     adapter.register_handler(callback)
     await adapter.run()
