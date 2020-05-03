@@ -20,7 +20,8 @@ class ProtobufHandler:
         """ Convert bytes to BusMessage. """
         bus_message = BusMessage()
         bus_message.ParseFromString(msg)
-        printable_msg = json_format.MessageToDict(bus_message, including_default_value_fields=True)
+        printable_msg = json_format.MessageToDict(
+            bus_message, including_default_value_fields=True)
         LOGGER.get().debug('msg_can', msg=printable_msg, source=source)
         await self.dispatch_message(bus_message, source)
 
