@@ -4,10 +4,10 @@ Isotp socket can adapter module.
 import asyncio
 import binascii
 from asyncio import StreamWriter, StreamReader
-from typing import Callable, Awaitable, List
+from typing import List
 
 from highlevel.logger import LOGGER
-from highlevel.robot.adapter.socket import SocketAdapter
+from highlevel.robot.adapter.socket import SocketAdapter, CallbackFunc
 
 
 class TCPSocketAdapter(SocketAdapter):
@@ -17,10 +17,12 @@ class TCPSocketAdapter(SocketAdapter):
     
     ABCD is the the hexadecimal representation of the data surrounded by < and >.
     """
-    def __init__(self, reader: StreamReader, writer: StreamWriter):
+    def __init__(self, reader: StreamReader, writer: StreamWriter,
+                 adapter_name: str):
         self.writer: StreamWriter = writer
         self.reader: StreamReader = reader
-        self.handlers: List[Callable[[bytes], Awaitable[None]]] = []
+        self.adapter_name = adapter_name
+        self.handlers: List[CallbackFunc] = []
 
     async def run(self) -> None:
         try:
@@ -37,21 +39,24 @@ class TCPSocketAdapter(SocketAdapter):
 
             LOGGER.get().debug('socket_adapter_received',
                                raw_payload=raw_payload,
-                               hex_payload=msg_str)
+                               hex_payload=msg_str,
+                               name=self.adapter_name)
 
             for handler in self.handlers:
-                await handler(raw_payload)
+                await handler(raw_payload, self.adapter_name)
 
     async def send(self, data: bytes) -> None:
         hex_payload = binascii.hexlify(data)
-        LOGGER.get().debug('socket_can_adapter_send',
-                           raw_payload=data,
-                           hex_payload=hex_payload)
+        LOGGER.get().debug(
+            'socket_can_adapter_send',
+            raw_payload=data,
+            hex_payload=hex_payload,
+            name=self.adapter_name,
+        )
         self.writer.write(b'<' + hex_payload + b'>\n')
         await self.writer.drain()
 
-    def register_handler(self, handler: Callable[[bytes],
-                                                 Awaitable[None]]) -> None:
+    def register_handler(self, handler: CallbackFunc) -> None:
         self.handlers.append(handler)
 
 
@@ -60,7 +65,7 @@ class LoopbackSocketAdapter(SocketAdapter):
     No-op adapter.
     """
     def __init__(self):
-        self.handlers: List[Callable[[bytes], Awaitable[None]]] = []
+        self.handlers: List[CallbackFunc] = []
 
     async def run(self) -> None:
         while True:
@@ -68,8 +73,7 @@ class LoopbackSocketAdapter(SocketAdapter):
 
     async def send(self, data: bytes) -> None:
         for handler in self.handlers:
-            await handler(data)
+            await handler(data, "loopback")
 
-    def register_handler(self, handler: Callable[[bytes],
-                                                 Awaitable[None]]) -> None:
+    def register_handler(self, handler: CallbackFunc) -> None:
         self.handlers.append(handler)

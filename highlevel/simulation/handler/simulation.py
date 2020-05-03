@@ -34,7 +34,7 @@ class SimulationHandler:
         self.simulation_state = simulation_state
         self.simulation_configuration = simulation_configuration
 
-    async def handle_movement_order(self, data: bytes) -> None:
+    async def handle_movement_order(self, data: bytes, _: str) -> None:
         """
         Handle move wheels packets.
         """

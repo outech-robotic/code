@@ -14,14 +14,17 @@ class ProtobufHandler:
         self.localization_controller = localization_controller
         self.match_action = match_action_controller
 
-    async def translate_message(self, msg: bytes) -> None:
+    async def translate_message(self, msg: bytes, adapter_name: str) -> None:
         """ Convert bytes to BusMessage. """
         bus_message = BusMessage()
         bus_message.ParseFromString(msg)
-        LOGGER.get().debug('msg_can', msg=bus_message)
-        await self.dispatch_message(bus_message)
+        LOGGER.get().debug('msg_can',
+                           msg=bus_message,
+                           adapter_name=adapter_name)
+        await self.dispatch_message(bus_message, adapter_name)
 
-    async def dispatch_message(self, bus_message: BusMessage) -> None:
+    async def dispatch_message(self, bus_message: BusMessage,
+                               adapter_name: str) -> None:
         """ Detect type of a BusMessage and call a controller. """
         type_msg = bus_message.WhichOneof("message_content")
         if type_msg == "heartbeat":
@@ -38,7 +41,10 @@ class ProtobufHandler:
         elif type_msg == "pressureSensor":
             await self.match_action.set_pressures()
         elif type_msg == "debugLog":
-            LOGGER.get().info("low_level_log", content=bus_message.debugLog.content)
+            LOGGER.get().info("low_level_log",
+                              content=bus_message.debugLog.content,
+                              adapter_name=adapter_name)
         else:
             LOGGER.get().error("unhandled_protobuf_message",
-                               message_type=type_msg)
+                               message_type=type_msg,
+                               adapter_name=adapter_name)

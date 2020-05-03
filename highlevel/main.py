@@ -131,7 +131,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         i.provide('motor_board_adapter',
                   TCPSocketAdapter,
                   reader=reader,
-                  writer=writer)
+                  writer=writer,
+                  adapter_name='motor_board')
 
     return i
 
