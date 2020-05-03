@@ -3,10 +3,10 @@ Test for protobuf handler controller
 """
 import pytest
 
+from highlevel.robot.handler.protobuf import ProtobufHandler
 from proto.gen.python.outech_pb2 import (EncoderPositionMsg, BusMessage,
                                          LaserSensorMsg, PressureSensorMsg,
-                                         MovementEndedMsg)
-from highlevel.robot.handler.protobuf import ProtobufHandler
+                                         MovementEndedMsg, DebugLog)
 
 
 @pytest.fixture(name='protobuf_handler')
@@ -19,6 +19,16 @@ def protobuf_handler_setup(match_action_controller_mock,
         match_action_controller=match_action_controller_mock,
         localization_controller=localization_controller_mock,
     )
+
+
+@pytest.mark.asyncio
+async def test_dispatch_debug_log(protobuf_handler):
+    """
+    Test low level log message.
+    """
+    bus_message = BusMessage(debugLog=DebugLog(content='Hello, world!'))
+    msg_bytes = bus_message.SerializeToString()
+    await protobuf_handler.translate_message(msg_bytes)
 
 
 @pytest.mark.asyncio

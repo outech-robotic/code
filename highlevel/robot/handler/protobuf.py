@@ -37,6 +37,8 @@ class ProtobufHandler:
             await self.match_action.set_laser_distances()
         elif type_msg == "pressureSensor":
             await self.match_action.set_pressures()
+        elif type_msg == "debugLog":
+            LOGGER.get().info("low_level_log", content=bus_message.debugLog.content)
         else:
             LOGGER.get().error("unhandled_protobuf_message",
                                message_type=type_msg)
