@@ -4,6 +4,8 @@ Socket adapter module.
 from abc import ABC, abstractmethod
 from typing import Callable, Awaitable
 
+CallbackFunc = Callable[[bytes, str], Awaitable[None]]
+
 
 class SocketAdapter(ABC):
     """
@@ -18,6 +20,5 @@ class SocketAdapter(ABC):
         """Send a message."""
 
     @abstractmethod
-    def register_handler(self, handler: Callable[[bytes],
-                                                 Awaitable[None]]) -> None:
+    def register_handler(self, handler: CallbackFunc) -> None:
         """Register a handler."""

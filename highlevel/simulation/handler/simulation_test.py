@@ -30,7 +30,7 @@ async def test_move_backward(simulation_handler, event_queue_mock):
     """
     bus_message = BusMessage(translate=TranslateMsg(ticks=-3))
     msg_bytes = bus_message.SerializeToString()
-    await simulation_handler.handle_movement_order(msg_bytes)
+    await simulation_handler.handle_movement_order(msg_bytes, 'test')
     event_queue_mock.push.assert_any_call(
         EventOrder(type=EventType.MOVE_WHEEL,
                    payload={
@@ -64,7 +64,7 @@ async def test_move_rotation(simulation_handler, event_queue_mock):
     """
     bus_message = BusMessage(rotate=RotateMsg(ticks=3))
     msg_bytes = bus_message.SerializeToString()
-    await simulation_handler.handle_movement_order(msg_bytes)
+    await simulation_handler.handle_movement_order(msg_bytes, 'test')
     event_queue_mock.push.assert_any_call(
         EventOrder(type=EventType.MOVE_WHEEL, payload={
             'left': -1,
@@ -95,7 +95,7 @@ async def test_move_wheels_zero_unit(simulation_handler, event_queue_mock):
     """
     bus_message = BusMessage(translate=TranslateMsg(ticks=0))
     msg_bytes = bus_message.SerializeToString()
-    await simulation_handler.handle_movement_order(msg_bytes)
+    await simulation_handler.handle_movement_order(msg_bytes, 'test')
 
     event_queue_mock.push.assert_called_with(
         EventOrder(type=EventType.MOVEMENT_DONE, payload=None), 0)

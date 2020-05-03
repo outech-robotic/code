@@ -3,10 +3,10 @@ Test for protobuf handler controller
 """
 import pytest
 
+from highlevel.robot.handler.protobuf import ProtobufHandler
 from proto.gen.python.outech_pb2 import (EncoderPositionMsg, BusMessage,
                                          LaserSensorMsg, PressureSensorMsg,
-                                         MovementEndedMsg)
-from highlevel.robot.handler.protobuf import ProtobufHandler
+                                         MovementEndedMsg, DebugLog)
 
 
 @pytest.fixture(name='protobuf_handler')
@@ -22,6 +22,16 @@ def protobuf_handler_setup(match_action_controller_mock,
 
 
 @pytest.mark.asyncio
+async def test_dispatch_debug_log(protobuf_handler):
+    """
+    Test low level log message.
+    """
+    bus_message = BusMessage(debugLog=DebugLog(content='Hello, world!'))
+    msg_bytes = bus_message.SerializeToString()
+    await protobuf_handler.translate_message(msg_bytes, 'motor_board')
+
+
+@pytest.mark.asyncio
 async def test_dispatch_encoder_position(protobuf_handler,
                                          localization_controller_mock):
     """
@@ -32,7 +42,7 @@ async def test_dispatch_encoder_position(protobuf_handler,
         right_tick=-2,
     ))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_handler.translate_message(msg_bytes)
+    await protobuf_handler.translate_message(msg_bytes, 'test')
 
     localization_controller_mock.update_odometry_position.assert_called_once_with(
         1, -2)
@@ -50,7 +60,7 @@ async def test_dispatch_laser_sensor(protobuf_handler,
                                    distance_back_left=10,
                                    distance_back_right=10))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_handler.translate_message(msg_bytes)
+    await protobuf_handler.translate_message(msg_bytes, 'test')
     match_action_controller_mock.set_laser_distances.assert_called_once_with()
 
 
@@ -67,7 +77,7 @@ async def test_dispatch_pressure_sensor(protobuf_handler,
                                          on_center_right=10,
                                          on_right=10))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_handler.translate_message(msg_bytes)
+    await protobuf_handler.translate_message(msg_bytes, 'test')
     match_action_controller_mock.set_pressures.assert_called_once_with()
 
 
@@ -80,7 +90,7 @@ async def test_movement_ended(protobuf_handler, localization_controller_mock,
     """
     bus_message = BusMessage(movementEnded=MovementEndedMsg(blocked=blocked))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_handler.translate_message(msg_bytes)
+    await protobuf_handler.translate_message(msg_bytes, 'test')
     localization_controller_mock.movement_done.assert_called_once_with(blocked)
 
 
@@ -90,4 +100,4 @@ async def test_dispatch_does_not_throw_exception(protobuf_handler):
         If random bytes provided, should not throw exception.
     """
     msg_bytes = b'46C7S7B767'
-    await protobuf_handler.translate_message(msg_bytes)
+    await protobuf_handler.translate_message(msg_bytes, 'test')
