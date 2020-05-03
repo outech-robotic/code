@@ -123,8 +123,13 @@ Automation of this setup is a WIP.
 
 ### Dump the parsed CAN messages
 
-```
-make candump port=14000
+```sh 
+$ make candump port=14000
 ```
 
 With `14000` being the TCP port of the `isotpserver`.
+
+Here is an example if you want to exclude some noisy messages and pretty print the result:
+```sh
+$ make candump port=14000 | grep -v --line-buffered encoder_position | jq .
+```
