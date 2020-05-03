@@ -40,3 +40,8 @@ endif
 	@echo Trying to upload to board $(BOARD_NAME)...
 	cmake --build lowlevel/cmake-build-debug --target flash_$(BOARD_NAME) $(CMAKE_FLAGS)
 	@echo Upload done.
+
+.PHONY: candump
+candump:
+	@pipenv run python -m tool.script.read_bus $(port)
+
