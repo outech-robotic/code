@@ -1,6 +1,8 @@
 """
 Protobuf message handler module.
 """
+from google.protobuf import json_format
+
 from proto.gen.python.outech_pb2 import BusMessage
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.match_action import MatchActionController
@@ -18,7 +20,8 @@ class ProtobufHandler:
         """ Convert bytes to BusMessage. """
         bus_message = BusMessage()
         bus_message.ParseFromString(msg)
-        LOGGER.get().debug('msg_can', msg=bus_message, source=source)
+        printable_msg = json_format.MessageToDict(bus_message, including_default_value_fields=True)
+        LOGGER.get().debug('msg_can', msg=printable_msg, source=source)
         await self.dispatch_message(bus_message, source)
 
     async def dispatch_message(self, bus_message: BusMessage,

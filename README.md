@@ -119,3 +119,4 @@ In CLion:
 If the project is already buit, press the ```Debug``` button next to configurations, while the new configuration is selected.
 
 Automation of this setup is a WIP.
+
