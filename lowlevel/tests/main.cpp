@@ -2,25 +2,15 @@
  * Test runner
  */
 
-#include <iostream>
-#include "CppUTest/TestHarness.h"
 #include "CppUTest/CommandLineTestRunner.h"
 
-TEST_GROUP(FirstTestGroup) {
-};
+#include <iostream>
 
-TEST(FirstTestGroup, FirstTest)
-{
-  STRCMP_EQUAL("AH", "BH");
-}
 
-TEST(FirstTestGroup, SecondTest)
-{
-  STRCMP_EQUAL("CH", "CH");
-}
+int main(int argc, char **argv) {
+  std::cout << "Running tests with CppUTest..." << std::endl;
+  int res = CommandLineTestRunner::RunAllTests(argc, argv);
 
-int main (int argc, char **argv)
-{
-  std::cout << "Hello, world!" << std::endl;
-  return CommandLineTestRunner::RunAllTests (argc, argv);
+  std::cout << "Tests done." << std::endl;
+  return res;
 }

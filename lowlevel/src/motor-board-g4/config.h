@@ -43,7 +43,7 @@ void Error_Handler();
 //BUFFER SIZE USED IN ISR
 #define CONST_CAN_BUFFER_SIZE (32)
 #define CONST_ISOTP_BUFF_SIZE (40)
-#define CONST_PB_BUFF_SIZE    (64)
+#define CONST_PB_BUFF_SIZE    (32)
 #define CONST_LOG_SIZE        (64)
 #define CONST_LOG_POOL_SIZE   (16)
 

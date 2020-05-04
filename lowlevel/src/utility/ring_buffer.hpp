@@ -10,6 +10,7 @@
 #define UTILITY_RING_BUFFER_HPP_
 
 #include <cstdint>
+#include <utility>
 
 template<uint16_t buffer_size, typename T = uint8_t>
 class ring_buffer {
@@ -47,7 +48,7 @@ class ring_buffer {
     if (is_full()) {
       return false;
     }
-    buffer[(nr_write++) & (buffer_size - 1)] = val;
+    buffer[(nr_write++) & (buffer_size - 1)] = std::move(val);
     return true;
   }
 
@@ -57,7 +58,7 @@ class ring_buffer {
    * @return T oldest value to return
    */
   T pop() {
-    return buffer[(nr_read++) & (buffer_size - 1)];
+    return std::move(buffer[(nr_read++) & (buffer_size - 1)]);
   }
 };
 

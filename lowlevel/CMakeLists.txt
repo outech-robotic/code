@@ -4,22 +4,14 @@ project(outech_ll)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
 
+
 #set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_CXX_STANDARD 14)
 
-
-add_subdirectory(tests)
-
-
-set(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR arm)
-
-set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-
-
 set(PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../proto")
 set(DRIVERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Drivers")
+set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 
 # INCLUDES
 # # PROTOBUF
@@ -27,9 +19,11 @@ include_directories(${PROTO_DIR}/gen/cpp/)
 include_directories(${PROTO_DIR}/nanopb/)
 include_directories(${PROTO_DIR}/)
 
+
 # # COMMON
 include_directories(src/)
 include_directories(src/com/)
+
 
 # COMMON SOURCES
 # # NANOPB
@@ -52,7 +46,22 @@ file(GLOB_RECURSE SRC_DRIVERS_ST_F0
 add_definitions(-DUSE_FULL_LL_DRIVER)
 add_definitions(-DUSE_HAL_DRIVER)
 
+
+# TEST SUB PROJECT
+add_subdirectory(tests)
+
+
+# MCU build target settings
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
+set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+
+
 # SUB PROJECTS
 add_subdirectory(src/motor-board)
 add_subdirectory(src/motor-board-g4)
 add_subdirectory(src/servo-board)
+
+add_custom_target(build_all DEPENDS build_motor build_motor_g4 build_servo build_servo_nucleo)

@@ -1,22 +1,15 @@
-/*
- * can_pb.h
- *
- *  Created on: 9 avr. 2020
- *      Author: ticta
- */
-
 #ifndef COM_CAN_PB_HPP_
 #define COM_CAN_PB_HPP_
 
-#include <outech.pb.h>
-#include <pb.h>
-#include "peripheral/can.h"
-#include "com/isotp/isotp.h"
+
+#include "pb.h"
+#include "outech.pb.h"
 #include "nanopb/pb_encode.h"
 #include "nanopb/pb_decode.h"
+#include "peripheral/can.h"
+#include "com/isotp/isotp.h"
 #include "utility/ring_buffer.hpp"
 #include "utility/BufferPool.hpp"
-#include "outech.pb.h"
 #include "config.h"
 
 
@@ -37,9 +30,8 @@ class Can_PB {
   const uint16_t isotp_rx_addr;
   const uint16_t isotp_tx_addr;
 
-
   BufferPool<CONST_LOG_POOL_SIZE, LogMessage> log_pool;
-  ring_buffer<CONST_LOG_POOL_SIZE, LogMessage *> logs_tx;
+  ring_buffer<CONST_LOG_POOL_SIZE, PoolPtr<LogMessage>> logs_tx;
 
  public:
 

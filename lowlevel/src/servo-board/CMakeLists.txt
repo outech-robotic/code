@@ -53,12 +53,12 @@ include_directories(./)
 set_property(SOURCE ${STARTUP_FILE} PROPERTY LANGUAGE C)
 
 file(GLOB_RECURSE SRC_MOTOR_BOARD
-        "../com/*.c"
-        "../com/*.cpp"
-        "../utility/*.c"
-        "../utility/*.cpp"
-        "./*.c"
-        "./*.cpp"
+        "${SRC_DIR}/com/*.c"
+        "${SRC_DIR}/com/*.cpp"
+        "${SRC_DIR}/utility/*.c"
+        "${SRC_DIR}/utility/*.cpp"
+        "*.c"
+        "*.cpp"
         )
 
 

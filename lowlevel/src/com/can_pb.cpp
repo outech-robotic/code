@@ -1,6 +1,7 @@
 #include <utility/timing.h>
 #include "can_pb.h"
 
+
 bool Can_PB::encode_log(pb_ostream_t *stream, const pb_field_t *field, void *const *arg) {
   bool encode_status = true;
 
@@ -43,7 +44,7 @@ int Can_PB::update() {
   // If there is no transfer going on
   if (is_tx_available()) {
     bool ready_to_send = false;
-    LogMessage *addr = nullptr;
+    PoolPtr<LogMessage> addr = nullptr;
     BusMessage msg;
 
     if (!pb_msg_tx_buffer.is_empty()) {
@@ -57,7 +58,7 @@ int Can_PB::update() {
 
       msg = BusMessage_init_zero;
       msg.which_message_content = BusMessage_debugLog_tag;
-      msg.message_content.debugLog.content.arg = addr;
+      msg.message_content.debugLog.content.arg = addr.get();
       msg.message_content.debugLog.content.funcs.encode = &Can_PB::encode_log;
 
       ready_to_send = true;
@@ -73,10 +74,6 @@ int Can_PB::update() {
       // Start an Iso-TP transmission sequence
       if (isotp_send(&isotp_link, pb_data_tx, ostream.bytes_written) != ISOTP_RET_OK) {
         return CAN_PB_RET_ERROR_SEND;
-      }
-
-      if (addr) {
-        log_pool.free(addr);
       }
     }
   }
@@ -124,15 +121,15 @@ bool Can_PB::send_log(const char *log) {
     return false;
   }
 
-  LogMessage *addr = log_pool.alloc();
+  auto addr = log_pool.alloc();
 
   if (!addr) {
     return false;
   }
 
-  strncpy((char *) addr, log, 64);
+  strncpy((char *) addr.get(), log, 64);
 
-  logs_tx.push(addr);
+  logs_tx.push(std::move(addr));
   return true;
 }
 

@@ -1,20 +1,22 @@
 if(UNIX)
     set(BUILD_TARGET "TestRunner")
 
+    set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
     # PROJECT SOURCES
-    file(GLOB_RECURSE SRC_TEST
-            "../com/*.c"
-            "../com/*.cpp"
-            "../utility/*.c"
-            "../utility/*.cpp"
+    set(SRC_TEST
+            "main.cpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/BufferPool/BufferPool_test.cpp"
+            "${SRC_DIR}/utility/BufferPool.hpp"
+            "${SRC_DIR}/utility/Average.hpp"
+            "${SRC_DIR}/utility/ring_buffer.hpp"
             )
 
     # Find CPPUtest
     find_package(CppUTest)
 
-
     # TARGETS
     # # The test executable
-    add_executable(${BUILD_TARGET} main.cpp)
+    add_executable(${BUILD_TARGET} ${SRC_TEST})
     target_link_libraries(${BUILD_TARGET} PRIVATE CppUTest CppUTestExt)
 endif()

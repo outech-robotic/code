@@ -41,6 +41,12 @@ endif
 	cmake --build lowlevel/cmake-build-debug --target flash_$(BOARD_NAME) $(CMAKE_FLAGS)
 	@echo Upload done.
 
+.PHONY: ll_test
+ll_test:
+	cmake --build lowlevel/cmake-build-debug --target TestRunner
+	lowlevel/cmake-build-debug/tests/TestRunner -c 
+
+
 .PHONY: candump
 candump:
 	@pipenv run python -m tool.script.read_bus $(port)
