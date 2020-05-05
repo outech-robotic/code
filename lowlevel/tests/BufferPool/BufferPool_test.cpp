@@ -4,7 +4,6 @@
 
 TEST_GROUP(BufferPoolTests) {
     static constexpr uint32_t pool_size = 4;
-    static constexpr uint32_t str_size  = 32;
     using TestType = uint32_t;
 
     BufferPool<pool_size, TestType> pool;

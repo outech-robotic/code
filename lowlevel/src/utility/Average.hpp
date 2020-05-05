@@ -5,6 +5,11 @@
 
 template<typename T, const unsigned int BUFFER_SIZE>
 class Average {
+  T buffer[BUFFER_SIZE];
+  static constexpr uint8_t BUFFER_SIZE_BITS = ceil_log2(BUFFER_SIZE);
+  uint32_t currentElement;
+  T currentSum;
+
  public:
   Average() {
     static_assert(is_powerof2(BUFFER_SIZE), "Buffer size should be a power of 2.");
@@ -14,9 +19,7 @@ class Average {
   void reset() {
     currentElement = 0;
     currentSum = 0;
-    for (unsigned int i = 0; i < BUFFER_SIZE; i++) {
-      buffer[i] = 0;
-    }
+    std::fill_n(buffer, BUFFER_SIZE, 0);
   }
 
   void add(T newValue) {
@@ -29,12 +32,6 @@ class Average {
   T value() const {
     return currentSum >> BUFFER_SIZE_BITS;
   }
-
- private:
-  T buffer[BUFFER_SIZE];
-  static constexpr uint8_t BUFFER_SIZE_BITS = ceil_log2(BUFFER_SIZE);
-  unsigned int currentElement;
-  T currentSum;
 };
 
 #endif /* UTILITY_AVERAGE_HPP_ */

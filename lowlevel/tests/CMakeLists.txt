@@ -6,11 +6,15 @@ if(UNIX)
     # PROJECT SOURCES
     set(SRC_TEST
             "main.cpp"
-            "${CMAKE_CURRENT_SOURCE_DIR}/BufferPool/BufferPool_test.cpp"
-            "${CMAKE_CURRENT_SOURCE_DIR}/RingBuffer/RingBuffer_test.cpp"
+
             "${SRC_DIR}/utility/BufferPool.hpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/BufferPool/BufferPool_test.cpp"
+
             "${SRC_DIR}/utility/Average.hpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/Average/Average_test.cpp"
+
             "${SRC_DIR}/utility/ring_buffer.hpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/RingBuffer/RingBuffer_test.cpp"
             )
 
     # Find CPPUtest

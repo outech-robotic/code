@@ -62,6 +62,10 @@ class ring_buffer {
   T pop() {
     return std::move(buffer[(nr_read++) & (buffer_size - 1)]);
   }
+
+  void reset(){
+    nr_read = nr_write = 0;
+  }
 };
 
 #endif /* UTILITY_RING_BUFFER_HPP_ */
