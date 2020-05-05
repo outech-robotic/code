@@ -7,6 +7,7 @@ if(UNIX)
     set(SRC_TEST
             "main.cpp"
             "${CMAKE_CURRENT_SOURCE_DIR}/BufferPool/BufferPool_test.cpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/RingBuffer/RingBuffer_test.cpp"
             "${SRC_DIR}/utility/BufferPool.hpp"
             "${SRC_DIR}/utility/Average.hpp"
             "${SRC_DIR}/utility/ring_buffer.hpp"

@@ -14,8 +14,10 @@
 
 template<uint16_t buffer_size, typename T = uint8_t>
 class ring_buffer {
+
   T buffer[buffer_size];
   volatile uint32_t nr_read = 0, nr_write = 0;
+
  public:
   ring_buffer() {
     static_assert(!(buffer_size & (buffer_size - 1)), "Buffer size should be a power of 2");
