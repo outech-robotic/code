@@ -1,5 +1,5 @@
 #include "can.h"
-#include "utility/ring_buffer.hpp"
+#include "utility/Queue.hpp"
 #include "config.h"
 
 #include <algorithm>
@@ -7,10 +7,10 @@
 FDCAN_HandleTypeDef hcan;
 
 // Buffer storing packets waiting for the peripheral to send them
-ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_tx;
+Queue<CONST_CAN_BUFFER_SIZE, can_msg> messages_tx;
 
 // Buffer storing packets received by the peripheral, waiting processing by the main program
-ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_rx;
+Queue<CONST_CAN_BUFFER_SIZE, can_msg> messages_rx;
 
 void CAN_IRQ_RX_Pending_enable(FDCAN_HandleTypeDef *can, uint32_t fifo) {
   SET_BIT(can->Instance->IE, fifo == FDCAN_RX_FIFO0 ? FDCAN_IT_RX_FIFO0_NEW_MESSAGE : FDCAN_IT_RX_FIFO1_NEW_MESSAGE);

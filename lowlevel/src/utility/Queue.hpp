@@ -1,5 +1,5 @@
 /*
- * ring_buffer.hpp
+ * Queue.hpp
  *
  * Description : a FIFO buffer with a static size, using a template type as elements
  *  Created on: 30 nov. 2019
@@ -13,13 +13,13 @@
 #include <utility>
 
 template<uint16_t buffer_size, typename T = uint8_t>
-class ring_buffer {
+class Queue {
 
   T buffer[buffer_size];
   volatile uint32_t nr_read = 0, nr_write = 0;
 
  public:
-  ring_buffer() {
+  Queue() {
     static_assert(!(buffer_size & (buffer_size - 1)), "Buffer size should be a power of 2");
   }
 

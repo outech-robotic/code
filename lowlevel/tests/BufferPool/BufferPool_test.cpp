@@ -1,4 +1,5 @@
 #include <array>
+#include <iostream>
 #include "utility/BufferPool.hpp"
 #include "CppUTest/TestHarness.h"
 
@@ -26,7 +27,6 @@ TEST(BufferPoolTests, OneAlloc) {
     CHECK_TEXT(((uint64_t)ptr.get() >= (uint64_t)&pool) && ((uint64_t)ptr.get() < (uint64_t)&pool+sizeof(pool)), "Allocated Address is not in the pool");
   }
 }
-
 
 TEST(BufferPoolTests, AllocAllMultiple) {
   for(int t = 0; t < 5; t++) {

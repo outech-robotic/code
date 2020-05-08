@@ -18,7 +18,7 @@
 #include <stm32g4xx_ll_usart.h>
 #endif
 
-#include "utility/ring_buffer.hpp"
+#include "utility/Queue.hpp"
 #include "utility/timing.h"
 #include "utility/macros.h"
 #include "peripheral/gpio.h"

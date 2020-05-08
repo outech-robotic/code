@@ -11,7 +11,7 @@
 template<typename T>
 using PoolPtr = std::unique_ptr<T, std::function<void(T*)>>;
 
-template<uint8_t NB_BUFFERS, typename T = char[64]>
+template<uint8_t NB_BUFFERS, typename T>
 class BufferPool {
 
   T buffer[NB_BUFFERS];

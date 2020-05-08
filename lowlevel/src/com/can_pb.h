@@ -8,7 +8,7 @@
 #include "nanopb/pb_decode.h"
 #include "peripheral/can.h"
 #include "com/isotp/isotp.h"
-#include "utility/ring_buffer.hpp"
+#include "utility/Queue.hpp"
 #include "utility/BufferPool.hpp"
 #include "config.h"
 
@@ -24,14 +24,14 @@ class Can_PB {
   uint8_t pb_data_rx[sizeof(BusMessage)];
   uint8_t pb_data_tx[sizeof(BusMessage)];
 
-  ring_buffer<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_rx_buffer;
-  ring_buffer<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_tx_buffer;
+  Queue<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_rx_buffer;
+  Queue<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_tx_buffer;
 
   const uint16_t isotp_rx_addr;
   const uint16_t isotp_tx_addr;
 
   BufferPool<CONST_LOG_POOL_SIZE, LogMessage> log_pool;
-  ring_buffer<CONST_LOG_POOL_SIZE, PoolPtr<LogMessage>> logs_tx;
+  Queue<CONST_LOG_POOL_SIZE, PoolPtr<LogMessage>> logs_tx;
 
  public:
 

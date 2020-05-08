@@ -1,16 +1,16 @@
 #include <array>
 #include <cstring>
-#include "utility/ring_buffer.hpp"
+#include "utility/Queue.hpp"
 #include "CppUTest/TestHarness.h"
 
 TEST_GROUP(RingBufferTests) {
     static constexpr uint32_t buff_size = 32;
     using TestType = uint32_t;
 
-    ring_buffer<buff_size, TestType> buffer;
+    Queue<buff_size, TestType> buffer;
 
     void setup(){
-      buffer = ring_buffer<buff_size, TestType>{};
+      buffer = Queue<buff_size, TestType>{};
     }
 
     void teardown(){

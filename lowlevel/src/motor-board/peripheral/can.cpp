@@ -1,6 +1,6 @@
 #include "can.h"
 #include "gpio.h"
-#include "utility/ring_buffer.hpp"
+#include "utility/Queue.hpp"
 #include "config.h"
 
 #include <algorithm>
@@ -8,10 +8,10 @@
 CAN_HandleTypeDef hcan;
 
 // Buffer storing packets waiting for the peripheral to send them
-ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_tx;
+Queue<CONST_CAN_BUFFER_SIZE, can_msg> messages_tx;
 
 // Buffer storing packets received by the peripheral, waiting processing by the main program
-ring_buffer<CONST_CAN_BUFFER_SIZE, can_msg> messages_rx;
+Queue<CONST_CAN_BUFFER_SIZE, can_msg> messages_rx;
 
 void CAN_IRQ_RX_Pending_enable(CAN_HandleTypeDef *can, uint32_t fifo) {
   SET_BIT(can->Instance->IER, fifo == CAN_RX_FIFO0 ? CAN_IER_FMPIE0 : CAN_IER_FMPIE1);
