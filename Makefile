@@ -12,6 +12,10 @@ NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
 
 
 # COMMON    ###################################################################################################################################
+.PHONY: jenkins
+jenkins:
+	make -C highlevel jenkins
+
 proto/gen/cpp/proto/outech.pb.c: proto/outech.proto
 	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=./proto/gen/cpp proto/outech.proto -I=./proto
 
@@ -31,9 +35,6 @@ candump:
 	@pipenv run python -m tool.script.read_bus $(port)
 
 # HIGH LEVEL ###################################################################################################################################
-.PHONY: jenkins
-jenkins:
-	make -C highlevel jenkins
 
 
 # LOW LEVEL ###################################################################################################################################
@@ -62,5 +63,7 @@ endif
 
 .PHONY: ll_test
 ll_test:
+	@echo -e "\nBuilding tests..."
 	cmake --build lowlevel/cmake-build-debug --target TestRunner
+	@echo -e "\nStarting TestRunner..."
 	lowlevel/cmake-build-debug/tests/TestRunner -c
