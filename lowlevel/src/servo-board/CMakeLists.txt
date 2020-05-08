@@ -1,6 +1,8 @@
 if (NOT BOARD_ID)
     message(WARNING "BOARD_ID offset not defined for servos, give it as a parameter to CMAKE. Default offset of 0 is assumed.")
     set(BOARD_ID 0)
+else()
+    message("Using servo board id " ${BOARD_ID})
 endif ()
 
 # BOARD SELECTION
@@ -28,7 +30,7 @@ set(CMAKE_ASM_FLAGS "-T ${LINKER_SCRIPT} -mcpu=cortex-m0 -g3 -c -x assembler-wit
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-Map='${BUILD_TARGET}.map' -Wl,--gc-sections -static -mthumb -mcpu=cortex-m0 -mfloat-abi=soft  --specs=nano.specs -Wl,--start-group -lc -lm -lsupc++ -lstdc++ -Wl,--end-group")
 
 # DEFINES
-add_definitions(-DSERVO_BOARD_ID)
+add_definitions(-DSERVO_BOARD_ID=${BOARD_ID})
 add_definitions(-DHSE_VALUE=8000000)
 add_definitions(-DHSI_VALUE=8000000)
 add_definitions(-DF_CPU=48000000)
