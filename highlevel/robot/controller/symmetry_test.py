@@ -5,7 +5,7 @@ from math import pi
 
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
-from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.entity.configuration import Configuration, DebugConfiguration
 from highlevel.util.geometry.vector import Vector2
 
 
@@ -14,17 +14,18 @@ def get_symmetry_controller(color: Color) -> SymmetryController:
     Return a symmetry controller configured with the given color.
     """
     return SymmetryController(
-        Configuration(
-            initial_position=Vector2(1500, 1000),
-            initial_angle=0,
-            robot_width=330,
-            robot_length=330,
-            field_shape=(3000, 2000),
-            color=color,
-            wheel_radius=1,
-            encoder_ticks_per_revolution=1,
-            distance_between_wheels=1,
-        ))
+        Configuration(initial_position=Vector2(1500, 1000),
+                      initial_angle=0,
+                      robot_width=330,
+                      robot_length=330,
+                      field_shape=(3000, 2000),
+                      color=color,
+                      wheel_radius=1,
+                      encoder_ticks_per_revolution=1,
+                      distance_between_wheels=1,
+                      debug=DebugConfiguration(port=8080,
+                                               host='0.0.0.0',
+                                               refresh_rate=10)))
 
 
 def test_vector_sym1():
