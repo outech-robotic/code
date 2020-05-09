@@ -13,7 +13,7 @@ from highlevel.robot.controller.motion.localization import LocalizationControlle
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
-from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.entity.configuration import Configuration, DebugConfiguration
 from highlevel.robot.gateway.motion.motion import MotionGateway
 from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.controller.replay_saver import ReplaySaver
@@ -41,6 +41,7 @@ def configuration_test():
         wheel_radius=1,
         encoder_ticks_per_revolution=1,
         distance_between_wheels=1,
+        debug=DebugConfiguration(port=8080, host="0.0.0.0", refresh_rate=10),
     )
 
 
