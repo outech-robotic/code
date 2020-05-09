@@ -7,7 +7,7 @@ from pytest import fixture
 
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.entity.color import Color
-from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.entity.configuration import Configuration, DebugConfiguration
 from highlevel.util.geometry.vector import Vector2
 
 TICK_PER_REVOLUTION = 100
@@ -30,6 +30,7 @@ def configuration_stub():
         wheel_radius=WHEEL_RADIUS,
         encoder_ticks_per_revolution=TICK_PER_REVOLUTION,
         distance_between_wheels=DISTANCE_BETWEEN_WHEELS,
+        debug=DebugConfiguration(port=8080, host="0.0.0.0", refresh_rate=10),
     )
 
 
