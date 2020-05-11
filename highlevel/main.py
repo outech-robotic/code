@@ -17,7 +17,6 @@ from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.odometry import OdometryController
-from highlevel.robot.controller.perf_metrics import print_performance_metrics
 from highlevel.robot.controller.sensor.rplidar import LidarController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
@@ -40,6 +39,7 @@ from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
+from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 
 CONFIG = Configuration(

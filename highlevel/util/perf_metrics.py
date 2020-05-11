@@ -24,5 +24,3 @@ async def print_performance_metrics():
             error_percent=f"{delta/INTERVAL:.2%}",
             active_tasks=active_tasks,
         )
-
-

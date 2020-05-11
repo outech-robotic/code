@@ -69,7 +69,7 @@ def ray_segment_intersection(
 
 
 def ray_segments_intersection(
-    ray: Ray, segments: Iterable[Segment]
+        ray: Ray, segments: Iterable[Segment]
 ) -> Tuple[Optional[Vector2], Optional[float]]:
     """
     Compute the intersection of a ray and a set of segments.
