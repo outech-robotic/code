@@ -27,6 +27,7 @@ flask = "*"
 flask-socketio = "*"
 flask-wtf = "*"
 python-can = "*"
+colorama = "*"
 psutil = "*"
 
 [requires]
