@@ -15,7 +15,7 @@ async def print_performance_metrics() -> None:
     """
     loop = asyncio.get_event_loop()
     while True:
-        # Mesure elapsed time after a sleep.
+        # Measure elapsed time after a sleep.
         # If the event loop is clogged, sleep will take more time to execute.
         # For instance "sleep(1)" might take 1.5s to execute.
         start = loop.time()
