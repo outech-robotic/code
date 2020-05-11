@@ -39,6 +39,7 @@ from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
+from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 
 CONFIG = Configuration(
@@ -173,6 +174,7 @@ async def main() -> None:
         debug_controller.run(),
         socket_adapter.run(),
         motor_board_adapter.run(),
+        print_performance_metrics(),
     }
 
     if is_simulation:
