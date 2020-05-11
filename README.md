@@ -28,7 +28,7 @@ See [pipenv documentation](https://github.com/pypa/pipenv/blob/master/README.md)
 
 ### Install the python dependencies:
 ```shell
-pipenv install # Equivalent to `pip install -r requirements.txt`
+pipenv install -d # Equivalent to `pip install -r requirements.txt`
 ```
 
 ### On Raspberry Pi you might have to: 

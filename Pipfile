@@ -9,18 +9,17 @@ name = "piwheels"
 verify_ssl = true
 
 [dev-packages]
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+yapf = "*"
+mypy = "*"
+pylint = "*"
 
 [packages]
 numpy = "*"
 structlog = "*"
-mypy = "*"
-pylint = "*"
-yapf = "*"
-pytest = "*"
-pytest-asyncio = "*"
-pytest-cov = "*"
 requests = "*"
-colorama = "*"
 rplidar-roboticia = "*"
 websockets = "*"
 protobuf = "*"
@@ -28,6 +27,7 @@ flask = "*"
 flask-socketio = "*"
 flask-wtf = "*"
 python-can = "*"
+colorama = "*"
 psutil = "*"
 
 [requires]
