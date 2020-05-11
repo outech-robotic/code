@@ -9,7 +9,7 @@ pipeline {
             steps {
                 sh 'python --version'
                 sh 'pip install pipenv'
-                sh 'pipenv install'
+                sh 'pipenv install -d'
             }
         }
         stage('unit-tests') {
