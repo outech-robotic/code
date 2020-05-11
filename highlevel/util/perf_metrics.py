@@ -9,13 +9,13 @@ from highlevel.logger import LOGGER
 INTERVAL = 1
 
 
-async def print_performance_metrics() -> NonMeasuree:
+async def print_performance_metrics() -> None:
     """
     Periodically log some performance metrics.
     """
     loop = asyncio.get_event_loop()
     while True:
-        # Measure elapsed time after a sleep.
+        # Mesure elapsed time after a sleep.
         # If the event loop is clogged, sleep will take more time to execute.
         # For instance "sleep(1)" might take 1.5s to execute.
         start = loop.time()
