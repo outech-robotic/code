@@ -4,6 +4,8 @@ Performance monitoring module.
 import asyncio
 from asyncio import Task
 
+import psutil
+
 from highlevel.logger import LOGGER
 
 INTERVAL = 1
@@ -27,10 +29,12 @@ async def print_performance_metrics() -> None:
         tasks = [t for t in Task.all_tasks(loop) if not t.done()]
         active_tasks = len(tasks)
 
+        vmem = psutil.virtual_memory()
         LOGGER.get().info(
-            "event_loop_perf",
-            time=f"{elapsed_time * 1000:.3f}ms",
-            delta=f"{delta * 1000:.3f}ms",
-            error_percent=f"{delta/INTERVAL:.2%}",
+            "performance_stats",
+            event_loop_error=f"{delta/INTERVAL:.2%}",
+            event_loop_delta=f"{delta*1000:.3f}ms",
             active_tasks=active_tasks,
+            cpu=f'{psutil.cpu_percent()/100:.2%}',
+            memory=f'{vmem.used / vmem.total:.2%}',
         )
