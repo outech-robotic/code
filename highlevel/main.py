@@ -17,6 +17,7 @@ from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.odometry import OdometryController
+from highlevel.robot.controller.perf_metrics import print_performance_metrics
 from highlevel.robot.controller.sensor.rplidar import LidarController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
@@ -173,6 +174,7 @@ async def main() -> None:
         debug_controller.run(),
         socket_adapter.run(),
         motor_board_adapter.run(),
+        print_performance_metrics(),
     }
 
     if is_simulation:
