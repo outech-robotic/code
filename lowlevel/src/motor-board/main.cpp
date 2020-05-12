@@ -64,22 +64,22 @@ int main() {
     if (canpb.receive_msg(msg_rx)) {
       rx_packet++;
       switch (msg_rx.which_message_content) {
-        case BusMessage_moveWheelAtSpeed_tag:serial.println("Packet Received: MoveWheelAtSpeed");
+        case BusMessage_moveWheelAtSpeed_tag:
           mcs.set_target_speed(msg_rx.message_content.moveWheelAtSpeed.left_tick_per_sec,
                                msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
           break;
 
-        case BusMessage_setMotionControlMode_tag:serial.println("Packet Received: SetMotionControlMode");
+        case BusMessage_setMotionControlMode_tag:
           mcs.set_control_mode(msg_rx.message_content.setMotionControlMode.speed);
           break;
 
-        case BusMessage_pidConfig_tag:serial.println("Packet Received: PID Config");
+        case BusMessage_pidConfig_tag:
           mcs.set_kp(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.kp);
           mcs.set_ki(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.ki);
           mcs.set_kd(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.kd);
           break;
 
-        case BusMessage_motionLimit_tag:serial.println("Packet Received: Motion Limits");
+        case BusMessage_motionLimit_tag:
           mcs.set_limits(msg_rx.message_content.motionLimit.wheel_acceleration);
           break;
 
