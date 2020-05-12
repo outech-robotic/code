@@ -4,7 +4,7 @@
 #include <stm32f0xx_ll_tim.h>
 
 /* TIM3 init function */
-void COD_right_init(void) {
+void PWM_init(void) {
   LL_TIM_InitTypeDef TIM_InitStruct = {};
   LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {};
   LL_GPIO_InitTypeDef GPIO_InitStruct = {};

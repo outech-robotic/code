@@ -1,71 +1,7 @@
 #include "stm32f0xx_ll_tim.h"
 #include "peripheral/gpio.h"
 #include "peripheral/tim.h"
-
 #include "config.h"
-//#include "stm32f0xx_hal.h"
-
-
-//
-////TIM16_CH1 : LEFT  - FIN PWM
-//void MX_TIM16_Init(void)
-//{
-//  LL_TIM_InitTypeDef TIM_InitStruct = {};
-//  LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {};
-//  LL_GPIO_InitTypeDef GPIO_InitStruct = {};
-//  /* Peripheral clock enable */
-//  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM16);
-//  LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
-//
-//    /**TIM16 GPIO Configuration
-//     * PA6     ------> TIM16_CH1
-//     */
-//  GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
-//  GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-//  GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
-//  GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-//  GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
-//  GPIO_InitStruct.Alternate = LL_GPIO_AF_5;
-//  LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-//
-//
-//  /* Peripheral clock enable */
-//  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM16);
-//
-//  /* TIM Configuration */
-//  TIM_InitStruct.Prescaler = CONST_PWM_PRESCALER-1;
-//  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-//  TIM_InitStruct.Autoreload = CONST_PWM_AUTORELOAD-1;
-//  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-//  TIM_InitStruct.RepetitionCounter = CONST_PWM_REPETITION-1;
-//  LL_TIM_Init(TIM16, &TIM_InitStruct);
-//  LL_TIM_DisableARRPreload(TIM16);
-//
-//  /* TIM Output Compare (PWM) mode Configuration */
-//  LL_TIM_OC_EnablePreload(TIM16, LL_TIM_CHANNEL_CH1);
-//  TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
-//  TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
-//  TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-//  TIM_OC_InitStruct.CompareValue = 1000;
-//  TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
-//  TIM_OC_InitStruct.OCNPolarity = LL_TIM_OCPOLARITY_HIGH;
-//  TIM_OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_LOW;
-//  TIM_OC_InitStruct.OCNIdleState = LL_TIM_OCIDLESTATE_LOW;
-//  LL_TIM_OC_Init(TIM16, LL_TIM_CHANNEL_CH1, &TIM_OC_InitStruct);
-//  LL_TIM_OC_DisableFast(TIM16, LL_TIM_CHANNEL_CH1);
-//
-//  /* - Enable PWM channel
-//   * - Enable output
-//   * - Generate an update event to force update all parameters
-//   * - Enable timer
-//   */
-//  LL_TIM_CC_EnableChannel(TIM16, LL_TIM_CHANNEL_CH1);
-//  LL_TIM_EnableAllOutputs(TIM16);
-//  LL_TIM_GenerateEvent_UPDATE(TIM16);
-//  LL_TIM_EnableCounter(TIM16);
-//
-//}
-
 
 //CH1 : PWM1 PA8
 //CH3 : PWM2 PA10

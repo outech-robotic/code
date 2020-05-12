@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-void COD_right_init(void);
+void PWM_init(void);
 
 int32_t COD_get_left();
 int16_t COD_get_right();
