@@ -18,8 +18,8 @@ GPIO_Pin pins_pwm[3] = {PIN_PWM_1, PIN_PWM_2, PIN_PWM_3};
 
 int main() {
   // Initialize all peripherals
-  MX_CAN_Init();
-  MX_TIM3_Init(); // PWM
+  CAN_init();
+  COD_right_init(); // PWM
 
 
   /**********************************************************************

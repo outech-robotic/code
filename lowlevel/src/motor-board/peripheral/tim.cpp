@@ -69,7 +69,7 @@
 
 //CH1 : PWM1 PA8
 //CH3 : PWM2 PA10
-void MX_TIM1_Init(void) {
+void PWM_init(void) {
   LL_TIM_InitTypeDef TIM_InitStruct = {};
   LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {};
   LL_GPIO_InitTypeDef GPIO_InitStruct = {};
@@ -139,7 +139,7 @@ void MX_TIM1_Init(void) {
 }
 
 /* TIM2 init function */
-void MX_TIM2_Init(void) {
+void COD_left_init(void) {
   LL_TIM_InitTypeDef TIM_InitStruct = {};
   LL_GPIO_InitTypeDef GPIO_InitStruct = {};
 
@@ -190,7 +190,7 @@ void MX_TIM2_Init(void) {
 }
 
 /* TIM3 init function */
-void MX_TIM3_Init(void) {
+void COD_right_init(void) {
   LL_TIM_InitTypeDef TIM_InitStruct = {};
   LL_GPIO_InitTypeDef GPIO_InitStruct = {};
 
@@ -239,7 +239,7 @@ void MX_TIM3_Init(void) {
 }
 //Simple 1khz interrupt
 /* TIM14 init function */
-void MX_TIM14_Init(void) {
+void IRQ_control_init(void) {
   LL_TIM_InitTypeDef TIM_InitStruct = {};
   /* Peripheral clock enable */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM14);

@@ -101,7 +101,7 @@ int CAN_send_packet(can_msg *msg) {
 }
 
 /* CAN init function */
-void MX_CAN_Init() {
+void CAN_init() {
   HAL_StatusTypeDef res = HAL_OK;
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_CAN);
   hcan.State = HAL_CAN_STATE_RESET;

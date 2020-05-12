@@ -61,7 +61,7 @@ set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 
 # SUB PROJECTS
 add_subdirectory(src/motor-board)
-add_subdirectory(src/motor-board-g4)
+#add_subdirectory(src/motor-board-g4)
 add_subdirectory(src/servo-board)
 
 add_custom_target(build_all DEPENDS build_motor build_motor_g4 build_servo build_servo_nucleo)
