@@ -14,9 +14,9 @@ class LIDARAdapter(ABC):
     Interface for a LIDAR adapter.
     """
     @abstractmethod
-    def register_handler(self, handler: Callback) -> None:
+    def register_callback(self, callback: Callback) -> None:
         """
-        Register a handler to be called each time the LIDAR makes a full rotation.
+        Register a callback to be called each time the LIDAR makes a full rotation.
         """
 
     @abstractmethod

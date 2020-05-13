@@ -10,7 +10,7 @@ from highlevel.simulation.entity.simulation_configuration import SimulationConfi
 class SimulationGateway:
     """
     This is the gateway from the simulation world to the "real" world. 
-    This gateway communicates with the sensors of the robot (and thus the handlers of the robot).
+    This gateway communicates with the sensors of the robot (and thus the router of the robot).
     """
     def __init__(self, simulation_configuration: SimulationConfiguration,
                  motor_board_adapter: SocketAdapter,

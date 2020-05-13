@@ -1,5 +1,5 @@
 """
-Simulation handler module.
+Simulation router module.
 """
 import math
 from typing import Iterator, Tuple
@@ -21,7 +21,7 @@ def _spread_delta_on_ticks(delta: int,
         map(int, numpy.diff(numpy.round(numpy.linspace(0, delta, num=ticks)))))
 
 
-class SimulationHandler:
+class SimulationRouter:
     """
     Listen to all the "real-world" orders from the robot (i.e. move forward) and convert them into 
     actions inside the simulation. This is the entry point of the simulation.
@@ -49,7 +49,7 @@ class SimulationHandler:
         else:
             return
 
-        LOGGER.get().info('simulation_handler_received_movement_order',
+        LOGGER.get().info('simulation_router_received_movement_order',
                           ticks=msg_ticks,
                           type='ROTATE' if rotate else 'TRANSLATE')
 

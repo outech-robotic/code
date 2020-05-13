@@ -14,13 +14,13 @@ class RPLIDARAdapter(LIDARAdapter):
     """Rplidar adapter receives positions of obstacles from a rplidar."""
     def __init__(self, rplidar_obj: rplidar.RPLidar):
         self._rplidar = rplidar_obj
-        self._handlers: List[Callback] = []
+        self._callbacks: List[Callback] = []
 
-    def register_handler(self, handler: Callback) -> None:
+    def register_callback(self, callback: Callback) -> None:
         """
-        Register a handler to be called with the LIDAR readings.
+        Register a callback to be called with the LIDAR readings.
         """
-        self._handlers.append(handler)
+        self._callbacks.append(callback)
 
     async def run(self):
         """
@@ -37,8 +37,8 @@ class RPLIDARAdapter(LIDARAdapter):
 
                 readings = tuple((angle * pi / 180, distance)
                                  for _, angle, distance in scans)
-                for handler in self._handlers:
-                    handler(readings)
+                for callback in self._callbacks:
+                    callback(readings)
         finally:
             self._rplidar.stop()
             self._rplidar.stop_motor()

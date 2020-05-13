@@ -16,13 +16,13 @@ class SimulatedLIDARAdapter(LIDARAdapter):
     Fake LIDAR.
     """
     def __init__(self):
-        self._handlers: List[Callback] = []
+        self._callbacks: List[Callback] = []
 
-    def register_handler(self, handler: Callback) -> None:
+    def register_callback(self, callback: Callback) -> None:
         """
-        Register a handler.
+        Register a callback.
         """
-        self._handlers.append(handler)
+        self._callbacks.append(callback)
 
     async def run(self) -> None:
         """
@@ -40,7 +40,7 @@ class SimulatedLIDARAdapter(LIDARAdapter):
     def push_simulated_readings(
             self, readings: Tuple[Tuple[Radian, Millimeter], ...]) -> None:
         """
-        Push simulated readings to handlers.
+        Push simulated readings to callbacks.
         """
-        for handler in self._handlers:
-            handler(readings)
+        for callback in self._callbacks:
+            callback(readings)

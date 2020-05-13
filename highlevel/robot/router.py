@@ -1,5 +1,5 @@
 """
-Protobuf message handler module.
+Protobuf message router module.
 """
 from google.protobuf import json_format
 
@@ -9,8 +9,8 @@ from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 
 
-class ProtobufHandler:
-    """ Protobuf handler : take bytes and decode to BusMessage """
+class ProtobufRouter:
+    """ Protobuf router decodes raw bytes messages and dispatches them to controllers. """
     def __init__(self, match_action_controller: MatchActionController,
                  localization_controller: LocalizationController):
         self.localization_controller = localization_controller
