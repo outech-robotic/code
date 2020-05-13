@@ -15,16 +15,15 @@ message EncoderPositionMsg {
   sint32 right_tick = 2;
 }
 
-message MotionLimitMsg {
-  uint32 wheel_acceleration_left  = 1;
-  uint32 wheel_acceleration_right = 2;
+message PIDCoefficients {
+  uint32 kp = 1;
+  uint32 ki = 2;
+  uint32 kd = 3;
 }
 
 message PIDConfigMsg {
-  uint32 pid_id = 1;
-  uint32 kp = 6;
-  uint32 ki = 7;
-  uint32 kd = 8;
+  PIDCoefficients pid_speed_left = 1;
+  PIDCoefficients pid_speed_right = 2;
 }
 
 message SetMotionControlModeMsg {
@@ -84,7 +83,7 @@ message BusMessage {
     MovementEndedMsg movementEnded = 3;
     EncoderPositionMsg encoderPosition = 4;
     PIDConfigMsg pidConfig = 5;
-    MotionLimitMsg motionLimit = 6;
+
     SetMotionControlModeMsg setMotionControlMode = 7;
     MoveWheelAtSpeedMsg moveWheelAtSpeed = 8;
     TranslateMsg translate = 9;

@@ -114,17 +114,17 @@ class MotionController {
   /**
    * Sets the proportional constant of the selected PID
    */
-  void set_kp(uint8_t id, uint32_t k);
+  void set_kp(uint32_t left, uint32_t right);
 
   /**
    * Sets the integral constant of the selected PID
    */
-  void set_ki(uint8_t id, uint32_t k);
+  void set_ki(uint32_t left, uint32_t right);
 
   /**
    * Sets the derivative constant of the selected PID
    */
-  void set_kd(uint8_t id, uint32_t k);
+  void set_kd(uint32_t left, uint32_t right);
 
   /**
    * Gets the PID data associated with the PID_DATA_ID requested_data, for a given PID_ID id

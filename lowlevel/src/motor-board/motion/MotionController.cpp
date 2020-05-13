@@ -38,6 +38,9 @@ void MotionController::init() {
   cod_right = {};
   cod_right_raw_last = 0;
 
+  robot_status.wheel_accel_max_left  = MAX_ACCEL_TICK;
+  robot_status.wheel_accel_max_right = MAX_ACCEL_TICK;
+
   IRQ_control_init();
 }
 
@@ -157,36 +160,22 @@ void MotionController::set_raw_pwm(int16_t left, int16_t right) {
 }
 
 
-void MotionController::set_kp(uint8_t id, uint32_t k) {
-  switch (id) {
-    case PID_ID::PID_LEFT_SPEED :pid_speed_left.set_kp(k);
-      break;
-    case PID_ID::PID_RIGHT_SPEED :pid_speed_right.set_kp(k);
-      break;
-    default:while (true);
-  }
+void MotionController::set_kp(uint32_t left, uint32_t right) {
+  pid_speed_left.set_kp(left);
+  pid_speed_right.set_kp(right);
 }
 
 
-void MotionController::set_ki(uint8_t id, uint32_t k) {
-  switch (id) {
-    case PID_ID::PID_LEFT_SPEED :pid_speed_left.set_ki(k, MOTION_CONTROL_FREQ);
-      break;
-    case PID_ID::PID_RIGHT_SPEED :pid_speed_right.set_ki(k, MOTION_CONTROL_FREQ);
-      break;
-    default:while (true);
-  }
+void MotionController::set_ki(uint32_t left, uint32_t right) {
+  pid_speed_left.set_ki(left, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_ki(right, MOTION_CONTROL_FREQ);
+
 }
 
 
-void MotionController::set_kd(uint8_t id, uint32_t k) {
-  switch (id) {
-    case PID_ID::PID_LEFT_SPEED :pid_speed_left.set_kd(k, MOTION_CONTROL_FREQ);
-      break;
-    case PID_ID::PID_RIGHT_SPEED :pid_speed_right.set_kd(k, MOTION_CONTROL_FREQ);
-      break;
-    default:while (true);
-  }
+void MotionController::set_kd(uint32_t left, uint32_t right) {
+  pid_speed_left.set_kd(left, MOTION_CONTROL_FREQ);
+  pid_speed_right.set_kd(right, MOTION_CONTROL_FREQ);
 }
 
 

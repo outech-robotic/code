@@ -8,14 +8,13 @@
 // Send position of encoders every 10ms
 Metro position_timer(10);
 // If no new speed order from HL, stop moving after 100ms
-Metro keepalive_timer(100);
+Metro keepalive_watchdog(100);
 // Send heartbeat every second
 Metro heartbeat_timer(1000);
 
 
 Serial serial;
 MotionController mcs;
-
 Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
 
 int main() {
@@ -49,7 +48,7 @@ int main() {
   mcs.set_raw_pwm(0,0);
   mcs.set_control_mode(true);
 
-  serial.init(115200);
+  serial.init(CONST_USART_BAUDRATE);
   serial.print("Setup done \r\n");
 
   canpb.send_log("Starting");
@@ -68,26 +67,22 @@ int main() {
     // Order reception
     if (canpb.receive_msg(msg_rx)) {
       nb_packets_rx++;
+      keepalive_watchdog.reset();
+
       switch (msg_rx.which_message_content) {
         case BusMessage_moveWheelAtSpeed_tag:
           mcs.set_speed_targets(msg_rx.message_content.moveWheelAtSpeed.left_tick_per_sec,
                                 msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
-          keepalive_timer.reset();
           break;
 
-        case BusMessage_setMotionControlMode_tag:mcs.set_control_mode(msg_rx.message_content.setMotionControlMode.speed);
+        case BusMessage_setMotionControlMode_tag:
+	      mcs.set_control_mode(msg_rx.message_content.setMotionControlMode.speed);
           break;
 
         case BusMessage_pidConfig_tag:
-          mcs.set_kp(msg_rx.message_content.pidConfig.pid_id,
-                     msg_rx.message_content.pidConfig.kp);
-          mcs.set_ki(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.ki);
-          mcs.set_kd(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.kd);
-          break;
-
-        case BusMessage_motionLimit_tag:
-          mcs.set_limits(msg_rx.message_content.motionLimit.wheel_acceleration_left,
-                         msg_rx.message_content.motionLimit.wheel_acceleration_left);
+          mcs.set_kp(msg_rx.message_content.pidConfig.pid_speed_left.kp, msg_rx.message_content.pidConfig.pid_speed_right.kp);
+          mcs.set_ki(msg_rx.message_content.pidConfig.pid_speed_left.ki, msg_rx.message_content.pidConfig.pid_speed_right.ki);
+          mcs.set_kd(msg_rx.message_content.pidConfig.pid_speed_left.kd, msg_rx.message_content.pidConfig.pid_speed_right.kd);
           break;
 
         default:break;
@@ -96,7 +91,7 @@ int main() {
 
 
     //If the master didn't send new speed setpoints recently enough, stop moving
-    if (keepalive_timer.check()){
+    if (keepalive_watchdog.check()){
       mcs.set_speed_targets(0, 0);
     }
 
