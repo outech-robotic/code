@@ -1,8 +1,6 @@
 """
 Strategy module
 """
-import asyncio
-import os
 
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.motion import MotionController

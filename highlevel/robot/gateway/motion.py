@@ -11,7 +11,6 @@ class MotionGateway:
     """
     Motion gateway.
     """
-
     def __init__(self, motor_board_adapter: SocketAdapter):
         self.motor_board_adapter = motor_board_adapter
 

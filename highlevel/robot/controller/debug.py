@@ -5,7 +5,7 @@ import asyncio
 import inspect
 import json
 from dataclasses import asdict
-from typing import List, Callable, Awaitable, Dict, Any
+from typing import Callable, Awaitable, Dict, Any
 
 import websockets
 from aiohttp import web
@@ -16,16 +16,18 @@ from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.gateway.motion import MotionGateway
-from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.util.get_methods import get_methods
 from highlevel.util.json_encoder import RobotJSONEncoder
 from highlevel.util.probe import Probe, DebugEvent
 
 
 def get_last_args_sent() -> Dict[str, Dict[str, Any]]:
+    """
+    Get the last argument sent by the client.
+    """
     try:
-        with open("debug_last_arguments.json", "r") as f:
-            data = json.loads(f.read())
+        with open("debug_last_arguments.json", "r") as file:
+            data = json.loads(file.read())
 
         return data
     except FileNotFoundError:
@@ -33,33 +35,48 @@ def get_last_args_sent() -> Dict[str, Dict[str, Any]]:
 
 
 def set_last_args_sent(last_args: Dict[str, Dict[str, Any]]) -> None:
-    with open("debug_last_arguments.json", "w") as f:
-        f.write(json.dumps(last_args))
+    """
+    Save the last argument sent by the client.
+    """
+    with open("debug_last_arguments.json", "w") as file:
+        file.write(json.dumps(last_args))
 
 
 class DebugController:
     """
     Class that sends periodically the state of the robot on a websocket.
+    Also exposes a "Action" API to control the robot.
     """
-    def __init__(self, configuration: Configuration,
-                 simulation_configuration: SimulationConfiguration,
-                 probe: Probe, event_loop: asyncio.AbstractEventLoop,
-                 motion_gateway: MotionGateway, localization_controller: LocalizationController):
+
+    # pylint: disable=too-many-arguments
+    def __init__(self, configuration: Configuration, probe: Probe,
+                 event_loop: asyncio.AbstractEventLoop,
+                 motion_gateway: MotionGateway,
+                 localization_controller: LocalizationController):
         self._configuration = configuration
-        self._simulation_configuration = simulation_configuration
         self._probe = probe
         self._event_loop = event_loop
-        self._actions = get_methods(motion_gateway) + get_methods(localization_controller)
+        self._actions = get_methods(motion_gateway) + get_methods(
+            localization_controller)
 
     async def run(self) -> None:
+        """
+        Run the whole debug controller.
+        """
         host = self._configuration.debug.host
-        stop_http = await self.start_http_server(host, self._configuration.debug.http_port)
+        stop_http = await self.start_http_server(
+            host, self._configuration.debug.http_port)
         try:
-            await self.run_websocket_server(host, self._configuration.debug.websocket_port)
+            await self.run_websocket_server(
+                host, self._configuration.debug.websocket_port)
         finally:
             await stop_http()
 
-    async def start_http_server(self, host: str, port: int) -> Callable[[], Awaitable[None]]:
+    async def start_http_server(self, host: str,
+                                port: int) -> Callable[[], Awaitable[None]]:
+        """
+        Start the HTTP server. The HTTP server exposes a REST API to execute actions on the robot.
+        """
         LOGGER.get().info("http_server_start", port=port)
 
         app = web.Application()
@@ -122,33 +139,23 @@ class DebugController:
         return web.HTTPNoContent()
 
     async def _http_get_actions(self, _):
-        response = {
-            'functions': []
-        }
+        response = {'functions': []}
         for action in self._actions:
             response['functions'].append({
-                'name': action.name,
-                'args': action.args,
-                'documentation': action.documentation,
-                'last_args_sent': get_last_args_sent().get(action.name, {})
+                'name':
+                action.name,
+                'args':
+                action.args,
+                'documentation':
+                action.documentation,
+                'last_args_sent':
+                get_last_args_sent().get(action.name, {})
             })
         return web.json_response(response)
 
-    def _get_config_events(self, time: float) -> List[DebugEvent]:
-        configuration_event = DebugEvent(
-            key='configuration',
-            time=time,
-            value=asdict(self._configuration),
-        )
-        simulation_configuration_event = DebugEvent(
-            key='simulation_configuration',
-            time=time,
-            value=asdict(self._simulation_configuration),
-        )
-        return [configuration_event, simulation_configuration_event]
-
-    async def _websocket_callback(self, websocket: websockets.WebSocketServerProtocol,
-                                  _: str) -> None:
+    async def _websocket_callback(
+            self, websocket: websockets.WebSocketServerProtocol,
+            _: str) -> None:
         """
         Function executed for each new incoming connection.
         """
@@ -156,7 +163,13 @@ class DebugController:
 
         LOGGER.get().debug("sending_config_to_debug_client")
         data, cursor = self._probe.poll()
-        config_events = self._get_config_events(data[-1].time)
+        config_events = [
+            DebugEvent(
+                key='configuration',
+                time=data[-1].time,
+                value=asdict(self._configuration),
+            ),
+        ]
 
         config_json_data = json.dumps(config_events, cls=RobotJSONEncoder)
         await websocket.send(config_json_data)
