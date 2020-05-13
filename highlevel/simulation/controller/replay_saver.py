@@ -5,8 +5,8 @@ import json
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.simulation.client.http import HTTPClient
-from highlevel.simulation.client.web_browser import WebBrowserClient
+from highlevel.adapter.http import HTTPClient
+from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.util.json_encoder import RobotJSONEncoder
 from highlevel.util.probe import Probe, DebugEvent

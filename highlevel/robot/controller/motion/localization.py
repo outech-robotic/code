@@ -10,7 +10,7 @@ from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Direction, Radian, Millimeter
-from highlevel.robot.gateway.motion import MotionGateway
+from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.geometry.direction import right, backward, left, forward
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.probe import Probe
@@ -42,12 +42,12 @@ class LocalizationController:
     """
     def __init__(self, symmetry_controller: SymmetryController,
                  odometry_controller: OdometryController,
-                 configuration: Configuration, motion_gateway: MotionGateway,
+                 configuration: Configuration, motor_gateway: MotorGateway,
                  probe: Probe):
         self.odometry_controller = odometry_controller
         self.symmetry_controller = symmetry_controller
         self.configuration = configuration
-        self.motion_gateway = motion_gateway
+        self.motor_gateway = motor_gateway
         self.probe = probe
 
         self._state = State(
@@ -108,7 +108,7 @@ class LocalizationController:
                                ticks_per_revolution)
 
         self._state.movement_done_event.clear()
-        await self.motion_gateway.translate(distance_ticks)
+        await self.motor_gateway.translate(distance_ticks)
         await self._state.movement_done_event.wait()
 
     async def rotate(self, angle: Radian) -> None:
@@ -126,7 +126,7 @@ class LocalizationController:
                                ticks_per_revolution)
 
         self._state.movement_done_event.clear()
-        await self.motion_gateway.rotate(distance_ticks)
+        await self.motor_gateway.rotate(distance_ticks)
         await self._state.movement_done_event.wait()
 
     def get_angle(self) -> Radian:

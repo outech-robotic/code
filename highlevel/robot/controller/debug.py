@@ -15,7 +15,7 @@ from websockets.protocol import State
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.gateway.motion import MotionGateway
+from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.get_methods import get_methods
 from highlevel.util.json_encoder import RobotJSONEncoder
 from highlevel.util.probe import Probe, DebugEvent
@@ -51,12 +51,12 @@ class DebugController:
     # pylint: disable=too-many-arguments
     def __init__(self, configuration: Configuration, probe: Probe,
                  event_loop: asyncio.AbstractEventLoop,
-                 motion_gateway: MotionGateway,
+                 motor_gateway: MotorGateway,
                  localization_controller: LocalizationController):
         self._configuration = configuration
         self._probe = probe
         self._event_loop = event_loop
-        self._actions = get_methods(motion_gateway) + get_methods(
+        self._actions = get_methods(motor_gateway) + get_methods(
             localization_controller)
 
     async def run(self) -> None:

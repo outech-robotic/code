@@ -7,11 +7,11 @@ import os
 import rplidar
 from serial.tools import list_ports
 
-from highlevel.robot.adapter.lidar import LIDARAdapter
-from highlevel.robot.adapter.lidar.rplidar import RPLIDARAdapter
-from highlevel.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
-from highlevel.robot.adapter.socket import SocketAdapter
-from highlevel.robot.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
+from highlevel.adapter import LIDARAdapter
+from highlevel.adapter import RPLIDARAdapter
+from highlevel.adapter import SimulatedLIDARAdapter
+from highlevel.adapter import SocketAdapter
+from highlevel.adapter import TCPSocketAdapter, LoopbackSocketAdapter
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
@@ -23,10 +23,10 @@ from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
-from highlevel.robot.gateway.motion import MotionGateway
+from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
-from highlevel.simulation.client.http import HTTPClient
-from highlevel.simulation.client.web_browser import WebBrowserClient
+from highlevel.adapter.http import HTTPClient
+from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.controller.runner import SimulationRunner
@@ -88,7 +88,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i.provide('debug_controller', DebugController)
     i.provide('match_action_controller', MatchActionController)
 
-    i.provide('motion_gateway', MotionGateway)
+    i.provide('motor_gateway', MotorGateway)
 
     i.provide('probe', Probe)
     i.provide('event_loop', asyncio.get_event_loop())

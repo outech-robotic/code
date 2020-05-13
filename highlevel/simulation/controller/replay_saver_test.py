@@ -4,8 +4,8 @@ Test for replay saver module.
 import json
 from unittest.mock import MagicMock
 
-from highlevel.simulation.client.http import HTTPClient
-from highlevel.simulation.client.web_browser import WebBrowserClient
+from highlevel.adapter.http import HTTPClient
+from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.util.probe import DebugEvent
 

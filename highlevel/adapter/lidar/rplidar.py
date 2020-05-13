@@ -7,7 +7,7 @@ from typing import List
 
 import rplidar
 
-from highlevel.robot.adapter.lidar import Callback, LIDARAdapter
+from highlevel.adapter import Callback, LIDARAdapter
 
 
 class RPLIDARAdapter(LIDARAdapter):

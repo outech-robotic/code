@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from highlevel.robot.adapter.socket.socket_adapter import TCPSocketAdapter
+from highlevel.adapter import TCPSocketAdapter
 
 
 @asynccontextmanager

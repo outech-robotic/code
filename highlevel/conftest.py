@@ -6,15 +6,15 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from highlevel.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
-from highlevel.robot.adapter.socket import SocketAdapter
+from highlevel.adapter import SimulatedLIDARAdapter
+from highlevel.adapter import SocketAdapter
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.gateway.motion import MotionGateway
+from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
@@ -138,11 +138,11 @@ def simulation_gateway_mock():
 
 
 @fixture
-def motion_gateway_mock():
+def motor_gateway_mock():
     """
     Motion gateway mock.
     """
-    mock = MagicMock(spec=MotionGateway)
+    mock = MagicMock(spec=MotorGateway)
 
     future = asyncio.Future()
     future.set_result(None)
