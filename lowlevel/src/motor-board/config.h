@@ -19,6 +19,8 @@
 
 // ASSERVISSEMENT
 #define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
+
+
 /*
  * COMMUNICATIONS
  */
@@ -27,15 +29,17 @@
 //#define CONST_CAN_SPEED_100K
 #define CONST_CAN_SPEED_1M
 
-//USART CONFIG
-#define CONST_USART_BAUDRATE (9600)
 
-//BUFFER SIZE USED IN ISR
+//USART CONFIG
+#define CONST_USART_BAUDRATE (115200)
+
+
 // IDs used by board on CAN interface
 #define CONST_CAN_BOARD_ID    ((uint16_t)0x000)                           // 10 bits unique board ID
 #define CONST_CAN_RX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 0u) // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers
 #define CONST_CAN_TX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 1u) // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
 #define CONST_CAN_STD_SHIFT   (5)
+
 
 //BUFFER SIZE USED IN ISR
 #define CONST_CAN_BUFFER_SIZE ((uint16_t)16)
@@ -43,6 +47,8 @@
 #define CONST_PB_BUFF_SIZE    ((size_t)8)
 #define CONST_LOG_SIZE        (64)
 #define CONST_LOG_POOL_SIZE   (8)
+
+
 
 /**
  * Project Pin Mapping
@@ -66,10 +72,10 @@
 
 // MOTOR CONTROL PINS (cf L298 IC)
 #define PIN_PWM_L PA8
-#define PIN_PWM_R PA10
-#define PIN_DIR_R2 PB0
-#define PIN_DIR_R1 PB1
-#define PIN_DIR_L2 PB4
 #define PIN_DIR_L1 PB5
+#define PIN_DIR_L2 PB4
+#define PIN_PWM_R PA10
+#define PIN_DIR_R1 PB1
+#define PIN_DIR_R2 PB0
 
 #endif /* UTILITY_CONFIG_H_ */

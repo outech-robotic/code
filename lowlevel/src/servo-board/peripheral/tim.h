@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-void MX_TIM3_Init(void);
+void PWM_init(void);
 
 int32_t COD_get_left();
 int16_t COD_get_right();

@@ -8,10 +8,10 @@
 extern "C" {
 #endif
 
-void MX_TIM1_Init(void);
-void MX_TIM2_Init(void);
-void MX_TIM3_Init(void);
-void MX_TIM14_Init(void);
+void PWM_init(void);
+void COD_left_init(void);
+void COD_right_init(void);
+void IRQ_control_init(void);
 void MX_TIM16_Init(void);
 void MX_TIM17_Init(void);
 

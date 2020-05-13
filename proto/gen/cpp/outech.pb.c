@@ -18,7 +18,7 @@ PB_BIND(MovementEndedMsg, MovementEndedMsg, AUTO)
 PB_BIND(EncoderPositionMsg, EncoderPositionMsg, AUTO)
 
 
-PB_BIND(MotionLimitMsg, MotionLimitMsg, AUTO)
+PB_BIND(PIDCoefficients, PIDCoefficients, AUTO)
 
 
 PB_BIND(PIDConfigMsg, PIDConfigMsg, AUTO)

@@ -38,13 +38,6 @@ typedef struct _LaserSensorMsg {
     uint32_t distance_back_right;
 } LaserSensorMsg;
 
-typedef struct _MotionLimitMsg {
-    uint32_t translation_speed;
-    uint32_t rotation_speed;
-    uint32_t wheel_speed;
-    uint32_t wheel_acceleration;
-} MotionLimitMsg;
-
 typedef struct _MoveWheelAtSpeedMsg {
     int32_t left_tick_per_sec;
     int32_t right_tick_per_sec;
@@ -54,12 +47,11 @@ typedef struct _MovementEndedMsg {
     bool blocked;
 } MovementEndedMsg;
 
-typedef struct _PIDConfigMsg {
-    uint32_t pid_id;
+typedef struct _PIDCoefficients {
     uint32_t kp;
     uint32_t ki;
     uint32_t kd;
-} PIDConfigMsg;
+} PIDCoefficients;
 
 typedef struct _PressureSensorMsg {
     bool on_left;
@@ -93,6 +85,13 @@ typedef struct _TranslateMsg {
     int32_t ticks;
 } TranslateMsg;
 
+typedef struct _PIDConfigMsg {
+    bool has_pid_speed_left;
+    PIDCoefficients pid_speed_left;
+    bool has_pid_speed_right;
+    PIDCoefficients pid_speed_right;
+} PIDConfigMsg;
+
 typedef struct _BusMessage {
     pb_size_t which_message_content;
     union {
@@ -101,7 +100,6 @@ typedef struct _BusMessage {
         MovementEndedMsg movementEnded;
         EncoderPositionMsg encoderPosition;
         PIDConfigMsg pidConfig;
-        MotionLimitMsg motionLimit;
         SetMotionControlModeMsg setMotionControlMode;
         MoveWheelAtSpeedMsg moveWheelAtSpeed;
         TranslateMsg translate;
@@ -120,8 +118,8 @@ typedef struct _BusMessage {
 #define StopMovingMsg_init_default               {0}
 #define MovementEndedMsg_init_default            {0}
 #define EncoderPositionMsg_init_default          {0, 0}
-#define MotionLimitMsg_init_default              {0, 0, 0, 0}
-#define PIDConfigMsg_init_default                {0, 0, 0, 0}
+#define PIDCoefficients_init_default             {0, 0, 0}
+#define PIDConfigMsg_init_default                {false, PIDCoefficients_init_default, false, PIDCoefficients_init_default}
 #define SetMotionControlModeMsg_init_default     {0, 0, 0}
 #define MoveWheelAtSpeedMsg_init_default         {0, 0}
 #define TranslateMsg_init_default                {0}
@@ -136,8 +134,8 @@ typedef struct _BusMessage {
 #define StopMovingMsg_init_zero                  {0}
 #define MovementEndedMsg_init_zero               {0}
 #define EncoderPositionMsg_init_zero             {0, 0}
-#define MotionLimitMsg_init_zero                 {0, 0, 0, 0}
-#define PIDConfigMsg_init_zero                   {0, 0, 0, 0}
+#define PIDCoefficients_init_zero                {0, 0, 0}
+#define PIDConfigMsg_init_zero                   {false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero}
 #define SetMotionControlModeMsg_init_zero        {0, 0, 0}
 #define MoveWheelAtSpeedMsg_init_zero            {0, 0}
 #define TranslateMsg_init_zero                   {0}
@@ -157,17 +155,12 @@ typedef struct _BusMessage {
 #define LaserSensorMsg_distance_front_right_tag  2
 #define LaserSensorMsg_distance_back_left_tag    3
 #define LaserSensorMsg_distance_back_right_tag   4
-#define MotionLimitMsg_translation_speed_tag     2
-#define MotionLimitMsg_rotation_speed_tag        3
-#define MotionLimitMsg_wheel_speed_tag           4
-#define MotionLimitMsg_wheel_acceleration_tag    5
 #define MoveWheelAtSpeedMsg_left_tick_per_sec_tag 1
 #define MoveWheelAtSpeedMsg_right_tick_per_sec_tag 2
 #define MovementEndedMsg_blocked_tag             1
-#define PIDConfigMsg_pid_id_tag                  1
-#define PIDConfigMsg_kp_tag                      6
-#define PIDConfigMsg_ki_tag                      7
-#define PIDConfigMsg_kd_tag                      8
+#define PIDCoefficients_kp_tag                   1
+#define PIDCoefficients_ki_tag                   2
+#define PIDCoefficients_kd_tag                   3
 #define PressureSensorMsg_on_left_tag            1
 #define PressureSensorMsg_on_center_left_tag     2
 #define PressureSensorMsg_on_center_tag          3
@@ -182,12 +175,13 @@ typedef struct _BusMessage {
 #define SetMotionControlModeMsg_translation_tag  2
 #define SetMotionControlModeMsg_rotation_tag     3
 #define TranslateMsg_ticks_tag                   1
+#define PIDConfigMsg_pid_speed_left_tag          1
+#define PIDConfigMsg_pid_speed_right_tag         2
 #define BusMessage_heartbeat_tag                 1
 #define BusMessage_stopMoving_tag                2
 #define BusMessage_movementEnded_tag             3
 #define BusMessage_encoderPosition_tag           4
 #define BusMessage_pidConfig_tag                 5
-#define BusMessage_motionLimit_tag               6
 #define BusMessage_setMotionControlMode_tag      7
 #define BusMessage_moveWheelAtSpeed_tag          8
 #define BusMessage_translate_tag                 9
@@ -220,21 +214,20 @@ X(a, STATIC,   SINGULAR, SINT32,   right_tick,        2)
 #define EncoderPositionMsg_CALLBACK NULL
 #define EncoderPositionMsg_DEFAULT NULL
 
-#define MotionLimitMsg_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   translation_speed,   2) \
-X(a, STATIC,   SINGULAR, UINT32,   rotation_speed,    3) \
-X(a, STATIC,   SINGULAR, UINT32,   wheel_speed,       4) \
-X(a, STATIC,   SINGULAR, UINT32,   wheel_acceleration,   5)
-#define MotionLimitMsg_CALLBACK NULL
-#define MotionLimitMsg_DEFAULT NULL
+#define PIDCoefficients_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT32,   kp,                1) \
+X(a, STATIC,   SINGULAR, UINT32,   ki,                2) \
+X(a, STATIC,   SINGULAR, UINT32,   kd,                3)
+#define PIDCoefficients_CALLBACK NULL
+#define PIDCoefficients_DEFAULT NULL
 
 #define PIDConfigMsg_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   pid_id,            1) \
-X(a, STATIC,   SINGULAR, UINT32,   kp,                6) \
-X(a, STATIC,   SINGULAR, UINT32,   ki,                7) \
-X(a, STATIC,   SINGULAR, UINT32,   kd,                8)
+X(a, STATIC,   OPTIONAL, MESSAGE,  pid_speed_left,    1) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  pid_speed_right,   2)
 #define PIDConfigMsg_CALLBACK NULL
 #define PIDConfigMsg_DEFAULT NULL
+#define PIDConfigMsg_pid_speed_left_MSGTYPE PIDCoefficients
+#define PIDConfigMsg_pid_speed_right_MSGTYPE PIDCoefficients
 
 #define SetMotionControlModeMsg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, BOOL,     speed,             1) \
@@ -299,7 +292,6 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,stopMoving,message_content.s
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,movementEnded,message_content.movementEnded),   3) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,encoderPosition,message_content.encoderPosition),   4) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,pidConfig,message_content.pidConfig),   5) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,motionLimit,message_content.motionLimit),   6) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,setMotionControlMode,message_content.setMotionControlMode),   7) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,moveWheelAtSpeed,message_content.moveWheelAtSpeed),   8) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,translate,message_content.translate),   9) \
@@ -316,7 +308,6 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.deb
 #define BusMessage_message_content_movementEnded_MSGTYPE MovementEndedMsg
 #define BusMessage_message_content_encoderPosition_MSGTYPE EncoderPositionMsg
 #define BusMessage_message_content_pidConfig_MSGTYPE PIDConfigMsg
-#define BusMessage_message_content_motionLimit_MSGTYPE MotionLimitMsg
 #define BusMessage_message_content_setMotionControlMode_MSGTYPE SetMotionControlModeMsg
 #define BusMessage_message_content_moveWheelAtSpeed_MSGTYPE MoveWheelAtSpeedMsg
 #define BusMessage_message_content_translate_MSGTYPE TranslateMsg
@@ -331,7 +322,7 @@ extern const pb_msgdesc_t HeartbeatMsg_msg;
 extern const pb_msgdesc_t StopMovingMsg_msg;
 extern const pb_msgdesc_t MovementEndedMsg_msg;
 extern const pb_msgdesc_t EncoderPositionMsg_msg;
-extern const pb_msgdesc_t MotionLimitMsg_msg;
+extern const pb_msgdesc_t PIDCoefficients_msg;
 extern const pb_msgdesc_t PIDConfigMsg_msg;
 extern const pb_msgdesc_t SetMotionControlModeMsg_msg;
 extern const pb_msgdesc_t MoveWheelAtSpeedMsg_msg;
@@ -349,7 +340,7 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define StopMovingMsg_fields &StopMovingMsg_msg
 #define MovementEndedMsg_fields &MovementEndedMsg_msg
 #define EncoderPositionMsg_fields &EncoderPositionMsg_msg
-#define MotionLimitMsg_fields &MotionLimitMsg_msg
+#define PIDCoefficients_fields &PIDCoefficients_msg
 #define PIDConfigMsg_fields &PIDConfigMsg_msg
 #define SetMotionControlModeMsg_fields &SetMotionControlModeMsg_msg
 #define MoveWheelAtSpeedMsg_fields &MoveWheelAtSpeedMsg_msg
@@ -367,8 +358,8 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define StopMovingMsg_size                       0
 #define MovementEndedMsg_size                    2
 #define EncoderPositionMsg_size                  12
-#define MotionLimitMsg_size                      24
-#define PIDConfigMsg_size                        24
+#define PIDCoefficients_size                     18
+#define PIDConfigMsg_size                        40
 #define SetMotionControlModeMsg_size             6
 #define MoveWheelAtSpeedMsg_size                 12
 #define TranslateMsg_size                        6
