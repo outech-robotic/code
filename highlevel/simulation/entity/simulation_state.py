@@ -4,23 +4,10 @@ SimulationState of a simulation at a given moment.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
 from typing import List
 
 from highlevel.robot.entity.type import Millisecond
 from highlevel.util.geometry.vector import Vector2
-
-
-class RobotID(str, Enum):
-    """
-    Object type.
-    Made RobotID inherit from `str` to make it JSON serializable.
-    See https://stackoverflow.com/a/51976841
-    """
-    RobotA = 'ROBOT_A'
-    RobotB = 'ROBOT_B'
-    RobotC = 'ROBOT_C'
-    RobotD = 'ROBOT_D'
 
 
 @dataclass
