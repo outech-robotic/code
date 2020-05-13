@@ -17,7 +17,7 @@ from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.odometry import OdometryController
-from highlevel.robot.controller.sensor.rplidar import LidarController
+from highlevel.robot.controller.obstacle import ObstacleController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
@@ -84,7 +84,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i.provide('motion_controller', MotionController)
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
-    i.provide('lidar_controller', LidarController)
+    i.provide('obstacle_controller', ObstacleController)
     i.provide('debug_controller', DebugController)
     i.provide('match_action_controller', MatchActionController)
 
@@ -151,8 +151,8 @@ async def main() -> None:
     i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
-    lidar_controller: LidarController = i.get('lidar_controller')
-    lidar_adapter.register_callback(lidar_controller.set_detection)
+    obstacle_controller: ObstacleController = i.get('obstacle_controller')
+    lidar_adapter.register_callback(obstacle_controller.set_detection)
 
     motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
 
