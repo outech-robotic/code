@@ -49,7 +49,7 @@ def test_happy_path(simulation_configuration_test, configuration_test,
     # Make sure the 2nd argument of the call is a valid JSON string and that it conforms to the
     # JSON expected output.
     data = http_client.post_file.call_args_list[0][0][1]
-    assert json.loads(data)['events'][2:] == [{
+    assert json.loads(data)['events'][1:] == [{
         'time': 0,
         'key': 'position',
         'value': {
