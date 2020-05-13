@@ -28,7 +28,7 @@ from highlevel.robot.router import ProtobufRouter
 from highlevel.adapter.http import HTTPClient
 from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.replay_saver import ReplaySaver
+from highlevel.util.replay_saver import ReplaySaver
 from highlevel.simulation.controller.runner import SimulationRunner
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 from highlevel.adapter.http import HTTPClient
 from highlevel.adapter.web_browser import WebBrowserClient
-from highlevel.simulation.controller.replay_saver import ReplaySaver
+from highlevel.util.replay_saver import ReplaySaver
 from highlevel.util.probe import DebugEvent
 
 

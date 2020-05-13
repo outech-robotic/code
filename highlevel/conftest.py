@@ -16,7 +16,7 @@ from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.replay_saver import ReplaySaver
+from highlevel.util.replay_saver import ReplaySaver
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
