@@ -182,11 +182,3 @@ void MotionController::set_kd(uint32_t left, uint32_t right) {
 void MotionController::set_control_mode(bool speed) {
   robot_status.controlled_speed = speed;
 }
-
-
-void MotionController::set_limits(uint16_t accel_left, uint16_t accel_right) {
-  // Acceleration is in tick/s each mcs update iteration
-  robot_status.wheel_accel_max_left  = accel_left / MOTION_CONTROL_FREQ;
-  // The two wheels have different acceleration limits in ticks, as wheel sizes may vary
-  robot_status.wheel_accel_max_right = accel_right / MOTION_CONTROL_FREQ;
-}

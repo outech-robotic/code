@@ -105,12 +105,7 @@ class MotionController {
    * Sets raw PWM duty cycles on both wheels. Only useful if motion control modes are all disabled
    */
   void set_raw_pwm(int16_t left, int16_t right);
-
-  /**
-   * Sets limits on the motion control : max wheel acceleration(in tick/s/s)
-   */
-  void set_limits(uint16_t accel_left, uint16_t accel_right);
-
+  
   /**
    * Sets the proportional constant of the selected PID
    */
