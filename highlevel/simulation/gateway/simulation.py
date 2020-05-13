@@ -1,10 +1,10 @@
 """
 Simulation gateway module.
 """
-from proto.gen.python.outech_pb2 import MovementEndedMsg, BusMessage, EncoderPositionMsg
-from highlevel.adapter import SimulatedLIDARAdapter
-from highlevel.adapter import SocketAdapter
+from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
+from highlevel.adapter.socket import SocketAdapter
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
+from proto.gen.python.outech_pb2 import MovementEndedMsg, BusMessage, EncoderPositionMsg
 
 
 class SimulationGateway:

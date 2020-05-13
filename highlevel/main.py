@@ -7,11 +7,11 @@ import os
 import rplidar
 from serial.tools import list_ports
 
-from highlevel.adapter import LIDARAdapter
-from highlevel.adapter import RPLIDARAdapter
-from highlevel.adapter import SimulatedLIDARAdapter
-from highlevel.adapter import SocketAdapter
-from highlevel.adapter import TCPSocketAdapter, LoopbackSocketAdapter
+from highlevel.adapter.lidar import LIDARAdapter
+from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
+from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
+from highlevel.adapter.socket import SocketAdapter
+from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
@@ -192,9 +192,8 @@ async def main() -> None:
     except asyncio.CancelledError:
         pass
 
-    if is_simulation:
-        replay_saver = i.get('replay_saver')
-        replay_saver.save_replay()
+    replay_saver = i.get('replay_saver')
+    replay_saver.save_replay()
 
 
 if __name__ == '__main__':

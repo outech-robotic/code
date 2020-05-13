@@ -7,7 +7,7 @@ from asyncio import StreamWriter, StreamReader
 from typing import List
 
 from highlevel.logger import LOGGER
-from highlevel.adapter import SocketAdapter, CallbackFunc
+from highlevel.adapter.socket import SocketAdapter, CallbackFunc
 
 
 class TCPSocketAdapter(SocketAdapter):

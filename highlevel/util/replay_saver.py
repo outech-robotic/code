@@ -3,10 +3,10 @@ Replay saver module.
 """
 import json
 
-from highlevel.logger import LOGGER
-from highlevel.robot.entity.configuration import Configuration
 from highlevel.adapter.http import HTTPClient
 from highlevel.adapter.web_browser import WebBrowserClient
+from highlevel.logger import LOGGER
+from highlevel.robot.entity.configuration import Configuration
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.util.json_encoder import RobotJSONEncoder
 from highlevel.util.probe import Probe, DebugEvent
@@ -20,7 +20,7 @@ REPLAY_VIEWER_URL = 'https://outech-robotic.github.io/code/'
 
 class ReplaySaver:
     """
-    Save simulation state for future replay.
+    Save the event log for future replay.
     """
 
     # pylint: disable=too-many-arguments
@@ -46,14 +46,8 @@ class ReplaySaver:
             time=frames[0].time,
             value=self.configuration,
         )
-        simulation_configuration_event = DebugEvent(
-            key='simulation_configuration',
-            time=frames[0].time,
-            value=self.simulation_configuration,
-        )
         result = {
-            'events':
-            [configuration_event, simulation_configuration_event] + frames,
+            'events': [configuration_event] + frames,
         }
 
         dump = json.dumps(result, cls=RobotJSONEncoder)

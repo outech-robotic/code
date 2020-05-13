@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from highlevel.adapter import SimulatedLIDARAdapter
-from highlevel.adapter import SocketAdapter
+from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
+from highlevel.adapter.socket import SocketAdapter
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.odometry import OdometryController

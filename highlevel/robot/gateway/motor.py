@@ -1,9 +1,8 @@
 """
 Motor gateway module.
 """
-
+from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
-from highlevel.adapter import SocketAdapter
 from proto.gen.python.outech_pb2 import BusMessage, TranslateMsg, RotateMsg
 
 
