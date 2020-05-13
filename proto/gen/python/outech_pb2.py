@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"t\n\x0eMotionLimitMsg\x12\x19\n\x11translation_speed\x18\x02 \x01(\r\x12\x16\n\x0erotation_speed\x18\x03 \x01(\r\x12\x13\n\x0bwheel_speed\x18\x04 \x01(\r\x12\x1a\n\x12wheel_acceleration\x18\x05 \x01(\r\"B\n\x0cPIDConfigMsg\x12\x0e\n\x06pid_id\x18\x01 \x01(\r\x12\n\n\x02kp\x18\x06 \x01(\r\x12\n\n\x02ki\x18\x07 \x01(\r\x12\n\n\x02kd\x18\x08 \x01(\r\"O\n\x17SetMotionControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x13\n\x0btranslation\x18\x02 \x01(\x08\x12\x10\n\x08rotation\x18\x03 \x01(\x08\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\x1b\n\x08\x44\x65\x62ugLog\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\"\xfa\x04\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12&\n\x0bmotionLimit\x18\x06 \x01(\x0b\x32\x0f.MotionLimitMsgH\x00\x12\x38\n\x14setMotionControlMode\x18\x07 \x01(\x0b\x32\x18.SetMotionControlModeMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x12\x1d\n\x08\x64\x65\x62ugLog\x18\x0f \x01(\x0b\x32\t.DebugLogH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
+  serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"S\n\x0eMotionLimitMsg\x12\x1f\n\x17wheel_acceleration_left\x18\x01 \x01(\r\x12 \n\x18wheel_acceleration_right\x18\x02 \x01(\r\"B\n\x0cPIDConfigMsg\x12\x0e\n\x06pid_id\x18\x01 \x01(\r\x12\n\n\x02kp\x18\x06 \x01(\r\x12\n\n\x02ki\x18\x07 \x01(\r\x12\n\n\x02kd\x18\x08 \x01(\r\"O\n\x17SetMotionControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x13\n\x0btranslation\x18\x02 \x01(\x08\x12\x10\n\x08rotation\x18\x03 \x01(\x08\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\x1b\n\x08\x44\x65\x62ugLog\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\"\xfa\x04\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12&\n\x0bmotionLimit\x18\x06 \x01(\x0b\x32\x0f.MotionLimitMsgH\x00\x12\x38\n\x14setMotionControlMode\x18\x07 \x01(\x0b\x32\x18.SetMotionControlModeMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x12\x1d\n\x08\x64\x65\x62ugLog\x18\x0f \x01(\x0b\x32\t.DebugLogH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
 )
 
 
@@ -149,29 +149,15 @@ _MOTIONLIMITMSG = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='translation_speed', full_name='MotionLimitMsg.translation_speed', index=0,
+      name='wheel_acceleration_left', full_name='MotionLimitMsg.wheel_acceleration_left', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='wheel_acceleration_right', full_name='MotionLimitMsg.wheel_acceleration_right', index=1,
       number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='rotation_speed', full_name='MotionLimitMsg.rotation_speed', index=1,
-      number=3, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='wheel_speed', full_name='MotionLimitMsg.wheel_speed', index=2,
-      number=4, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='wheel_acceleration', full_name='MotionLimitMsg.wheel_acceleration', index=3,
-      number=5, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -189,7 +175,7 @@ _MOTIONLIMITMSG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=147,
-  serialized_end=263,
+  serialized_end=230,
 )
 
 
@@ -240,8 +226,8 @@ _PIDCONFIGMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=265,
-  serialized_end=331,
+  serialized_start=232,
+  serialized_end=298,
 )
 
 
@@ -285,8 +271,8 @@ _SETMOTIONCONTROLMODEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=333,
-  serialized_end=412,
+  serialized_start=300,
+  serialized_end=379,
 )
 
 
@@ -323,8 +309,8 @@ _MOVEWHEELATSPEEDMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=414,
-  serialized_end=490,
+  serialized_start=381,
+  serialized_end=457,
 )
 
 
@@ -354,8 +340,8 @@ _TRANSLATEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=492,
-  serialized_end=521,
+  serialized_start=459,
+  serialized_end=488,
 )
 
 
@@ -385,8 +371,8 @@ _ROTATEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=523,
-  serialized_end=549,
+  serialized_start=490,
+  serialized_end=516,
 )
 
 
@@ -423,8 +409,8 @@ _SERVOMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=551,
-  serialized_end=588,
+  serialized_start=518,
+  serialized_end=555,
 )
 
 
@@ -461,8 +447,8 @@ _PUMPANDVALVEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=590,
-  serialized_end=631,
+  serialized_start=557,
+  serialized_end=598,
 )
 
 
@@ -513,8 +499,8 @@ _LASERSENSORMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=634,
-  serialized_end=766,
+  serialized_start=601,
+  serialized_end=733,
 )
 
 
@@ -572,8 +558,8 @@ _PRESSURESENSORMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=768,
-  serialized_end=890,
+  serialized_start=735,
+  serialized_end=857,
 )
 
 
@@ -603,8 +589,8 @@ _DEBUGLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=892,
-  serialized_end=919,
+  serialized_start=859,
+  serialized_end=886,
 )
 
 
@@ -735,8 +721,8 @@ _BUSMESSAGE = _descriptor.Descriptor(
       name='message_content', full_name='BusMessage.message_content',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=922,
-  serialized_end=1556,
+  serialized_start=889,
+  serialized_end=1523,
 )
 
 _BUSMESSAGE.fields_by_name['heartbeat'].message_type = _HEARTBEATMSG

@@ -19,6 +19,8 @@
 
 // ASSERVISSEMENT
 #define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
+
+
 /*
  * COMMUNICATIONS
  */
@@ -30,7 +32,6 @@
 //USART CONFIG
 #define CONST_USART_BAUDRATE (9600)
 
-//BUFFER SIZE USED IN ISR
 // IDs used by board on CAN interface
 #define CONST_CAN_BOARD_ID    ((uint16_t)0x000)                           // 10 bits unique board ID
 #define CONST_CAN_RX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 0u) // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers

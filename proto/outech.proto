@@ -16,10 +16,8 @@ message EncoderPositionMsg {
 }
 
 message MotionLimitMsg {
-  uint32 translation_speed = 2;
-  uint32 rotation_speed = 3;
-  uint32 wheel_speed = 4;
-  uint32 wheel_acceleration = 5;
+  uint32 wheel_acceleration_left  = 1;
+  uint32 wheel_acceleration_right = 2;
 }
 
 message PIDConfigMsg {

@@ -5,8 +5,13 @@
 #include "utility/Metro.hpp"
 #include "config.h"
 
+// Send position of encoders every 10ms
 Metro position_timer(10);
+// If no new speed order from HL, stop moving after 100ms
+Metro keepalive_timer(100);
+// Send heartbeat every second
 Metro heartbeat_timer(1000);
+
 
 Serial serial;
 MotionController mcs;
@@ -14,7 +19,7 @@ MotionController mcs;
 Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
 
 int main() {
-  volatile uint32_t rx_packet = 0;
+  volatile uint32_t nb_packets_rx = 0;
 
   can_msg can_raw_msg;
 
@@ -62,29 +67,37 @@ int main() {
 
     // Order reception
     if (canpb.receive_msg(msg_rx)) {
-      rx_packet++;
+      nb_packets_rx++;
       switch (msg_rx.which_message_content) {
         case BusMessage_moveWheelAtSpeed_tag:
-          mcs.set_target_speed(msg_rx.message_content.moveWheelAtSpeed.left_tick_per_sec,
-                               msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
+          mcs.set_speed_targets(msg_rx.message_content.moveWheelAtSpeed.left_tick_per_sec,
+                                msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
+          keepalive_timer.reset();
           break;
 
-        case BusMessage_setMotionControlMode_tag:
-          mcs.set_control_mode(msg_rx.message_content.setMotionControlMode.speed);
+        case BusMessage_setMotionControlMode_tag:mcs.set_control_mode(msg_rx.message_content.setMotionControlMode.speed);
           break;
 
         case BusMessage_pidConfig_tag:
-          mcs.set_kp(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.kp);
+          mcs.set_kp(msg_rx.message_content.pidConfig.pid_id,
+                     msg_rx.message_content.pidConfig.kp);
           mcs.set_ki(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.ki);
           mcs.set_kd(msg_rx.message_content.pidConfig.pid_id, msg_rx.message_content.pidConfig.kd);
           break;
 
         case BusMessage_motionLimit_tag:
-          mcs.set_limits(msg_rx.message_content.motionLimit.wheel_acceleration);
+          mcs.set_limits(msg_rx.message_content.motionLimit.wheel_acceleration_left,
+                         msg_rx.message_content.motionLimit.wheel_acceleration_left);
           break;
 
         default:break;
       }
+    }
+
+
+    //If the master didn't send new speed setpoints recently enough, stop moving
+    if (keepalive_timer.check()){
+      mcs.set_speed_targets(0, 0);
     }
 
 
@@ -116,9 +129,10 @@ int main() {
 extern "C" {
 #endif
 void TIM14_IRQHandler(void) {
-  // Control loop
   if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
     LL_TIM_ClearFlag_UPDATE(TIM14);
+
+    // Control loop
     mcs.update_position();
     mcs.control_motion();
   }

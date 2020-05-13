@@ -70,28 +70,31 @@ void MotionController::update_position() {
 
 void MotionController::control_motion() {
   if (robot_status.controlled_speed) {
-    cod_left.speed_setpoint = cod_left.speed_setpoint_wanted;
-    cod_right.speed_setpoint = cod_right.speed_setpoint_wanted;
+    cod_left.speed_target_current = cod_left.speed_target;
+    cod_right.speed_target_current = cod_right.speed_target;
+
+    int32_t accel_left  = cod_left.speed_target_current  - cod_left.speed_target_last;
+    int32_t accel_right = cod_right.speed_target_current - cod_right.speed_target_last;
 
     //Wheel Acceleration limits
-    if (((cod_left.speed_setpoint - cod_left.speed_setpoint_last) > robot_status.wheel_accel_max)) {
-      cod_left.speed_setpoint = (cod_left.speed_setpoint_last + robot_status.wheel_accel_max);
-    } else if (((cod_left.speed_setpoint_last - cod_left.speed_setpoint) > robot_status.wheel_accel_max)) {
-      cod_left.speed_setpoint = (cod_left.speed_setpoint_last - robot_status.wheel_accel_max);
+    if (accel_left > robot_status.wheel_accel_max_left) {
+      cod_left.speed_target_current = cod_left.speed_target_last + robot_status.wheel_accel_max_left;
+    } else if (accel_left < -robot_status.wheel_accel_max_left) {
+      cod_left.speed_target_current = cod_left.speed_target_last - robot_status.wheel_accel_max_left;
     }
 
-    if (((cod_right.speed_setpoint - cod_right.speed_setpoint_last) > robot_status.wheel_accel_max)) {
-      cod_right.speed_setpoint = (cod_right.speed_setpoint_last + robot_status.wheel_accel_max);
-    } else if (((cod_right.speed_setpoint_last - cod_right.speed_setpoint) > robot_status.wheel_accel_max)) {
-      cod_right.speed_setpoint = (cod_right.speed_setpoint_last - robot_status.wheel_accel_max);
+    if (accel_right > robot_status.wheel_accel_max_right) {
+      cod_right.speed_target_current = cod_right.speed_target_last + robot_status.wheel_accel_max_right;
+    } else if (accel_left < -robot_status.wheel_accel_max_right) {
+      cod_right.speed_target_current = cod_right.speed_target_last - robot_status.wheel_accel_max_right;
     }
 
-    // Update last wheel setpoints
-    cod_left.speed_setpoint_last = cod_left.speed_setpoint;
-    cod_right.speed_setpoint_last = cod_right.speed_setpoint;
+    // Update last wheel targets
+    cod_left.speed_target_last = cod_left.speed_target_current;
+    cod_right.speed_target_last = cod_right.speed_target_current;
 
-    int16_t left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_setpoint);
-    int16_t right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_setpoint);
+    int16_t left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_target_current);
+    int16_t right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_target_current);
 
     motor_left.set_pwm(left_pwm);
     motor_right.set_pwm(right_pwm);
@@ -99,9 +102,9 @@ void MotionController::control_motion() {
 }
 
 
-void MotionController::set_target_speed(int32_t left, int32_t right) {
-  cod_left.speed_setpoint_wanted = left;
-  cod_right.speed_setpoint_wanted = right;
+void MotionController::set_speed_targets(int32_t left, int32_t right) {
+  cod_left.speed_target = left;
+  cod_right.speed_target = right;
 }
 
 
@@ -192,6 +195,9 @@ void MotionController::set_control_mode(bool speed) {
 }
 
 
-void MotionController::set_limits(uint16_t accel_wheel) {
-  robot_status.wheel_accel_max = accel_wheel / MOTION_CONTROL_FREQ; // Acceleration is in tick/s each mcs update iteration
+void MotionController::set_limits(uint16_t accel_left, uint16_t accel_right) {
+  // Acceleration is in tick/s each mcs update iteration
+  robot_status.wheel_accel_max_left  = accel_left / MOTION_CONTROL_FREQ;
+  // The two wheels have different acceleration limits in ticks, as wheel sizes may vary
+  robot_status.wheel_accel_max_right = accel_right / MOTION_CONTROL_FREQ;
 }

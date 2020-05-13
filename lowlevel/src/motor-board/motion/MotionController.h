@@ -20,13 +20,14 @@ class MotionController {
     volatile int32_t last;
     volatile int32_t speed_current;
     volatile int32_t speed_average;
-    volatile int32_t speed_setpoint;
-    volatile int32_t speed_setpoint_last;
-    volatile int32_t speed_setpoint_wanted;
+    volatile int32_t speed_target_current;
+    volatile int32_t speed_target_last;
+    volatile int32_t speed_target;
   } encoder_status;
 
   struct {
-    int32_t wheel_accel_max;
+    int32_t wheel_accel_max_left;
+    int32_t wheel_accel_max_right;
     bool controlled_speed;
   } robot_status;
 
@@ -82,7 +83,7 @@ class MotionController {
   /**
    * Sets target speeds for both motors, in ticks/s
    */
-  void set_target_speed(int32_t left, int32_t right);
+  void set_speed_targets(int32_t left, int32_t right);
 
   /**
    * Sets the control mode of the robot's motion :
@@ -108,7 +109,7 @@ class MotionController {
   /**
    * Sets limits on the motion control : max wheel acceleration(in tick/s/s)
    */
-  void set_limits(uint16_t accel_wheel);
+  void set_limits(uint16_t accel_left, uint16_t accel_right);
 
   /**
    * Sets the proportional constant of the selected PID

@@ -39,10 +39,8 @@ typedef struct _LaserSensorMsg {
 } LaserSensorMsg;
 
 typedef struct _MotionLimitMsg {
-    uint32_t translation_speed;
-    uint32_t rotation_speed;
-    uint32_t wheel_speed;
-    uint32_t wheel_acceleration;
+    uint32_t wheel_acceleration_left;
+    uint32_t wheel_acceleration_right;
 } MotionLimitMsg;
 
 typedef struct _MoveWheelAtSpeedMsg {
@@ -120,7 +118,7 @@ typedef struct _BusMessage {
 #define StopMovingMsg_init_default               {0}
 #define MovementEndedMsg_init_default            {0}
 #define EncoderPositionMsg_init_default          {0, 0}
-#define MotionLimitMsg_init_default              {0, 0, 0, 0}
+#define MotionLimitMsg_init_default              {0, 0}
 #define PIDConfigMsg_init_default                {0, 0, 0, 0}
 #define SetMotionControlModeMsg_init_default     {0, 0, 0}
 #define MoveWheelAtSpeedMsg_init_default         {0, 0}
@@ -136,7 +134,7 @@ typedef struct _BusMessage {
 #define StopMovingMsg_init_zero                  {0}
 #define MovementEndedMsg_init_zero               {0}
 #define EncoderPositionMsg_init_zero             {0, 0}
-#define MotionLimitMsg_init_zero                 {0, 0, 0, 0}
+#define MotionLimitMsg_init_zero                 {0, 0}
 #define PIDConfigMsg_init_zero                   {0, 0, 0, 0}
 #define SetMotionControlModeMsg_init_zero        {0, 0, 0}
 #define MoveWheelAtSpeedMsg_init_zero            {0, 0}
@@ -157,10 +155,8 @@ typedef struct _BusMessage {
 #define LaserSensorMsg_distance_front_right_tag  2
 #define LaserSensorMsg_distance_back_left_tag    3
 #define LaserSensorMsg_distance_back_right_tag   4
-#define MotionLimitMsg_translation_speed_tag     2
-#define MotionLimitMsg_rotation_speed_tag        3
-#define MotionLimitMsg_wheel_speed_tag           4
-#define MotionLimitMsg_wheel_acceleration_tag    5
+#define MotionLimitMsg_wheel_acceleration_left_tag 1
+#define MotionLimitMsg_wheel_acceleration_right_tag 2
 #define MoveWheelAtSpeedMsg_left_tick_per_sec_tag 1
 #define MoveWheelAtSpeedMsg_right_tick_per_sec_tag 2
 #define MovementEndedMsg_blocked_tag             1
@@ -221,10 +217,8 @@ X(a, STATIC,   SINGULAR, SINT32,   right_tick,        2)
 #define EncoderPositionMsg_DEFAULT NULL
 
 #define MotionLimitMsg_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   translation_speed,   2) \
-X(a, STATIC,   SINGULAR, UINT32,   rotation_speed,    3) \
-X(a, STATIC,   SINGULAR, UINT32,   wheel_speed,       4) \
-X(a, STATIC,   SINGULAR, UINT32,   wheel_acceleration,   5)
+X(a, STATIC,   SINGULAR, UINT32,   wheel_acceleration_left,   1) \
+X(a, STATIC,   SINGULAR, UINT32,   wheel_acceleration_right,   2)
 #define MotionLimitMsg_CALLBACK NULL
 #define MotionLimitMsg_DEFAULT NULL
 
@@ -367,7 +361,7 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define StopMovingMsg_size                       0
 #define MovementEndedMsg_size                    2
 #define EncoderPositionMsg_size                  12
-#define MotionLimitMsg_size                      24
+#define MotionLimitMsg_size                      12
 #define PIDConfigMsg_size                        24
 #define SetMotionControlModeMsg_size             6
 #define MoveWheelAtSpeedMsg_size                 12
