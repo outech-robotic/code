@@ -22,7 +22,7 @@ class TCPSocketAdapter(SocketAdapter):
         self.writer: StreamWriter = writer
         self.reader: StreamReader = reader
         self.adapter_name = adapter_name
-        self.handlers: List[CallbackFunc] = []
+        self.callbacks: List[CallbackFunc] = []
 
     async def run(self) -> None:
         try:
@@ -42,8 +42,8 @@ class TCPSocketAdapter(SocketAdapter):
                                hex_payload=msg_str,
                                name=self.adapter_name)
 
-            for handler in self.handlers:
-                await handler(raw_payload, self.adapter_name)
+            for callback in self.callbacks:
+                await callback(raw_payload, self.adapter_name)
 
     async def send(self, data: bytes) -> None:
         hex_payload = binascii.hexlify(data)
@@ -56,8 +56,8 @@ class TCPSocketAdapter(SocketAdapter):
         self.writer.write(b'<' + hex_payload + b'>\n')
         await self.writer.drain()
 
-    def register_handler(self, handler: CallbackFunc) -> None:
-        self.handlers.append(handler)
+    def register_callback(self, callback: CallbackFunc) -> None:
+        self.callbacks.append(callback)
 
 
 class LoopbackSocketAdapter(SocketAdapter):
@@ -65,15 +65,15 @@ class LoopbackSocketAdapter(SocketAdapter):
     No-op adapter.
     """
     def __init__(self):
-        self.handlers: List[CallbackFunc] = []
+        self.callbacks: List[CallbackFunc] = []
 
     async def run(self) -> None:
         while True:
             await asyncio.sleep(100)
 
     async def send(self, data: bytes) -> None:
-        for handler in self.handlers:
-            await handler(data, "loopback")
+        for callback in self.callbacks:
+            await callback(data, "loopback")
 
-    def register_handler(self, handler: CallbackFunc) -> None:
-        self.handlers.append(handler)
+    def register_callback(self, callback: CallbackFunc) -> None:
+        self.callbacks.append(callback)

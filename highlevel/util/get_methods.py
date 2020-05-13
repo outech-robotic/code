@@ -19,7 +19,7 @@ class RobotFunction:
 
 def get_methods(module: Any) -> List[RobotFunction]:
     """
-    Get the functions of a handler/controller/gateway that can be called.
+    Get the functions of a router/controller/gateway that can be called.
     """
     functions: List[RobotFunction] = []
     for item in [getattr(module, x) for x in dir(module)]:

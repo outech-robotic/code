@@ -24,7 +24,7 @@ from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
 from highlevel.robot.gateway.motion import MotionGateway
-from highlevel.robot.handler.protobuf import ProtobufHandler
+from highlevel.robot.router import ProtobufRouter
 from highlevel.simulation.client.http import HTTPClient
 from highlevel.simulation.client.web_browser import WebBrowserClient
 from highlevel.simulation.controller.event_queue import EventQueue
@@ -33,7 +33,7 @@ from highlevel.simulation.controller.runner import SimulationRunner
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
-from highlevel.simulation.handler.simulation import SimulationHandler
+from highlevel.simulation.router import SimulationRouter
 from highlevel.util import tcp
 from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
@@ -77,7 +77,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
 
     i.provide('configuration', CONFIG)
 
-    i.provide('protobuf_handler', ProtobufHandler)
+    i.provide('protobuf_router', ProtobufRouter)
 
     i.provide('odometry_controller', OdometryController)
     i.provide('localization_controller', LocalizationController)
@@ -97,7 +97,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         i.provide('simulation_configuration', SIMULATION_CONFIG)
         i.provide('event_queue', EventQueue())
 
-        i.provide('simulation_handler', SimulationHandler)
+        i.provide('simulation_router', SimulationRouter)
         i.provide('simulation_runner', SimulationRunner)
         i.provide(
             'simulation_state',
@@ -125,7 +125,6 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         i.provide('lidar_adapter', RPLIDARAdapter)
 
     if simulation or stub_socket_can:
-        i.provide('socket_adapter', LoopbackSocketAdapter)
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
     else:
         reader, writer = await tcp.get_reader_writer('localhost', 32000)
@@ -153,26 +152,24 @@ async def main() -> None:
 
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     lidar_controller: LidarController = i.get('lidar_controller')
-    lidar_adapter.register_handler(lidar_controller.set_detection)
+    lidar_adapter.register_callback(lidar_controller.set_detection)
 
-    socket_adapter: SocketAdapter = i.get('socket_adapter')
     motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
 
-    # Register the CAN bus to call the handlers.
-    protobuf_handler: ProtobufHandler = i.get('protobuf_handler')
-    motor_board_adapter.register_handler(protobuf_handler.translate_message)
+    # Register the CAN bus to call the router.
+    protobuf_router: ProtobufRouter = i.get('protobuf_router')
+    motor_board_adapter.register_callback(protobuf_router.translate_message)
 
     if is_simulation:
-        simulation_handler: SimulationHandler = i.get('simulation_handler')
-        motor_board_adapter.register_handler(
-            simulation_handler.handle_movement_order)
+        simulation_router: SimulationRouter = i.get('simulation_router')
+        motor_board_adapter.register_callback(
+            simulation_router.handle_movement_order)
 
     strategy_controller = i.get('strategy_controller')
     debug_controller = i.get('debug_controller')
     coroutines_to_run = {
         strategy_controller.run(),
         debug_controller.run(),
-        socket_adapter.run(),
         motor_board_adapter.run(),
         print_performance_metrics(),
     }

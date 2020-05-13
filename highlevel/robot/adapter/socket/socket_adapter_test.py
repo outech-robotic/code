@@ -36,7 +36,7 @@ async def stub_tcp_server(data: bytes) -> AsyncGenerator:
 @pytest.mark.parametrize(
     'data,expected',
     [
-        # No packet received, handlers should not be called.
+        # No packet received, callbacks should not be called.
         (b'', []),
 
         # Should be able to handle empty packets.
@@ -71,18 +71,18 @@ async def test_socket_can(data, expected):
     """
     future = asyncio.Future()
     future.set_result(None)
-    mock_handler1 = MagicMock(return_value=future)
+    mock_callback1 = MagicMock(return_value=future)
 
     future = asyncio.Future()
     future.set_result(None)
-    mock_handler2 = MagicMock(return_value=future)
+    mock_callback2 = MagicMock(return_value=future)
 
     async with stub_tcp_server(data) as (host, port):
         reader, writer = await asyncio.open_connection(host=host, port=port)
 
         adapter = TCPSocketAdapter(reader, writer, "test_adapter")
-        adapter.register_handler(mock_handler1)
-        adapter.register_handler(mock_handler2)
+        adapter.register_callback(mock_callback1)
+        adapter.register_callback(mock_callback2)
 
         run_task = asyncio.create_task(adapter.run())
         await asyncio.sleep(0.1)
@@ -92,8 +92,8 @@ async def test_socket_can(data, expected):
 
     calls = [call(c, 'test_adapter') for c in expected]
 
-    mock_handler1.assert_has_calls(calls)
-    mock_handler2.assert_has_calls(calls)
+    mock_callback1.assert_has_calls(calls)
+    mock_callback2.assert_has_calls(calls)
 
 
 @pytest.mark.asyncio
@@ -117,22 +117,22 @@ async def test_socket_can(data, expected):
     ])
 async def test_invalid_packet_socket_can(data):
     """
-    Make sure that SocketAdapter will never call the handlers if the packets are malformed.
+    Make sure that SocketAdapter will never call the callbacks if the packets are malformed.
     """
     future = asyncio.Future()
     future.set_result(None)
-    mock_handler1 = MagicMock(return_value=future)
+    mock_callback1 = MagicMock(return_value=future)
 
     future = asyncio.Future()
     future.set_result(None)
-    mock_handler2 = MagicMock(return_value=future)
+    mock_callback2 = MagicMock(return_value=future)
 
     async with stub_tcp_server(data) as (host, port):
         reader, writer = await asyncio.open_connection(host=host, port=port)
 
         adapter = TCPSocketAdapter(reader, writer, "test_adapter")
-        adapter.register_handler(mock_handler1)
-        adapter.register_handler(mock_handler2)
+        adapter.register_callback(mock_callback1)
+        adapter.register_callback(mock_callback2)
 
         run_task = asyncio.create_task(adapter.run())
         await asyncio.sleep(0.1)
@@ -140,5 +140,5 @@ async def test_invalid_packet_socket_can(data):
 
         writer.close()
 
-    mock_handler1.assert_not_called()
-    mock_handler2.assert_not_called()
+    mock_callback1.assert_not_called()
+    mock_callback2.assert_not_called()

@@ -39,7 +39,7 @@ We can use the same design pattern as the robot's code.
 
 The *SimulationRunner* is a class that runs an infinite loop which calculates the state of everything N times per second.
 
-The *SimulationHandler* receives messages from the robot and creates events that will be processed by the *SimulationRunner*. These events will change the state of the simulation. They are put into the `EventQueue`.
+The *SimulationRouter* receives messages from the robot and creates events that will be processed by the *SimulationRunner*. These events will change the state of the simulation. They are put into the `EventQueue`.
 
 For instance, when receiving a `Move the robot forward by 100 units` order, the *SimulationController* would create **100 events** `Robot moved forward by 1 unit on tick N` in the EventQueue.
 
@@ -51,11 +51,11 @@ The *SimulationRunner* would execute them sequentially, tick after tick, until t
 
 ![simulation arch](https://raw.githubusercontent.com/outech-robotic/code/master/highlevel/docs/img/simulation_is_independant.png)
 
-The simulation is built with the same pattern than the robot's code (handler/controller/gateway). 
+The simulation is built with the same pattern than the robot's code (router/controller/gateway). 
 
 **What comes out of the robot is the simulation input. The input of the robot is the simulation output.**
 
-Thus, the **handler** of the simulation receives data from the **gateways** of the robot. The **gateway** of the simulation actually send data to the **handlers** of the robot.
+Thus, the **router** of the simulation receives data from the **gateways** of the robot. The **gateway** of the simulation actually send data to the **routers** of the robot.
 
 When running the simulation, we just run the robot's strategy controller and the simulation runner in __parallel__ and we just let them communicate.
 

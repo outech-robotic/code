@@ -20,5 +20,5 @@ class SocketAdapter(ABC):
         """Send a message."""
 
     @abstractmethod
-    def register_handler(self, handler: CallbackFunc) -> None:
-        """Register a handler."""
+    def register_callback(self, callback: CallbackFunc) -> None:
+        """Register a callback."""

@@ -28,7 +28,7 @@ async def main():
         sys.stdout.write(json_data + '\n')
         sys.stdout.flush()
 
-    adapter.register_handler(callback)
+    adapter.register_callback(callback)
     await adapter.run()
 
 
