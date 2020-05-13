@@ -1,6 +1,7 @@
 """
 Strategy module
 """
+
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.util.geometry.vector import Vector2

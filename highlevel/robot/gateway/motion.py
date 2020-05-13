@@ -2,9 +2,9 @@
 Motion gateway module.
 """
 
-from proto.gen.python.outech_pb2 import BusMessage, TranslateMsg, RotateMsg
 from highlevel.logger import LOGGER
 from highlevel.robot.adapter.socket import SocketAdapter
+from proto.gen.python.outech_pb2 import BusMessage, TranslateMsg, RotateMsg
 
 
 class MotionGateway:

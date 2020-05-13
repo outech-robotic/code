@@ -43,12 +43,12 @@ class ReplaySaver:
 
         configuration_event = DebugEvent(
             key='configuration',
-            time=0,
+            time=frames[0].time,
             value=self.configuration,
         )
         simulation_configuration_event = DebugEvent(
             key='simulation_configuration',
-            time=0,
+            time=frames[0].time,
             value=self.simulation_configuration,
         )
         result = {

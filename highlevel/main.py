@@ -23,7 +23,7 @@ from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
-from highlevel.robot.gateway.motion.motion import MotionGateway
+from highlevel.robot.gateway.motion import MotionGateway
 from highlevel.robot.handler.protobuf import ProtobufHandler
 from highlevel.simulation.client.http import HTTPClient
 from highlevel.simulation.client.web_browser import WebBrowserClient

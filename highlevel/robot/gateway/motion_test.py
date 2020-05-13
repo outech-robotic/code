@@ -3,7 +3,7 @@ Test for motion gateway.
 """
 import pytest
 
-from highlevel.robot.gateway.motion.motion import MotionGateway
+from highlevel.robot.gateway.motion import MotionGateway
 
 
 class TestMotionGateway:
