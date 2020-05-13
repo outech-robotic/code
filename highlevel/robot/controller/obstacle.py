@@ -1,5 +1,5 @@
 """
-Lidar controller module.
+Obstacle controller module.
 """
 from math import cos, sin
 from typing import Tuple
@@ -9,8 +9,9 @@ from highlevel.util.probe import Probe
 from highlevel.util.geometry.vector import Vector2
 
 
-class LidarController:
-    """Lidar controller is a controller for saving positions of obstacles."""
+class ObstacleController:
+    """Obstacle controller is a controller for saving positions of obstacles detected by the
+    LiDAR."""
     def __init__(self, probe: Probe):
         self.seen_polar: Tuple[Tuple[Radian, Millimeter], ...] = ()
         self.seen_cartesian: Tuple[Vector2, ...] = ()

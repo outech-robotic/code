@@ -1,15 +1,14 @@
 """
-Motion gateway module.
+Motor gateway module.
 """
-
+from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
-from highlevel.robot.adapter.socket import SocketAdapter
 from proto.gen.python.outech_pb2 import BusMessage, TranslateMsg, RotateMsg
 
 
-class MotionGateway:
+class MotorGateway:
     """
-    Motion gateway.
+    Motor gateway.
     """
     def __init__(self, motor_board_adapter: SocketAdapter):
         self.motor_board_adapter = motor_board_adapter

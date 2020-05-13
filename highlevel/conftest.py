@@ -6,17 +6,16 @@ from unittest.mock import MagicMock
 
 from pytest import fixture
 
-from highlevel.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
-from highlevel.robot.adapter.socket import SocketAdapter
+from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
+from highlevel.adapter.socket import SocketAdapter
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
-from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.gateway.motion import MotionGateway
+from highlevel.robot.entity.configuration import Configuration, DebugConfiguration
+from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
@@ -24,6 +23,7 @@ from highlevel.util.clock import Clock
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.probe import Probe
+from highlevel.util.replay_saver import ReplaySaver
 
 
 @fixture
@@ -41,6 +41,12 @@ def configuration_test():
         wheel_radius=1,
         encoder_ticks_per_revolution=1,
         distance_between_wheels=1,
+        debug=DebugConfiguration(
+            websocket_port=8080,
+            http_port=9090,
+            host='0.0.0.0',
+            refresh_rate=30,
+        ),
     )
 
 
@@ -61,6 +67,7 @@ def simulation_configuration_test():
         rotation_speed=10,
         replay_fps=60,
         encoder_position_rate=100,
+        lidar_position_rate=11,
     )
 
 
@@ -138,11 +145,11 @@ def simulation_gateway_mock():
 
 
 @fixture
-def motion_gateway_mock():
+def motor_gateway_mock():
     """
     Motion gateway mock.
     """
-    mock = MagicMock(spec=MotionGateway)
+    mock = MagicMock(spec=MotorGateway)
 
     future = asyncio.Future()
     future.set_result(None)

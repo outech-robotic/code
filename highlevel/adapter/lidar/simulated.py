@@ -5,7 +5,7 @@ import asyncio
 from math import pi
 from typing import List, Tuple
 
-from highlevel.robot.adapter.lidar import LIDARAdapter, Callback
+from highlevel.adapter.lidar import LIDARAdapter, Callback
 from highlevel.robot.entity.type import Radian, Millimeter
 
 POINTS = tuple((angle * pi / 180, 100) for angle in range(36))

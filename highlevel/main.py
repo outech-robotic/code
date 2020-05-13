@@ -2,33 +2,33 @@
 Main module.
 """
 import asyncio
+import math
 import os
 
 import rplidar
 from serial.tools import list_ports
 
-from highlevel.robot.adapter.lidar import LIDARAdapter
-from highlevel.robot.adapter.lidar.rplidar import RPLIDARAdapter
-from highlevel.robot.adapter.lidar.simulated import SimulatedLIDARAdapter
-from highlevel.robot.adapter.socket import SocketAdapter
-from highlevel.robot.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
+from highlevel.adapter.http import HTTPClient
+from highlevel.adapter.lidar import LIDARAdapter
+from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
+from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
+from highlevel.adapter.socket import SocketAdapter
+from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
+from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.odometry import OdometryController
-from highlevel.robot.controller.sensor.rplidar import LidarController
+from highlevel.robot.controller.obstacle import ObstacleController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
-from highlevel.robot.gateway.motion import MotionGateway
+from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
-from highlevel.simulation.client.http import HTTPClient
-from highlevel.simulation.client.web_browser import WebBrowserClient
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.controller.replay_saver import ReplaySaver
 from highlevel.simulation.controller.runner import SimulationRunner
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
@@ -41,6 +41,7 @@ from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
+from highlevel.util.replay_saver import ReplaySaver
 
 CONFIG = Configuration(
     initial_position=Vector2(200, 1200),
@@ -52,11 +53,21 @@ CONFIG = Configuration(
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
-    debug=DebugConfiguration(),
+    debug=DebugConfiguration(
+        websocket_port=8080,
+        http_port=9090,
+        host='0.0.0.0',
+        refresh_rate=30,
+    ),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
+    tickrate=60,
+    rotation_speed=math.pi * 2 * 4.547,
+    encoder_position_rate=100,
+    replay_fps=60,
+    lidar_position_rate=11,
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
         Segment(start=Vector2(0, 0), end=Vector2(CONFIG.field_shape[0], 0)),
@@ -84,11 +95,11 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i.provide('motion_controller', MotionController)
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
-    i.provide('lidar_controller', LidarController)
+    i.provide('obstacle_controller', ObstacleController)
     i.provide('debug_controller', DebugController)
     i.provide('match_action_controller', MatchActionController)
 
-    i.provide('motion_gateway', MotionGateway)
+    i.provide('motor_gateway', MotorGateway)
 
     i.provide('probe', Probe)
     i.provide('event_loop', asyncio.get_event_loop())
@@ -151,8 +162,8 @@ async def main() -> None:
     i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
-    lidar_controller: LidarController = i.get('lidar_controller')
-    lidar_adapter.register_callback(lidar_controller.set_detection)
+    obstacle_controller: ObstacleController = i.get('obstacle_controller')
+    lidar_adapter.register_callback(obstacle_controller.set_detection)
 
     motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
 
@@ -192,9 +203,8 @@ async def main() -> None:
     except asyncio.CancelledError:
         pass
 
-    if is_simulation:
-        replay_saver = i.get('replay_saver')
-        replay_saver.save_replay()
+    replay_saver = i.get('replay_saver')
+    replay_saver.save_replay()
 
 
 if __name__ == '__main__':
