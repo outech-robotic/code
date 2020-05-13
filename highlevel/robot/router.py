@@ -10,7 +10,7 @@ from highlevel.robot.controller.motion.localization import LocalizationControlle
 
 
 class ProtobufRouter:
-    """ Protobuf router decodes raw bytes message and dispatch them to controllers. """
+    """ Protobuf router decodes raw bytes messages and dispatches them to controllers. """
     def __init__(self, match_action_controller: MatchActionController,
                  localization_controller: LocalizationController):
         self.localization_controller = localization_controller
