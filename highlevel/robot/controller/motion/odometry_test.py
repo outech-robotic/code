@@ -1,12 +1,12 @@
 """
 Tests for odometry module.
 """
+import dataclasses
 import math
 
 from pytest import fixture
 
 from highlevel.robot.controller.motion.odometry import OdometryController
-from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.util.geometry.vector import Vector2
 
@@ -16,17 +16,12 @@ DISTANCE_BETWEEN_WHEELS = 200
 
 
 @fixture(name='configuration')
-def configuration_stub():
+def configuration_stub(configuration_test: Configuration) -> Configuration:
     """
     Configuration.
     """
-    return Configuration(
-        initial_position=Vector2(0, 0),
-        initial_angle=0,
-        robot_width=0,
-        robot_length=0,
-        field_shape=(0, 0),
-        color=Color.BLUE,
+    return dataclasses.replace(
+        configuration_test,
         wheel_radius=WHEEL_RADIUS,
         encoder_ticks_per_revolution=TICK_PER_REVOLUTION,
         distance_between_wheels=DISTANCE_BETWEEN_WHEELS,

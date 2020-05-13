@@ -2,16 +2,19 @@
 Main module.
 """
 import asyncio
+import math
 import os
 
 import rplidar
 from serial.tools import list_ports
 
+from highlevel.adapter.http import HTTPClient
 from highlevel.adapter.lidar import LIDARAdapter
 from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
 from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
+from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
@@ -25,10 +28,7 @@ from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
-from highlevel.adapter.http import HTTPClient
-from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.util.replay_saver import ReplaySaver
 from highlevel.simulation.controller.runner import SimulationRunner
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
@@ -41,6 +41,7 @@ from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
+from highlevel.util.replay_saver import ReplaySaver
 
 CONFIG = Configuration(
     initial_position=Vector2(200, 1200),
@@ -52,11 +53,21 @@ CONFIG = Configuration(
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
-    debug=DebugConfiguration(),
+    debug=DebugConfiguration(
+        websocket_port=8080,
+        http_port=9090,
+        host='0.0.0.0',
+        refresh_rate=30,
+    ),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
+    tickrate=60,
+    rotation_speed=math.pi * 2 * 4.547,
+    encoder_position_rate=100,
+    replay_fps=60,
+    lidar_position_rate=11,
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
         Segment(start=Vector2(0, 0), end=Vector2(CONFIG.field_shape[0], 0)),
