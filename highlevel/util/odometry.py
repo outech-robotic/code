@@ -37,7 +37,7 @@ def odometry(delta_left: Millimeter, delta_right: Millimeter,
 
     # Trajectory is both translation and rotation.
     # 1. Calculate the radius of curvature.
-    wheel_dist = distance_between_encoder_wheel
+    wheel_dist = distance_between_encoder_wheels
     curvature_radius = (delta_right + delta_left) / \
                        (delta_right - delta_left) * wheel_dist / 2
     # 2. Calculate the angle delta.
