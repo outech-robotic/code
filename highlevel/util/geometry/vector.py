@@ -3,6 +3,7 @@ Vector entity.
 """
 from __future__ import annotations
 
+import math
 import sys
 from math import sqrt, atan2
 
@@ -13,6 +14,7 @@ class Vector2:
     """
     Vector in 2 dimensions.
     """
+
     def __init__(self, vec_x: float, vec_y: float):
         self._v = numpy.array([vec_x, vec_y])
 
@@ -38,8 +40,7 @@ class Vector2:
         # have a slight imprecision (sys.float_info.epsilon). hash would check that the two values
         # are precisely identical.
         if isinstance(other, Vector2):
-            return abs(self.x - other.x) < sys.float_info.epsilon and \
-                   abs(self.y - other.y) < sys.float_info.epsilon
+            return math.isclose(self.x, other.x, abs_tol=1e-9) and math.isclose(self.y, other.y, abs_tol=1e-9)
         return False
 
     def __add__(self, other: Vector2) -> Vector2:
@@ -73,7 +74,7 @@ class Vector2:
         """
         Return the norm2 of the vector (euclidean norm squared).
         """
-        return self.x**2 + self.y**2
+        return self.x ** 2 + self.y ** 2
 
     def euclidean_norm(self) -> float:
         """
