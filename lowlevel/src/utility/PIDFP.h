@@ -8,12 +8,16 @@
 #ifndef MOTION_PIDFP_H_
 #define MOTION_PIDFP_H_
 
+#ifdef STM32F042x6
 #include "stm32f042x6.h"
+#else
+#include <stdint.h>
+#endif
 
 class PID_FP {
   uint32_t kp, ki, kd;
   int32_t min, max;
-
+  int32_t freq;
   int64_t integral_max, integral_min;
 
   int32_t derivative_max, derivative_min;

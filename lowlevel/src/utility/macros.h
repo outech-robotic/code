@@ -8,6 +8,8 @@
 #ifndef UTILITY_MACROS_H_
 #define UTILITY_MACROS_H_
 
+#include <stdint.h>
+
 #define TRY(fn_call, expected) \
 if((fn_call) != (expected)) {      \
     return false;              \

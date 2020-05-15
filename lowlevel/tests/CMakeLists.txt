@@ -15,6 +15,10 @@ if(UNIX)
 
             "${SRC_DIR}/utility/Queue.hpp"
             "${CMAKE_CURRENT_SOURCE_DIR}/Queue/Queue_test.cpp"
+
+            "${SRC_DIR}/utility/PIDFP.h"
+            "${SRC_DIR}/utility/PIDFP.cpp"
+            "${CMAKE_CURRENT_SOURCE_DIR}/PID_FP/PID_FP_test.cpp"
             )
 
     # Find CPPUtest

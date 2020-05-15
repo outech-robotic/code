@@ -24,8 +24,9 @@ void PID_FP::reset() {
 
 void PID_FP::set_coefficients(float new_kp, float new_ki, float new_kd, uint32_t new_freq) {
   kp = new_kp * COEFF_MULTIPLIER;
-  kd = new_kd * COEFF_MULTIPLIER * new_freq;
   ki = new_ki * COEFF_MULTIPLIER / new_freq;
+  kd = new_kd * COEFF_MULTIPLIER * new_freq;
+  freq = new_freq;
 }
 
 void PID_FP::set_kp(uint32_t new_kp) {
@@ -56,9 +57,9 @@ void PID_FP::set_derivative_limit(int32_t new_limit) {
 }
 
 void PID_FP::get_coefficients(float *ret_kp, float *ret_ki, float *ret_kd) {
-  *ret_kp = kp;
-  *ret_ki = ki;
-  *ret_kd = kd;
+  *ret_kp = kp/(float)COEFF_MULTIPLIER;
+  *ret_ki = (ki/(float)COEFF_MULTIPLIER)*freq;
+  *ret_kd = (kd/(float)COEFF_MULTIPLIER)/freq;
 }
 
 int16_t PID_FP::compute(int32_t input, int32_t setpoint) {

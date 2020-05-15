@@ -9,7 +9,7 @@
 #define MOTION_MOTIONCONTROLLER_H_
 
 #include "Motor.h"
-#include "PIDFP.h"
+#include "utility/PIDFP.h"
 #include "peripheral/tim.h"
 #include "utility/Average.hpp"
 
