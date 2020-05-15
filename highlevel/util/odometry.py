@@ -6,14 +6,13 @@ Used to track a robot's position with sensors.
 import math
 from typing import Tuple
 
-from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Radian, Millimeter
 from highlevel.util.geometry.vector import Vector2
 
 
 def odometry(delta_left: Millimeter, delta_right: Millimeter,
              current_position: Vector2, current_angle: Radian,
-             distance_between_encoder_wheels) -> Tuple[Vector2, Radian]:
+             distance_between_encoder_wheels: float) -> Tuple[Vector2, Radian]:
     """
     Computes the current position and angle of the robot using the movements of its wheels.
     Uses a curvature radius to compute the new position.
