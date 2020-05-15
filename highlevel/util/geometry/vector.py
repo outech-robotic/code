@@ -3,7 +3,7 @@ Vector entity.
 """
 from __future__ import annotations
 
-import sys
+import math
 from math import sqrt, atan2
 
 import numpy
@@ -38,8 +38,8 @@ class Vector2:
         # have a slight imprecision (sys.float_info.epsilon). hash would check that the two values
         # are precisely identical.
         if isinstance(other, Vector2):
-            return abs(self.x - other.x) < sys.float_info.epsilon and \
-                   abs(self.y - other.y) < sys.float_info.epsilon
+            return (math.isclose(self.x, other.x, abs_tol=1e-9)
+                    and math.isclose(self.y, other.y, abs_tol=1e-9))
         return False
 
     def __add__(self, other: Vector2) -> Vector2:
