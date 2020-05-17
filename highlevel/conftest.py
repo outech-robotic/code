@@ -208,3 +208,11 @@ def clock_mock():
     Clock.
     """
     return MagicMock(spec=Clock)
+
+
+@fixture
+def odometry_mock():
+    """
+    Mocks an odometry function
+    """
+    return MagicMock(return_value=(Vector2(123, 321), 3.14159777))

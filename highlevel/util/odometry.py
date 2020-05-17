@@ -4,15 +4,20 @@ Used to track a robot's position with sensors.
 """
 
 import math
-from typing import Tuple
+from typing import Tuple, Callable
 
+from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Radian, Millimeter
 from highlevel.util.geometry.vector import Vector2
 
+OdometryFunc = Callable[
+    [Millimeter, Millimeter, Vector2, Radian, Configuration], Tuple[Vector2,
+                                                                    Radian]]
 
-def odometry(delta_left: Millimeter, delta_right: Millimeter,
-             current_position: Vector2, current_angle: Radian,
-             distance_between_encoder_wheels: float) -> Tuple[Vector2, Radian]:
+
+def odometry_arc(delta_left: Millimeter, delta_right: Millimeter,
+                 current_position: Vector2, current_angle: Radian,
+                 configuration: Configuration) -> Tuple[Vector2, Radian]:
     """
     Computes the current position and angle of the robot using the movements of its wheels.
     Uses a curvature radius to compute the new position.
@@ -25,7 +30,7 @@ def odometry(delta_left: Millimeter, delta_right: Millimeter,
 
     if delta_distance == 0:
         # Robot did not translate, rotate only.
-        wheel_dist = distance_between_encoder_wheels / 2
+        wheel_dist = configuration.distance_between_wheels / 2
         d_theta = delta_right / wheel_dist
         return current_position, current_angle + d_theta
 
@@ -37,7 +42,7 @@ def odometry(delta_left: Millimeter, delta_right: Millimeter,
 
     # Trajectory is both translation and rotation.
     # 1. Calculate the radius of curvature.
-    wheel_dist = distance_between_encoder_wheels
+    wheel_dist = configuration.distance_between_wheels
     curvature_radius = (delta_right + delta_left) / \
                        (delta_right - delta_left) * wheel_dist / 2
     # 2. Calculate the angle delta.
