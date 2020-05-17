@@ -4,11 +4,17 @@ Types.
 from enum import Enum
 
 Millisecond = float
+
 Millimeter = float
 MillimeterPerSec = float
+
 Radian = float
 RadianPerSec = float
+
 Hz = float
+
+Tick = int
+TickPerSec = float
 
 
 class Wheel(Enum):
