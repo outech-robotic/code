@@ -6,18 +6,18 @@ import pytest
 from highlevel.robot.router import ProtobufRouter
 from proto.gen.python.outech_pb2 import (EncoderPositionMsg, BusMessage,
                                          LaserSensorMsg, PressureSensorMsg,
-                                         MovementEndedMsg, DebugLog)
+                                         DebugLog)
 
 
 @pytest.fixture(name='protobuf_router')
 def protobuf_router_setup(match_action_controller_mock,
-                          localization_controller_mock):
+                          position_controller_mock):
     """
     Setup a router for testing.
     """
     return ProtobufRouter(
         match_action_controller=match_action_controller_mock,
-        localization_controller=localization_controller_mock,
+        position_controller=position_controller_mock,
     )
 
 
@@ -33,9 +33,9 @@ async def test_dispatch_debug_log(protobuf_router):
 
 @pytest.mark.asyncio
 async def test_dispatch_encoder_position(protobuf_router,
-                                         localization_controller_mock):
+                                         position_controller_mock):
     """
-    Dispatch encoder position to localization controller.
+    Dispatch encoder position to position controller.
     """
     bus_message = BusMessage(encoderPosition=EncoderPositionMsg(
         left_tick=1,
@@ -44,8 +44,7 @@ async def test_dispatch_encoder_position(protobuf_router,
     msg_bytes = bus_message.SerializeToString()
     await protobuf_router.translate_message(msg_bytes, 'test')
 
-    localization_controller_mock.update_odometry_position.assert_called_once_with(
-        1, -2)
+    position_controller_mock.update.assert_called_once_with(1, -2)
 
 
 @pytest.mark.asyncio
@@ -79,19 +78,6 @@ async def test_dispatch_pressure_sensor(protobuf_router,
     msg_bytes = bus_message.SerializeToString()
     await protobuf_router.translate_message(msg_bytes, 'test')
     match_action_controller_mock.set_pressures.assert_called_once_with()
-
-
-@pytest.mark.parametrize('blocked', [True, False])
-@pytest.mark.asyncio
-async def test_movement_ended(protobuf_router, localization_controller_mock,
-                              blocked):
-    """
-    Route movement ended messages to localization controller.
-    """
-    bus_message = BusMessage(movementEnded=MovementEndedMsg(blocked=blocked))
-    msg_bytes = bus_message.SerializeToString()
-    await protobuf_router.translate_message(msg_bytes, 'test')
-    localization_controller_mock.movement_done.assert_called_once_with(blocked)
 
 
 @pytest.mark.asyncio

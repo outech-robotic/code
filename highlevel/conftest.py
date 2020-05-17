@@ -11,6 +11,7 @@ from highlevel.adapter.socket import SocketAdapter
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.odometry import OdometryController
+from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration, DebugConfiguration
@@ -111,6 +112,18 @@ def localization_controller_mock():
     future.set_result(None)
     mock.rotate = MagicMock(return_value=future)
     mock.move_forward = MagicMock(return_value=future)
+    return mock
+
+
+@fixture
+def position_controller_mock():
+    """
+    Position controller mock.
+    """
+    mock = MagicMock(spec=PositionController)
+    future = asyncio.Future()
+    future.set_result(None)
+    mock.update = MagicMock(return_value=future)
     return mock
 
 

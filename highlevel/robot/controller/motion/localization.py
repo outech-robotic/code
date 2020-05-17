@@ -2,7 +2,6 @@
 Localization controller module.
 """
 import asyncio
-import math
 from dataclasses import dataclass
 
 from highlevel.logger import LOGGER
@@ -57,42 +56,6 @@ class LocalizationController:
             last_left_tick=0,
             movement_done_event=asyncio.Event(),
         )
-
-    def update_odometry_position(self, left_tick: int,
-                                 right_tick: int) -> None:
-        """
-        Update the position received from odometry.
-        """
-        self.probe.emit("encoder_left", left_tick)
-        self.probe.emit("encoder_right", right_tick)
-
-        pos, angle = self.odometry_controller.odometry(
-            left_tick,
-            right_tick,
-            self._state.odometry_position,
-            self._state.odometry_angle,
-        )
-        LOGGER.get().debug('localization_controller_update_odometry',
-                           left_tick=left_tick,
-                           right_tick=right_tick,
-                           new_position=pos,
-                           new_angle=angle / (2 * math.pi) * 360)
-
-        self._state.odometry_position = pos
-        self._state.odometry_angle = angle
-
-        self._state.last_right_tick = right_tick
-        self._state.last_left_tick = left_tick
-
-        self.probe.emit("position", self._state.odometry_position)
-        self.probe.emit("angle", float(self._state.odometry_angle))
-
-    def movement_done(self, _: bool) -> None:
-        """"
-        Set the a flag to indicate that the robot is not moving anymore.
-        """
-        LOGGER.get().debug('localization_controller_movement_done')
-        self._state.movement_done_event.set()
 
     async def move_forward(self, distance_mm: Millimeter) -> None:
         """
