@@ -101,14 +101,7 @@ class LocalizationController:
         LOGGER.get().info('localization_controller_move_forward',
                           distance=distance_mm)
 
-        ticks_per_revolution = self.configuration.encoder_ticks_per_revolution
-        wheel_circumference = 2 * math.pi * self.configuration.wheel_radius
-        distance_revolution_count = distance_mm / wheel_circumference
-        distance_ticks = round(distance_revolution_count *
-                               ticks_per_revolution)
-
         self._state.movement_done_event.clear()
-        await self.motor_gateway.translate(distance_ticks)
         await self._state.movement_done_event.wait()
 
     async def rotate(self, angle: Radian) -> None:
@@ -117,16 +110,7 @@ class LocalizationController:
         """
         LOGGER.get().info('localization_controller_rotate', angle=angle)
 
-        radius = self.configuration.distance_between_wheels / 2
-        ticks_per_revolution = self.configuration.encoder_ticks_per_revolution
-        wheel_circumference = 2 * math.pi * self.configuration.wheel_radius
-        distance_mm = radius * angle
-        distance_revolution_count = distance_mm / wheel_circumference
-        distance_ticks = round(distance_revolution_count *
-                               ticks_per_revolution)
-
         self._state.movement_done_event.clear()
-        await self.motor_gateway.rotate(distance_ticks)
         await self._state.movement_done_event.wait()
 
     def get_angle(self) -> Radian:
