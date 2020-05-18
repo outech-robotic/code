@@ -4,6 +4,7 @@ Strategy module
 
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
+from highlevel.robot.entity.configuration import Configuration
 from highlevel.util.geometry.vector import Vector2
 
 PATH = [
@@ -52,13 +53,16 @@ class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
     """
-    def __init__(self, trajectory_controller: TrajectoryController):
+    def __init__(self, trajectory_controller: TrajectoryController,
+                 configuration: Configuration):
+        self.configuration = configuration
         self.trajectory_controller = trajectory_controller
 
     async def run(self) -> None:
         """
         Run the strategy.
         """
+
         for vec, reverse in PATH:
             LOGGER.get().info("move robot", destination=vec)
             await self.trajectory_controller.move_to(

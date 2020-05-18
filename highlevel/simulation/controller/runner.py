@@ -5,13 +5,13 @@ import asyncio
 
 from highlevel.logger import LOGGER
 from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.util.replay_saver import ReplaySaver
 from highlevel.simulation.entity.event import EventType, EventOrder
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
 from highlevel.util.clock import FakeClock
 from highlevel.util.probe import Probe
+from highlevel.util.replay_saver import ReplaySaver
 
 
 class SimulationRunner:
@@ -51,6 +51,12 @@ class SimulationRunner:
             # Process all the events.
             for event in events:
                 await self._process_event(event)
+
+            self.state.left_tick += round(
+                self.state.left_speed / self.simulation_configuration.tickrate)
+            self.state.right_tick += round(
+                self.state.right_speed /
+                self.simulation_configuration.tickrate)
 
             # Send the encoder positions periodically.
             interval = 1 / self.simulation_configuration.encoder_position_rate * 1000

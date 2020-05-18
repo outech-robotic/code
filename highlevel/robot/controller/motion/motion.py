@@ -2,9 +2,9 @@
 Motion controller module.
 """
 import asyncio
-import math
 
-from highlevel.robot.controller.motion.position import PositionController
+from highlevel.logger import LOGGER
+from highlevel.robot.controller.motion.position import PositionController, mm_to_tick
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Millimeter, MotionResult, Radian
 from highlevel.robot.gateway.motor import MotorGateway
@@ -36,6 +36,9 @@ class MotionController:
         If the robot is already moving, will return BUSY.
         Requires trigger_wheel_speed_update calls to be able to terminate successfully.
         """
+
+        LOGGER.get().info('motion_controller_translate', distance=distance)
+
         if self.is_moving:
             return MotionResult.BUSY
         self.is_moving = True
@@ -45,15 +48,22 @@ class MotionController:
         current_distance = 0.0
         start_distance = self.position_controller.distance_travelled
 
-        while current_distance <= abs(
-                distance) - self.configuration.translation_tolerance:
+        current_speed = self.configuration.max_wheel_speed
+
+        while current_distance < abs(distance):
             # update wheel speeds
             # implement ramp
 
             # send them to the board
             await self.motor_gateway.set_speed(
-                direction * self.configuration.max_wheel_speed,
-                direction * self.configuration.max_wheel_speed)
+                direction *
+                mm_to_tick(current_speed,
+                           self.configuration.encoder_ticks_per_revolution,
+                           self.configuration.wheel_radius),
+                direction *
+                mm_to_tick(current_speed,
+                           self.configuration.encoder_ticks_per_revolution,
+                           self.configuration.wheel_radius))
 
             self.wheel_speed_update_event.clear()
             await self.wheel_speed_update_event.wait()
@@ -74,6 +84,11 @@ class MotionController:
         If the robot is already moving, will return BUSY.
         Requires trigger_wheel_speed_update calls to be able to terminate successfully.
         """
+
+        LOGGER.get().info('motion_controller_rotate',
+                          angle_relative=angle_relative,
+                          current_angle=self.position_controller.angle)
+
         if self.is_moving:
             return MotionResult.BUSY
         self.is_moving = True
@@ -82,16 +97,22 @@ class MotionController:
 
         start_angle = self.position_controller.angle
         angle_travelled = 0.0
+        current_speed = self.configuration.max_wheel_speed
 
-        while angle_travelled <= abs(
-                angle_relative) - self.configuration.rotation_tolerance:
+        while angle_travelled < abs(angle_relative):
             # update wheel speeds
             # implement ramp
 
             # send them to the board
             await self.motor_gateway.set_speed(
-                -direction * self.configuration.max_wheel_speed,
-                direction * self.configuration.max_wheel_speed)
+                -direction *
+                mm_to_tick(current_speed,
+                           self.configuration.encoder_ticks_per_revolution,
+                           self.configuration.wheel_radius),
+                direction *
+                mm_to_tick(current_speed,
+                           self.configuration.encoder_ticks_per_revolution,
+                           self.configuration.wheel_radius))
 
             self.wheel_speed_update_event.clear()
             await self.wheel_speed_update_event.wait()
@@ -103,17 +124,3 @@ class MotionController:
         self.is_moving = False
 
         return MotionResult.OK
-
-
-def normalize_angle(angle: float) -> float:
-    """
-    Takes an arbitrary angle (expressed in radians) and normalize it into an angle that is in
-    ]-pi, pi].
-    """
-    while angle <= -math.pi:
-        angle += 2 * math.pi
-
-    while angle > math.pi:
-        angle -= 2 * math.pi
-
-    return angle

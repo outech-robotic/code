@@ -10,9 +10,19 @@ import pytest
 from pytest import fixture
 
 from highlevel.robot.controller.motion.motion import MotionController
+from highlevel.robot.controller.motion.position import mm_to_tick
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import MotionResult
+from highlevel.robot.entity.type import MotionResult, MillimeterPerSec
 from highlevel.util.geometry.vector import Vector2
+
+
+def _mm_to_tick(distance: MillimeterPerSec,
+                configuration: Configuration) -> MillimeterPerSec:
+    """
+    Converts locally millimeter distance to encoder ticks
+    """
+    return mm_to_tick(distance, configuration.encoder_ticks_per_revolution,
+                      configuration.wheel_radius)
 
 
 @fixture(name='configuration')
@@ -84,7 +94,8 @@ class TestMotionController:
         await asyncio.sleep(0)
         # Yield once to let the controller run, check that it started the movement
         motor_gateway_mock.set_speed.assert_called_once_with(
-            configuration.max_wheel_speed, configuration.max_wheel_speed)
+            _mm_to_tick(configuration.max_wheel_speed, configuration),
+            _mm_to_tick(configuration.max_wheel_speed, configuration))
 
         motor_gateway_mock.set_speed.reset_mock()
 
@@ -96,7 +107,8 @@ class TestMotionController:
         await asyncio.sleep(0)
         # check that the movement continues
         motor_gateway_mock.set_speed.assert_called_once_with(
-            configuration.max_wheel_speed, configuration.max_wheel_speed)
+            _mm_to_tick(configuration.max_wheel_speed, configuration),
+            _mm_to_tick(configuration.max_wheel_speed, configuration))
         task.cancel()
 
     @staticmethod
@@ -113,13 +125,15 @@ class TestMotionController:
 
         await asyncio.sleep(0)
         motor_gateway_mock.set_speed.assert_called_once_with(
-            -configuration.max_wheel_speed, -configuration.max_wheel_speed)
+            _mm_to_tick(-configuration.max_wheel_speed, configuration),
+            _mm_to_tick(-configuration.max_wheel_speed, configuration))
         motor_gateway_mock.set_speed.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         await asyncio.sleep(0)
         motor_gateway_mock.set_speed.assert_called_once_with(
-            -configuration.max_wheel_speed, -configuration.max_wheel_speed)
+            _mm_to_tick(-configuration.max_wheel_speed, configuration),
+            _mm_to_tick(-configuration.max_wheel_speed, configuration))
         task.cancel()
 
     @staticmethod
@@ -195,7 +209,8 @@ class TestMotionController:
         await asyncio.sleep(0)
         # a positive relative angle means the left wheel goes backwards, right forwards
         motor_gateway_mock.set_speed.assert_called_once_with(
-            -configuration.max_wheel_speed, configuration.max_wheel_speed)
+            _mm_to_tick(-configuration.max_wheel_speed, configuration),
+            _mm_to_tick(configuration.max_wheel_speed, configuration))
 
         motor_gateway_mock.set_speed.reset_mock()
         await asyncio.sleep(0)
@@ -205,7 +220,8 @@ class TestMotionController:
         motion_controller.trigger_wheel_speed_update()
         await asyncio.sleep(0)
         motor_gateway_mock.set_speed.assert_called_once_with(
-            -configuration.max_wheel_speed, configuration.max_wheel_speed)
+            _mm_to_tick(-configuration.max_wheel_speed, configuration),
+            _mm_to_tick(configuration.max_wheel_speed, configuration))
         task.cancel()
 
     @staticmethod
@@ -224,12 +240,14 @@ class TestMotionController:
         await asyncio.sleep(0)
         # a positive relative angle means the left wheel goes backwards, right forwards
         motor_gateway_mock.set_speed.assert_called_once_with(
-            configuration.max_wheel_speed, -configuration.max_wheel_speed)
+            _mm_to_tick(configuration.max_wheel_speed, configuration),
+            _mm_to_tick(-configuration.max_wheel_speed, configuration))
         motor_gateway_mock.set_speed.reset_mock()
         motion_controller.trigger_wheel_speed_update()
         await asyncio.sleep(0)
         motor_gateway_mock.set_speed.assert_called_once_with(
-            configuration.max_wheel_speed, -configuration.max_wheel_speed)
+            _mm_to_tick(configuration.max_wheel_speed, configuration),
+            _mm_to_tick(-configuration.max_wheel_speed, configuration))
         task.cancel()
 
     @staticmethod

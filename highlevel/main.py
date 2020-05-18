@@ -2,7 +2,6 @@
 Main module.
 """
 import asyncio
-import math
 import os
 
 import rplidar
@@ -56,8 +55,8 @@ CONFIG = Configuration(
     distance_between_wheels=357,
     max_wheel_speed=1000,
     max_wheel_acceleration=1500,
-    translation_tolerance=1,
-    rotation_tolerance=0.01,
+    translation_tolerance=0.001,
+    rotation_tolerance=0.00001,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
@@ -68,8 +67,7 @@ CONFIG = Configuration(
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
-    tickrate=60,
-    rotation_speed=math.pi * 2 * 4.547,
+    tickrate=100,
     encoder_position_rate=100,
     replay_fps=60,
     lidar_position_rate=11,
@@ -92,20 +90,19 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i = DependencyContainer()
 
     i.provide('configuration', CONFIG)
-
     i.provide('protobuf_router', ProtobufRouter)
 
     i.provide('odometry_function', lambda: odometry_arc)
     i.provide('position_controller', PositionController)
+    i.provide('motor_gateway', MotorGateway)
     i.provide('motion_controller', MotionController)
     i.provide('trajectory_controller', TrajectoryController)
+
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
     i.provide('obstacle_controller', ObstacleController)
     i.provide('debug_controller', DebugController)
     i.provide('match_action_controller', MatchActionController)
-
-    i.provide('motor_gateway', MotorGateway)
 
     i.provide('probe', Probe)
     i.provide('event_loop', asyncio.get_event_loop())
@@ -122,6 +119,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             cups=[],
                             left_tick=0,
                             right_tick=0,
+                            left_speed=0,
+                            right_speed=0,
                             last_position_update=0,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)

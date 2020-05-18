@@ -70,7 +70,6 @@ def simulation_configuration_test():
         ],
         speed_factor=10000,
         tickrate=200,
-        rotation_speed=10,
         replay_fps=60,
         encoder_position_rate=100,
         lidar_position_rate=11,
@@ -87,6 +86,8 @@ def simulation_state_mock():
         cups=[],
         left_tick=0,
         right_tick=0,
+        left_speed=0,
+        right_speed=0,
         last_position_update=0,
     )
 

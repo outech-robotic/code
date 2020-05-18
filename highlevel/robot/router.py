@@ -48,6 +48,8 @@ class ProtobufRouter:
             LOGGER.get().info("low_level_log",
                               content=bus_message.debugLog.content,
                               source=source)
+        elif type_msg == "moveWheelAtSpeed":
+            pass
         else:
             LOGGER.get().error("unhandled_protobuf_message",
                                message_type=type_msg,
