@@ -17,9 +17,9 @@ from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSo
 from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
-from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.motion import MotionController
-from highlevel.robot.controller.motion.odometry import OdometryController
+from highlevel.robot.controller.motion.position import PositionController
+from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.controller.obstacle import ObstacleController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
@@ -39,6 +39,7 @@ from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
+from highlevel.util.odometry import odometry_arc
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 from highlevel.util.replay_saver import ReplaySaver
@@ -53,6 +54,10 @@ CONFIG = Configuration(
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
+    max_wheel_speed=1000,
+    max_wheel_acceleration=1500,
+    translation_tolerance=1,
+    rotation_tolerance=0.01,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
@@ -90,9 +95,10 @@ async def _get_container(simulation: bool, stub_lidar: bool,
 
     i.provide('protobuf_router', ProtobufRouter)
 
-    i.provide('odometry_controller', OdometryController)
-    i.provide('localization_controller', LocalizationController)
+    i.provide('odometry_function', lambda: odometry_arc)
+    i.provide('position_controller', PositionController)
     i.provide('motion_controller', MotionController)
+    i.provide('trajectory_controller', TrajectoryController)
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
     i.provide('obstacle_controller', ObstacleController)
@@ -161,6 +167,9 @@ async def main() -> None:
                                      'false').lower() == 'true'
     i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
+    position_controller = i.get('position_controller')
+    position_controller.set_odometry_function(odometry_arc)
+
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     obstacle_controller: ObstacleController = i.get('obstacle_controller')
     lidar_adapter.register_callback(obstacle_controller.set_detection)
@@ -169,7 +178,7 @@ async def main() -> None:
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
-    motor_board_adapter.register_callback(protobuf_router.translate_message)
+    motor_board_adapter.register_callback(protobuf_router.decode_message)
 
     if is_simulation:
         simulation_router: SimulationRouter = i.get('simulation_router')

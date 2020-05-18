@@ -10,6 +10,7 @@ from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
+from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.controller.symmetry import SymmetryController
@@ -42,6 +43,10 @@ def configuration_test():
         wheel_radius=1,
         encoder_ticks_per_revolution=1,
         distance_between_wheels=1,
+        max_wheel_speed=10,
+        max_wheel_acceleration=3,
+        translation_tolerance=1,
+        rotation_tolerance=0.01,
         debug=DebugConfiguration(
             websocket_port=8080,
             http_port=9090,
@@ -123,7 +128,7 @@ def position_controller_mock():
     mock = MagicMock(spec=PositionController)
     future = asyncio.Future()
     future.set_result(None)
-    mock.update = MagicMock(return_value=future)
+    mock.update_odometry = MagicMock(return_value=future)
     return mock
 
 
@@ -166,11 +171,8 @@ def motor_gateway_mock():
 
     future = asyncio.Future()
     future.set_result(None)
-    mock.rotate = MagicMock(return_value=future)
+    mock.set_speed = MagicMock(return_value=future)
 
-    future = asyncio.Future()
-    future.set_result(None)
-    mock.translate = MagicMock(return_value=future)
     return mock
 
 
@@ -228,4 +230,14 @@ def odometry_mock():
     """
     Mocks an odometry function
     """
-    return MagicMock(return_value=(Vector2(123, 321), 3.14159777))
+    return MagicMock(return_value=(Vector2(10, 20), 3))
+
+
+@fixture
+def motion_controller_mock():
+    """
+    Mocks a Motion Controller
+    """
+    mock = MagicMock(spec=MotionController)
+    mock.trigger_wheel_speed_update = MagicMock(return_value=None)
+    return mock

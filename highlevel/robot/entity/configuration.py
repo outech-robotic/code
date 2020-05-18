@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 from highlevel.robot.entity.color import Color
-from highlevel.robot.entity.type import Radian, Millimeter
+from highlevel.robot.entity.type import Radian, Millimeter, MillimeterPerSec, MillimeterPerSec2
 from highlevel.util.geometry.vector import Vector2
 
 
@@ -38,5 +38,11 @@ class Configuration:
     wheel_radius: Millimeter
     encoder_ticks_per_revolution: int
     distance_between_wheels: Millimeter
+
+    max_wheel_speed: MillimeterPerSec
+    max_wheel_acceleration: MillimeterPerSec2
+
+    rotation_tolerance: Radian
+    translation_tolerance: Millimeter
 
     debug: DebugConfiguration

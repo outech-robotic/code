@@ -28,8 +28,8 @@ def odometry_arc(delta_left: Millimeter, delta_right: Millimeter,
 
     delta_distance = (delta_left + delta_right) / 2
 
-    if delta_distance == 0:
-        # Robot did not translate, rotate only.
+    if math.isclose(delta_distance, 0):
+        # Robot did not translate, rotation only.
         wheel_dist = configuration.distance_between_wheels / 2
         d_theta = delta_right / wheel_dist
         return current_position, current_angle + d_theta
