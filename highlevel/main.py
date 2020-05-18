@@ -167,9 +167,6 @@ async def main() -> None:
                                      'false').lower() == 'true'
     i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
-    position_controller = i.get('position_controller')
-    position_controller.set_odometry_function(odometry_arc)
-
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     obstacle_controller: ObstacleController = i.get('obstacle_controller')
     lidar_adapter.register_callback(obstacle_controller.set_detection)
