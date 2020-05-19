@@ -43,8 +43,11 @@ def configuration_test():
         wheel_radius=1,
         encoder_ticks_per_revolution=1,
         distance_between_wheels=1,
+        encoder_update_rate=1,
         max_wheel_speed=10,
         max_wheel_acceleration=3,
+        max_angular_velocity=10,
+        max_angular_acceleration=3,
         translation_tolerance=1,
         rotation_tolerance=0.01,
         debug=DebugConfiguration(
@@ -172,6 +175,7 @@ def motor_gateway_mock():
 
     future = asyncio.Future()
     future.set_result(None)
+
     mock.set_speed = MagicMock(return_value=future)
 
     return mock

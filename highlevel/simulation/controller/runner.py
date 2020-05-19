@@ -52,15 +52,17 @@ class SimulationRunner:
             for event in events:
                 await self._process_event(event)
 
-            self.state.left_tick += round(
-                self.state.left_speed / self.simulation_configuration.tickrate)
-            self.state.right_tick += round(
-                self.state.right_speed /
-                self.simulation_configuration.tickrate)
-
             # Send the encoder positions periodically.
             interval = 1 / self.simulation_configuration.encoder_position_rate * 1000
             if self.state.time - self.state.last_position_update > interval:
+                self.state.left_tick += round(
+                    self.state.left_speed /
+                    self.simulation_configuration.encoder_position_rate)
+
+                self.state.right_tick += round(
+                    self.state.right_speed /
+                    self.simulation_configuration.encoder_position_rate)
+
                 self.state.last_position_update = self.state.time
                 await self.simulation_gateway.encoder_position(
                     self.state.left_tick, self.state.right_tick)

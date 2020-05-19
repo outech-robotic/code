@@ -11,6 +11,7 @@ MillimeterPerSec2 = float
 
 Radian = float
 RadianPerSec = float
+RadianPerSec2 = float
 
 Hz = float
 

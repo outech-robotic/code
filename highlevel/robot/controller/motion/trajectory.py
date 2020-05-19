@@ -34,6 +34,7 @@ class TrajectoryController:
 
         current_pos = self.position_controller.position
         if (current_pos - target).euclidean_norm() < 1:
+            print((current_pos - target).euclidean_norm())
             return
         direction = target - current_pos
         distance = direction.euclidean_norm()

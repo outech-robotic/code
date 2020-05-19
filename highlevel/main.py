@@ -2,6 +2,7 @@
 Main module.
 """
 import asyncio
+import math
 import os
 
 import rplidar
@@ -53,10 +54,13 @@ CONFIG = Configuration(
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
+    encoder_update_rate=100,
     max_wheel_speed=1000,
-    max_wheel_acceleration=1500,
-    translation_tolerance=0.001,
-    rotation_tolerance=0.00001,
+    max_wheel_acceleration=1300,
+    max_angular_velocity=3 * math.pi,
+    max_angular_acceleration=3 * math.pi,
+    translation_tolerance=0.1,
+    rotation_tolerance=0.001,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
@@ -67,8 +71,8 @@ CONFIG = Configuration(
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
-    tickrate=100,
-    encoder_position_rate=100,
+    tickrate=1000,
+    encoder_position_rate=CONFIG.encoder_update_rate,
     replay_fps=60,
     lidar_position_rate=11,
     obstacles=[

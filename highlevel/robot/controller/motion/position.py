@@ -5,7 +5,7 @@ import math
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Millimeter, Radian, Tick
+from highlevel.robot.entity.type import Millimeter, Radian, Tick, MillimeterPerSec
 from highlevel.util.odometry import OdometryFunc
 from highlevel.util.probe import Probe
 
@@ -41,6 +41,8 @@ class PositionController:
         self.probe = probe
 
         self.distance_travelled: Millimeter = 0
+        self.speed: MillimeterPerSec = 0
+        self.angular_velocity: Radian = 0
         self.position = configuration.initial_position
         self.angle: Radian = configuration.initial_angle
         self.last_ticks_right = 0
@@ -53,8 +55,16 @@ class PositionController:
         The first call will initialize the previous encoder positions used for deltas.
         The position/angle will not be updated on this first call.
         """
-        self.probe.emit("encoder_left", tick_left)
-        self.probe.emit("encoder_right", tick_right)
+        self.probe.emit(
+            "encoder_left",
+            tick_to_mm(tick_left,
+                       self.configuration.encoder_ticks_per_revolution,
+                       self.configuration.wheel_radius))
+        self.probe.emit(
+            "encoder_right",
+            tick_to_mm(tick_right,
+                       self.configuration.encoder_ticks_per_revolution,
+                       self.configuration.wheel_radius))
 
         if not self.initialized:
             self.last_ticks_left = tick_left
@@ -63,6 +73,8 @@ class PositionController:
             return
 
         old_position = self.position
+        old_distance = self.distance_travelled
+        old_angle = self.angle
 
         self.position, self.angle = self.odometry(
             tick_to_mm(tick_left - self.last_ticks_left,
@@ -75,6 +87,10 @@ class PositionController:
 
         self.distance_travelled += (self.position -
                                     old_position).euclidean_norm()
+        self.speed = \
+            (self.distance_travelled - old_distance) * self.configuration.encoder_update_rate
+        self.angular_velocity = \
+            (self.angle - old_angle) * self.configuration.encoder_update_rate
 
         LOGGER.get().debug('position_controller_update_odometry',
                            left_tick=tick_left,
