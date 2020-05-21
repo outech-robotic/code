@@ -11,14 +11,13 @@ from proto.gen.python.outech_pb2 import (EncoderPositionMsg, BusMessage,
 
 @pytest.fixture(name='protobuf_router')
 def protobuf_router_setup(match_action_controller_mock,
-                          position_controller_mock, motion_controller_mock):
+                          position_controller_mock):
     """
     Setup a router for testing.
     """
     return ProtobufRouter(
         match_action_controller=match_action_controller_mock,
         position_controller=position_controller_mock,
-        motion_controller=motion_controller_mock,
     )
 
 
@@ -29,7 +28,7 @@ async def test_dispatch_debug_log(protobuf_router):
     """
     bus_message = BusMessage(debugLog=DebugLog(content='Hello, world!'))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_router.decode_message(msg_bytes, 'motor_board')
+    await protobuf_router.translate_message(msg_bytes, 'motor_board')
 
 
 @pytest.mark.asyncio
@@ -43,9 +42,9 @@ async def test_dispatch_encoder_position(protobuf_router,
         right_tick=-2,
     ))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_router.decode_message(msg_bytes, 'test')
+    await protobuf_router.translate_message(msg_bytes, 'test')
 
-    position_controller_mock.update_odometry.assert_called_once_with(1, -2)
+    position_controller_mock.update.assert_called_once_with(1, -2)
 
 
 @pytest.mark.asyncio
@@ -60,7 +59,7 @@ async def test_dispatch_laser_sensor(protobuf_router,
                                    distance_back_left=10,
                                    distance_back_right=10))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_router.decode_message(msg_bytes, 'test')
+    await protobuf_router.translate_message(msg_bytes, 'test')
     match_action_controller_mock.set_laser_distances.assert_called_once_with()
 
 
@@ -77,7 +76,7 @@ async def test_dispatch_pressure_sensor(protobuf_router,
                                          on_center_right=10,
                                          on_right=10))
     msg_bytes = bus_message.SerializeToString()
-    await protobuf_router.decode_message(msg_bytes, 'test')
+    await protobuf_router.translate_message(msg_bytes, 'test')
     match_action_controller_mock.set_pressures.assert_called_once_with()
 
 
@@ -87,4 +86,4 @@ async def test_dispatch_does_not_throw_exception(protobuf_router):
         If random bytes provided, should not throw exception.
     """
     msg_bytes = b'46C7S7B767'
-    await protobuf_router.decode_message(msg_bytes, 'test')
+    await protobuf_router.translate_message(msg_bytes, 'test')

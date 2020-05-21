@@ -44,7 +44,7 @@ class TestPositionController:
         """
         Test the update function's first call (no change to position/angle).
         """
-        position_controller.update_odometry(1, 1)
+        position_controller.update(1, 1)
         odometry_mock.assert_not_called()
 
     @staticmethod
@@ -57,8 +57,8 @@ class TestPositionController:
         ticks = 100
         distance = perimeter * ticks / configuration.encoder_ticks_per_revolution
 
-        position_controller.update_odometry(1, 2)
-        position_controller.update_odometry(1 + ticks, 2 - 2 * ticks)
+        position_controller.update(1, 2)
+        position_controller.update(1 + ticks, 2 - 2 * ticks)
         odometry_mock.assert_called_once_with(distance, -2 * distance,
                                               configuration.initial_position,
                                               configuration.initial_angle,
@@ -69,8 +69,8 @@ class TestPositionController:
         """
         Test the update function's result.
         """
-        position_controller.update_odometry(0, 0)
-        position_controller.update_odometry(777, 666)
+        position_controller.update(0, 0)
+        position_controller.update(777, 666)
 
         assert (position_controller.position,
                 position_controller.angle) == odometry_mock.return_value
@@ -82,26 +82,3 @@ class TestPositionController:
         """
         assert position_controller.position == configuration.initial_position
         assert position_controller.angle == configuration.initial_angle
-
-    @staticmethod
-    def test_distance_travelled_translation(position_controller, configuration,
-                                            odometry_mock):
-        """
-        Test the travelled distance computation.
-        """
-        odometry_mock.return_value = (
-            configuration.initial_position + Vector2(10, 0),
-            0,
-        )
-
-        position_controller.update_odometry(0, 0)
-        position_controller.update_odometry(100, 100)
-        assert position_controller.distance_travelled == 10
-
-        odometry_mock.return_value = (
-            configuration.initial_position,
-            0,
-        )
-
-        position_controller.update_odometry(100, 100)
-        assert position_controller.distance_travelled == 20

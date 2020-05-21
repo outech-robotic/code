@@ -13,7 +13,7 @@ from websockets.http import Headers
 from websockets.protocol import State
 
 from highlevel.logger import LOGGER
-from highlevel.robot.controller.motion.motion import MotionController
+from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.get_methods import get_methods
@@ -52,12 +52,12 @@ class DebugController:
     def __init__(self, configuration: Configuration, probe: Probe,
                  event_loop: asyncio.AbstractEventLoop,
                  motor_gateway: MotorGateway,
-                 motion_controller: MotionController):
+                 localization_controller: LocalizationController):
         self._configuration = configuration
         self._probe = probe
         self._event_loop = event_loop
         self._actions = get_methods(motor_gateway) + get_methods(
-            motion_controller)
+            localization_controller)
 
     async def run(self) -> None:
         """

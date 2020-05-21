@@ -4,7 +4,7 @@ Simulation configuration module.
 from dataclasses import dataclass
 from typing import List
 
-from highlevel.robot.entity.type import Hz
+from highlevel.robot.entity.type import RadianPerSec, Hz
 from highlevel.util.geometry.segment import Segment
 
 
@@ -17,6 +17,7 @@ class SimulationConfiguration:
     # Speed factor, 1 is normal speed, 2 will run the simulation twice as fast, INF is fastest.
     speed_factor: float
     tickrate: int  # FPS.
+    rotation_speed: RadianPerSec
     encoder_position_rate: Hz  # Frequency to send the encoder wheel positions.
     replay_fps: Hz  # Downsample the replay file at this rate.
     lidar_position_rate: Hz  # Frequency to send the LIDAR positions.

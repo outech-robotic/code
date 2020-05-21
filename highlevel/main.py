@@ -4,7 +4,6 @@ Main module.
 import asyncio
 import math
 import os
-from collections import deque
 
 import rplidar
 from serial.tools import list_ports
@@ -18,9 +17,9 @@ from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSo
 from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
+from highlevel.robot.controller.motion.localization import LocalizationController
 from highlevel.robot.controller.motion.motion import MotionController
-from highlevel.robot.controller.motion.position import PositionController
-from highlevel.robot.controller.motion.trajectory import TrajectoryController
+from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.obstacle import ObstacleController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
@@ -40,7 +39,6 @@ from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
-from highlevel.util.odometry import odometry_arc
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 from highlevel.util.replay_saver import ReplaySaver
@@ -55,13 +53,6 @@ CONFIG = Configuration(
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
-    encoder_update_rate=100,
-    max_wheel_speed=1000,
-    max_wheel_acceleration=1300,
-    max_angular_velocity=3 * math.pi,
-    max_angular_acceleration=3 * math.pi,
-    translation_tolerance=0.1,
-    rotation_tolerance=0.001,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
@@ -72,8 +63,9 @@ CONFIG = Configuration(
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
-    tickrate=1000,
-    encoder_position_rate=CONFIG.encoder_update_rate,
+    tickrate=60,
+    rotation_speed=math.pi * 2 * 4.547,
+    encoder_position_rate=100,
     replay_fps=60,
     lidar_position_rate=11,
     obstacles=[
@@ -95,19 +87,19 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i = DependencyContainer()
 
     i.provide('configuration', CONFIG)
+
     i.provide('protobuf_router', ProtobufRouter)
 
-    i.provide('odometry_function', lambda: odometry_arc)
-    i.provide('position_controller', PositionController)
-    i.provide('motor_gateway', MotorGateway)
+    i.provide('odometry_controller', OdometryController)
+    i.provide('localization_controller', LocalizationController)
     i.provide('motion_controller', MotionController)
-    i.provide('trajectory_controller', TrajectoryController)
-
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
     i.provide('obstacle_controller', ObstacleController)
     i.provide('debug_controller', DebugController)
     i.provide('match_action_controller', MatchActionController)
+
+    i.provide('motor_gateway', MotorGateway)
 
     i.provide('probe', Probe)
     i.provide('event_loop', asyncio.get_event_loop())
@@ -124,10 +116,6 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             cups=[],
                             left_tick=0,
                             right_tick=0,
-                            left_speed=0,
-                            right_speed=0,
-                            left_speed_list=deque([0 for _ in range(20)]),
-                            right_speed_list=deque([0 for _ in range(20)]),
                             last_position_update=0,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)
@@ -181,7 +169,7 @@ async def main() -> None:
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
-    motor_board_adapter.register_callback(protobuf_router.decode_message)
+    motor_board_adapter.register_callback(protobuf_router.translate_message)
 
     if is_simulation:
         simulation_router: SimulationRouter = i.get('simulation_router')

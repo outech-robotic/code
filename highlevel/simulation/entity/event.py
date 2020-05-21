@@ -10,7 +10,6 @@ class EventType(Enum):
     """
     Event type.
     """
-    WHEEL_SPEED = 'WHEEL_SPEED'
     MOVE_WHEEL = 'MOVE_WHEEL'
     MOVEMENT_DONE = 'MOVEMENT_DONE'
 

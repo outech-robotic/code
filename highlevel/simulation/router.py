@@ -1,16 +1,18 @@
 """
 Simulation router module.
 """
+import math
 from typing import Iterator, Tuple
 
 import numpy
 
+from proto.gen.python.outech_pb2 import BusMessage
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.simulation.controller.event_queue import EventQueue
+from highlevel.simulation.entity.event import EventOrder, EventType
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
-from proto.gen.python.outech_pb2 import BusMessage
 
 
 def _spread_delta_on_ticks(delta: int,
@@ -38,21 +40,49 @@ class SimulationRouter:
         """
         bus_message = BusMessage()
         bus_message.ParseFromString(data)
-
-        # pylint: disable=no-member
-        type_msg = bus_message.WhichOneof("message_content")
-        if type_msg == "moveWheelAtSpeed":
-            speed_left = bus_message.moveWheelAtSpeed.left_tick_per_sec
-            speed_right = bus_message.moveWheelAtSpeed.right_tick_per_sec
-
-            self.simulation_state.left_speed_list.append(speed_left)
-            self.simulation_state.left_speed_list.popleft()
-            self.simulation_state.right_speed_list.append(speed_right)
-            self.simulation_state.right_speed_list.popleft()
-
-            LOGGER.get().debug('simulation_router_received_wheel_speed')
-
-        elif type_msg == "pidConfig":
-            LOGGER.get().debug('simulation_router_received_pid_config')
+        if bus_message.WhichOneof("message_content") == "translate":
+            rotate = False
+            msg_ticks = bus_message.translate.ticks  # pylint: disable=no-member
+        elif bus_message.WhichOneof("message_content") == "rotate":
+            rotate = True
+            msg_ticks = bus_message.rotate.ticks  # pylint: disable=no-member
         else:
-            LOGGER.get().debug('simulation_router_received_unhandled_order')
+            return
+
+        LOGGER.get().info('simulation_router_received_movement_order',
+                          ticks=msg_ticks,
+                          type='ROTATE' if rotate else 'TRANSLATE')
+
+        if msg_ticks == 0:
+            self.event_queue.push(EventOrder(type=EventType.MOVEMENT_DONE), 0)
+            return
+
+        ticks_per_revolution = self.configuration.encoder_ticks_per_revolution
+        rotation_speed = self.simulation_configuration.rotation_speed
+        tickrate = self.simulation_configuration.tickrate
+
+        revolution_to_rotate = msg_ticks / ticks_per_revolution
+        angle_to_rotate = revolution_to_rotate * 2 * math.pi
+        time_to_rotate = abs(angle_to_rotate) / rotation_speed
+        time_ticks_to_rotate = round(time_to_rotate * tickrate)
+
+        for k, ticks_to_move in _spread_delta_on_ticks(msg_ticks,
+                                                       time_ticks_to_rotate):
+            if ticks_to_move == 0:
+                continue
+
+            self.event_queue.push(
+                EventOrder(
+                    type=EventType.MOVE_WHEEL,
+                    payload={
+                        'left':
+                        ticks_to_move if not rotate else -ticks_to_move,
+                        'right': ticks_to_move,
+                    },
+                ), k)
+
+        self.event_queue.push(
+            EventOrder(type=EventType.MOVEMENT_DONE),
+            time_ticks_to_rotate +
+            self.simulation_configuration.tickrate // 10,
+        )

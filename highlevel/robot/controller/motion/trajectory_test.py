@@ -1,3 +1,0 @@
-"""
-Test the trajectory module.
-"""
