@@ -2,6 +2,7 @@
 Mocks.
 """
 import asyncio
+from collections import deque
 from unittest.mock import MagicMock
 
 from pytest import fixture
@@ -89,6 +90,8 @@ def simulation_state_mock():
         cups=[],
         left_tick=0,
         right_tick=0,
+        left_speed_list=deque([0 for _ in range(10)]),
+        right_speed_list=deque([0 for _ in range(10)]),
         left_speed=0,
         right_speed=0,
         last_position_update=0,

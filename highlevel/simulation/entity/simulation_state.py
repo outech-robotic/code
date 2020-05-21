@@ -4,7 +4,7 @@ SimulationState of a simulation at a given moment.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Deque
 
 from highlevel.robot.entity.type import Millisecond
 from highlevel.util.geometry.vector import Vector2
@@ -28,6 +28,8 @@ class SimulationState:
     cups: List[Cup]
     left_tick: int
     right_tick: int
+    left_speed_list: Deque[int]
+    right_speed_list: Deque[int]
     left_speed: int
     right_speed: int
     last_position_update: float

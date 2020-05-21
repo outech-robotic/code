@@ -2,6 +2,9 @@
 Simulation runner module.
 """
 import asyncio
+import random
+from collections import deque
+from statistics import mean
 
 from highlevel.logger import LOGGER
 from highlevel.simulation.controller.event_queue import EventQueue
@@ -35,10 +38,19 @@ class SimulationRunner:
         self.replay_saver = replay_saver
         self.simulation_configuration = simulation_configuration
         self.state = simulation_state
+
         self.probe = probe
 
         self.tick = 0
         self.running = True
+
+        self.speed_noise = 5  # %
+        self.speed_delay = 5  # ticks before a speed modification reaches its full value
+
+        self.state.left_speed_list = deque(
+            [0 for _ in range(self.speed_delay)])
+        self.state.right_speed_list = deque(
+            [0 for _ in range(self.speed_delay)])
 
     async def run(self) -> None:
         """
@@ -52,16 +64,33 @@ class SimulationRunner:
             for event in events:
                 await self._process_event(event)
 
+            last_left = self.state.left_speed_list[-1]
+            last_right = self.state.right_speed_list[-1]
+
+            self.state.left_speed_list.append(
+                round(
+                    last_left *
+                    (1 + random.randint(-self.speed_noise, self.speed_noise) /
+                     100)))
+            self.state.left_speed_list.popleft()
+
+            self.state.right_speed_list.append(
+                round(
+                    last_right *
+                    (1 + random.randint(-self.speed_noise, self.speed_noise) /
+                     100)))
+            self.state.right_speed_list.popleft()
+
             # Send the encoder positions periodically.
             interval = 1 / self.simulation_configuration.encoder_position_rate * 1000
             if self.state.time - self.state.last_position_update > interval:
-                self.state.left_tick += round(
-                    self.state.left_speed /
-                    self.simulation_configuration.encoder_position_rate)
+                left_speed = mean(self.state.left_speed_list)
+                right_speed = mean(self.state.right_speed_list)
 
-                self.state.right_tick += round(
-                    self.state.right_speed /
-                    self.simulation_configuration.encoder_position_rate)
+                self.state.left_tick += \
+                    round(left_speed / self.simulation_configuration.encoder_position_rate)
+                self.state.right_tick += \
+                    round(right_speed / self.simulation_configuration.encoder_position_rate)
 
                 self.state.last_position_update = self.state.time
                 await self.simulation_gateway.encoder_position(

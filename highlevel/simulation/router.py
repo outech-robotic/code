@@ -45,8 +45,10 @@ class SimulationRouter:
             speed_left = bus_message.moveWheelAtSpeed.left_tick_per_sec
             speed_right = bus_message.moveWheelAtSpeed.right_tick_per_sec
 
-            self.simulation_state.left_speed = speed_left
-            self.simulation_state.right_speed = speed_right
+            self.simulation_state.left_speed_list.append(speed_left)
+            self.simulation_state.left_speed_list.popleft()
+            self.simulation_state.right_speed_list.append(speed_right)
+            self.simulation_state.right_speed_list.popleft()
 
             LOGGER.get().debug('simulation_router_received_wheel_speed')
 

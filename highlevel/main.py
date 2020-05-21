@@ -4,6 +4,7 @@ Main module.
 import asyncio
 import math
 import os
+from collections import deque
 
 import rplidar
 from serial.tools import list_ports
@@ -125,6 +126,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             right_tick=0,
                             left_speed=0,
                             right_speed=0,
+                            left_speed_list=deque([0 for _ in range(20)]),
+                            right_speed_list=deque([0 for _ in range(20)]),
                             last_position_update=0,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)
