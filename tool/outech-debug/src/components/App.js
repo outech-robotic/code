@@ -11,12 +11,9 @@ import useDerivative from "../hooks/useDerivative";
 import useAggregatedGraph from "../hooks/useAggregatedGraph";
 import useDecimate from "../hooks/useDecimate";
 
-const DATA_DECIMATION_RATE = 10
-
 const useDataSeries = (event$, name) => {
     const event = useFilterEvent(event$, name);
-    const decimatedEvent = useDecimate(event, DATA_DECIMATION_RATE)
-    const xy = useMemo(() => mapEventToPoint(decimatedEvent), [decimatedEvent])
+    const xy = useMemo(() => mapEventToPoint(event), [event])
     const speedXY = useDerivative(xy);
     return [useAggregatedGraph(xy), useAggregatedGraph(speedXY)]
 }
