@@ -5,7 +5,7 @@ import sys
 
 from google.protobuf import json_format
 
-from highlevel.adapter import TCPSocketAdapter
+from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter
 from highlevel.util import tcp
 from proto.gen.python.outech_pb2 import BusMessage
 
