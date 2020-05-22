@@ -179,7 +179,7 @@ def motor_gateway_mock():
     future = asyncio.Future()
     future.set_result(None)
 
-    mock.set_speed = MagicMock(return_value=future)
+    mock.set_target_positions = MagicMock(return_value=future)
 
     return mock
 

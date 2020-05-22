@@ -5,9 +5,9 @@ from dataclasses import dataclass
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
-from highlevel.robot.entity.type import TickPerSec
+from highlevel.robot.entity.type import TickPerSec, Tick
 from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
-    PIDConfigMsg
+    PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg
 
 
 @dataclass(frozen=True)
@@ -20,13 +20,14 @@ class PIDValues:
     k_d: float
 
 
-FIXED_POINT_COEF = 2**16
+FIXED_POINT_COEF = 2 ** 16
 
 
 class MotorGateway:
     """
     Motor gateway.
     """
+
     def __init__(self, motor_board_adapter: SocketAdapter):
         self.motor_board_adapter = motor_board_adapter
 
@@ -34,21 +35,33 @@ class MotorGateway:
         payload = message.SerializeToString()
         await self.motor_board_adapter.send(payload)
 
-    async def set_speed(self, left_speed: TickPerSec,
-                        right_speed: TickPerSec) -> None:
+    async def set_target_speeds(self, tick_left: TickPerSec, tick_right: TickPerSec) -> None:
         """
         Sets each wheel's speed target.
         """
         LOGGER.get().debug('gateway_set_speed',
-                           left_speed=left_speed,
-                           right_speed=right_speed)
+                           left_speed=tick_left,
+                           right_speed=tick_right)
         message = BusMessage(moveWheelAtSpeed=MoveWheelAtSpeedMsg(
-            left_tick_per_sec=round(left_speed),
-            right_tick_per_sec=round(right_speed)))
+            left_tick_per_sec=round(tick_left),
+            right_tick_per_sec=round(tick_right)))
         await self._send_message(message)
 
-    async def send_pid(self, pid_left: PIDValues,
-                       pid_right: PIDValues) -> None:
+    async def set_target_positions(self, tick_left: Tick, tick_right: Tick) -> None:
+        """
+        Sets each wheel's position target, in encoder ticks.
+        """
+        LOGGER.get().debug('motor_gateway_target_pos', tick_left=tick_left, tick_right=tick_right)
+        message = BusMessage(
+            wheelPositionTarget=WheelPositionTargetMsg(
+                tick_left=tick_left,
+                tick_right=tick_right
+            )
+        )
+        await self._send_message(message)
+
+    async def set_pids_position(self, pid_left: PIDValues,
+                                pid_right: PIDValues) -> None:
         """
         Sends the PID configurations for both wheels.
         """
@@ -59,15 +72,28 @@ class MotorGateway:
         # The motor board uses 16 bit fixed point notation
         # so the float constants are rounded after a x2^16
         message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=PIDCoefficients(
+            pid_speed_left=PIDCoefficients(kp=0,ki=0,kd=0),
+            pid_speed_right=PIDCoefficients(kp=0,ki=0,kd=0),
+            pid_position_left=PIDCoefficients(
                 kp=pid_left.k_p * FIXED_POINT_COEF,
                 ki=pid_left.k_i * FIXED_POINT_COEF,
                 kd=pid_left.k_d * FIXED_POINT_COEF,
             ),
-            pid_speed_right=PIDCoefficients(
+            pid_position_right=PIDCoefficients(
                 kp=pid_right.k_p * FIXED_POINT_COEF,
                 ki=pid_right.k_i * FIXED_POINT_COEF,
                 kd=pid_right.k_d * FIXED_POINT_COEF,
             ),
         ))
+        await self._send_message(message)
+
+    async def send_control_mode(self, speed: bool, position: bool):
+        """
+        Sets a boolean in the motor board making it control either its wheel speeds or positions
+        Settings both generates an error and both are disabled
+        """
+        LOGGER.get().debug('motor_gateway_set_control_mode',
+                           speed_controlled=speed,
+                           position_controlled=position)
+        message = BusMessage(wheelControlMode=WheelControlModeMsg(speed=speed, position=position))
         await self._send_message(message)

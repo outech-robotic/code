@@ -41,17 +41,16 @@ class SimulationRouter:
 
         # pylint: disable=no-member
         type_msg = bus_message.WhichOneof("message_content")
-        if type_msg == "moveWheelAtSpeed":
-            speed_left = bus_message.moveWheelAtSpeed.left_tick_per_sec
-            speed_right = bus_message.moveWheelAtSpeed.right_tick_per_sec
+        if type_msg == "wheelPositionTarget":
+            target_left = bus_message.wheelPositionTarget.tick_left
+            target_right = bus_message.wheelPositionTarget.tick_right
 
-            self.simulation_state.left_speed_list.append(speed_left)
-            self.simulation_state.left_speed_list.popleft()
-            self.simulation_state.right_speed_list.append(speed_right)
-            self.simulation_state.right_speed_list.popleft()
+            self.simulation_state.position_queue_left.append(target_left)
+            self.simulation_state.position_queue_left.popleft()
+            self.simulation_state.position_queue_right.append(target_right)
+            self.simulation_state.position_queue_right.popleft()
 
-            LOGGER.get().debug('simulation_router_received_wheel_speed')
-
+            LOGGER.get().debug('simulation_router_received_wheel_position_target')
         elif type_msg == "pidConfig":
             LOGGER.get().debug('simulation_router_received_pid_config')
         else:

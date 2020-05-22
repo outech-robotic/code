@@ -28,8 +28,8 @@ class SimulationState:
     cups: List[Cup]
     left_tick: int
     right_tick: int
-    left_speed_list: Deque[int]
-    right_speed_list: Deque[int]
+    position_queue_left: Deque[int]
+    position_queue_right: Deque[int]
     left_speed: int
     right_speed: int
     last_position_update: float

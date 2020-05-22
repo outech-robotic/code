@@ -50,6 +50,8 @@ class ProtobufRouter:
                               source=source)
         elif type_msg == "moveWheelAtSpeed":
             pass
+        elif type_msg == "wheelPositionTarget":
+            pass
         else:
             LOGGER.get().error("unhandled_protobuf_message",
                                message_type=type_msg,

@@ -1,6 +1,8 @@
 """
 Strategy module
 """
+import asyncio
+import math
 
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
@@ -63,9 +65,18 @@ class StrategyController:
         Run the strategy.
         """
 
-        for vec, reverse in PATH:
-            LOGGER.get().info("move robot", destination=vec)
-            await self.trajectory_controller.move_to(
-                Vector2(vec.x, 2000 - vec.y), reverse)
+        await self.trajectory_controller.motion_controller.rotate(math.pi/2)
+        await asyncio.sleep(0.001)
+        await self.trajectory_controller.motion_controller.rotate(-math.pi/2)
+        await asyncio.sleep(0.001)
+        await self.trajectory_controller.motion_controller.translate(500)
+        await asyncio.sleep(0.01)
+        await self.trajectory_controller.motion_controller.translate(-500)
+
+
+        # for vec, reverse in PATH:
+        #     LOGGER.get().info("move robot", destination=vec)
+        #     await self.trajectory_controller.move_to(
+        #         Vector2(vec.x, 2000 - vec.y), reverse)
 
         LOGGER.get().info("Strategy algorithm finished running")  # lol

@@ -69,7 +69,7 @@ class TestMotionController:
         Robot translates 0 mm to verify that it doesn't do anything on short enough distances
         """
         result = await motion_controller.translate(0)
-        motor_gateway_mock.set_speed.assert_called_once_with(0, 0)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -98,17 +98,17 @@ class TestMotionController:
 
         await asyncio.sleep(0)
         # Yield once to let the controller run, check that it started the movement
-        motor_gateway_mock.set_speed.assert_called_once_with(1, 1)
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.assert_called_once_with(1, 1)
+        motor_gateway_mock.set_target_positions.reset_mock()
 
         await asyncio.sleep(0)
         # yield again and check that the controller correctly waits for a trigger
-        motor_gateway_mock.set_speed.assert_not_called()
+        motor_gateway_mock.set_target_positions.assert_not_called()
 
         motion_controller.trigger_wheel_speed_update()
         await asyncio.sleep(0)
         # check that the movement continues
-        motor_gateway_mock.set_speed.assert_called_once_with(2, 2)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(2, 2)
         task.cancel()
 
     @staticmethod
@@ -123,12 +123,12 @@ class TestMotionController:
         task = asyncio.create_task(motion_controller.translate(-100))
 
         await asyncio.sleep(0)
-        motor_gateway_mock.set_speed.assert_called_once_with(-1, -1)
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.assert_called_once_with(-1, -1)
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         await asyncio.sleep(0)
-        motor_gateway_mock.set_speed.assert_called_once_with(-2, -2)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(-2, -2)
         task.cancel()
 
     @staticmethod
@@ -146,18 +146,18 @@ class TestMotionController:
         await asyncio.sleep(0)
 
         position_controller_mock.distance_travelled = 100 - configuration.translation_tolerance
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         await asyncio.sleep(0)
 
         position_controller_mock.distance_travelled = 100
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         result = await task
 
-        motor_gateway_mock.set_speed.assert_called_once_with(0, 0)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -175,18 +175,18 @@ class TestMotionController:
         await asyncio.sleep(0)
 
         position_controller_mock.distance_travelled = 100 - configuration.translation_tolerance
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         await asyncio.sleep(0)
 
         position_controller_mock.distance_travelled = 100
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         result = await task
 
-        motor_gateway_mock.set_speed.assert_called_once_with(0, 0)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -203,16 +203,16 @@ class TestMotionController:
 
         await asyncio.sleep(0)
         # a positive relative angle means the left wheel goes backwards, right forwards
-        motor_gateway_mock.set_speed.assert_called_once_with(-1, 1)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(-1, 1)
 
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         await asyncio.sleep(0)
-        motor_gateway_mock.set_speed.assert_not_called()
+        motor_gateway_mock.set_target_positions.assert_not_called()
 
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
         await asyncio.sleep(0)
-        motor_gateway_mock.set_speed.assert_called_once_with(-2, 2)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(-2, 2)
         task.cancel()
 
     @staticmethod
@@ -229,11 +229,11 @@ class TestMotionController:
 
         await asyncio.sleep(0)
         # a positive relative angle means the left wheel goes backwards, right forwards
-        motor_gateway_mock.set_speed.assert_called_once_with(1, -1)
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.assert_called_once_with(1, -1)
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
         await asyncio.sleep(0)
-        motor_gateway_mock.set_speed.assert_called_once_with(2, -2)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(2, -2)
         task.cancel()
 
     @staticmethod
@@ -251,18 +251,18 @@ class TestMotionController:
         await asyncio.sleep(0)
         # Test that barely before the tolerance is reached, the movemnt continues
         position_controller_mock.angle = math.pi / 2 - configuration.rotation_tolerance
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         await asyncio.sleep(0)
 
         position_controller_mock.angle = math.pi / 2
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         result = await task
 
-        motor_gateway_mock.set_speed.assert_called_once_with(0, 0)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -280,10 +280,10 @@ class TestMotionController:
         await asyncio.sleep(0)
 
         position_controller_mock.angle = -math.pi / 2
-        motor_gateway_mock.set_speed.reset_mock()
+        motor_gateway_mock.set_target_positions.reset_mock()
         motion_controller.trigger_wheel_speed_update()
 
         result = await task
 
-        motor_gateway_mock.set_speed.assert_called_once_with(0, 0)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK

@@ -33,5 +33,5 @@ async def test_move_backward(simulation_router, simulation_state_mock):
     msg_bytes = bus_message.SerializeToString()
     await simulation_router.handle_movement_order(msg_bytes, 'test')
 
-    assert simulation_state_mock.left_speed_list[-1] == 100
-    assert simulation_state_mock.right_speed_list[-1] == 200
+    assert simulation_state_mock.position_queue_left[-1] == 100
+    assert simulation_state_mock.position_queue_right[-1] == 200

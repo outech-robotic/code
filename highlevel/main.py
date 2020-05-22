@@ -56,17 +56,17 @@ CONFIG = Configuration(
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
     encoder_update_rate=100,
-    max_wheel_speed=1000,
-    max_wheel_acceleration=1300,
-    max_angular_velocity=3 * math.pi,
-    max_angular_acceleration=3 * math.pi,
+    max_wheel_speed=500,
+    max_wheel_acceleration=1000,
+    max_angular_velocity=0.5 * math.pi,
+    max_angular_acceleration=1 * math.pi,
     translation_tolerance=0.1,
     rotation_tolerance=0.001,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
-        refresh_rate=30,
+        refresh_rate=60,
     ),
 )
 
@@ -126,8 +126,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             right_tick=0,
                             left_speed=0,
                             right_speed=0,
-                            left_speed_list=deque([0 for _ in range(20)]),
-                            right_speed_list=deque([0 for _ in range(20)]),
+                            position_queue_left=deque([0 for _ in range(20)]),
+                            position_queue_right=deque([0 for _ in range(20)]),
                             last_position_update=0,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)
