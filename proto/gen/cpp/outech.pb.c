@@ -24,10 +24,13 @@ PB_BIND(PIDCoefficients, PIDCoefficients, AUTO)
 PB_BIND(PIDConfigMsg, PIDConfigMsg, AUTO)
 
 
-PB_BIND(SetMotionControlModeMsg, SetMotionControlModeMsg, AUTO)
+PB_BIND(WheelControlModeMsg, WheelControlModeMsg, AUTO)
 
 
 PB_BIND(MoveWheelAtSpeedMsg, MoveWheelAtSpeedMsg, AUTO)
+
+
+PB_BIND(WheelPositionTargetMsg, WheelPositionTargetMsg, AUTO)
 
 
 PB_BIND(TranslateMsg, TranslateMsg, AUTO)

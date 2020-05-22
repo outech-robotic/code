@@ -24,17 +24,23 @@ message PIDCoefficients {
 message PIDConfigMsg {
   PIDCoefficients pid_speed_left = 1;
   PIDCoefficients pid_speed_right = 2;
+  PIDCoefficients pid_position_left = 3;
+  PIDCoefficients pid_position_right = 4;
 }
 
-message SetMotionControlModeMsg {
+message WheelControlModeMsg {
   bool speed = 1;
-  bool translation = 2;
-  bool rotation = 3;
+  bool position = 2;
 }
 
 message MoveWheelAtSpeedMsg {
   sint32 left_tick_per_sec = 1;
   sint32 right_tick_per_sec = 2;
+}
+
+message WheelPositionTargetMsg {
+  sint32 tick_left = 1;
+  sint32 tick_right = 2;
 }
 
 message TranslateMsg {
@@ -83,8 +89,8 @@ message BusMessage {
     MovementEndedMsg movementEnded = 3;
     EncoderPositionMsg encoderPosition = 4;
     PIDConfigMsg pidConfig = 5;
-
-    SetMotionControlModeMsg setMotionControlMode = 7;
+    WheelControlModeMsg wheelControlMode = 6;
+    WheelPositionTargetMsg wheelPositionTarget = 7;
     MoveWheelAtSpeedMsg moveWheelAtSpeed = 8;
     TranslateMsg translate = 9;
     RotateMsg rotate = 10;
