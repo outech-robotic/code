@@ -65,13 +65,16 @@ class StrategyController:
         Run the strategy.
         """
 
-        await self.trajectory_controller.motion_controller.rotate(math.pi/2)
-        await asyncio.sleep(0.001)
-        await self.trajectory_controller.motion_controller.rotate(-math.pi/2)
-        await asyncio.sleep(0.001)
-        await self.trajectory_controller.motion_controller.translate(500)
-        await asyncio.sleep(0.01)
-        await self.trajectory_controller.motion_controller.translate(-500)
+        while True:
+            await asyncio.sleep(1000)
+
+        # await self.trajectory_controller.motion_controller.rotate(math.pi/2)
+        # await asyncio.sleep(0.001)
+        # await self.trajectory_controller.motion_controller.rotate(-math.pi/2)
+        # await asyncio.sleep(0.001)
+        # await self.trajectory_controller.motion_controller.translate(100)
+        # await asyncio.sleep(2)
+        # await self.trajectory_controller.motion_controller.translate(-500)
 
 
         # for vec, reverse in PATH:

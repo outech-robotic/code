@@ -25,7 +25,7 @@ def ramp(current: float, last_output: float, first_order: float,
         # getting close
         output = last_output - max_second_order / update_rate
     else:
-        if abs(first_order) < max_first_order:
+        if abs(last_output) < max_first_order:
             # can go faster
             output = last_output + max_second_order / update_rate
         else:
@@ -94,22 +94,26 @@ class MotionController:
         target_wheel_speed = 0.0
 
         current_speed = self.position_controller.speed
+        target_left = self.position_controller.position_left
+        target_right = self.position_controller.position_right
 
-        while abs(dist_remaining) > 1:
+        while dist_remaining > 0:
             # update wheel speeds
             target_wheel_speed = ramp(dist_remaining,
                                       target_wheel_speed, current_speed,
                                       max_speed, max_accel, update_rate)
 
-            LOGGER.get().info('looping', target_wheel_speed=target_wheel_speed,
-                              remaining=dist_remaining, current_speed=current_speed,
-                              position_left=self.position_controller.position_left,
-                              position_right=self.position_controller.position_right)
-
             # Updaet target position
             position_increment = target_wheel_speed / update_rate
-            target_left = self.position_controller.position_left + direction * position_increment
-            target_right = self.position_controller.position_right + direction * position_increment
+            target_left = target_left + direction * position_increment
+            target_right = target_left + direction * position_increment
+
+            LOGGER.get().info('looping', target_wheel_speed=target_wheel_speed,
+                              remaining=dist_remaining, current_speed=current_speed,
+                              distance_travelled=self.position_controller.distance_travelled-dist_start,
+                              position_increment=position_increment,
+                              target_left=target_left
+                              )
 
             # send them to the board
             await self._set_target_wheel_positions(target_left, target_right)
@@ -118,8 +122,7 @@ class MotionController:
             await self.wheel_speed_update_event.wait()
 
             # update the distance traveled
-            dist_remaining = dist_target - (
-                    self.position_controller.distance_travelled - dist_start)
+            dist_remaining = dist_remaining - position_increment
             current_speed = self.position_controller.speed
 
         self.is_moving = False

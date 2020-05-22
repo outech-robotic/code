@@ -57,7 +57,7 @@ CONFIG = Configuration(
     distance_between_wheels=357,
     encoder_update_rate=100,
     max_wheel_speed=500,
-    max_wheel_acceleration=1000,
+    max_wheel_acceleration=500,
     max_angular_velocity=0.5 * math.pi,
     max_angular_acceleration=1 * math.pi,
     translation_tolerance=0.1,
@@ -66,7 +66,7 @@ CONFIG = Configuration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
-        refresh_rate=60,
+        refresh_rate=30,
     ),
 )
 
@@ -74,7 +74,7 @@ SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
     tickrate=1000,
     encoder_position_rate=CONFIG.encoder_update_rate,
-    replay_fps=60,
+    replay_fps=30,
     lidar_position_rate=11,
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
@@ -112,8 +112,12 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i.provide('probe', Probe)
     i.provide('event_loop', asyncio.get_event_loop())
 
+    i.provide('simulation_configuration', SIMULATION_CONFIG)
+    i.provide('http_client', HTTPClient)
+    i.provide('web_browser_client', WebBrowserClient)
+    i.provide('replay_saver', ReplaySaver)
+
     if simulation:
-        i.provide('simulation_configuration', SIMULATION_CONFIG)
         i.provide('event_queue', EventQueue())
 
         i.provide('simulation_router', SimulationRouter)
@@ -132,9 +136,6 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)
 
-        i.provide('http_client', HTTPClient)
-        i.provide('web_browser_client', WebBrowserClient)
-        i.provide('replay_saver', ReplaySaver)
         i.provide('clock', FakeClock)
 
     else:
@@ -150,7 +151,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     if simulation or stub_socket_can:
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
     else:
-        reader, writer = await tcp.get_reader_writer('localhost', 32000)
+        reader, writer = await tcp.get_reader_writer('192.168.1.120', 14000)
         i.provide('motor_board_adapter',
                   TCPSocketAdapter,
                   reader=reader,
