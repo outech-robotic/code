@@ -62,12 +62,12 @@ class MotorGateway:
         )
         await self._send_message(message)
 
-    async def set_pid_position_left(self, pid_left: PIDValues) -> None:
+    async def set_pid_position_left(self, k_p: float, k_i: float, k_d: float) -> None:
         """
         Sends the PID configurations for the left wheel.
         """
-        LOGGER.get().debug('gateway_send_pid_pos_left',
-                           pid_left=pid_left)
+        pid_left = PIDValues(k_p, k_i, k_d)
+        LOGGER.get().debug('gateway_send_pid_pos_left', pid_left=pid_left)
 
         # The motor board uses 16 bit fixed point notation
         # so the float constants are rounded after a x2^16
@@ -88,12 +88,12 @@ class MotorGateway:
         self.pid_position_left_last = pid_left
         await self._send_message(message)
 
-    async def set_pid_position_right(self, pid_right: PIDValues) -> None:
+    async def set_pid_position_right(self, k_p: float, k_i: float, k_d: float) -> None:
         """
         Sends the PID configurations for the right wheel.
         """
-        LOGGER.get().debug('gateway_send_pid_pos_right',
-                           pid_left=pid_right)
+        pid_right = PIDValues(k_p, k_i, k_d)
+        LOGGER.get().debug('gateway_send_pid_pos_right', pid_left=pid_right)
 
         # The motor board uses 16 bit fixed point notation
         # so the float constants are rounded after a x2^16
@@ -113,7 +113,6 @@ class MotorGateway:
         ))
         self.pid_position_right_last = pid_right
         await self._send_message(message)
-
 
     async def send_control_mode(self, speed: bool, position: bool):
         """
