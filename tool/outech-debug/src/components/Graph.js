@@ -44,7 +44,7 @@ export default function Graph({value, seriesName, color}) {
                 pointHitRadius: 10,
                 showLine: true,
                 borderWidth: 1,
-                data: value.slice(-1000),
+                data: value.slice(-500),
             }
         ]
     };
