@@ -30,6 +30,8 @@ class MotorGateway:
 
     def __init__(self, motor_board_adapter: SocketAdapter):
         self.motor_board_adapter = motor_board_adapter
+        self.pid_position_left_last = PIDValues(0, 0, 0)
+        self.pid_position_right_last = PIDValues(0, 0, 0)
 
     async def _send_message(self, message: BusMessage) -> None:
         payload = message.SerializeToString()
@@ -60,24 +62,48 @@ class MotorGateway:
         )
         await self._send_message(message)
 
-    async def set_pids_position(self, pid_left: PIDValues,
-                                pid_right: PIDValues) -> None:
+    async def set_pid_position_left(self, pid_left: PIDValues) -> None:
         """
-        Sends the PID configurations for both wheels.
+        Sends the PID configurations for the left wheel.
         """
-        LOGGER.get().debug('gateway_send_pid',
-                           pid_left=pid_left,
-                           pid_right=pid_right)
+        LOGGER.get().debug('gateway_send_pid_pos_left',
+                           pid_left=pid_left)
 
         # The motor board uses 16 bit fixed point notation
         # so the float constants are rounded after a x2^16
         message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=PIDCoefficients(kp=0,ki=0,kd=0),
-            pid_speed_right=PIDCoefficients(kp=0,ki=0,kd=0),
+            pid_speed_left=PIDCoefficients(kp=0, ki=0, kd=0),
+            pid_speed_right=PIDCoefficients(kp=0, ki=0, kd=0),
             pid_position_left=PIDCoefficients(
                 kp=pid_left.k_p * FIXED_POINT_COEF,
                 ki=pid_left.k_i * FIXED_POINT_COEF,
                 kd=pid_left.k_d * FIXED_POINT_COEF,
+            ),
+            pid_position_right=PIDCoefficients(
+                kp=self.pid_position_right_last.k_p * FIXED_POINT_COEF,
+                ki=self.pid_position_right_last.k_i * FIXED_POINT_COEF,
+                kd=self.pid_position_right_last.k_d * FIXED_POINT_COEF,
+            ),
+        ))
+        self.pid_position_left_last = pid_left
+        await self._send_message(message)
+
+    async def set_pid_position_right(self, pid_right: PIDValues) -> None:
+        """
+        Sends the PID configurations for the right wheel.
+        """
+        LOGGER.get().debug('gateway_send_pid_pos_right',
+                           pid_left=pid_right)
+
+        # The motor board uses 16 bit fixed point notation
+        # so the float constants are rounded after a x2^16
+        message = BusMessage(pidConfig=PIDConfigMsg(
+            pid_speed_left=PIDCoefficients(kp=0, ki=0, kd=0),
+            pid_speed_right=PIDCoefficients(kp=0, ki=0, kd=0),
+            pid_position_left=PIDCoefficients(
+                kp=self.pid_position_left_last.k_p * FIXED_POINT_COEF,
+                ki=self.pid_position_left_last.k_i * FIXED_POINT_COEF,
+                kd=self.pid_position_left_last.k_d * FIXED_POINT_COEF,
             ),
             pid_position_right=PIDCoefficients(
                 kp=pid_right.k_p * FIXED_POINT_COEF,
@@ -85,7 +111,9 @@ class MotorGateway:
                 kd=pid_right.k_d * FIXED_POINT_COEF,
             ),
         ))
+        self.pid_position_right_last = pid_right
         await self._send_message(message)
+
 
     async def send_control_mode(self, speed: bool, position: bool):
         """
