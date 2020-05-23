@@ -48,9 +48,8 @@ class ProtobufRouter:
             LOGGER.get().info("low_level_log",
                               content=bus_message.debugLog.content,
                               source=source)
-        elif type_msg == "moveWheelAtSpeed":
-            pass
-        elif type_msg == "wheelPositionTarget":
+        elif type_msg in ["moveWheelAtSpeed", "wheelPositionTarget",
+                          "pidConfig", "wheelTolerances"]:
             pass
         else:
             LOGGER.get().error("unhandled_protobuf_message",

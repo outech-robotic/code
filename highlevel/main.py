@@ -56,17 +56,17 @@ CONFIG = Configuration(
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
     encoder_update_rate=100,
-    max_wheel_speed=500,
-    max_wheel_acceleration=500,
+    max_wheel_speed=250,
+    max_wheel_acceleration=750,
     max_angular_velocity=0.5 * math.pi,
     max_angular_acceleration=1 * math.pi,
-    translation_tolerance=0.1,
-    rotation_tolerance=0.001,
+    tolerance_distance=0.5,
+    tolerance_angle=0.005,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
-        refresh_rate=30,
+        refresh_rate=1000,
     ),
 )
 
@@ -74,7 +74,7 @@ SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
     tickrate=1000,
     encoder_position_rate=CONFIG.encoder_update_rate,
-    replay_fps=30,
+    replay_fps=60,
     lidar_position_rate=11,
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),

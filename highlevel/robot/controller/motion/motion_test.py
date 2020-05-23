@@ -4,6 +4,7 @@ Tests for the motion controller module.
 import asyncio
 import dataclasses
 import math
+from typing import List, Any
 
 import pytest
 from pytest import fixture
@@ -24,6 +25,27 @@ def _mm_to_tick(distance: MillimeterPerSec,
                       configuration.wheel_radius)
 
 
+async def do_test_stop(motion_controller: MotionController,
+                       position_controller_mock: Any, motor_gateway_mock: Any,
+                       positions: List[int], rotation: bool) -> None:
+    """
+    Awaits enough motion controller steps for a complete movement.
+    positions list is a list of positions following a trapezoid speed shape.
+    """
+    expected_positions = positions[1:] + [positions[-1]]
+    for position, expected in zip(positions, expected_positions):
+        position_controller_mock.position_left = -position if rotation else position
+        position_controller_mock.position_right = position
+        if rotation:
+            position_controller_mock.angle = position
+        else:
+            position_controller_mock.distance_travelled = position
+        motion_controller.trigger_wheel_speed_update()
+        await asyncio.sleep(0)
+        motor_gateway_mock.set_target_positions.assert_called_with(
+            -expected if rotation else expected, expected)
+
+
 @fixture(name='configuration')
 def configuration_stub(configuration_test: Configuration) -> Configuration:
     """
@@ -32,9 +54,9 @@ def configuration_stub(configuration_test: Configuration) -> Configuration:
     return dataclasses.replace(configuration_test,
                                distance_between_wheels=2,
                                encoder_update_rate=1,
-                               max_wheel_speed=10,
+                               max_wheel_speed=5,
                                max_wheel_acceleration=1,
-                               max_angular_velocity=1,
+                               max_angular_velocity=5,
                                max_angular_acceleration=1,
                                wheel_radius=1 / (2 * math.pi))
 
@@ -50,6 +72,8 @@ def motion_controller_setup(position_controller_mock, motor_gateway_mock,
     position_controller_mock.distance_travelled = 0
     position_controller_mock.speed = 0
     position_controller_mock.angular_velocity = 0
+    position_controller_mock.position_left = 0
+    position_controller_mock.position_right = 0
 
     return MotionController(
         position_controller=position_controller_mock,
@@ -108,7 +132,7 @@ class TestMotionController:
         motion_controller.trigger_wheel_speed_update()
         await asyncio.sleep(0)
         # check that the movement continues
-        motor_gateway_mock.set_target_positions.assert_called_once_with(2, 2)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(3, 3)
         task.cancel()
 
     @staticmethod
@@ -128,65 +152,56 @@ class TestMotionController:
         motion_controller.trigger_wheel_speed_update()
 
         await asyncio.sleep(0)
-        motor_gateway_mock.set_target_positions.assert_called_once_with(-2, -2)
+        motor_gateway_mock.set_target_positions.assert_called_once_with(-3, -3)
         task.cancel()
 
     @staticmethod
     @pytest.mark.asyncio
     async def test_translate_stops_at_target(motion_controller,
                                              position_controller_mock,
-                                             motor_gateway_mock,
-                                             configuration):
+                                             motor_gateway_mock):
         """
         Robot translates a given distance. Check that the speed is zero at the end.
         """
         position_controller_mock.distance_travelled = 0
-        task = asyncio.create_task(motion_controller.translate(100))
+        position_controller_mock.position_left = 0
+        position_controller_mock.position_right = 0
 
-        await asyncio.sleep(0)
+        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
+        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
 
-        position_controller_mock.distance_travelled = 100 - configuration.translation_tolerance
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        task = asyncio.create_task(motion_controller.translate(positions[-1]))
 
-        await asyncio.sleep(0)
-
-        position_controller_mock.distance_travelled = 100
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        await do_test_stop(motion_controller, position_controller_mock,
+                           motor_gateway_mock, positions, False)
 
         result = await task
 
-        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
     @pytest.mark.asyncio
     async def test_translate_stops_at_target_negative(motion_controller,
                                                       position_controller_mock,
-                                                      motor_gateway_mock,
-                                                      configuration):
+                                                      motor_gateway_mock):
         """
         Robot translates a given  negative distance. Check that the speed is zero at the end.
         """
         position_controller_mock.distance_travelled = 0
-        task = asyncio.create_task(motion_controller.translate(-100))
+        position_controller_mock.position_left = 0
+        position_controller_mock.position_right = 0
 
-        await asyncio.sleep(0)
+        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
+        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
+        positions = [-p for p in positions]
 
-        position_controller_mock.distance_travelled = 100 - configuration.translation_tolerance
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        task = asyncio.create_task(motion_controller.translate(positions[-1]))
 
-        await asyncio.sleep(0)
-
-        position_controller_mock.distance_travelled = 100
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        await do_test_stop(motion_controller, position_controller_mock,
+                           motor_gateway_mock, positions, False)
 
         result = await task
 
-        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -240,29 +255,24 @@ class TestMotionController:
     @pytest.mark.asyncio
     async def test_rotate_stops_at_target(motion_controller,
                                           position_controller_mock,
-                                          motor_gateway_mock, configuration):
+                                          motor_gateway_mock):
         """
         Robot rotates for a given relative angle. Check that the controller stops at target.
         """
-
         position_controller_mock.angle = 0
-        task = asyncio.create_task(motion_controller.rotate(math.pi / 2))
+        position_controller_mock.position_left = 0
+        position_controller_mock.position_right = 0
 
-        await asyncio.sleep(0)
-        # Test that barely before the tolerance is reached, the movemnt continues
-        position_controller_mock.angle = math.pi / 2 - configuration.rotation_tolerance
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
+        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
 
-        await asyncio.sleep(0)
+        task = asyncio.create_task(motion_controller.rotate(positions[-1]))
 
-        position_controller_mock.angle = math.pi / 2
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        await do_test_stop(motion_controller, position_controller_mock,
+                           motor_gateway_mock, positions, True)
 
         result = await task
 
-        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -273,17 +283,18 @@ class TestMotionController:
         """
         Robot rotates for a given negative relative angle. Check for a stop at target.
         """
-
         position_controller_mock.angle = 0
-        task = asyncio.create_task(motion_controller.rotate(-math.pi / 2))
+        position_controller_mock.position_left = 0
+        position_controller_mock.position_right = 0
 
-        await asyncio.sleep(0)
+        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
+        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
+        positions = [-p for p in positions]
 
-        position_controller_mock.angle = -math.pi / 2
-        motor_gateway_mock.set_target_positions.reset_mock()
-        motion_controller.trigger_wheel_speed_update()
+        task = asyncio.create_task(motion_controller.rotate(positions[-1]))
+
+        await do_test_stop(motion_controller, position_controller_mock,
+                           motor_gateway_mock, positions, True)
 
         result = await task
-
-        motor_gateway_mock.set_target_positions.assert_called_once_with(0, 0)
         assert result == MotionResult.OK

@@ -34,22 +34,21 @@ class PositionController:
     """
     Keeps track of the robot's position & angle and gives access to it.
     """
-
     def __init__(self, odometry_function: OdometryFunc,
                  configuration: Configuration, probe: Probe):
         self.odometry = odometry_function
         self.configuration = configuration
         self.probe = probe
 
-        self.distance_travelled: Millimeter = 0
-        self.speed: MillimeterPerSec = 0
-        self.angular_velocity: Radian = 0
+        self.distance_travelled: Millimeter = 0.0
+        self.speed: MillimeterPerSec = 0.0
+        self.angular_velocity: Radian = 0.0
         self.position = configuration.initial_position
         self.angle: Radian = configuration.initial_angle
-        self.position_left_last = 0
-        self.position_right_last = 0
-        self.position_left = 0
-        self.position_right = 0
+        self.position_left_last = 0.0
+        self.position_right_last = 0.0
+        self.position_left = 0.0
+        self.position_right = 0.0
         self.initialized = False
 
     def update_odometry(self, tick_left: int, tick_right: int) -> None:
@@ -59,15 +58,11 @@ class PositionController:
         The position/angle will not be updated on this first call.
         """
         self.position_left = tick_to_mm(
-            tick_left,
-            self.configuration.encoder_ticks_per_revolution,
-            self.configuration.wheel_radius
-        )
+            tick_left, self.configuration.encoder_ticks_per_revolution,
+            self.configuration.wheel_radius)
         self.position_right = tick_to_mm(
-            tick_right,
-            self.configuration.encoder_ticks_per_revolution,
-            self.configuration.wheel_radius
-        )
+            tick_right, self.configuration.encoder_ticks_per_revolution,
+            self.configuration.wheel_radius)
 
         self.probe.emit("encoder_left", self.position_left)
         self.probe.emit("encoder_right", self.position_right)
@@ -78,20 +73,13 @@ class PositionController:
             self.initialized = True
             return
 
-        old_position = self.position
-        old_distance = self.distance_travelled
-        old_angle = self.angle
+        self.position, self.angle = self.odometry(
+            self.position_left - self.position_left_last,
+            self.position_right - self.position_right_last, self.position,
+            self.angle, self.configuration)
 
-        self.position, self.angle = self.odometry(self.position_left - self.position_left_last,
-                                                  self.position_right - self.position_right_last,
-                                                  self.position, self.angle,
-                                                  self.configuration)
-
-        self.distance_travelled += (self.position - old_position).euclidean_norm()
-        self.speed = \
-            (self.distance_travelled - old_distance) * self.configuration.encoder_update_rate
-        self.angular_velocity = \
-            (self.angle - old_angle) * self.configuration.encoder_update_rate
+        self.distance_travelled = (self.position_left +
+                                   self.position_right) / 2
 
         LOGGER.get().debug('position_controller_update_odometry',
                            left_tick=tick_left,

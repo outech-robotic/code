@@ -50,7 +50,8 @@ class SimulationRouter:
             self.simulation_state.position_queue_right.append(target_right)
             self.simulation_state.position_queue_right.popleft()
 
-            LOGGER.get().debug('simulation_router_received_wheel_position_target')
+            LOGGER.get().debug(
+                'simulation_router_received_wheel_position_target')
         elif type_msg == "pidConfig":
             LOGGER.get().debug('simulation_router_received_pid_config')
         else:

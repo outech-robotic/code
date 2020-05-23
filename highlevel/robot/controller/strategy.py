@@ -65,21 +65,27 @@ class StrategyController:
         Run the strategy.
         """
 
-        while True:
-            await asyncio.sleep(1000)
+        await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position_left(
+            2, 0.2, 0.3)
+        await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position_right(
+            2, 0.2, 0.3)
 
-        # await self.trajectory_controller.motion_controller.rotate(math.pi/2)
-        # await asyncio.sleep(0.001)
-        # await self.trajectory_controller.motion_controller.rotate(-math.pi/2)
-        # await asyncio.sleep(0.001)
-        # await self.trajectory_controller.motion_controller.translate(100)
+        # while True:
+        #     await asyncio.sleep(1000)
+        # await self.trajectory_controller.motion_controller.translate(500)
         # await asyncio.sleep(2)
-        # await self.trajectory_controller.motion_controller.translate(-500)
+        # await self.trajectory_controller.motion_controller.translate(-750)
+        # await asyncio.sleep(0.02)
 
+        await self.trajectory_controller.motion_controller.rotate(math.pi / 4)
+        await asyncio.sleep(0.02)
+        await self.trajectory_controller.motion_controller.rotate(-math.pi / 2)
+        await asyncio.sleep(0.02)
 
-        # for vec, reverse in PATH:
+        # for vec, reverse in PATH[:5]:
         #     LOGGER.get().info("move robot", destination=vec)
         #     await self.trajectory_controller.move_to(
         #         Vector2(vec.x, 2000 - vec.y), reverse)
+        #     await asyncio.sleep(0.02)
 
         LOGGER.get().info("Strategy algorithm finished running")  # lol

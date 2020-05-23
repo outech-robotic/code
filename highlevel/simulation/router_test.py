@@ -4,7 +4,7 @@ Test for simulation router module.
 import pytest
 
 from highlevel.simulation.router import SimulationRouter
-from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg
+from proto.gen.python.outech_pb2 import BusMessage, WheelPositionTargetMsg
 
 
 @pytest.fixture(name='simulation_router')
@@ -27,8 +27,8 @@ async def test_move_backward(simulation_router, simulation_state_mock):
     """
     Happy path for translation.
     """
-    bus_message = BusMessage(moveWheelAtSpeed=MoveWheelAtSpeedMsg(
-        left_tick_per_sec=100, right_tick_per_sec=200))
+    bus_message = BusMessage(wheelPositionTarget=WheelPositionTargetMsg(
+        tick_left=100, tick_right=200))
 
     msg_bytes = bus_message.SerializeToString()
     await simulation_router.handle_movement_order(msg_bytes, 'test')

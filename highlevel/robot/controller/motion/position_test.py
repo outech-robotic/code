@@ -6,7 +6,7 @@ import math
 
 from pytest import fixture
 
-from highlevel.robot.controller.motion.position import PositionController
+from highlevel.robot.controller.motion.position import PositionController, tick_to_mm
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.util.geometry.vector import Vector2
 
@@ -16,11 +16,10 @@ def configuration_stub(configuration_test: Configuration) -> Configuration:
     """
     Configuration for tests.
     """
-    return dataclasses.replace(
-        configuration_test,
-        initial_angle=0,
-        initial_position=Vector2(0, 0),
-    )
+    return dataclasses.replace(configuration_test,
+                               initial_angle=0,
+                               initial_position=Vector2(0, 0),
+                               wheel_radius=1 / (2 * math.pi))
 
 
 @fixture(name='position_controller')
@@ -94,14 +93,16 @@ class TestPositionController:
             0,
         )
 
+        step_ticks = 100
+        step_mm = tick_to_mm(100, configuration.encoder_ticks_per_revolution,
+                             configuration.wheel_radius)
+
         position_controller.update_odometry(0, 0)
-        position_controller.update_odometry(100, 100)
-        assert position_controller.distance_travelled == 10
+        position_controller.update_odometry(step_ticks, step_ticks)
+        assert position_controller.distance_travelled == step_mm
 
-        odometry_mock.return_value = (
-            configuration.initial_position,
-            0,
-        )
+        position_controller.update_odometry(2 * step_ticks, 2 * step_ticks)
+        assert position_controller.distance_travelled == 2 * step_mm
 
-        position_controller.update_odometry(100, 100)
-        assert position_controller.distance_travelled == 20
+        position_controller.update_odometry(step_ticks, step_ticks)
+        assert position_controller.distance_travelled == step_mm

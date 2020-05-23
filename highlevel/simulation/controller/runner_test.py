@@ -8,7 +8,7 @@ from pytest import fixture
 
 from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.controller.runner import SimulationRunner
-from highlevel.simulation.entity.event import EventOrder, EventType
+from highlevel.simulation.entity.event import EventOrder
 
 
 @fixture(name='event_queue')
@@ -36,48 +36,6 @@ def simulation_runner_factory(event_queue, simulation_gateway_mock,
         probe=probe_mock,
         clock=clock_mock,
     )
-
-
-@pytest.mark.asyncio
-async def test_run_move_wheel(simulation_runner, event_queue):
-    """
-    Test the move wheel event.
-    """
-    event_queue.push(event_order=EventOrder(type=EventType.MOVE_WHEEL,
-                                            payload={
-                                                'left': 10,
-                                                'right': 10,
-                                            }),
-                     tick_offset=0)
-    event_queue.push(event_order=EventOrder(type=EventType.MOVE_WHEEL,
-                                            payload={
-                                                'left': -10,
-                                                'right': 10,
-                                            }),
-                     tick_offset=10)
-
-    task = asyncio.create_task(simulation_runner.run())
-    await asyncio.sleep(0.05)
-    task.cancel()
-
-    assert simulation_runner.state.right_tick == 20
-    assert simulation_runner.state.left_tick == 0
-
-
-@pytest.mark.asyncio
-async def test_run_movement_done(simulation_runner, event_queue,
-                                 simulation_gateway_mock):
-    """
-    Test the movement done event.
-    """
-    event_queue.push(event_order=EventOrder(type=EventType.MOVEMENT_DONE),
-                     tick_offset=0)
-
-    task = asyncio.create_task(simulation_runner.run())
-    await asyncio.sleep(0.05)
-    task.cancel()
-
-    simulation_gateway_mock.movement_done.assert_called_once()
 
 
 @pytest.mark.asyncio

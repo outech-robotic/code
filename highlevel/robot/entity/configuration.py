@@ -47,7 +47,7 @@ class Configuration:
     max_angular_velocity: RadianPerSec
     max_angular_acceleration: RadianPerSec2
 
-    rotation_tolerance: Radian
-    translation_tolerance: Millimeter
+    tolerance_angle: Radian
+    tolerance_distance: Millimeter
 
     debug: DebugConfiguration

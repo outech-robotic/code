@@ -2,7 +2,6 @@
 Simulation runner module.
 """
 import asyncio
-import random
 from collections import deque
 from statistics import mean
 
@@ -44,8 +43,7 @@ class SimulationRunner:
         self.tick = 0
         self.running = True
 
-        self.position_noise = 0  # % of noise
-        self.position_delay = 12  # ticks before a position target is achieved
+        self.position_delay = 15  # ticks before a position target is achieved
 
         self.state.position_queue_left = deque(
             [0 for _ in range(self.position_delay)])
@@ -67,25 +65,19 @@ class SimulationRunner:
             last_left = self.state.position_queue_left[-1]
             last_right = self.state.position_queue_right[-1]
 
-            self.state.position_queue_left.append(
-                round(
-                    last_left *
-                    (1 + random.randint(-self.position_noise, self.position_noise) /
-                     100)))
+            self.state.position_queue_left.append(last_left)
             self.state.position_queue_left.popleft()
 
-            self.state.position_queue_right.append(
-                round(
-                    last_right *
-                    (1 + random.randint(-self.position_noise, self.position_noise) /
-                     100)))
+            self.state.position_queue_right.append(last_right)
             self.state.position_queue_right.popleft()
 
             # Send the encoder positions periodically.
             interval = 1 / self.simulation_configuration.encoder_position_rate * 1000
             if self.state.time - self.state.last_position_update > interval:
-                self.state.left_tick = round(mean(self.state.position_queue_left))
-                self.state.right_tick = round(mean(self.state.position_queue_right))
+                self.state.left_tick = round(
+                    mean(self.state.position_queue_left))
+                self.state.right_tick = round(
+                    mean(self.state.position_queue_right))
 
                 self.state.last_position_update = self.state.time
                 await self.simulation_gateway.encoder_position(
