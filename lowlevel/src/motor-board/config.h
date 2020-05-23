@@ -19,7 +19,7 @@
 
 // ASSERVISSEMENT
 #define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
-
+#define CONST_TOLERANCE_TICKS_INIT ((int32_t)5)
 
 /*
  * COMMUNICATIONS

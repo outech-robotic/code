@@ -89,6 +89,11 @@ typedef struct _WheelPositionTargetMsg {
     int32_t tick_right;
 } WheelPositionTargetMsg;
 
+typedef struct _WheelTolerancesMsg {
+    uint32_t ticks_left;
+    uint32_t ticks_right;
+} WheelTolerancesMsg;
+
 typedef struct _PIDConfigMsg {
     bool has_pid_speed_left;
     PIDCoefficients pid_speed_left;
@@ -118,6 +123,7 @@ typedef struct _BusMessage {
         LaserSensorMsg laserSensor;
         PressureSensorMsg pressureSensor;
         DebugLog debugLog;
+        WheelTolerancesMsg wheelTolerances;
     } message_content;
 } BusMessage;
 
@@ -130,6 +136,7 @@ typedef struct _BusMessage {
 #define PIDCoefficients_init_default             {0, 0, 0}
 #define PIDConfigMsg_init_default                {false, PIDCoefficients_init_default, false, PIDCoefficients_init_default, false, PIDCoefficients_init_default, false, PIDCoefficients_init_default}
 #define WheelControlModeMsg_init_default         {0, 0}
+#define WheelTolerancesMsg_init_default          {0, 0}
 #define MoveWheelAtSpeedMsg_init_default         {0, 0}
 #define WheelPositionTargetMsg_init_default      {0, 0}
 #define TranslateMsg_init_default                {0}
@@ -147,6 +154,7 @@ typedef struct _BusMessage {
 #define PIDCoefficients_init_zero                {0, 0, 0}
 #define PIDConfigMsg_init_zero                   {false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero}
 #define WheelControlModeMsg_init_zero            {0, 0}
+#define WheelTolerancesMsg_init_zero             {0, 0}
 #define MoveWheelAtSpeedMsg_init_zero            {0, 0}
 #define WheelPositionTargetMsg_init_zero         {0, 0}
 #define TranslateMsg_init_zero                   {0}
@@ -187,6 +195,8 @@ typedef struct _BusMessage {
 #define WheelControlModeMsg_position_tag         2
 #define WheelPositionTargetMsg_tick_left_tag     1
 #define WheelPositionTargetMsg_tick_right_tag    2
+#define WheelTolerancesMsg_ticks_left_tag        1
+#define WheelTolerancesMsg_ticks_right_tag       2
 #define PIDConfigMsg_pid_speed_left_tag          1
 #define PIDConfigMsg_pid_speed_right_tag         2
 #define PIDConfigMsg_pid_position_left_tag       3
@@ -206,6 +216,7 @@ typedef struct _BusMessage {
 #define BusMessage_laserSensor_tag               13
 #define BusMessage_pressureSensor_tag            14
 #define BusMessage_debugLog_tag                  15
+#define BusMessage_wheelTolerances_tag           16
 
 /* Struct field encoding specification for nanopb */
 #define HeartbeatMsg_FIELDLIST(X, a) \
@@ -253,6 +264,12 @@ X(a, STATIC,   SINGULAR, BOOL,     speed,             1) \
 X(a, STATIC,   SINGULAR, BOOL,     position,          2)
 #define WheelControlModeMsg_CALLBACK NULL
 #define WheelControlModeMsg_DEFAULT NULL
+
+#define WheelTolerancesMsg_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT32,   ticks_left,        1) \
+X(a, STATIC,   SINGULAR, UINT32,   ticks_right,       2)
+#define WheelTolerancesMsg_CALLBACK NULL
+#define WheelTolerancesMsg_DEFAULT NULL
 
 #define MoveWheelAtSpeedMsg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, SINT32,   left_tick_per_sec,   1) \
@@ -325,7 +342,8 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,servo,message_content.servo)
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,pumpAndValve,message_content.pumpAndValve),  12) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,laserSensor,message_content.laserSensor),  13) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,pressureSensor,message_content.pressureSensor),  14) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.debugLog),  15)
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.debugLog),  15) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,wheelTolerances,message_content.wheelTolerances),  16)
 #define BusMessage_CALLBACK NULL
 #define BusMessage_DEFAULT NULL
 #define BusMessage_message_content_heartbeat_MSGTYPE HeartbeatMsg
@@ -343,6 +361,7 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.deb
 #define BusMessage_message_content_laserSensor_MSGTYPE LaserSensorMsg
 #define BusMessage_message_content_pressureSensor_MSGTYPE PressureSensorMsg
 #define BusMessage_message_content_debugLog_MSGTYPE DebugLog
+#define BusMessage_message_content_wheelTolerances_MSGTYPE WheelTolerancesMsg
 
 extern const pb_msgdesc_t HeartbeatMsg_msg;
 extern const pb_msgdesc_t StopMovingMsg_msg;
@@ -351,6 +370,7 @@ extern const pb_msgdesc_t EncoderPositionMsg_msg;
 extern const pb_msgdesc_t PIDCoefficients_msg;
 extern const pb_msgdesc_t PIDConfigMsg_msg;
 extern const pb_msgdesc_t WheelControlModeMsg_msg;
+extern const pb_msgdesc_t WheelTolerancesMsg_msg;
 extern const pb_msgdesc_t MoveWheelAtSpeedMsg_msg;
 extern const pb_msgdesc_t WheelPositionTargetMsg_msg;
 extern const pb_msgdesc_t TranslateMsg_msg;
@@ -370,6 +390,7 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define PIDCoefficients_fields &PIDCoefficients_msg
 #define PIDConfigMsg_fields &PIDConfigMsg_msg
 #define WheelControlModeMsg_fields &WheelControlModeMsg_msg
+#define WheelTolerancesMsg_fields &WheelTolerancesMsg_msg
 #define MoveWheelAtSpeedMsg_fields &MoveWheelAtSpeedMsg_msg
 #define WheelPositionTargetMsg_fields &WheelPositionTargetMsg_msg
 #define TranslateMsg_fields &TranslateMsg_msg
@@ -389,6 +410,7 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define PIDCoefficients_size                     18
 #define PIDConfigMsg_size                        80
 #define WheelControlModeMsg_size                 4
+#define WheelTolerancesMsg_size                  12
 #define MoveWheelAtSpeedMsg_size                 12
 #define WheelPositionTargetMsg_size              12
 #define TranslateMsg_size                        6

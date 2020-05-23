@@ -33,6 +33,11 @@ message WheelControlModeMsg {
   bool position = 2;
 }
 
+message WheelTolerancesMsg {
+  uint32 ticks_left = 1;
+  uint32 ticks_right = 2;
+}
+
 message MoveWheelAtSpeedMsg {
   sint32 left_tick_per_sec = 1;
   sint32 right_tick_per_sec = 2;
@@ -99,5 +104,6 @@ message BusMessage {
     LaserSensorMsg laserSensor = 13;
     PressureSensorMsg pressureSensor = 14;
     DebugLog debugLog = 15;
+    WheelTolerancesMsg wheelTolerances= 16;
   }
 }

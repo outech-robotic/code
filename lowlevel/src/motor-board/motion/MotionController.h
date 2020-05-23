@@ -30,6 +30,8 @@ class MotionController {
     struct {
         bool controlled_speed;
         bool controlled_position;
+        int32_t tolerance_ticks_left;
+        int32_t tolerance_ticks_right;
     } robot_status;
 
     PID_FP pid_speed_left;
@@ -100,6 +102,14 @@ public:
      * - wheel speed control on/off
      */
     void set_control_mode(bool speed, bool position);
+
+    /**
+     * Sets the tick tolerance applied to position control of each wheel.
+     * If the difference between the current target and current position is less than this, set the target to the position
+     * @param ticks_left
+     * @param ticks_right
+     */
+    void set_tolerances(int32_t ticks_left, int32_t ticks_right);
 
     /**
      * Left wheel encoder position, in ticks.

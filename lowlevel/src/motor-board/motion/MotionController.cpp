@@ -39,7 +39,8 @@ void MotionController::init() {
 
     robot_status.controlled_speed = false;
     robot_status.controlled_position = false;
-
+    robot_status.tolerance_ticks_left = CONST_TOLERANCE_TICKS_INIT;
+    robot_status.tolerance_ticks_right = CONST_TOLERANCE_TICKS_INIT;
     cod_left = {};
     cod_right = {};
     cod_right_raw_last = 0;
@@ -80,6 +81,13 @@ void MotionController::control_motion() {
 
     if (robot_status.controlled_position) {
         // Position only control of the wheels
+        if (ABS(cod_left.position_target - cod_left.position_current) < robot_status.tolerance_ticks_left) {
+            cod_left.position_target = cod_left.position_current;
+        }
+        if (ABS(cod_right.position_target - cod_right.position_current) < robot_status.tolerance_ticks_right) {
+            cod_right.position_target = cod_right.position_current;
+        }
+
         left_pwm = pid_position_left.compute(cod_left.position_current, cod_left.position_target);
         right_pwm = pid_position_right.compute(cod_right.position_current, cod_right.position_target);
     } else if (robot_status.controlled_speed) {
@@ -104,6 +112,11 @@ void MotionController::control_motion() {
 void MotionController::set_control_mode(bool speed, bool position) {
     robot_status.controlled_position = position and not speed;
     robot_status.controlled_speed = speed and not position;
+}
+
+void MotionController::set_tolerances(int32_t ticks_left, int32_t ticks_right) {
+    robot_status.tolerance_ticks_left = ticks_left;
+    robot_status.tolerance_ticks_right = ticks_right;
 }
 
 void MotionController::set_speed_targets(int32_t left, int32_t right) {
@@ -180,7 +193,7 @@ void MotionController::set_raw_pwm(int16_t left, int16_t right) {
 }
 
 
-void MotionController::set_kp(uint32_t speed_left, uint32_t speed_right,uint32_t pos_left, uint32_t pos_right) {
+void MotionController::set_kp(uint32_t speed_left, uint32_t speed_right, uint32_t pos_left, uint32_t pos_right) {
     pid_speed_left.set_kp(speed_left);
     pid_speed_right.set_kp(speed_right);
     pid_position_left.set_kp(pos_left);
@@ -189,7 +202,7 @@ void MotionController::set_kp(uint32_t speed_left, uint32_t speed_right,uint32_t
 }
 
 
-void MotionController::set_ki(uint32_t speed_left, uint32_t speed_right,uint32_t pos_left, uint32_t pos_right) {
+void MotionController::set_ki(uint32_t speed_left, uint32_t speed_right, uint32_t pos_left, uint32_t pos_right) {
     pid_speed_left.set_ki(speed_left, MOTION_CONTROL_FREQ);
     pid_speed_right.set_ki(speed_right, MOTION_CONTROL_FREQ);
     pid_position_left.set_ki(pos_left, MOTION_CONTROL_FREQ);
@@ -197,7 +210,7 @@ void MotionController::set_ki(uint32_t speed_left, uint32_t speed_right,uint32_t
 }
 
 
-void MotionController::set_kd(uint32_t speed_left, uint32_t speed_right,uint32_t pos_left, uint32_t pos_right) {
+void MotionController::set_kd(uint32_t speed_left, uint32_t speed_right, uint32_t pos_left, uint32_t pos_right) {
     pid_speed_left.set_kd(speed_left, MOTION_CONTROL_FREQ);
     pid_speed_right.set_kd(speed_right, MOTION_CONTROL_FREQ);
     pid_position_left.set_kd(pos_left, MOTION_CONTROL_FREQ);

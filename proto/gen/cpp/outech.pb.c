@@ -27,6 +27,9 @@ PB_BIND(PIDConfigMsg, PIDConfigMsg, AUTO)
 PB_BIND(WheelControlModeMsg, WheelControlModeMsg, AUTO)
 
 
+PB_BIND(WheelTolerancesMsg, WheelTolerancesMsg, AUTO)
+
+
 PB_BIND(MoveWheelAtSpeedMsg, MoveWheelAtSpeedMsg, AUTO)
 
 

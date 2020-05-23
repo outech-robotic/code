@@ -108,6 +108,10 @@ int main() {
                     );
                     break;
 
+                case BusMessage_wheelTolerances_tag:
+                    mcs.set_tolerances(msg_rx.message_content.wheelTolerances.ticks_left,
+                                       msg_rx.message_content.wheelTolerances.ticks_right);
+                    break;
                 default:
                     break;
             }
