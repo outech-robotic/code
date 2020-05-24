@@ -9,13 +9,14 @@ from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Millimeter, MotionResult, Radian
 from highlevel.robot.gateway.motor import MotorGateway
 # pylint: disable=too-many-arguments
-from highlevel.util.trapezoid import TrapezoidFilter
+from highlevel.util.trapezoid import trapezoid_filter
 
 
 class MotionController:
     """
     Motion controller.
     """
+
     def __init__(self, position_controller: PositionController,
                  motor_gateway: MotorGateway, configuration: Configuration):
         self.configuration = configuration
@@ -23,12 +24,14 @@ class MotionController:
         self.position_controller = position_controller
         self.wheel_speed_update_event = asyncio.Event()
 
-        self.trapezoid_distance = TrapezoidFilter(
+        self.trapezoid_distance = trapezoid_filter(
+            self.position_controller.distance_travelled,
             self.configuration.tolerance_distance,
             self.configuration.max_wheel_speed,
             self.configuration.max_wheel_acceleration,
             self.configuration.encoder_update_rate)
-        self.trapezoid_angle = TrapezoidFilter(
+        self.trapezoid_angle = trapezoid_filter(
+            self.position_controller.angle,
             self.configuration.tolerance_angle,
             self.configuration.max_angular_velocity,
             self.configuration.max_angular_acceleration,

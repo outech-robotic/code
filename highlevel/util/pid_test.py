@@ -1,18 +1,5 @@
 """
 Test for PID module.
-Tests list:
-OK - Test that the filter is initialized to 0, and returns 0 for a 0 input.
-OK - Correct use of a proportional coefficient.
-OK - Correct use of a derivative coefficient.
-OK - Correct use of an integral coefficient.
-OK - Correct use of output limit.
-OK - Correct use of integral limit. (anti windup).
-OK - Correct reset of the integral constant when close to target, with a tolerance (~anti windup).
-   - Test that constants are used with a scale factor taking into account the update rate:
-     - integral: / update rate to remove time dependency. If the PID is updated more often,
-       the integral component should be lower (since the sum would grow faster else)
-     - derivative: x update rate to remove time dependency. If the PID is updated faster,
-       the difference used to compute the derivative would be lower.
 """
 import math
 

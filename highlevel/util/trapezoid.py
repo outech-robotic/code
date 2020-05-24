@@ -1,53 +1,56 @@
 """
 Trapezoid functions
 """
+from typing import Generator
 
 
-class TrapezoidFilter:
+def _trapezoid_filter(initial_value: float, tolerance: float, max_first_order: float,
+                      max_second_order: float, update_rate: int) -> Generator:
     """
-    Applies a trapezoid shape to variable's first order derivative, computes its result
+    Trapezoid filter implementation.
     """
-    def __init__(self, tolerance: float, max_first_order: float,
-                 max_second_order: float, update_rate: int):
-        self.tolerance = tolerance
-        self.update_rate = update_rate
-        self.max_second_order = max_second_order
-        self.max_first_order = max_first_order
+    output = initial_value
+    output_first_order = 0.0
 
-        self.output_last = 0.0
-        self.output_first_order_last = 0.0
+    # First call
+    received = yield
 
-    def reset_position_to(self, value: float) -> None:
-        """
-        Sets the last used position to the given value.
-        Resets the first order derivative of it.
-        """
-        self.output_last = value
-        self.output_first_order_last = 0.0
+    while True:
 
-    def compute(self, target: float) -> float:
-        """
-        Updates the trapezoid with a target for the controlled variable.
-        Uses any previously updated parameter (first order derivative, previous outputs)
-        """
+        target = received
+        distance = target - output
 
-        distance = target - self.output_last
-
-        if abs(distance) <= self.tolerance:
-            self.output_first_order_last = 0.0
-            self.output_last = target
-            return target
-
-        stop_distance = (self.output_first_order_last**
-                         2) / (2 * self.max_second_order)
-        direction = -1 if distance < 0 else 1
-
-        if direction * distance < stop_distance:
-            self.output_first_order_last -= direction * self.max_second_order / self.update_rate
+        if abs(distance) <= tolerance:
+            # If close enough, stop
+            output_first_order = 0.0
+            output = target
+            # Return that target is reached, and wait next input
+            received = yield target
         else:
-            self.output_first_order_last += direction * self.max_second_order / self.update_rate
-            if direction * self.output_first_order_last > self.max_first_order:
-                self.output_first_order_last = direction * self.max_first_order
+            stop_distance = (output_first_order ** 2) / (2 * max_second_order)
+            direction = -1 if distance < 0 else 1
 
-        self.output_last += self.output_first_order_last / self.update_rate
-        return self.output_last
+            if direction * distance < stop_distance:
+                output_first_order -= direction * max_second_order / update_rate
+            else:
+                output_first_order += direction * max_second_order / update_rate
+                if direction * output_first_order > max_first_order:
+                    output_first_order = direction * max_first_order
+
+            output += output_first_order / update_rate
+
+            # Return result and wait next input
+            received = yield output
+
+
+def trapezoid_filter(initial_value: float, tolerance: float, max_first_order: float,
+                     max_second_order: float, update_rate: int) -> Generator:
+    """
+    Applies a trapezoid shape to variable's first order derivative, computes the variable's target
+    to get this trapezoid.
+    Uses any previously updated parameter (first order derivative, previous outputs)
+    """
+    return_filter = _trapezoid_filter(initial_value, tolerance,
+                                      max_first_order, max_second_order, update_rate)
+    next(return_filter)
+    return return_filter

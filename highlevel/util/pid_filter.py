@@ -40,9 +40,7 @@ def _pid_filter(constants_in: PIDConstants, limits: PIDLimits,
     """
 
     # State status
-    in_current = None
     in_last = None
-    in_target = None
 
     # constants used
     constants = PIDConstants(k_p=constants_in.k_p,
@@ -50,18 +48,14 @@ def _pid_filter(constants_in: PIDConstants, limits: PIDLimits,
                              k_d=constants_in.k_d * update_rate)
 
     # Components
-    res_proportional = 0.0  # Proportional result
     res_integral = 0.0  # Integral result
-    res_derivative = 0.0  # Derivative result
+
+    # Wait a first call
+    received = yield
+
     while True:
-        # Outputs
-        output = res_proportional + res_integral + res_derivative
-        received = yield bound_value(output, -limits.max_output,
-                                     limits.max_output)
         # Receive
-        (in_target,
-         in_current) = (in_target,
-                        in_current) if received is None else received
+        (in_target, in_current) = received
         error = in_target - in_current
 
         # Proportional component
@@ -86,6 +80,10 @@ def _pid_filter(constants_in: PIDConstants, limits: PIDLimits,
             error_derivative = in_last - in_current
             res_derivative = constants.k_d * error_derivative
         in_last = in_current
+
+        # Outputs
+        output = res_proportional + res_integral + res_derivative
+        received = yield bound_value(output, -limits.max_output, limits.max_output)
 
 
 def pid_filter(pid_constants: PIDConstants, pid_limits: PIDLimits,
