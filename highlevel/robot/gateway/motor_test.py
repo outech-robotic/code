@@ -3,7 +3,7 @@ Test for motor gateway.
 """
 import pytest
 
-from highlevel.robot.gateway.motor import MotorGateway, FIXED_POINT_COEF
+from highlevel.robot.gateway.motor import MotorGateway
 from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
     PIDConfigMsg, WheelPositionTargetMsg, WheelTolerancesMsg
 
@@ -43,26 +43,27 @@ class TestMotorGateway:
 
     @staticmethod
     @pytest.mark.asyncio
-    async def test_set_pids_position(socket_adapter_mock):
+    async def test_set_position_pids(socket_adapter_mock):
         """
         Test that the motor gateway encodes a pid configuration message.
+        Assumes that speed PIDs are initially 0, if never set before.
         """
         motor_gateway = MotorGateway(socket_adapter_mock)
-
-        await motor_gateway.set_pid_position_left(1, 2, 3)
+        fixed_point_scale_factor = 2**16
+        await motor_gateway.set_pid_position(1, 2, 3, 4, 5, 6)
         packet, _ = socket_adapter_mock.send.call_args
         message = BusMessage()
         message.ParseFromString(*packet)
 
         left_pid = PIDCoefficients(
-            kp=1 * FIXED_POINT_COEF,
-            ki=2 * FIXED_POINT_COEF,
-            kd=3 * FIXED_POINT_COEF,
+            kp=1 * fixed_point_scale_factor,
+            ki=2 * fixed_point_scale_factor,
+            kd=3 * fixed_point_scale_factor,
         )
         right_pid = PIDCoefficients(
-            kp=0 * FIXED_POINT_COEF,
-            ki=0 * FIXED_POINT_COEF,
-            kd=0 * FIXED_POINT_COEF,
+            kp=4 * fixed_point_scale_factor,
+            ki=5 * fixed_point_scale_factor,
+            kd=6 * fixed_point_scale_factor,
         )
 
         # If we want to set the position PIDs, speed PIDs should be set to 0

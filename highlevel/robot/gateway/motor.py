@@ -1,26 +1,13 @@
 """
 Motor gateway module.
 """
-from dataclasses import dataclass
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.type import TickPerSec, Tick
+from highlevel.util.pid_filter import PIDConstants
 from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
     PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg
-
-
-@dataclass(frozen=True)
-class PIDValues:
-    """
-    Structure holding a PID's constants
-    """
-    k_p: float
-    k_i: float
-    k_d: float
-
-
-FIXED_POINT_COEF = 2**16
 
 
 class MotorGateway:
@@ -29,21 +16,51 @@ class MotorGateway:
     """
     def __init__(self, motor_board_adapter: SocketAdapter):
         self.motor_board_adapter = motor_board_adapter
-        self.pid_speed_left_last = PIDValues(0, 0, 0)
-        self.pid_speed_right_last = PIDValues(0, 0, 0)
-        self.pid_position_left_last = PIDValues(0, 0, 0)
-        self.pid_position_right_last = PIDValues(0, 0, 0)
+        self.pid_speed_left = PIDConstants(0, 0, 0)
+        self.pid_speed_right = PIDConstants(0, 0, 0)
+        self.pid_position_left = PIDConstants(0, 0, 0)
+        self.pid_position_right = PIDConstants(0, 0, 0)
+        self.pid_scale_factor = 2**16
 
     async def _send_message(self, message: BusMessage) -> None:
+        """
+        Serializes and sends sends a protobuf BusMessage through an adapter.
+        """
         payload = message.SerializeToString()
         await self.motor_board_adapter.send(payload)
+
+    def _pid_constants_to_proto(
+            self, pid_constants: PIDConstants) -> PIDCoefficients:
+        """
+        Converts a PIDConstants structure to a Protobuf PIDCoefficients sub message.
+        Applies a scaling factor to each value.
+        """
+        return PIDCoefficients(
+            kp=pid_constants.k_p * self.pid_scale_factor,
+            ki=pid_constants.k_i * self.pid_scale_factor,
+            kd=pid_constants.k_d * self.pid_scale_factor,
+        )
+
+    async def _send_pid_configs(self) -> None:
+        """
+        Sends last updated PID configurations.
+        """
+        message = BusMessage(pidConfig=PIDConfigMsg(
+            pid_speed_left=self._pid_constants_to_proto(self.pid_speed_left),
+            pid_speed_right=self._pid_constants_to_proto(self.pid_speed_right),
+            pid_position_left=self._pid_constants_to_proto(
+                self.pid_position_left),
+            pid_position_right=self._pid_constants_to_proto(
+                self.pid_position_right),
+        ))
+        await self._send_message(message)
 
     async def set_target_speeds(self, tick_left: TickPerSec,
                                 tick_right: TickPerSec) -> None:
         """
         Sets each wheel's speed target.
         """
-        LOGGER.get().debug('gateway_set_speed',
+        LOGGER.get().debug('motor_gateway_set_target_speeds',
                            left_speed=tick_left,
                            right_speed=tick_right)
         message = BusMessage(moveWheelAtSpeed=MoveWheelAtSpeedMsg(
@@ -56,120 +73,41 @@ class MotorGateway:
         """
         Sets each wheel's position target, in encoder ticks.
         """
-        LOGGER.get().debug('motor_gateway_target_pos',
+        LOGGER.get().debug('motor_gateway_set_target_positions',
                            tick_left=tick_left,
                            tick_right=tick_right)
         message = BusMessage(wheelPositionTarget=WheelPositionTargetMsg(
             tick_left=tick_left, tick_right=tick_right))
         await self._send_message(message)
 
-    async def set_pid_position_left(self, k_p: float, k_i: float,
-                                    k_d: float) -> None:
+    # pylint:disable=too-many-arguments
+    async def set_pid_position(self, left_kp: float, left_ki: float,
+                               left_kd: float, right_kp: float,
+                               right_ki: float, right_kd: float) -> None:
         """
-        Sends the PID configurations for the left wheel.
+        Sends the position PID configurations for both wheels.
         """
-        pid_left = PIDValues(k_p, k_i, k_d)
-        LOGGER.get().info('gateway_send_pid_pos_left', pid_left=pid_left)
+        self.pid_position_left = PIDConstants(left_kp, left_ki, left_kd)
+        self.pid_position_right = PIDConstants(right_kp, right_ki, right_kd)
 
-        # The motor board uses 16 bit fixed point notation
-        # so the float constants are rounded after a x2^16
-        message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=PIDCoefficients(kp=0, ki=0, kd=0),
-            pid_speed_right=PIDCoefficients(kp=0, ki=0, kd=0),
-            pid_position_left=PIDCoefficients(
-                kp=round(pid_left.k_p * FIXED_POINT_COEF),
-                ki=round(pid_left.k_i * FIXED_POINT_COEF),
-                kd=round(pid_left.k_d * FIXED_POINT_COEF),
-            ),
-            pid_position_right=PIDCoefficients(
-                kp=round(self.pid_position_right_last.k_p * FIXED_POINT_COEF),
-                ki=round(self.pid_position_right_last.k_i * FIXED_POINT_COEF),
-                kd=round(self.pid_position_right_last.k_d * FIXED_POINT_COEF),
-            ),
-        ))
-        self.pid_position_left_last = pid_left
-        await self._send_message(message)
+        LOGGER.get().debug('motor_gateway_set_position_pids',
+                           pid_left=self.pid_position_left,
+                           pid_right=self.pid_position_right)
+        await self._send_pid_configs()
 
-    async def set_pid_position_right(self, k_p: float, k_i: float,
-                                     k_d: float) -> None:
+    # pylint:disable=too-many-arguments
+    async def set_pid_speed(self, left_kp: float, left_ki: float,
+                            left_kd: float, right_kp: float, right_ki: float,
+                            right_kd: float) -> None:
         """
-        Sends the PID configurations for the right wheel.
+        Sends the speed PID configurations for both wheels.
         """
-        pid_right = PIDValues(k_p, k_i, k_d)
-        LOGGER.get().info('gateway_send_pid_pos_right', pid_left=pid_right)
-
-        # The motor board uses 16 bit fixed point notation
-        # so the float constants are rounded after a x2^16
-        message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=PIDCoefficients(kp=0, ki=0, kd=0),
-            pid_speed_right=PIDCoefficients(kp=0, ki=0, kd=0),
-            pid_position_left=PIDCoefficients(
-                kp=round(self.pid_position_left_last.k_p * FIXED_POINT_COEF),
-                ki=round(self.pid_position_left_last.k_i * FIXED_POINT_COEF),
-                kd=round(self.pid_position_left_last.k_d * FIXED_POINT_COEF),
-            ),
-            pid_position_right=PIDCoefficients(
-                kp=round(pid_right.k_p * FIXED_POINT_COEF),
-                ki=round(pid_right.k_i * FIXED_POINT_COEF),
-                kd=round(pid_right.k_d * FIXED_POINT_COEF),
-            ),
-        ))
-        self.pid_position_right_last = pid_right
-        await self._send_message(message)
-
-    async def set_pid_speed_right(self, k_p: float, k_i: float,
-                                  k_d: float) -> None:
-        """
-        Sends the speed PID configuration for the right wheel.
-        """
-        pid_right = PIDValues(k_p, k_i, k_d)
-        LOGGER.get().info('gateway_send_pid_speed_right', pid_left=pid_right)
-
-        # The motor board uses 16 bit fixed point notation
-        # so the float constants are rounded after a x2^16
-        message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=PIDCoefficients(
-                kp=round(self.pid_position_left_last.k_p * FIXED_POINT_COEF),
-                ki=round(self.pid_position_left_last.k_i * FIXED_POINT_COEF),
-                kd=round(self.pid_position_left_last.k_d * FIXED_POINT_COEF),
-            ),
-            pid_speed_right=PIDCoefficients(
-                kp=round(pid_right.k_p * FIXED_POINT_COEF),
-                ki=round(pid_right.k_i * FIXED_POINT_COEF),
-                kd=round(pid_right.k_d * FIXED_POINT_COEF),
-            ),
-            pid_position_left=PIDCoefficients(kp=0, ki=0, kd=0),
-            pid_position_right=PIDCoefficients(kp=0, ki=0, kd=0),
-        ))
-        self.pid_speed_right_last = pid_right
-        await self._send_message(message)
-
-    async def set_pid_speed_left(self, k_p: float, k_i: float,
-                                 k_d: float) -> None:
-        """
-        Sends the speed PID configuration for the left wheel.
-        """
-        pid_left = PIDValues(k_p, k_i, k_d)
-        LOGGER.get().info('gateway_send_pid_speed_left', pid_left=pid_left)
-
-        # The motor board uses 16 bit fixed point notation
-        # so the float constants are rounded after a x2^16
-        message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=PIDCoefficients(
-                kp=round(pid_left.k_p * FIXED_POINT_COEF),
-                ki=round(pid_left.k_i * FIXED_POINT_COEF),
-                kd=round(pid_left.k_d * FIXED_POINT_COEF),
-            ),
-            pid_speed_right=PIDCoefficients(
-                kp=round(self.pid_speed_right_last.k_p * FIXED_POINT_COEF),
-                ki=round(self.pid_speed_right_last.k_i * FIXED_POINT_COEF),
-                kd=round(self.pid_speed_right_last.k_d * FIXED_POINT_COEF),
-            ),
-            pid_position_left=PIDCoefficients(kp=0, ki=0, kd=0),
-            pid_position_right=PIDCoefficients(kp=0, ki=0, kd=0),
-        ))
-        self.pid_speed_left_last = pid_left
-        await self._send_message(message)
+        self.pid_speed_left = PIDConstants(left_kp, left_ki, left_kd)
+        self.pid_speed_right = PIDConstants(right_kp, right_ki, right_kd)
+        LOGGER.get().debug('motor_gateway_set_speed_pids',
+                           pid_left=self.pid_speed_left,
+                           pid_right=self.pid_speed_right)
+        await self._send_pid_configs()
 
     async def set_control_mode(self, speed: bool, position: bool) -> None:
         """

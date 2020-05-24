@@ -65,22 +65,18 @@ class StrategyController:
         Run the strategy.
         """
 
-        await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position_left(
-            2, 0.2, 0.3)
-        await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position_right(
-            2, 0.2, 0.3)
+        await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position(
+            2, 0.2, 0.3, 2, 0.2, 0.3)
 
         # while True:
         #     await asyncio.sleep(1000)
-        # await self.trajectory_controller.motion_controller.translate(500)
-        # await asyncio.sleep(2)
-        # await self.trajectory_controller.motion_controller.translate(-750)
-        # await asyncio.sleep(0.02)
+        await self.trajectory_controller.motion_controller.translate(500)
+        await self.trajectory_controller.motion_controller.translate(-500)
 
-        await self.trajectory_controller.motion_controller.rotate(math.pi / 4)
-        await asyncio.sleep(0.02)
-        await self.trajectory_controller.motion_controller.rotate(-math.pi / 2)
-        await asyncio.sleep(0.02)
+        # await self.trajectory_controller.motion_controller.rotate(math.pi / 4)
+        # await asyncio.sleep(0.02)
+        # await self.trajectory_controller.motion_controller.rotate(-math.pi / 2)
+        # await asyncio.sleep(0.02)
 
         # for vec, reverse in PATH[:5]:
         #     LOGGER.get().info("move robot", destination=vec)
