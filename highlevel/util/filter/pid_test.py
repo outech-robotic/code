@@ -3,7 +3,7 @@ Test for PID module.
 """
 import math
 
-from highlevel.util.pid_filter import PIDConstants, PIDLimits, pid_filter
+from highlevel.util.filter.pid import PIDConstants, PIDLimits, pid_gen
 
 
 class TestPID:
@@ -15,8 +15,8 @@ class TestPID:
         """
         Tests that the pid filter initially returns a 0 output if the input is zero.
         """
-        pid = pid_filter(PIDConstants(1.0, 1.0, 1.0),
-                         PIDLimits(10000.0, 10000.0, 0.0), 1.0)
+        pid = pid_gen(PIDConstants(1.0, 1.0, 1.0),
+                      PIDLimits(10000.0, 10000.0, 0.0), 1.0)
         assert pid.send((0, 0)) == 0
 
     @staticmethod
@@ -25,8 +25,8 @@ class TestPID:
         Tests that the output of the module is limited by a given parameter.
         """
         limit = 10.0
-        pid = pid_filter(PIDConstants(1.0, 1.0, 1.0),
-                         PIDLimits(limit, limit / 2, 0.0), 1.0)
+        pid = pid_gen(PIDConstants(1.0, 1.0, 1.0),
+                      PIDLimits(limit, limit / 2, 0.0), 1.0)
         assert limit >= pid.send((100000000, -10000000))
 
     @staticmethod
@@ -35,8 +35,8 @@ class TestPID:
         Tests that the integral sum of the module is limited by a given parameter.
         """
         limit = 10.0
-        pid = pid_filter(PIDConstants(0.0, 1.0, 0.0),
-                         PIDLimits(2 * limit, limit, 0.0), 1.0)
+        pid = pid_gen(PIDConstants(0.0, 1.0, 0.0),
+                      PIDLimits(2 * limit, limit, 0.0), 1.0)
         assert limit >= pid.send((100000000, -10000000))
 
     @staticmethod
@@ -46,8 +46,8 @@ class TestPID:
         with other constants are 0, at every call.
         """
         for k_p in [2.5, -5.2, 0.0]:
-            pid = pid_filter(PIDConstants(k_p, 0.0, 0.0),
-                             PIDLimits(1000000.0, 1000000.0, 0.0), 1.0)
+            pid = pid_gen(PIDConstants(k_p, 0.0, 0.0),
+                          PIDLimits(1000000.0, 1000000.0, 0.0), 1.0)
             for target in range(-2, 2):
                 for current in range(-5, 5):
                     assert k_p * (target - current) == pid.send(
@@ -60,8 +60,8 @@ class TestPID:
         with other constants are 0, at every call.
         """
         for k_i in [2.5, -5.2, 0.0]:
-            pid = pid_filter(PIDConstants(0.0, k_i, 0.0),
-                             PIDLimits(1000000.0, 1000000.0, 0.0), 1.0)
+            pid = pid_gen(PIDConstants(0.0, k_i, 0.0),
+                          PIDLimits(1000000.0, 1000000.0, 0.0), 1.0)
             integral_sum = 0.0
             for target in range(-2, 2):
                 for _ in range(10):
@@ -77,8 +77,8 @@ class TestPID:
         with other constants are 0, at every call.
         """
         for k_d in [2.5, -5.2, 0.0]:
-            pid = pid_filter(PIDConstants(0.0, 0.0, k_d),
-                             PIDLimits(1000000.0, 1000000.0, 0.0), 1.0)
+            pid = pid_gen(PIDConstants(0.0, 0.0, k_d),
+                          PIDLimits(1000000.0, 1000000.0, 0.0), 1.0)
             error_last = 0.0
             target_last = 0.0
             pid.send(
@@ -101,8 +101,8 @@ class TestPID:
         """
         target = 20
         tolerance = 0.25
-        pid = pid_filter(PIDConstants(0.0, 1.0, 0.0),
-                         PIDLimits(100000.0, 100000.0, tolerance), 1.0)
+        pid = pid_gen(PIDConstants(0.0, 1.0, 0.0),
+                      PIDLimits(100000.0, 100000.0, tolerance), 1.0)
 
         for current in range(target):
             assert pid.send((target, current)) > 0
@@ -120,8 +120,8 @@ class TestPID:
         """
 
         for freq in [1.0, 10.0, 100.0, 1000.0]:
-            pid = pid_filter(PIDConstants(0.0, 1.0, 0.0),
-                             PIDLimits(100000.0, 100000.0, 0.0), freq)
+            pid = pid_gen(PIDConstants(0.0, 1.0, 0.0),
+                          PIDLimits(100000.0, 100000.0, 0.0), freq)
             integral_sum = 0.0
             for target in range(-2, 2):
                 for current in range(-5, 5):
@@ -139,8 +139,8 @@ class TestPID:
         Basically, if the update frequency is high, the derivative would be low and depend on time.
         """
         for freq in [1.0, 10.0, 100.0, 1000.0]:
-            pid = pid_filter(PIDConstants(0.0, 0.0, 1.0),
-                             PIDLimits(100000.0, 100000.0, 0.0), freq)
+            pid = pid_gen(PIDConstants(0.0, 0.0, 1.0),
+                          PIDLimits(100000.0, 100000.0, 0.0), freq)
             error_last = 0.0
             target_last = 0.0
             pid.send((0.0, 0.0))

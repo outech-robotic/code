@@ -31,7 +31,6 @@ int main() {
     msg_heartbeat.message_content.heartbeat = HeartbeatMsg_init_zero;
     msg_heartbeat.which_message_content = BusMessage_heartbeat_tag;
 
-
     // peripherals init
     CAN_init();
     PWM_init();
@@ -49,7 +48,8 @@ int main() {
     serial.init(CONST_USART_BAUDRATE);
     serial.print("Setup done \r\n");
 
-    canpb.send_log("Starting");
+    canpb.send_log("Starting Motor Board");
+
 
     while (true) {
         // Update ISOTP server
@@ -61,11 +61,16 @@ int main() {
 
         canpb.update();
 
-
         // Order reception
         if (canpb.receive_msg(msg_rx)) {
             nb_packets_rx++;
+            char str[32] = "";
             bool speed, position;
+            volatile float speed_left_p, speed_left_i, speed_left_d,
+                    speed_right_p, speed_right_i, speed_right_d,
+                    pos_left_p, pos_left_i, pos_left_d,
+                    pos_right_p, pos_right_i, pos_right_d;
+
             switch (msg_rx.which_message_content) {
                 case BusMessage_wheelPositionTarget_tag:
                     mcs.set_position_targets(msg_rx.message_content.wheelPositionTarget.tick_left,
@@ -88,23 +93,36 @@ int main() {
                     break;
 
                 case BusMessage_pidConfig_tag:
+                    speed_left_p = msg_rx.message_content.pidConfig.pid_speed_left.kp;
+                    speed_left_i = msg_rx.message_content.pidConfig.pid_speed_left.ki;
+                    speed_left_d = msg_rx.message_content.pidConfig.pid_speed_left.kd;
+                    speed_right_p = msg_rx.message_content.pidConfig.pid_speed_right.kp;
+                    speed_right_i = msg_rx.message_content.pidConfig.pid_speed_right.ki;
+                    speed_right_d = msg_rx.message_content.pidConfig.pid_speed_right.kd;
+                    pos_left_p = msg_rx.message_content.pidConfig.pid_position_left.kp;
+                    pos_left_i = msg_rx.message_content.pidConfig.pid_position_left.ki;
+                    pos_left_d = msg_rx.message_content.pidConfig.pid_position_left.kd;
+                    pos_right_p = msg_rx.message_content.pidConfig.pid_position_right.kp;
+                    pos_right_i = msg_rx.message_content.pidConfig.pid_position_right.ki;
+                    pos_right_d = msg_rx.message_content.pidConfig.pid_position_right.kd;
+
                     mcs.set_kp(
-                            msg_rx.message_content.pidConfig.pid_speed_left.kp,
-                            msg_rx.message_content.pidConfig.pid_speed_right.kp,
-                            msg_rx.message_content.pidConfig.pid_position_left.kp,
-                            msg_rx.message_content.pidConfig.pid_position_right.kp
+                            speed_left_p,
+                            speed_right_p,
+                            pos_left_p,
+                            pos_right_p
                     );
                     mcs.set_ki(
-                            msg_rx.message_content.pidConfig.pid_speed_left.ki,
-                            msg_rx.message_content.pidConfig.pid_speed_right.ki,
-                            msg_rx.message_content.pidConfig.pid_position_left.ki,
-                            msg_rx.message_content.pidConfig.pid_position_right.ki
+                            speed_left_i,
+                            speed_right_i,
+                            pos_left_i,
+                            pos_right_i
                     );
                     mcs.set_kd(
-                            msg_rx.message_content.pidConfig.pid_speed_left.kd,
-                            msg_rx.message_content.pidConfig.pid_speed_right.kd,
-                            msg_rx.message_content.pidConfig.pid_position_left.kd,
-                            msg_rx.message_content.pidConfig.pid_position_right.kd
+                            speed_left_d,
+                            speed_right_d,
+                            pos_left_d,
+                            pos_right_d
                     );
                     break;
 
@@ -117,7 +135,6 @@ int main() {
             }
         }
 
-
         //Periodic encoder position message
         if (position_timer.check()) {
             if (canpb.is_tx_available()) {
@@ -128,7 +145,6 @@ int main() {
                 }
             }
         }
-
 
         //Periodic Heartbeat
         if (heartbeat_timer.check()) {

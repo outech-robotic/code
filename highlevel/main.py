@@ -40,7 +40,7 @@ from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
-from highlevel.util.odometry import odometry_arc
+from highlevel.util.filter.odometry import odometry_arc
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 from highlevel.util.replay_saver import ReplaySaver
@@ -56,6 +56,8 @@ CONFIG = Configuration(
     encoder_ticks_per_revolution=2400,
     distance_between_wheels=357,
     encoder_update_rate=100,
+    motor_update_rate=1000,
+    pid_scale_factor=2**16,
     max_wheel_speed=250,
     max_wheel_acceleration=750,
     max_angular_velocity=0.5 * math.pi,

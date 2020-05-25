@@ -3,7 +3,7 @@
 #include "utility/Queue.hpp"
 #include "CppUTest/TestHarness.h"
 
-TEST_GROUP(RingBufferTests) {
+TEST_GROUP(QueueTests) {
     static constexpr uint32_t buff_size = 32;
     using TestType = uint32_t;
 
@@ -25,23 +25,23 @@ TEST_GROUP(RingBufferTests) {
 };
 
 
-TEST(RingBufferTests, TestEmptyBeforePush) {
+TEST(QueueTests, TestEmptyBeforePush) {
   CHECK(buffer.is_empty());
 }
 
-TEST(RingBufferTests, TestOnePush) {
+TEST(QueueTests, TestOnePush) {
   buffer.push(5);
   CHECK(!buffer.is_empty());
 }
 
-TEST(RingBufferTests, TestFill) {
+TEST(QueueTests, TestFill) {
   fill_with(0);
 
   CHECK(buffer.is_full());
   CHECK(!buffer.push(0));
 }
 
-TEST(RingBufferTests, TestPopOne) {
+TEST(QueueTests, TestPopOne) {
   //Ensure all the memory only contains zeroes
   fill_with(0);
   buffer.reset();
@@ -51,7 +51,7 @@ TEST(RingBufferTests, TestPopOne) {
   CHECK(buffer.pop() == 0xA5A5A5A5);
 }
 
-TEST(RingBufferTests, TestFillCountAndPopAll) {
+TEST(QueueTests, TestFillCountAndPopAll) {
   for(int i = 0; i < buff_size; i++){
     buffer.push(i);
   }

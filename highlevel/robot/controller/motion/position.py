@@ -6,7 +6,7 @@ import math
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Millimeter, Radian, Tick, MillimeterPerSec
-from highlevel.util.odometry import OdometryFunc
+from highlevel.util.filter.odometry import OdometryFunc
 from highlevel.util.probe import Probe
 
 

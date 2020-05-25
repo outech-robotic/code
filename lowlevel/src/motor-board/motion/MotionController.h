@@ -129,17 +129,17 @@ public:
     /**
      * Sets the proportional constant for all PIDs
      */
-    void set_kp(uint32_t speed_left, uint32_t speed_right,uint32_t pos_left, uint32_t pos_right);
+    void set_kp(double speed_left, double speed_right, double pos_left, double pos_right);
 
     /**
      * Sets the integral constant for all PIDs
      */
-    void set_ki(uint32_t speed_left, uint32_t speed_right,uint32_t pos_left, uint32_t pos_right);
+    void set_ki(double speed_left, double speed_right, double pos_left, double pos_right);
 
     /**
      * Sets the derivative constant for all PIDs
      */
-    void set_kd(uint32_t speed_left, uint32_t speed_right,uint32_t pos_left, uint32_t pos_right);
+    void set_kd(double speed_left, double speed_right, double pos_left, double pos_right);
 
     /**
      * Gets the PID data associated with the PID_DATA_ID requested_data, for a given PID_ID id

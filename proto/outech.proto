@@ -16,9 +16,9 @@ message EncoderPositionMsg {
 }
 
 message PIDCoefficients {
-  uint32 kp = 1;
-  uint32 ki = 2;
-  uint32 kd = 3;
+  float kp = 1;
+  float ki = 2;
+  float kd = 3;
 }
 
 message PIDConfigMsg {

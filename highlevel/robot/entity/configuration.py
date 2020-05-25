@@ -40,6 +40,8 @@ class Configuration:
     encoder_ticks_per_revolution: int
     distance_between_wheels: Millimeter
     encoder_update_rate: int
+    motor_update_rate: int
+    pid_scale_factor: int
 
     max_wheel_speed: MillimeterPerSec
     max_wheel_acceleration: MillimeterPerSec2

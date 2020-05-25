@@ -4,8 +4,9 @@ Motor gateway module.
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
+from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import TickPerSec, Tick
-from highlevel.util.pid_filter import PIDConstants
+from highlevel.util.filter.pid import PIDConstants
 from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
     PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg
 
@@ -14,13 +15,14 @@ class MotorGateway:
     """
     Motor gateway.
     """
-    def __init__(self, motor_board_adapter: SocketAdapter):
+    def __init__(self, motor_board_adapter: SocketAdapter,
+                 configuration: Configuration):
+        self.configuration = configuration
         self.motor_board_adapter = motor_board_adapter
         self.pid_speed_left = PIDConstants(0, 0, 0)
         self.pid_speed_right = PIDConstants(0, 0, 0)
         self.pid_position_left = PIDConstants(0, 0, 0)
         self.pid_position_right = PIDConstants(0, 0, 0)
-        self.pid_scale_factor = 2**16
 
     async def _send_message(self, message: BusMessage) -> None:
         """
@@ -35,10 +37,20 @@ class MotorGateway:
         Converts a PIDConstants structure to a Protobuf PIDCoefficients sub message.
         Applies a scaling factor to each value.
         """
+        scale_factor = self.configuration.pid_scale_factor
+        update_rate = self.configuration.motor_update_rate
+        max_value_on_motor_board = (2**32) - 1
+        if pid_constants.k_i * scale_factor / update_rate >= max_value_on_motor_board:
+            LOGGER.get().error('pid_to_proto_ki_too_large',
+                               k_i=pid_constants.k_i)
+        if pid_constants.k_d * scale_factor * update_rate >= max_value_on_motor_board:
+            LOGGER.get().error('pid_to_proto_kd_too_large',
+                               k_d=pid_constants.k_d)
+
         return PIDCoefficients(
-            kp=pid_constants.k_p * self.pid_scale_factor,
-            ki=pid_constants.k_i * self.pid_scale_factor,
-            kd=pid_constants.k_d * self.pid_scale_factor,
+            kp=pid_constants.k_p,
+            ki=pid_constants.k_i,
+            kd=pid_constants.k_d,
         )
 
     async def _send_pid_configs(self) -> None:
@@ -90,9 +102,9 @@ class MotorGateway:
         self.pid_position_left = PIDConstants(left_kp, left_ki, left_kd)
         self.pid_position_right = PIDConstants(right_kp, right_ki, right_kd)
 
-        LOGGER.get().debug('motor_gateway_set_position_pids',
-                           pid_left=self.pid_position_left,
-                           pid_right=self.pid_position_right)
+        LOGGER.get().info('motor_gateway_set_position_pids',
+                          pid_left=self.pid_position_left,
+                          pid_right=self.pid_position_right)
         await self._send_pid_configs()
 
     # pylint:disable=too-many-arguments

@@ -9,14 +9,13 @@ from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Millimeter, MotionResult, Radian
 from highlevel.robot.gateway.motor import MotorGateway
 # pylint: disable=too-many-arguments
-from highlevel.util.trapezoid import trapezoid_filter
+from highlevel.util.filter.trapezoid import trapezoid_filter
 
 
 class MotionController:
     """
     Motion controller.
     """
-
     def __init__(self, position_controller: PositionController,
                  motor_gateway: MotorGateway, configuration: Configuration):
         self.configuration = configuration
@@ -31,8 +30,7 @@ class MotionController:
             self.configuration.max_wheel_acceleration,
             self.configuration.encoder_update_rate)
         self.trapezoid_angle = trapezoid_filter(
-            self.position_controller.angle,
-            self.configuration.tolerance_angle,
+            self.position_controller.angle, self.configuration.tolerance_angle,
             self.configuration.max_angular_velocity,
             self.configuration.max_angular_acceleration,
             self.configuration.encoder_update_rate)
@@ -93,7 +91,7 @@ class MotionController:
             dist_remaining = dist_target - self.position_controller.distance_travelled
 
             # Update the distance target for wheels
-            wheel_target = self.trapezoid_distance.compute(dist_target)
+            wheel_target = self.trapezoid_distance.send(dist_target)
 
             # Update wheel position targets
             distance_rotation = angle_start * wheel_half_track
@@ -162,7 +160,7 @@ class MotionController:
             angle_remaining = angle_target - self.position_controller.angle
 
             # Update angle target for wheels
-            wheel_target = self.trapezoid_angle.compute(angle_target)
+            wheel_target = self.trapezoid_angle.send(angle_target)
 
             # Update wheel position targets
             distance_translation = distance_start

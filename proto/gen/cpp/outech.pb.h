@@ -48,9 +48,9 @@ typedef struct _MovementEndedMsg {
 } MovementEndedMsg;
 
 typedef struct _PIDCoefficients {
-    uint32_t kp;
-    uint32_t ki;
-    uint32_t kd;
+    float kp;
+    float ki;
+    float kd;
 } PIDCoefficients;
 
 typedef struct _PressureSensorMsg {
@@ -241,9 +241,9 @@ X(a, STATIC,   SINGULAR, SINT32,   right_tick,        2)
 #define EncoderPositionMsg_DEFAULT NULL
 
 #define PIDCoefficients_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   kp,                1) \
-X(a, STATIC,   SINGULAR, UINT32,   ki,                2) \
-X(a, STATIC,   SINGULAR, UINT32,   kd,                3)
+X(a, STATIC,   SINGULAR, FLOAT,    kp,                1) \
+X(a, STATIC,   SINGULAR, FLOAT,    ki,                2) \
+X(a, STATIC,   SINGULAR, FLOAT,    kd,                3)
 #define PIDCoefficients_CALLBACK NULL
 #define PIDCoefficients_DEFAULT NULL
 
@@ -407,8 +407,8 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define StopMovingMsg_size                       0
 #define MovementEndedMsg_size                    2
 #define EncoderPositionMsg_size                  12
-#define PIDCoefficients_size                     18
-#define PIDConfigMsg_size                        80
+#define PIDCoefficients_size                     15
+#define PIDConfigMsg_size                        68
 #define WheelControlModeMsg_size                 4
 #define WheelTolerancesMsg_size                  12
 #define MoveWheelAtSpeedMsg_size                 12

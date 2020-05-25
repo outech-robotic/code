@@ -2,11 +2,13 @@
 Strategy module
 """
 import asyncio
-import math
+from typing import List
 
 from highlevel.logger import LOGGER
+from highlevel.robot.controller.motion.position import mm_to_tick
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.entity.type import Millimeter
 from highlevel.util.geometry.vector import Vector2
 
 PATH = [
@@ -60,25 +62,33 @@ class StrategyController:
         self.configuration = configuration
         self.trajectory_controller = trajectory_controller
 
+    async def do_raw_wheel_test(self, path: List[Millimeter], rotation: bool,
+                                step_time: float) -> None:
+        """
+        Makes the robot's wheels follow a path (list of positions), with a given
+        delay in seconds between each order, and the left wheel goes reverse if rotation.
+        """
+        for position in path:
+            ticks = mm_to_tick(position,
+                               self.configuration.encoder_ticks_per_revolution,
+                               self.configuration.wheel_radius)
+            await self.trajectory_controller.motion_controller.motor_gateway.set_target_positions(
+                -ticks if rotation else ticks,
+                ticks,
+            )
+            await asyncio.sleep(step_time)
+
     async def run(self) -> None:
         """
         Run the strategy.
         """
 
         await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position(
-            2, 0.2, 0.3, 2, 0.2, 0.3)
+            3.3, 0.0, 0.27, 3.1, 0.0, 0.25)
+        await self.do_raw_wheel_test(list(range(0, 500, 5)), False, 0.05)
+        # await asyncio.sleep(1000)
 
-        # while True:
-        #     await asyncio.sleep(1000)
-        await self.trajectory_controller.motion_controller.translate(500)
-        await self.trajectory_controller.motion_controller.translate(-500)
-
-        # await self.trajectory_controller.motion_controller.rotate(math.pi / 4)
-        # await asyncio.sleep(0.02)
-        # await self.trajectory_controller.motion_controller.rotate(-math.pi / 2)
-        # await asyncio.sleep(0.02)
-
-        # for vec, reverse in PATH[:5]:
+        # for vec, reverse in PATH:
         #     LOGGER.get().info("move robot", destination=vec)
         #     await self.trajectory_controller.move_to(
         #         Vector2(vec.x, 2000 - vec.y), reverse)

@@ -24,12 +24,12 @@ TEST(PIDFPTests, reset) {
 }
 
 
-TEST(PIDFPTests, setKpKiKd){
-  const float kp_i = 1.234567, ki_i=2.345678, kd_i=3.456789;
-  float kp, ki, kd;
-  pid.set_coefficients(kp_i, ki_i, kd_i, 1000);
-  pid.get_coefficients(&kp, &ki, &kd);
-  DOUBLES_EQUAL(kp_i, kp, 0.0001);
-  DOUBLES_EQUAL(ki_i, ki, 0.1);
-  DOUBLES_EQUAL(kd_i, kd, 0.0001);
-}
+//TEST(PIDFPTests, setKpKiKd){
+//  const float kp_i = 1.234567, ki_i=2.345678, kd_i=3.456789;
+//  float kp, ki, kd;
+//  pid.set_coefficients(kp_i, ki_i, kd_i, 1000);
+//  pid.get_coefficients(&kp, &ki, &kd);
+//  DOUBLES_EQUAL(kp_i, kp, 0.0001);
+//  DOUBLES_EQUAL(ki_i, ki, 0.1);
+//  DOUBLES_EQUAL(kd_i, kd, 0.0001);
+//}

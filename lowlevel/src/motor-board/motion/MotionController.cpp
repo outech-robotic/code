@@ -23,12 +23,12 @@ void MotionController::init() {
     pid_speed_right.set_anti_windup(CONST_PWM_MAX);
     pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
 
-    pid_position_left.set_coefficients(0.275, 0.24, 0.0002, MOTION_CONTROL_FREQ);
+    pid_position_left.set_coefficients(3.35, 0.5, 0.2, MOTION_CONTROL_FREQ);
     pid_position_left.set_output_limit(CONST_PWM_MAX);
     pid_position_left.set_anti_windup(CONST_PWM_MAX);
     pid_position_left.set_derivative_limit(CONST_PWM_MAX);
 
-    pid_position_right.set_coefficients(0.27, 0.22, 0.0002, MOTION_CONTROL_FREQ);
+    pid_position_right.set_coefficients(3.15, 0.3, 0.22, MOTION_CONTROL_FREQ);
     pid_position_right.set_output_limit(CONST_PWM_MAX);
     pid_position_right.set_anti_windup(CONST_PWM_MAX);
     pid_position_right.set_derivative_limit(CONST_PWM_MAX);
@@ -82,14 +82,15 @@ void MotionController::control_motion() {
     if (robot_status.controlled_position) {
         // Position only control of the wheels
         if (ABS(cod_left.position_target - cod_left.position_current) < robot_status.tolerance_ticks_left) {
-            cod_left.position_target = cod_left.position_current;
+            left_pwm = 0;
+        } else {
+            left_pwm = pid_position_left.compute(cod_left.position_current, cod_left.position_target);
         }
         if (ABS(cod_right.position_target - cod_right.position_current) < robot_status.tolerance_ticks_right) {
-            cod_right.position_target = cod_right.position_current;
+            right_pwm = 0;
+        } else {
+            right_pwm = pid_position_right.compute(cod_right.position_current, cod_right.position_target);
         }
-
-        left_pwm = pid_position_left.compute(cod_left.position_current, cod_left.position_target);
-        right_pwm = pid_position_right.compute(cod_right.position_current, cod_right.position_target);
     } else if (robot_status.controlled_speed) {
         // Speed only control of the wheels
         cod_left.speed_target_current = cod_left.speed_target;
@@ -193,7 +194,7 @@ void MotionController::set_raw_pwm(int16_t left, int16_t right) {
 }
 
 
-void MotionController::set_kp(uint32_t speed_left, uint32_t speed_right, uint32_t pos_left, uint32_t pos_right) {
+void MotionController::set_kp(double speed_left, double speed_right, double pos_left, double pos_right) {
     pid_speed_left.set_kp(speed_left);
     pid_speed_right.set_kp(speed_right);
     pid_position_left.set_kp(pos_left);
@@ -202,7 +203,7 @@ void MotionController::set_kp(uint32_t speed_left, uint32_t speed_right, uint32_
 }
 
 
-void MotionController::set_ki(uint32_t speed_left, uint32_t speed_right, uint32_t pos_left, uint32_t pos_right) {
+void MotionController::set_ki(double speed_left, double speed_right, double pos_left, double pos_right) {
     pid_speed_left.set_ki(speed_left, MOTION_CONTROL_FREQ);
     pid_speed_right.set_ki(speed_right, MOTION_CONTROL_FREQ);
     pid_position_left.set_ki(pos_left, MOTION_CONTROL_FREQ);
@@ -210,7 +211,7 @@ void MotionController::set_ki(uint32_t speed_left, uint32_t speed_right, uint32_
 }
 
 
-void MotionController::set_kd(uint32_t speed_left, uint32_t speed_right, uint32_t pos_left, uint32_t pos_right) {
+void MotionController::set_kd(double speed_left, double speed_right, double pos_left, double pos_right) {
     pid_speed_left.set_kd(speed_left, MOTION_CONTROL_FREQ);
     pid_speed_right.set_kd(speed_right, MOTION_CONTROL_FREQ);
     pid_position_left.set_kd(pos_left, MOTION_CONTROL_FREQ);

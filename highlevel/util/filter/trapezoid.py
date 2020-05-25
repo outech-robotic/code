@@ -4,8 +4,9 @@ Trapezoid functions
 from typing import Generator
 
 
-def _trapezoid_filter(initial_value: float, tolerance: float, max_first_order: float,
-                      max_second_order: float, update_rate: int) -> Generator:
+def _trapezoid_filter(initial_value: float, tolerance: float,
+                      max_first_order: float, max_second_order: float,
+                      update_rate: int) -> Generator:
     """
     Trapezoid filter implementation.
     """
@@ -27,7 +28,7 @@ def _trapezoid_filter(initial_value: float, tolerance: float, max_first_order: f
             # Return that target is reached, and wait next input
             received = yield target
         else:
-            stop_distance = (output_first_order ** 2) / (2 * max_second_order)
+            stop_distance = (output_first_order**2) / (2 * max_second_order)
             direction = -1 if distance < 0 else 1
 
             if direction * distance < stop_distance:
@@ -43,14 +44,16 @@ def _trapezoid_filter(initial_value: float, tolerance: float, max_first_order: f
             received = yield output
 
 
-def trapezoid_filter(initial_value: float, tolerance: float, max_first_order: float,
-                     max_second_order: float, update_rate: int) -> Generator:
+def trapezoid_filter(initial_value: float, tolerance: float,
+                     max_first_order: float, max_second_order: float,
+                     update_rate: int) -> Generator:
     """
     Applies a trapezoid shape to variable's first order derivative, computes the variable's target
     to get this trapezoid.
     Uses any previously updated parameter (first order derivative, previous outputs)
     """
     return_filter = _trapezoid_filter(initial_value, tolerance,
-                                      max_first_order, max_second_order, update_rate)
+                                      max_first_order, max_second_order,
+                                      update_rate)
     next(return_filter)
     return return_filter

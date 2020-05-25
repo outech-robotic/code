@@ -30,7 +30,7 @@ async def print_performance_metrics() -> None:
         active_tasks = len(tasks)
 
         vmem = psutil.virtual_memory()
-        LOGGER.get().info(
+        LOGGER.get().debug(
             "performance_stats",
             event_loop_error=f"{delta/INTERVAL:.2%}",
             event_loop_delta=f"{delta*1000:.3f}ms",

@@ -33,8 +33,8 @@ class PIDLimits:
     tolerance_integral: float = 0.0
 
 
-def _pid_filter(constants_in: PIDConstants, limits: PIDLimits,
-                update_rate: float) -> Generator:
+def _pid_gen(constants_in: PIDConstants, limits: PIDLimits,
+             update_rate: float) -> Generator:
     """
     Generator implementing a PID filter.
     """
@@ -83,14 +83,15 @@ def _pid_filter(constants_in: PIDConstants, limits: PIDLimits,
 
         # Outputs
         output = res_proportional + res_integral + res_derivative
-        received = yield bound_value(output, -limits.max_output, limits.max_output)
+        received = yield bound_value(output, -limits.max_output,
+                                     limits.max_output)
 
 
-def pid_filter(pid_constants: PIDConstants, pid_limits: PIDLimits,
-               update_rate: float) -> Generator:
+def pid_gen(pid_constants: PIDConstants, pid_limits: PIDLimits,
+            update_rate: float) -> Generator:
     """
     Wrapper around the pid filter generator, prepares it by calling next on it once.
     """
-    return_filter = _pid_filter(pid_constants, pid_limits, update_rate)
+    return_filter = _pid_gen(pid_constants, pid_limits, update_rate)
     next(return_filter)
     return return_filter

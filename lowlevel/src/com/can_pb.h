@@ -21,8 +21,8 @@ class Can_PB {
   uint8_t isotp_rx_buffer[CONST_ISOTP_BUFF_SIZE];
   uint8_t isotp_tx_buffer[CONST_ISOTP_BUFF_SIZE];
 
-  uint8_t pb_data_rx[sizeof(BusMessage)];
-  uint8_t pb_data_tx[sizeof(BusMessage)];
+  uint8_t pb_data_rx[CONST_ISOTP_BUFF_SIZE];
+  uint8_t pb_data_tx[CONST_ISOTP_BUFF_SIZE];
 
   Queue<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_rx_buffer;
   Queue<CONST_PB_BUFF_SIZE, BusMessage> pb_msg_tx_buffer;

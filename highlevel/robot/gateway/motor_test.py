@@ -1,6 +1,9 @@
 """
 Test for motor gateway.
 """
+
+from math import pi
+
 import pytest
 
 from highlevel.robot.gateway.motor import MotorGateway
@@ -14,11 +17,11 @@ class TestMotorGateway:
     """
     @staticmethod
     @pytest.mark.asyncio
-    async def test_set_speed(socket_adapter_mock):
+    async def test_set_speed(socket_adapter_mock, configuration_test):
         """
         Test that the motor gateway encodes a wheel target speed message.
         """
-        motor_gateway = MotorGateway(motor_board_adapter=socket_adapter_mock)
+        motor_gateway = MotorGateway(socket_adapter_mock, configuration_test)
         await motor_gateway.set_target_speeds(10, 20)
         packet, _ = socket_adapter_mock.send.call_args
         message = BusMessage()
@@ -28,11 +31,11 @@ class TestMotorGateway:
 
     @staticmethod
     @pytest.mark.asyncio
-    async def test_set_position(socket_adapter_mock):
+    async def test_set_position(socket_adapter_mock, configuration_test):
         """
         Test that the motor gateway encodes a wheel target positon message.
         """
-        motor_gateway = MotorGateway(motor_board_adapter=socket_adapter_mock)
+        motor_gateway = MotorGateway(socket_adapter_mock, configuration_test)
         await motor_gateway.set_target_positions(10, 20)
         packet, _ = socket_adapter_mock.send.call_args
         message = BusMessage()
@@ -43,27 +46,27 @@ class TestMotorGateway:
 
     @staticmethod
     @pytest.mark.asyncio
-    async def test_set_position_pids(socket_adapter_mock):
+    async def test_set_position_pids(socket_adapter_mock, configuration_test):
         """
-        Test that the motor gateway encodes a pid configuration message.
+        Test that the motor gateway encodes a pid configuration message, with float values.
         Assumes that speed PIDs are initially 0, if never set before.
         """
-        motor_gateway = MotorGateway(socket_adapter_mock)
-        fixed_point_scale_factor = 2**16
-        await motor_gateway.set_pid_position(1, 2, 3, 4, 5, 6)
+        motor_gateway = MotorGateway(socket_adapter_mock, configuration_test)
+        await motor_gateway.set_pid_position(1 * pi, 2 * pi, 3 * pi, 4 * pi,
+                                             5 * pi, 6 * pi)
         packet, _ = socket_adapter_mock.send.call_args
         message = BusMessage()
         message.ParseFromString(*packet)
 
         left_pid = PIDCoefficients(
-            kp=1 * fixed_point_scale_factor,
-            ki=2 * fixed_point_scale_factor,
-            kd=3 * fixed_point_scale_factor,
+            kp=1 * pi,
+            ki=2 * pi,
+            kd=3 * pi,
         )
         right_pid = PIDCoefficients(
-            kp=4 * fixed_point_scale_factor,
-            ki=5 * fixed_point_scale_factor,
-            kd=6 * fixed_point_scale_factor,
+            kp=4 * pi,
+            ki=5 * pi,
+            kd=6 * pi,
         )
 
         # If we want to set the position PIDs, speed PIDs should be set to 0
@@ -75,11 +78,11 @@ class TestMotorGateway:
 
     @staticmethod
     @pytest.mark.asyncio
-    async def test_set_tolerances(socket_adapter_mock):
+    async def test_set_tolerances(socket_adapter_mock, configuration_test):
         """
         Test that the motor gateway encodes a wheel tolerance message.
         """
-        motor_gateway = MotorGateway(motor_board_adapter=socket_adapter_mock)
+        motor_gateway = MotorGateway(socket_adapter_mock, configuration_test)
         await motor_gateway.set_tolerances(10, 20)
         packet, _ = socket_adapter_mock.send.call_args
         message = BusMessage()

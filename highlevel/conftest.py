@@ -45,6 +45,8 @@ def configuration_test():
         encoder_ticks_per_revolution=1,
         distance_between_wheels=1,
         encoder_update_rate=1,
+        motor_update_rate=1,
+        pid_scale_factor=2**16,
         max_wheel_speed=10,
         max_wheel_acceleration=3,
         max_angular_velocity=10,
