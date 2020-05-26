@@ -8,7 +8,7 @@ from typing import List, Generator
 from pytest import fixture
 
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.util.filter.trapezoid import trapezoid_filter
+from highlevel.util.filter.trapezoid import trapezoid_gen
 
 
 @fixture(name='configuration')
@@ -32,8 +32,8 @@ def trapezoid_stub(configuration: Configuration) -> Generator:
     max_first_order = configuration.max_wheel_speed
     max_second_order = configuration.max_wheel_acceleration
     update_rate = configuration.encoder_update_rate
-    return trapezoid_filter(initial_value, tolerance, max_first_order,
-                            max_second_order, update_rate)
+    return trapezoid_gen(initial_value, tolerance, max_first_order,
+                         max_second_order, update_rate, 1.0)
 
 
 def do_trapezoid_test(trapezoid: Generator, speed_profile: List[int],
@@ -64,7 +64,7 @@ class TestTrapezoidPosition:
         Tests that the output of the trapezoid filter stays at its initial value if no excitation.
         """
         for target in range(-20, 20):
-            trapezoid = trapezoid_filter(target, 1.0, 1.0, 1.0, 1)
+            trapezoid = trapezoid_gen(target, 1.0, 1.0, 1.0, 1, 1.0)
             for _ in range(5):
                 output = trapezoid.send(target)
                 assert output == target

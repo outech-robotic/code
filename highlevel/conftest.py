@@ -23,6 +23,7 @@ from highlevel.simulation.entity.simulation_configuration import SimulationConfi
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
 from highlevel.util.clock import Clock
+from highlevel.util.filter.pid import PIDConstants, PIDLimits
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.probe import Probe
@@ -53,12 +54,19 @@ def configuration_test():
         max_angular_acceleration=3,
         tolerance_distance=1,
         tolerance_angle=1,
+        trapezoid_anticipation=1,
         debug=DebugConfiguration(
             websocket_port=8080,
             http_port=9090,
             host='0.0.0.0',
             refresh_rate=30,
         ),
+        pid_constants_distance=PIDConstants(1.0, 0.0, 0.0),
+        pid_constants_angle=PIDConstants(1.0, 0.0, 0.0),
+        pid_constants_position_left=PIDConstants(0.0, 0.0, 0.0),
+        pid_constants_position_right=PIDConstants(0.0, 0.0, 0.0),
+        pid_limits_distance=PIDLimits(100.0, 0.0, 0.0),
+        pid_limits_angle=PIDLimits(100.0, 0.0, 0.0),
     )
 
 
@@ -249,5 +257,5 @@ def motion_controller_mock():
     Mocks a Motion Controller
     """
     mock = MagicMock(spec=MotionController)
-    mock.trigger_wheel_speed_update = MagicMock(return_value=None)
+    mock.trigger_update = MagicMock(return_value=None)
     return mock

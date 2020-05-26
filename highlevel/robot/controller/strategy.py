@@ -83,10 +83,23 @@ class StrategyController:
         Run the strategy.
         """
 
+        # send initial PID configuratin for motor board wheels
         await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position(
-            3.3, 0.0, 0.27, 3.1, 0.0, 0.25)
-        await self.do_raw_wheel_test(list(range(0, 500, 5)), False, 0.05)
-        # await asyncio.sleep(1000)
+            self.configuration.pid_constants_position_left.k_p,
+            self.configuration.pid_constants_position_left.k_i,
+            self.configuration.pid_constants_position_left.k_d,
+            self.configuration.pid_constants_position_right.k_p,
+            self.configuration.pid_constants_position_right.k_i,
+            self.configuration.pid_constants_position_right.k_d,
+        )
+
+        # await self.do_raw_wheel_test(list(range(0, 500, 5)), False, 0.05)
+        await self.trajectory_controller.motion_controller.translate(500)
+        await self.trajectory_controller.motion_controller.rotate(1.5)
+        # await self.trajectory_controller.motion_controller.translate(-500)
+        # await self.trajectory_controller.motion_controller.rotate(-1.5)
+
+        await asyncio.sleep(0.01)
 
         # for vec, reverse in PATH:
         #     LOGGER.get().info("move robot", destination=vec)

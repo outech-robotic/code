@@ -38,6 +38,7 @@ from highlevel.simulation.router import SimulationRouter
 from highlevel.util import tcp
 from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
+from highlevel.util.filter.pid import PIDConstants, PIDLimits
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.filter.odometry import odometry_arc
@@ -58,18 +59,25 @@ CONFIG = Configuration(
     encoder_update_rate=100,
     motor_update_rate=1000,
     pid_scale_factor=2**16,
-    max_wheel_speed=250,
-    max_wheel_acceleration=750,
-    max_angular_velocity=0.5 * math.pi,
-    max_angular_acceleration=1 * math.pi,
+    max_wheel_speed=1400,
+    max_wheel_acceleration=2000,
+    max_angular_velocity=2 * math.pi,
+    max_angular_acceleration=3 * math.pi,
     tolerance_distance=0.5,
     tolerance_angle=0.005,
+    trapezoid_anticipation=1.05,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
         refresh_rate=1000,
     ),
+    pid_constants_distance=PIDConstants(1.0, 0.0, 0.0),
+    pid_constants_angle=PIDConstants(1.0, 0.0, 0.0),
+    pid_constants_position_left=PIDConstants(3.3, 0.0, 0.27),
+    pid_constants_position_right=PIDConstants(3.1, 0.0, 0.25),
+    pid_limits_distance=PIDLimits(100.0, 0.0, 0.0),
+    pid_limits_angle=PIDLimits(0.1, 0.0, 0.0),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(

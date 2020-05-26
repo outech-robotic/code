@@ -38,7 +38,7 @@ class ProtobufRouter:
             self.position_controller.update_odometry(
                 bus_message.encoderPosition.left_tick,
                 bus_message.encoderPosition.right_tick)
-            self.motion_controller.trigger_wheel_speed_update()
+            self.motion_controller.trigger_update()
 
         elif type_msg == "laserSensor":
             await self.match_action.set_laser_distances()
