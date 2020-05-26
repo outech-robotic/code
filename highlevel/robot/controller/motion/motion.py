@@ -2,6 +2,7 @@
 Motion controller module.
 """
 import asyncio
+import math
 from dataclasses import dataclass
 
 from highlevel.logger import LOGGER
@@ -156,6 +157,20 @@ class MotionController:
             # Set wheel targets
             await self._set_target_wheel_positions(self.status.target_left,
                                                    self.status.target_right)
+            LOGGER.get().info('motion_controller_dist',
+                              distance_remaining=distance_remaining, current_dist=current_dist,
+                              target_dist_ramp=target_dist_ramp,
+                              target_dist_pid=target_dist_pid)
+            LOGGER.get().info('motion_controller_wheels',
+                              target_left=target_left, target_right=target_right,
+                              pos_left=self.position_controller.position_left,
+                              pos_right=self.position_controller.position_right)
+            LOGGER.get().info('motion_controller_angle',
+                              angle_remaining=angle_remaining, current_angle=current_angle,
+                              target_angle_ramp=target_angle_ramp,
+                              target_angle_pid=target_angle_pid,
+                              target_angle_mm=target_angle_mm
+                              )
 
             # Wait for a new position update event
             self.position_update_event.clear()
@@ -168,7 +183,7 @@ class MotionController:
         Requires trigger_update calls to be able to terminate successfully.
         """
 
-        LOGGER.get().debug(
+        LOGGER.get().info(
             'motion_controller_translate',
             distance=dist_relative,
             position=self.position_controller.position,
@@ -189,7 +204,7 @@ class MotionController:
         # Wait until movement is done, or there is a physical problem
         while not (self.status.is_arrived or self.status.is_blocked):
             await self._update()
-
+        LOGGER.get().info("motion_controller_translate_done")
         return MotionResult.BLOCKED if self.status.is_blocked else MotionResult.OK
 
     async def rotate(self, angle_relative: Radian) -> MotionResult:
@@ -199,7 +214,7 @@ class MotionController:
         Requires trigger_update calls to be able to terminate successfully.
         """
 
-        LOGGER.get().debug('motion_controller_rotate',
+        LOGGER.get().info('motion_controller_rotate',
                            angle_relative=angle_relative,
                            current_angle=self.position_controller.angle)
 
@@ -218,5 +233,5 @@ class MotionController:
         # Wait until movement is done, or there is a physical problem
         while not (self.status.is_arrived or self.status.is_blocked):
             await self._update()
-
+        LOGGER.get().info("motion_controller_rotate_done")
         return MotionResult.BLOCKED if self.status.is_blocked else MotionResult.OK

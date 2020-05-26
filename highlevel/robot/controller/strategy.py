@@ -93,13 +93,17 @@ class StrategyController:
             self.configuration.pid_constants_position_right.k_d,
         )
 
-        # await self.do_raw_wheel_test(list(range(0, 500, 5)), False, 0.05)
-        await self.trajectory_controller.motion_controller.translate(500)
-        await self.trajectory_controller.motion_controller.rotate(1.5)
+        while True:
+            await asyncio.sleep(1000)
+        # await self.trajectory_controller.motion_controller.translate(200)
+        # await self.trajectory_controller.motion_controller.rotate(1.5)
         # await self.trajectory_controller.motion_controller.translate(-500)
         # await self.trajectory_controller.motion_controller.rotate(-1.5)
-
-        await asyncio.sleep(0.01)
+        # distance = 200
+        # step = 1
+        # delays = 1.0/(distance/step)
+        # await self.do_raw_wheel_test([i for i in range(0, distance, step)], False, delays)
+        # await self.do_raw_wheel_test([i for i in range(distance, 0, -step)], False, delays)
 
         # for vec, reverse in PATH:
         #     LOGGER.get().info("move robot", destination=vec)
