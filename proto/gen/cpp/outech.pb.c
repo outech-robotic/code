@@ -36,6 +36,9 @@ PB_BIND(MoveWheelAtSpeedMsg, MoveWheelAtSpeedMsg, AUTO)
 PB_BIND(WheelPositionTargetMsg, WheelPositionTargetMsg, AUTO)
 
 
+PB_BIND(WheelPWMMsg, WheelPWMMsg, AUTO)
+
+
 PB_BIND(TranslateMsg, TranslateMsg, AUTO)
 
 

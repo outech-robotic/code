@@ -50,7 +50,7 @@ class ProtobufRouter:
                               source=source)
         elif type_msg in [
                 "moveWheelAtSpeed", "wheelPositionTarget", "pidConfig",
-                "wheelTolerances"
+                "wheelTolerances", "wheelPWM", "wheelControlMode"
         ]:
             pass
         else:

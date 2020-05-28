@@ -64,8 +64,8 @@ class PositionController:
             tick_right, self.configuration.encoder_ticks_per_revolution,
             self.configuration.wheel_radius)
 
-        self.probe.emit("encoder_left", self.position_left)
-        self.probe.emit("encoder_right", self.position_right)
+        # self.probe.emit("encoder_left", self.position_left)
+        # self.probe.emit("encoder_right", self.position_right)
 
         if not self.initialized:
             self.position_left_last = self.position_left
@@ -73,6 +73,8 @@ class PositionController:
             self.initialized = True
             return
 
+        distance_old = self.distance_travelled
+        angle_old = self.angle
         self.position, self.angle = self.odometry(
             self.position_left - self.position_left_last,
             self.position_right - self.position_right_last, self.position,
@@ -89,6 +91,9 @@ class PositionController:
 
         self.position_left_last = self.position_left
         self.position_right_last = self.position_right
+
+        self.speed = (self.distance_travelled-distance_old)*self.configuration.encoder_update_rate
+        self.angular_velocity = (self.angle-angle_old)*self.configuration.encoder_update_rate
 
         self.probe.emit("position", self.position)
         self.probe.emit("angle", self.angle)

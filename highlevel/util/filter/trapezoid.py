@@ -5,6 +5,9 @@ from typing import Generator
 
 
 # pylint: disable=too-many-arguments
+from highlevel.logger import LOGGER
+
+
 def _trapezoid_gen(initial_value: float, tolerance: float,
                    max_first_order: float, max_second_order: float,
                    update_rate: int, anticipation: float) -> Generator:
@@ -26,8 +29,8 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
 
         target = received
         distance = target - output
-
         if abs(distance) <= tolerance:
+            LOGGER.get().info('trapezoid_stop')
             # If close enough, stop
             output_first_order = 0.0
             output = target
@@ -39,10 +42,12 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
             direction = -1 if distance < 0 else 1
 
             if direction * distance < stop_distance:
+                LOGGER.get().info('trapezoid_brake', distance=distance, stop_distance=stop_distance)
                 output_first_order -= direction * max_second_order / update_rate
             else:
                 output_first_order += direction * max_second_order / update_rate
                 if direction * output_first_order > max_first_order:
+                    LOGGER.get().info('trapezoid_keep', speed=output_first_order, max_first_order=max_first_order)
                     output_first_order = direction * max_first_order
 
             output += output_first_order / update_rate

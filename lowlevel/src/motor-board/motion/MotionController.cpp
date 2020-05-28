@@ -15,32 +15,34 @@ void MotionController::init() {
 
     pid_speed_left.set_coefficients(0.275, 0.24, 0.0002, MOTION_CONTROL_FREQ);
     pid_speed_left.set_output_limit(CONST_PWM_MAX);
-    pid_speed_left.set_anti_windup(CONST_PWM_MAX);
-    pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
+    pid_speed_left.set_anti_windup(CONST_PWM_MAX/4);
+    pid_speed_left.set_derivative_limit(CONST_PWM_MAX/4);
 
     pid_speed_right.set_coefficients(0.27, 0.22, 0.0002, MOTION_CONTROL_FREQ);
     pid_speed_right.set_output_limit(CONST_PWM_MAX);
-    pid_speed_right.set_anti_windup(CONST_PWM_MAX);
-    pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
+    pid_speed_right.set_anti_windup(CONST_PWM_MAX/4);
+    pid_speed_right.set_derivative_limit(CONST_PWM_MAX/4);
 
-    pid_position_left.set_coefficients(3.35, 0.5, 0.2, MOTION_CONTROL_FREQ);
+    pid_position_left.set_coefficients(4.0, 0.1, 0.4, MOTION_CONTROL_FREQ);
     pid_position_left.set_output_limit(CONST_PWM_MAX);
-    pid_position_left.set_anti_windup(CONST_PWM_MAX);
-    pid_position_left.set_derivative_limit(CONST_PWM_MAX);
+    pid_position_left.set_anti_windup(CONST_PWM_MAX/4);
+    pid_position_left.set_derivative_limit(CONST_PWM_MAX/4);
 
-    pid_position_right.set_coefficients(3.15, 0.3, 0.22, MOTION_CONTROL_FREQ);
+    pid_position_right.set_coefficients(4.0, 0.1, 0.4, MOTION_CONTROL_FREQ);
     pid_position_right.set_output_limit(CONST_PWM_MAX);
-    pid_position_right.set_anti_windup(CONST_PWM_MAX);
-    pid_position_right.set_derivative_limit(CONST_PWM_MAX);
+    pid_position_right.set_anti_windup(CONST_PWM_MAX/4);
+    pid_position_right.set_derivative_limit(CONST_PWM_MAX/4);
 
 
     motor_left.init();
     motor_right.init();
 
     robot_status.controlled_speed = false;
-    robot_status.controlled_position = false;
+    robot_status.controlled_position = true;
     robot_status.tolerance_ticks_left = CONST_TOLERANCE_TICKS_INIT;
     robot_status.tolerance_ticks_right = CONST_TOLERANCE_TICKS_INIT;
+    robot_status.raw_pwm_left = 0;
+    robot_status.raw_pwm_right = 0;
     cod_left = {};
     cod_right = {};
     cod_right_raw_last = 0;
@@ -51,8 +53,9 @@ void MotionController::init() {
 
 void MotionController::update_position() {
     int32_t cod_right_raw = COD_get_right();           // Right wheel is positive (trigo rotations)
-    cod_left.position_current = -COD_get_left();                // Left wheel is the opposite
+    cod_left.position_current = -COD_get_left();       // Left wheel is the opposite
 
+    // Overflow management of 16 bit counter
     if (cod_right_raw - cod_right_raw_last > 32767) {
         cod_right_overflows--;
     } else if (cod_right_raw_last - cod_right_raw > 32767) {
@@ -76,38 +79,40 @@ void MotionController::update_position() {
 
 
 void MotionController::control_motion() {
-    int16_t left_pwm = 0, right_pwm = 0;
+    if (robot_status.controlled_speed || robot_status.controlled_position) {
+        int16_t left_pwm = 0, right_pwm = 0;
+        if (robot_status.controlled_position) {
+            // Position only control of the wheels
+            if (ABS(cod_left.position_target - cod_left.position_current) < robot_status.tolerance_ticks_left) {
+                left_pwm = 0;
+            } else {
+                left_pwm = pid_position_left.compute(cod_left.position_current, cod_left.position_target);
+            }
+            if (ABS(cod_right.position_target - cod_right.position_current) < robot_status.tolerance_ticks_right) {
+                right_pwm = 0;
+            } else {
+                right_pwm = pid_position_right.compute(cod_right.position_current, cod_right.position_target);
+            }
+        } else if (robot_status.controlled_speed) {
+            // Speed only control of the wheels
+            cod_left.speed_target_current = cod_left.speed_target;
+            cod_right.speed_target_current = cod_right.speed_target;
 
+            // Update last wheel targets
+            cod_left.speed_target_last = cod_left.speed_target_current;
+            cod_right.speed_target_last = cod_right.speed_target_current;
 
-    if (robot_status.controlled_position) {
-        // Position only control of the wheels
-        if (ABS(cod_left.position_target - cod_left.position_current) < robot_status.tolerance_ticks_left) {
-            left_pwm = 0;
-        } else {
-            left_pwm = pid_position_left.compute(cod_left.position_current, cod_left.position_target);
+            left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_target_current);
+            right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_target_current);
         }
-        if (ABS(cod_right.position_target - cod_right.position_current) < robot_status.tolerance_ticks_right) {
-            right_pwm = 0;
-        } else {
-            right_pwm = pid_position_right.compute(cod_right.position_current, cod_right.position_target);
-        }
-    } else if (robot_status.controlled_speed) {
-        // Speed only control of the wheels
-        cod_left.speed_target_current = cod_left.speed_target;
-        cod_right.speed_target_current = cod_right.speed_target;
 
-        // Update last wheel targets
-        cod_left.speed_target_last = cod_left.speed_target_current;
-        cod_right.speed_target_last = cod_right.speed_target_current;
-
-        left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_target_current);
-        right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_target_current);
+        // Update the PWM used by the Timers
+        motor_left.set_pwm(left_pwm);
+        motor_right.set_pwm(right_pwm);
+    } else {
+        motor_left.set_pwm(robot_status.raw_pwm_left);
+        motor_right.set_pwm(robot_status.raw_pwm_right);
     }
-
-
-    // Update the PWM used by the Timers
-    motor_left.set_pwm(left_pwm);
-    motor_right.set_pwm(right_pwm);
 }
 
 void MotionController::set_control_mode(bool speed, bool position) {
@@ -188,9 +193,9 @@ int32_t MotionController::get_pid_data(uint8_t id, uint8_t requested_data) {
 }
 
 
-void MotionController::set_raw_pwm(int16_t left, int16_t right) {
-    motor_left.set_pwm(left);
-    motor_right.set_pwm(right);
+void MotionController::set_raw_pwm(float left, float right) {
+    robot_status.raw_pwm_left = left*CONST_PWM_MAX;
+    robot_status.raw_pwm_right = right*CONST_PWM_MAX;
 }
 
 

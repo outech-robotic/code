@@ -32,6 +32,8 @@ class MotionController {
         bool controlled_position;
         int32_t tolerance_ticks_left;
         int32_t tolerance_ticks_right;
+        int16_t raw_pwm_left;
+        int16_t raw_pwm_right;
     } robot_status;
 
     PID_FP pid_speed_left;
@@ -124,7 +126,7 @@ public:
     /**
      * Sets raw PWM duty cycles on both wheels. Only useful if motion control modes are all disabled
      */
-    void set_raw_pwm(int16_t left, int16_t right);
+    void set_raw_pwm(float left, float right);
 
     /**
      * Sets the proportional constant for all PIDs

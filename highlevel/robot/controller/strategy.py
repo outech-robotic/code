@@ -62,7 +62,7 @@ class StrategyController:
         self.configuration = configuration
         self.trajectory_controller = trajectory_controller
 
-    async def do_raw_wheel_test(self, path: List[Millimeter], rotation: bool,
+    async def do_raw_wheel_test(self, path: List[Millimeter], rotation: bool, speed: bool,
                                 step_time: float) -> None:
         """
         Makes the robot's wheels follow a path (list of positions), with a given
@@ -72,10 +72,16 @@ class StrategyController:
             ticks = mm_to_tick(position,
                                self.configuration.encoder_ticks_per_revolution,
                                self.configuration.wheel_radius)
-            await self.trajectory_controller.motion_controller.motor_gateway.set_target_positions(
-                -ticks if rotation else ticks,
-                ticks,
-            )
+            if speed:
+                await self.trajectory_controller.motion_controller.motor_gateway.set_target_speeds(
+                    -ticks if rotation else ticks,
+                    ticks,
+                )
+            else:
+                await self.trajectory_controller.motion_controller.motor_gateway.set_target_positions(
+                    -ticks if rotation else ticks,
+                    ticks,
+                )
             await asyncio.sleep(step_time)
 
     async def run(self) -> None:
@@ -83,7 +89,7 @@ class StrategyController:
         Run the strategy.
         """
 
-        # send initial PID configuratin for motor board wheels
+
         await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position(
             self.configuration.pid_constants_position_left.k_p,
             self.configuration.pid_constants_position_left.k_i,
@@ -93,18 +99,24 @@ class StrategyController:
             self.configuration.pid_constants_position_right.k_d,
         )
 
+        await self.trajectory_controller.motion_controller.motor_gateway.set_control_mode(
+            False, True
+        )
+
         while True:
             await asyncio.sleep(1000)
-        # await self.trajectory_controller.motion_controller.translate(200)
+        # for i in range(100):
+        #     await self.trajectory_controller.motion_controller.motor_gateway.set_pwms(i/100.0, i/100.0)
+        #     await asyncio.sleep(0.02)
+        # await asyncio.sleep(1.0)
+        # await self.trajectory_controller.motion_controller.translate(1000)
         # await self.trajectory_controller.motion_controller.rotate(1.5)
         # await self.trajectory_controller.motion_controller.translate(-500)
         # await self.trajectory_controller.motion_controller.rotate(-1.5)
-        # distance = 200
-        # step = 1
-        # delays = 1.0/(distance/step)
-        # await self.do_raw_wheel_test([i for i in range(0, distance, step)], False, delays)
-        # await self.do_raw_wheel_test([i for i in range(distance, 0, -step)], False, delays)
 
+        # await self.do_raw_wheel_test([i for i in range(0, 250, 5)], False, True, 0.01)
+        # await self.do_raw_wheel_test([i for i in range(0, 200, 3)], False, 0.01)
+        # await self.do_raw_wheel_test([i for i in range(200, 0, -3)], False, 0.01)
         # for vec, reverse in PATH:
         #     LOGGER.get().info("move robot", destination=vec)
         #     await self.trajectory_controller.move_to(

@@ -7,6 +7,10 @@
 
 // Send position of encoders every 10ms
 Metro position_timer(10);
+
+// Watchdog for speed settings, if not reset will stop the robot every 200ms
+Metro speed_watchdog(200);
+
 // Send heartbeat every second
 Metro heartbeat_timer(1000);
 
@@ -42,14 +46,13 @@ int main() {
     pinMode(PIN_LED, PinDirection::OUTPUT);
     setPin(PIN_LED);
 
-    mcs.set_raw_pwm(0, 0);
     mcs.set_control_mode(false, true);
 
     serial.init(CONST_USART_BAUDRATE);
-    serial.print("Setup done \r\n");
 
     canpb.send_log("Starting Motor Board");
 
+    speed_watchdog.reset();
 
     while (true) {
         // Update ISOTP server
@@ -63,8 +66,8 @@ int main() {
 
         // Order reception
         if (canpb.receive_msg(msg_rx)) {
+            speed_watchdog.reset();
             nb_packets_rx++;
-            char str[32] = "";
             bool speed, position;
             volatile float speed_left_p, speed_left_i, speed_left_d,
                     speed_right_p, speed_right_i, speed_right_d,
@@ -83,13 +86,15 @@ int main() {
                                           msg_rx.message_content.moveWheelAtSpeed.right_tick_per_sec);
                     break;
 
+                case BusMessage_wheelPWM_tag:
+                    mcs.set_raw_pwm(msg_rx.message_content.wheelPWM.ratio_left,
+                                    msg_rx.message_content.wheelPWM.ratio_right);
+                    break;
+
                 case BusMessage_wheelControlMode_tag:
                     speed = msg_rx.message_content.wheelControlMode.speed;
                     position = msg_rx.message_content.wheelControlMode.position;
                     mcs.set_control_mode(speed, position);
-                    if (speed and position) {
-                        canpb.send_log("received both modes at true, setting both false");
-                    }
                     break;
 
                 case BusMessage_pidConfig_tag:
@@ -144,6 +149,12 @@ int main() {
                     serial.print("ERROR: SENDING ENCODER POS\r\n");
                 }
             }
+        }
+
+        // Periodic watchdog check for speed targets or PWM commands
+        if (speed_watchdog.check()) {
+            mcs.set_speed_targets(0, 0);
+            mcs.set_raw_pwm(0, 0);
         }
 
         //Periodic Heartbeat

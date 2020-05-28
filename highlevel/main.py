@@ -62,9 +62,9 @@ CONFIG = Configuration(
     max_wheel_speed=200,
     max_wheel_acceleration=600,
     max_angular_velocity=0.8 * math.pi,
-    max_angular_acceleration=1.5 * math.pi,
+    max_angular_acceleration=1.2 * math.pi,
     tolerance_distance=0.5,
-    tolerance_angle=0.008,
+    tolerance_angle=0.01,
     trapezoid_anticipation=1.05,
     debug=DebugConfiguration(
         websocket_port=8080,
@@ -72,19 +72,19 @@ CONFIG = Configuration(
         host='0.0.0.0',
         refresh_rate=30,
     ),
-    pid_constants_distance=PIDConstants(3.5, 0.0, 1.0),
-    pid_constants_angle=PIDConstants(1.0, 0.0, 0.0),
-    pid_constants_position_left=PIDConstants(3.3, 0.0, 0.27),
-    pid_constants_position_right=PIDConstants(3.1, 0.0, 0.25),
-    pid_limits_distance=PIDLimits(50.0, 10.0, 0.5),
-    pid_limits_angle=PIDLimits(0.1, 0.01, 0.005),
+    pid_constants_distance=PIDConstants(1.0, 0.0, 0.0),
+    pid_constants_angle=PIDConstants(1.5, 0.0, 0.0),
+    pid_constants_position_left=PIDConstants(4, 0.1, 0.45),
+    pid_constants_position_right=PIDConstants(4, 0.1, 0.45),
+    pid_limits_distance=PIDLimits(50, 100.0, 0.5),
+    pid_limits_angle=PIDLimits(50, 1, 0.005),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
     tickrate=1000,
     encoder_position_rate=CONFIG.encoder_update_rate,
-    replay_fps=60,
+    replay_fps=30,
     lidar_position_rate=11,
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),

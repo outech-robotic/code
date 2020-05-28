@@ -8,7 +8,7 @@ from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import TickPerSec, Tick
 from highlevel.util.filter.pid import PIDConstants
 from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
-    PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg
+    PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg, WheelPWMMsg
 
 
 class MotorGateway:
@@ -65,6 +65,20 @@ class MotorGateway:
             pid_position_right=self._pid_constants_to_proto(
                 self.pid_position_right),
         ))
+        await self._send_message(message)
+
+
+    async def set_pwms(self, ratio_left, ratio_right):
+        """
+        Sets each wheel's PWM output. Ratios are duty cycles, signs are directions.
+        """
+        LOGGER.get().info('motor_gateway_set_pwms',
+                           ratio_left=ratio_left,
+                           ratio_right=ratio_right)
+        message = BusMessage(wheelPWM=WheelPWMMsg(
+            ratio_left=ratio_left,
+            ratio_right=ratio_right)
+        )
         await self._send_message(message)
 
     async def set_target_speeds(self, tick_left: TickPerSec,
@@ -143,3 +157,4 @@ class MotorGateway:
         message = BusMessage(wheelTolerances=WheelTolerancesMsg(
             ticks_left=ticks_left, ticks_right=ticks_right))
         await self._send_message(message)
+

@@ -48,6 +48,11 @@ message WheelPositionTargetMsg {
   sint32 tick_right = 2;
 }
 
+message WheelPWMMsg {
+  float ratio_left = 1;
+  float ratio_right = 2;
+}
+
 message TranslateMsg {
   sint32 ticks = 1;
 }
@@ -105,5 +110,6 @@ message BusMessage {
     PressureSensorMsg pressureSensor = 14;
     DebugLog debugLog = 15;
     WheelTolerancesMsg wheelTolerances= 16;
+    WheelPWMMsg wheelPWM = 17;
   }
 }

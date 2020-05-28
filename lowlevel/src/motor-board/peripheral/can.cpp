@@ -51,8 +51,6 @@ int CAN_poll_TX() {
         asm volatile("nop");
     }
     if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) > 0) { // Free buffers in hardware, send
-        volatile uint32_t cap = messages_tx.get_capacity();
-        volatile uint32_t sz = messages_tx.get_size();
         if (!messages_tx.is_empty()) {
             uint32_t mailbox;
             can_msg msg = messages_tx.pop();
@@ -219,7 +217,6 @@ extern "C" {
 #endif
 
 void CEC_CAN_IRQHandler(void) {
-    HAL_StatusTypeDef res;
     CAN_RxHeaderTypeDef rx_header;
     can_msg msg;
 

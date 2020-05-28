@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"5\n\x0fPIDCoefficients\x12\n\n\x02kp\x18\x01 \x01(\x02\x12\n\n\x02ki\x18\x02 \x01(\x02\x12\n\n\x02kd\x18\x03 \x01(\x02\"\xbe\x01\n\x0cPIDConfigMsg\x12(\n\x0epid_speed_left\x18\x01 \x01(\x0b\x32\x10.PIDCoefficients\x12)\n\x0fpid_speed_right\x18\x02 \x01(\x0b\x32\x10.PIDCoefficients\x12+\n\x11pid_position_left\x18\x03 \x01(\x0b\x32\x10.PIDCoefficients\x12,\n\x12pid_position_right\x18\x04 \x01(\x0b\x32\x10.PIDCoefficients\"6\n\x13WheelControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x10\n\x08position\x18\x02 \x01(\x08\"=\n\x12WheelTolerancesMsg\x12\x12\n\nticks_left\x18\x01 \x01(\r\x12\x13\n\x0bticks_right\x18\x02 \x01(\r\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"?\n\x16WheelPositionTargetMsg\x12\x11\n\ttick_left\x18\x01 \x01(\x11\x12\x12\n\ntick_right\x18\x02 \x01(\x11\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\x1b\n\x08\x44\x65\x62ugLog\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\"\xb2\x05\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12\x30\n\x10wheelControlMode\x18\x06 \x01(\x0b\x32\x14.WheelControlModeMsgH\x00\x12\x36\n\x13wheelPositionTarget\x18\x07 \x01(\x0b\x32\x17.WheelPositionTargetMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x12\x1d\n\x08\x64\x65\x62ugLog\x18\x0f \x01(\x0b\x32\t.DebugLogH\x00\x12.\n\x0fwheelTolerances\x18\x10 \x01(\x0b\x32\x13.WheelTolerancesMsgH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
+  serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"5\n\x0fPIDCoefficients\x12\n\n\x02kp\x18\x01 \x01(\x02\x12\n\n\x02ki\x18\x02 \x01(\x02\x12\n\n\x02kd\x18\x03 \x01(\x02\"\xbe\x01\n\x0cPIDConfigMsg\x12(\n\x0epid_speed_left\x18\x01 \x01(\x0b\x32\x10.PIDCoefficients\x12)\n\x0fpid_speed_right\x18\x02 \x01(\x0b\x32\x10.PIDCoefficients\x12+\n\x11pid_position_left\x18\x03 \x01(\x0b\x32\x10.PIDCoefficients\x12,\n\x12pid_position_right\x18\x04 \x01(\x0b\x32\x10.PIDCoefficients\"6\n\x13WheelControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x10\n\x08position\x18\x02 \x01(\x08\"=\n\x12WheelTolerancesMsg\x12\x12\n\nticks_left\x18\x01 \x01(\r\x12\x13\n\x0bticks_right\x18\x02 \x01(\r\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"?\n\x16WheelPositionTargetMsg\x12\x11\n\ttick_left\x18\x01 \x01(\x11\x12\x12\n\ntick_right\x18\x02 \x01(\x11\"6\n\x0bWheelPWMMsg\x12\x12\n\nratio_left\x18\x01 \x01(\x02\x12\x13\n\x0bratio_right\x18\x02 \x01(\x02\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\x1b\n\x08\x44\x65\x62ugLog\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\"\xd4\x05\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12\x30\n\x10wheelControlMode\x18\x06 \x01(\x0b\x32\x14.WheelControlModeMsgH\x00\x12\x36\n\x13wheelPositionTarget\x18\x07 \x01(\x0b\x32\x17.WheelPositionTargetMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x12\x1d\n\x08\x64\x65\x62ugLog\x18\x0f \x01(\x0b\x32\t.DebugLogH\x00\x12.\n\x0fwheelTolerances\x18\x10 \x01(\x0b\x32\x13.WheelTolerancesMsgH\x00\x12 \n\x08wheelPWM\x18\x11 \x01(\x0b\x32\x0c.WheelPWMMsgH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
 )
 
 
@@ -390,6 +390,44 @@ _WHEELPOSITIONTARGETMSG = _descriptor.Descriptor(
 )
 
 
+_WHEELPWMMSG = _descriptor.Descriptor(
+  name='WheelPWMMsg',
+  full_name='WheelPWMMsg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ratio_left', full_name='WheelPWMMsg.ratio_left', index=0,
+      number=1, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='ratio_right', full_name='WheelPWMMsg.ratio_right', index=1,
+      number=2, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=657,
+  serialized_end=711,
+)
+
+
 _TRANSLATEMSG = _descriptor.Descriptor(
   name='TranslateMsg',
   full_name='TranslateMsg',
@@ -416,8 +454,8 @@ _TRANSLATEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=657,
-  serialized_end=686,
+  serialized_start=713,
+  serialized_end=742,
 )
 
 
@@ -447,8 +485,8 @@ _ROTATEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=688,
-  serialized_end=714,
+  serialized_start=744,
+  serialized_end=770,
 )
 
 
@@ -485,8 +523,8 @@ _SERVOMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=716,
-  serialized_end=753,
+  serialized_start=772,
+  serialized_end=809,
 )
 
 
@@ -523,8 +561,8 @@ _PUMPANDVALVEMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=755,
-  serialized_end=796,
+  serialized_start=811,
+  serialized_end=852,
 )
 
 
@@ -575,8 +613,8 @@ _LASERSENSORMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=799,
-  serialized_end=931,
+  serialized_start=855,
+  serialized_end=987,
 )
 
 
@@ -634,8 +672,8 @@ _PRESSURESENSORMSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=933,
-  serialized_end=1055,
+  serialized_start=989,
+  serialized_end=1111,
 )
 
 
@@ -665,8 +703,8 @@ _DEBUGLOG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1057,
-  serialized_end=1084,
+  serialized_start=1113,
+  serialized_end=1140,
 )
 
 
@@ -789,6 +827,13 @@ _BUSMESSAGE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='wheelPWM', full_name='BusMessage.wheelPWM', index=16,
+      number=17, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -804,8 +849,8 @@ _BUSMESSAGE = _descriptor.Descriptor(
       name='message_content', full_name='BusMessage.message_content',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1087,
-  serialized_end=1777,
+  serialized_start=1143,
+  serialized_end=1867,
 )
 
 _PIDCONFIGMSG.fields_by_name['pid_speed_left'].message_type = _PIDCOEFFICIENTS
@@ -828,6 +873,7 @@ _BUSMESSAGE.fields_by_name['laserSensor'].message_type = _LASERSENSORMSG
 _BUSMESSAGE.fields_by_name['pressureSensor'].message_type = _PRESSURESENSORMSG
 _BUSMESSAGE.fields_by_name['debugLog'].message_type = _DEBUGLOG
 _BUSMESSAGE.fields_by_name['wheelTolerances'].message_type = _WHEELTOLERANCESMSG
+_BUSMESSAGE.fields_by_name['wheelPWM'].message_type = _WHEELPWMMSG
 _BUSMESSAGE.oneofs_by_name['message_content'].fields.append(
   _BUSMESSAGE.fields_by_name['heartbeat'])
 _BUSMESSAGE.fields_by_name['heartbeat'].containing_oneof = _BUSMESSAGE.oneofs_by_name['message_content']
@@ -876,6 +922,9 @@ _BUSMESSAGE.fields_by_name['debugLog'].containing_oneof = _BUSMESSAGE.oneofs_by_
 _BUSMESSAGE.oneofs_by_name['message_content'].fields.append(
   _BUSMESSAGE.fields_by_name['wheelTolerances'])
 _BUSMESSAGE.fields_by_name['wheelTolerances'].containing_oneof = _BUSMESSAGE.oneofs_by_name['message_content']
+_BUSMESSAGE.oneofs_by_name['message_content'].fields.append(
+  _BUSMESSAGE.fields_by_name['wheelPWM'])
+_BUSMESSAGE.fields_by_name['wheelPWM'].containing_oneof = _BUSMESSAGE.oneofs_by_name['message_content']
 DESCRIPTOR.message_types_by_name['HeartbeatMsg'] = _HEARTBEATMSG
 DESCRIPTOR.message_types_by_name['StopMovingMsg'] = _STOPMOVINGMSG
 DESCRIPTOR.message_types_by_name['MovementEndedMsg'] = _MOVEMENTENDEDMSG
@@ -886,6 +935,7 @@ DESCRIPTOR.message_types_by_name['WheelControlModeMsg'] = _WHEELCONTROLMODEMSG
 DESCRIPTOR.message_types_by_name['WheelTolerancesMsg'] = _WHEELTOLERANCESMSG
 DESCRIPTOR.message_types_by_name['MoveWheelAtSpeedMsg'] = _MOVEWHEELATSPEEDMSG
 DESCRIPTOR.message_types_by_name['WheelPositionTargetMsg'] = _WHEELPOSITIONTARGETMSG
+DESCRIPTOR.message_types_by_name['WheelPWMMsg'] = _WHEELPWMMSG
 DESCRIPTOR.message_types_by_name['TranslateMsg'] = _TRANSLATEMSG
 DESCRIPTOR.message_types_by_name['RotateMsg'] = _ROTATEMSG
 DESCRIPTOR.message_types_by_name['ServoMsg'] = _SERVOMSG
@@ -965,6 +1015,13 @@ WheelPositionTargetMsg = _reflection.GeneratedProtocolMessageType('WheelPosition
   # @@protoc_insertion_point(class_scope:WheelPositionTargetMsg)
   })
 _sym_db.RegisterMessage(WheelPositionTargetMsg)
+
+WheelPWMMsg = _reflection.GeneratedProtocolMessageType('WheelPWMMsg', (_message.Message,), {
+  'DESCRIPTOR' : _WHEELPWMMSG,
+  '__module__' : 'outech_pb2'
+  # @@protoc_insertion_point(class_scope:WheelPWMMsg)
+  })
+_sym_db.RegisterMessage(WheelPWMMsg)
 
 TranslateMsg = _reflection.GeneratedProtocolMessageType('TranslateMsg', (_message.Message,), {
   'DESCRIPTOR' : _TRANSLATEMSG,
