@@ -75,12 +75,12 @@ class StrategyController:
 
         await self.trajectory_controller.motion_controller.motor_gateway.set_control_mode(
             False, True)
-
-        while True:
-            await asyncio.sleep(1000)
-        # await self.trajectory_controller.motion_controller.translate(1000)
+        
+        #while True:
+        #    await asyncio.sleep(1000)
+        await self.trajectory_controller.motion_controller.translate(400)
         # await self.trajectory_controller.motion_controller.rotate(1.5)
-        # await self.trajectory_controller.motion_controller.translate(-500)
+        await self.trajectory_controller.motion_controller.translate(-400)
         # await self.trajectory_controller.motion_controller.rotate(-1.5)
 
         # for vec, reverse in PATH:

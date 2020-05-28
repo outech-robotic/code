@@ -38,7 +38,7 @@ class MotionController:
         self.motor_gateway = motor_gateway
         self.position_controller = position_controller
         self.position_update_event = asyncio.Event()
-
+        self.old_target_dist = 0.0
         self.status = MotionStatus(
             target_dist=self.position_controller.distance_travelled,
             target_angle=self.position_controller.angle,
@@ -162,11 +162,11 @@ class MotionController:
             # small correction command to the motors.
             step_pid_dist = self.pid_distance.send((ramp_dist, current_dist))
             step_pid_angle = self.pid_angle.send((ramp_angle, current_angle))
-
-            target_dist = ramp_dist + step_pid_dist / update_rate
-            target_angle = (ramp_angle +
-                            step_pid_angle / update_rate) * half_track
-
+            
+            target_dist = ramp_dist + step_pid_dist
+            target_angle = (ramp_angle + step_pid_angle) * half_track
+            delta_target_dist = target_dist - self.old_target_dist
+            self.old_target_dist = target_dist
             # Update wheel targets
             command_left = target_dist - target_angle
             command_right = target_dist + target_angle
@@ -174,13 +174,14 @@ class MotionController:
             # Set wheel targets
             await self._set_target_wheel_positions(command_left, command_right)
 
-            # LOGGER.get().debug('motion_controller_dist',
-            #                   a_dist_remain=distance_remaining, b_dist_curr=current_dist,
-            #                   c_dist_ramp=ramp_dist,
-            #                   d_dist_pid=step_pid_dist,
-            #                   e_dist_target=target_dist,
-            #                   )
-            # LOGGER.get().debug('motion_controller_wheels',
+            LOGGER.get().info('motion_controller_dist',
+                              f_delta_dist=delta_target_dist,
+                              a_dist_remain=distance_remaining, b_dist_curr=current_dist,
+                              c_dist_ramp=ramp_dist,
+                              d_dist_pid=step_pid_dist,
+                              e_dist_target=target_dist,
+                              )
+            # LOGGER.get().info('motion_controller_wheels',
             #                   left_target=command_left, right_target=command_right,
             #                   left_pos=self.position_controller.position_left,
             #                   right_pos=self.position_controller.position_right

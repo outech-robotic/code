@@ -59,25 +59,25 @@ CONFIG = Configuration(
     encoder_update_rate=100,
     motor_update_rate=1000,
     pid_scale_factor=2**16,
-    max_wheel_speed=200,
+    max_wheel_speed=500,
     max_wheel_acceleration=600,
     max_angular_velocity=0.8 * math.pi,
     max_angular_acceleration=1.2 * math.pi,
     tolerance_distance=0.5,
     tolerance_angle=0.01,
-    trapezoid_anticipation=1.05,
+    trapezoid_anticipation=0.98,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
         refresh_rate=30,
     ),
-    pid_constants_distance=PIDConstants(1.0, 0.0, 0.0),
-    pid_constants_angle=PIDConstants(1.5, 0.0, 0.0),
-    pid_constants_position_left=PIDConstants(4, 0.1, 0.45),
-    pid_constants_position_right=PIDConstants(4, 0.1, 0.45),
-    pid_limits_distance=PIDLimits(50, 100.0, 0.5),
-    pid_limits_angle=PIDLimits(50, 1, 0.005),
+    pid_constants_distance=PIDConstants(1.0, 0.0, 0.00),
+    pid_constants_angle=PIDConstants(1.0, 0.0, 0.0),
+    pid_constants_position_left=PIDConstants(2.5, 0.0, 0.2),
+    pid_constants_position_right=PIDConstants(2.5, 0.0, 0.2),
+    pid_limits_distance=PIDLimits(100, 100.0, 0.5),
+    pid_limits_angle=PIDLimits(3.0, 1, 0.005),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(
@@ -161,7 +161,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     if simulation or stub_socket_can:
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
     else:
-        reader, writer = await tcp.get_reader_writer('192.168.1.120', 14000)
+        reader, writer = await tcp.get_reader_writer('localhost', 14000)
         i.provide('motor_board_adapter',
                   TCPSocketAdapter,
                   reader=reader,
