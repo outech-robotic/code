@@ -9,7 +9,7 @@ from highlevel.robot.controller.motion.position import PositionController, mm_to
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Millimeter, MotionResult, Radian
 from highlevel.robot.gateway.motor import MotorGateway
-from highlevel.util.filter.pid import pid_gen, limit_value
+from highlevel.util.filter.pid import pid_gen
 from highlevel.util.filter.trapezoid import trapezoid_gen
 
 
@@ -82,7 +82,8 @@ class MotionController:
         """
         self.position_update_event.set()
 
-    def check_arrived(self, dist_remaining: Millimeter, angle_remaining: Radian) -> bool:
+    def check_arrived(self, dist_remaining: Millimeter,
+                      angle_remaining: Radian) -> bool:
         """
         Checks whether the robot is at the targets.
         @return: ^
@@ -95,20 +96,23 @@ class MotionController:
 
         return distance_ok and angle_ok
 
-    async def _set_target_wheel_pwms(self, ratio_left: float, ratio_right: float):
+    async def _set_target_wheel_pwms(self, ratio_left: float,
+                                     ratio_right: float) -> None:
         """
         Sends raw duty cycles for each wheel's PWM output. Between -1.0 and 1.0.
         """
-        await self.motor_gateway.set_pwms(ratio_left, ratio_right);
+        await self.motor_gateway.set_pwms(ratio_left, ratio_right)
 
     async def _set_target_wheel_speeds(self, target_left, target_right):
         """
         Converts wheel speeds to ticks/sec and sends them to the motor control board
         """
         await self.motor_gateway.set_target_speeds(
-            mm_to_tick(target_left, self.configuration.encoder_ticks_per_revolution,
+            mm_to_tick(target_left,
+                       self.configuration.encoder_ticks_per_revolution,
                        self.configuration.wheel_radius),
-            mm_to_tick(target_right, self.configuration.encoder_ticks_per_revolution,
+            mm_to_tick(target_right,
+                       self.configuration.encoder_ticks_per_revolution,
                        self.configuration.wheel_radius))
 
     async def _set_target_wheel_positions(self, left: Millimeter,
@@ -137,7 +141,7 @@ class MotionController:
         target_angle = self.status.target_angle
 
         update_rate = self.configuration.encoder_update_rate
-        half_track = self.configuration.distance_between_wheels/2.0
+        half_track = self.configuration.distance_between_wheels / 2.0
 
         if self.check_arrived(distance_remaining, angle_remaining):
             # Stop condition
@@ -159,31 +163,29 @@ class MotionController:
             step_pid_dist = self.pid_distance.send((ramp_dist, current_dist))
             step_pid_angle = self.pid_angle.send((ramp_angle, current_angle))
 
-            self.position_controller.probe.emit('encoder_left', step_pid_dist)
-            self.position_controller.probe.emit('encoder_right', ramp_dist)
-
-            command_dist = ramp_dist + step_pid_dist/update_rate
-            command_angle = (ramp_angle + step_pid_angle/update_rate)*half_track
+            target_dist = ramp_dist + step_pid_dist / update_rate
+            target_angle = (ramp_angle +
+                            step_pid_angle / update_rate) * half_track
 
             # Update wheel targets
-            command_left = command_dist - command_angle
-            command_right = command_dist + command_angle
+            command_left = target_dist - target_angle
+            command_right = target_dist + target_angle
 
             # Set wheel targets
             await self._set_target_wheel_positions(command_left, command_right)
 
-            LOGGER.get().info('motion_controller_dist',
-                              a_dist_remain=distance_remaining, b_dist_curr=current_dist,
-                              c_dist_ramp=ramp_dist,
-                              d_dist_pid=step_pid_dist,
-                              e_dist_target=target_dist,
-                              )
-            LOGGER.get().info('motion_controller_wheels',
-                              left_target=command_left, right_target=command_right,
-                              left_pos=self.position_controller.position_left,
-                              right_pos=self.position_controller.position_right
-                              )
-            # LOGGER.get().info('motion_controller_angle',
+            # LOGGER.get().debug('motion_controller_dist',
+            #                   a_dist_remain=distance_remaining, b_dist_curr=current_dist,
+            #                   c_dist_ramp=ramp_dist,
+            #                   d_dist_pid=step_pid_dist,
+            #                   e_dist_target=target_dist,
+            #                   )
+            # LOGGER.get().debug('motion_controller_wheels',
+            #                   left_target=command_left, right_target=command_right,
+            #                   left_pos=self.position_controller.position_left,
+            #                   right_pos=self.position_controller.position_right
+            #                   )
+            # LOGGER.get().debug('motion_controller_angle',
             #                   angle_remain=angle_remaining, angle_curr=current_angle,
             #                   angle_ramp=ramp_angle,
             #                   angle_pid=step_pid_angle,

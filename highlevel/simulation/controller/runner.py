@@ -3,7 +3,6 @@ Simulation runner module.
 """
 import asyncio
 from collections import deque
-from random import random
 from statistics import mean
 
 import numpy
@@ -69,10 +68,12 @@ class SimulationRunner:
             last_left = self.state.position_queue_left[-1]
             last_right = self.state.position_queue_right[-1]
 
-            self.state.position_queue_left.append(last_left+numpy.random.normal(0, self.position_noise))
+            self.state.position_queue_left.append(
+                last_left + numpy.random.normal(0, self.position_noise))
             self.state.position_queue_left.popleft()
 
-            self.state.position_queue_right.append(last_right+numpy.random.normal(0, self.position_noise))
+            self.state.position_queue_right.append(
+                last_right + numpy.random.normal(0, self.position_noise))
             self.state.position_queue_right.popleft()
 
             # Send the encoder positions periodically.

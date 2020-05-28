@@ -68,7 +68,7 @@ def _pid_gen(constants_in: PIDConstants, limits: PIDLimits,
         else:
             res_integral += constants.k_i * error
             res_integral = limit_value(res_integral, -limits.max_integral,
-                                        limits.max_integral)
+                                       limits.max_integral)
 
         # Derivative component
         if in_last is None:
@@ -84,7 +84,7 @@ def _pid_gen(constants_in: PIDConstants, limits: PIDLimits,
         # Outputs
         output = res_proportional + res_integral + res_derivative
         received = yield limit_value(output, -limits.max_output,
-                                      limits.max_output)
+                                     limits.max_output)
 
 
 def pid_gen(pid_constants: PIDConstants, pid_limits: PIDLimits,

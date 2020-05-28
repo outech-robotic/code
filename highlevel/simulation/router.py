@@ -51,8 +51,8 @@ class SimulationRouter:
                     target_left = bus_message.moveWheelAtSpeed.left_tick_per_sec
                     target_right = bus_message.moveWheelAtSpeed.right_tick_per_sec
                 else:
-                    target_left = bus_message.wheelPWM.ratio_left*100
-                    target_right = bus_message.wheelPWM.ratio_right*100
+                    target_left = bus_message.wheelPWM.ratio_left * 100
+                    target_right = bus_message.wheelPWM.ratio_right * 100
             self.simulation_state.position_queue_left.append(target_left)
             self.simulation_state.position_queue_left.popleft()
             self.simulation_state.position_queue_right.append(target_right)

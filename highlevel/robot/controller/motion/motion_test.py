@@ -12,6 +12,7 @@ from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.position import mm_to_tick
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import MotionResult, MillimeterPerSec
+from highlevel.util.filter.pid import PIDConstants
 from highlevel.util.geometry.vector import Vector2
 
 
@@ -29,18 +30,19 @@ def configuration_stub(configuration_test: Configuration) -> Configuration:
     """
     Configuration for tests.
     """
-    return dataclasses.replace(
-        configuration_test,
-        distance_between_wheels=2,
-        encoder_update_rate=1,
-        max_wheel_speed=5,
-        max_wheel_acceleration=1,
-        max_angular_velocity=5,
-        max_angular_acceleration=1,
-        wheel_radius=1 / (2 * math.pi),
-        tolerance_distance=0.1,
-        tolerance_angle=0.04,
-    )
+    return dataclasses.replace(configuration_test,
+                               distance_between_wheels=2,
+                               encoder_update_rate=1,
+                               max_wheel_speed=5,
+                               max_wheel_acceleration=1,
+                               max_angular_velocity=5,
+                               max_angular_acceleration=1,
+                               wheel_radius=1 / (2 * math.pi),
+                               tolerance_distance=0.1,
+                               tolerance_angle=0.04,
+                               pid_constants_distance=PIDConstants(
+                                   0.0, 0.0, 0.0),
+                               pid_constants_angle=PIDConstants(0.0, 0.0, 0.0))
 
 
 @fixture(name='motion_controller')
@@ -67,6 +69,7 @@ def motion_controller_setup(position_controller_mock, motor_gateway_mock,
 class TestMotionController:
     """
     Test the motion controller.
+    All the tests assume the PIDs has 0 coefficients.
     """
     @staticmethod
     @pytest.mark.asyncio

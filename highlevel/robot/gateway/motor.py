@@ -67,18 +67,15 @@ class MotorGateway:
         ))
         await self._send_message(message)
 
-
-    async def set_pwms(self, ratio_left, ratio_right):
+    async def set_pwms(self, ratio_left: float, ratio_right: float) -> None:
         """
         Sets each wheel's PWM output. Ratios are duty cycles, signs are directions.
         """
         LOGGER.get().info('motor_gateway_set_pwms',
-                           ratio_left=ratio_left,
-                           ratio_right=ratio_right)
-        message = BusMessage(wheelPWM=WheelPWMMsg(
-            ratio_left=ratio_left,
-            ratio_right=ratio_right)
-        )
+                          ratio_left=ratio_left,
+                          ratio_right=ratio_right)
+        message = BusMessage(wheelPWM=WheelPWMMsg(ratio_left=ratio_left,
+                                                  ratio_right=ratio_right))
         await self._send_message(message)
 
     async def set_target_speeds(self, tick_left: TickPerSec,
@@ -157,4 +154,3 @@ class MotorGateway:
         message = BusMessage(wheelTolerances=WheelTolerancesMsg(
             ticks_left=ticks_left, ticks_right=ticks_right))
         await self._send_message(message)
-

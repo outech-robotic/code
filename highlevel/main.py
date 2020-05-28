@@ -38,10 +38,10 @@ from highlevel.simulation.router import SimulationRouter
 from highlevel.util import tcp
 from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
+from highlevel.util.filter.odometry import odometry_arc
 from highlevel.util.filter.pid import PIDConstants, PIDLimits
 from highlevel.util.geometry.segment import Segment
 from highlevel.util.geometry.vector import Vector2
-from highlevel.util.filter.odometry import odometry_arc
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 from highlevel.util.replay_saver import ReplaySaver
