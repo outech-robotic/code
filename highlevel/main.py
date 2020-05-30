@@ -60,7 +60,7 @@ CONFIG = Configuration(
     motor_update_rate=1000,
     pid_scale_factor=2**16,
     max_wheel_speed=600,
-    max_wheel_acceleration=1400,
+    max_wheel_acceleration=1000,
     max_angular_velocity=1.0 * math.pi,
     max_angular_acceleration=1.6 * math.pi,
     tolerance_distance=1,
@@ -72,14 +72,14 @@ CONFIG = Configuration(
         host='0.0.0.0',
         refresh_rate=1000,
     ),
-    pid_constants_distance=PIDConstants(5, 0.0, 0.1),
+    pid_constants_distance=PIDConstants(8, 5.0, 0.3),
     pid_constants_angle=PIDConstants(5, 2.0, 0.1),
     pid_constants_position_left=PIDConstants(2.5, 0.0, 0.2),
     pid_constants_position_right=PIDConstants(2.5, 0.0, 0.2),
     pid_constants_speed_left=PIDConstants(0.41, 0.6, 0.0018),
     pid_constants_speed_right=PIDConstants(0.41, 0.6, 0.0018),
-    pid_limits_distance=PIDLimits(1e2, 1e3, 0.5),
-    pid_limits_angle=PIDLimits(4.0, 2, 0.005),
+    pid_limits_distance=PIDLimits(1e2, 1e3, 0.0),
+    pid_limits_angle=PIDLimits(4.0, 2, 0.000),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(

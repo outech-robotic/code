@@ -105,25 +105,28 @@ class StrategyController:
 
         start_pos = self.configuration.initial_position
         start_angle = self.configuration.initial_angle
-       
-        await asyncio.sleep(3.0)
-        await self.trajectory_controller.motion_controller.translate(500)
-        await asyncio.sleep(0.5)
-        await self.trajectory_controller.motion_controller.translate(-500)
         
-        await asyncio.sleep(10000)
+        try:
+            while True:
+                await asyncio.sleep(1.0)
+                await self.trajectory_controller.motion_controller.translate(-500)
+                await asyncio.sleep(1.0)
+                await self.trajectory_controller.motion_controller.translate(500)
+            
+           # await asyncio.sleep(10000)
 
-        await self.trajectory_controller.move_to(start_pos + Vector2(300, 0), False)
-        await asyncio.sleep(1.0)
-        await self.trajectory_controller.move_to(start_pos + Vector2(300, 200), True)
-        await asyncio.sleep(1.0)
-        await self.trajectory_controller.move_to(start_pos + Vector2(0, 200), True)
-        await asyncio.sleep(1.0)
-        await self.trajectory_controller.move_to(start_pos + Vector2(-5, 0), True)
-        await asyncio.sleep(1.0)
-        await self.trajectory_controller.move_to(start_pos + Vector2(0, 0), False)
-        await asyncio.sleep(1.0)
-
+           # await self.trajectory_controller.move_to(start_pos + Vector2(300, 0), False)
+           # await asyncio.sleep(1.0)
+           # await self.trajectory_controller.move_to(start_pos + Vector2(300, 200), True)
+           # await asyncio.sleep(1.0)
+           # await self.trajectory_controller.move_to(start_pos + Vector2(0, 200), True)
+           # await asyncio.sleep(1.0)
+           # await self.trajectory_controller.move_to(start_pos + Vector2(-5, 0), True)
+           # await asyncio.sleep(1.0)
+           # await self.trajectory_controller.move_to(start_pos + Vector2(0, 0), False)
+           # await asyncio.sleep(1.0)
+        finally:
+            LOGGER.get().info("Strategy algorithm finished running")  # lol
         # while True:
         #    await asyncio.sleep(1000)
         # await self.trajectory_controller.motion_controller.translate(500)
@@ -137,4 +140,3 @@ class StrategyController:
         #     await self.trajectory_controller.move_to(
         #         Vector2(vec.x, 2000 - vec.y), reverse)
 
-        LOGGER.get().info("Strategy algorithm finished running")  # lol

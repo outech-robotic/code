@@ -183,6 +183,7 @@ class MotionController:
             correction_pid_dist = self.pid_distance.send((self.status.ramp_dist, current_dist))
             correction_pid_angle = self.pid_angle.send((self.status.ramp_angle, current_angle))
 
+            correction_pid_dist = self.output_filter_distance.send(correction_pid_dist)
             correction_pid_angle = self.output_filter_angle.send(correction_pid_angle)
 
 
