@@ -182,7 +182,10 @@ class MotionController:
             # small correction speed command to the motor board.
             correction_pid_dist = self.pid_distance.send((self.status.ramp_dist, current_dist))
             correction_pid_angle = self.pid_angle.send((self.status.ramp_angle, current_angle))
-            
+
+            correction_pid_angle = self.output_filter_angle.send(correction_pid_angle)
+
+
             speed_target_dist = speed_ramp_dist +correction_pid_dist
             speed_target_angle = (speed_ramp_angle + correction_pid_angle) * half_track
 
@@ -190,8 +193,8 @@ class MotionController:
             speed_target_left = speed_target_dist - speed_target_angle
             speed_target_right = speed_target_dist + speed_target_angle
 
-            self.position_controller.probe.emit("encoder_left", self.status.ramp_dist - self.position_controller.distance_travelled)
-            self.position_controller.probe.emit("encoder_right", speed_target_dist)
+            self.position_controller.probe.emit("encoder_left", correction_pid_dist)
+            self.position_controller.probe.emit("encoder_right", self.status.ramp_dist - self.position_controller.distance_travelled)
 
             # Set wheel targets
             await self._set_target_wheel_speeds(speed_target_left, speed_target_right)
@@ -209,12 +212,14 @@ class MotionController:
             #                   left_pos=self.position_controller.position_left,
             #                   right_pos=self.position_controller.position_right
             #                   )
-            # LOGGER.get().debug('motion_controller_angle',
-            #                   angle_remain=angle_remaining, angle_curr=current_angle,
-            #                   angle_ramp=self.status.ramp_angle,
-            #                   angle_pid=step_pid_angle,
-            #                   angle_target=target_angle,
-            #                   )
+            LOGGER.get().info('motion_controller_angle',
+                              a_angle_remain=angle_remaining, b_angle_curr=current_angle,
+                              c_angle_ramp=self.status.ramp_angle,
+                              d_angle_pid=correction_pid_angle,
+                              e_angle_target=target_angle,
+                              f_angle_speed_ramp=speed_ramp_angle,
+                              f_angle_speed=speed_angle,
+                              )
 
             # Wait for a new position update event
             self.position_update_event.clear()
