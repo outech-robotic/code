@@ -60,7 +60,9 @@ class Configuration:
     # # PID
     # # # Motor board Wheel PIDs
     pid_constants_position_left: PIDConstants
+    pid_constants_speed_left: PIDConstants
     pid_constants_position_right: PIDConstants
+    pid_constants_speed_right: PIDConstants
 
     # # # Motion Controller PIDs
     pid_constants_distance: PIDConstants

@@ -7,9 +7,11 @@ from dataclasses import dataclass
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.position import PositionController, mm_to_tick
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Millimeter, MotionResult, Radian
+from highlevel.robot.entity.type import Millimeter, MotionResult, Radian, MillimeterPerSec, \
+    RadianPerSec
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.filter.pid import pid_gen
+from highlevel.util.filter.slope_limit import slope_limit_gen
 from highlevel.util.filter.trapezoid import trapezoid_gen
 
 
@@ -22,6 +24,8 @@ class MotionStatus:
     target_angle: Radian
     target_left: Millimeter
     target_right: Millimeter
+    ramp_dist: Millimeter
+    ramp_angle: Radian
     is_arrived: bool
     is_blocked: bool
 
@@ -38,12 +42,13 @@ class MotionController:
         self.motor_gateway = motor_gateway
         self.position_controller = position_controller
         self.position_update_event = asyncio.Event()
-        self.old_target_dist = 0.0
         self.status = MotionStatus(
             target_dist=self.position_controller.distance_travelled,
             target_angle=self.position_controller.angle,
             target_left=self.position_controller.position_left,
             target_right=self.position_controller.position_right,
+            ramp_dist=0.0,
+            ramp_angle=0.0,
             is_arrived=True,
             is_blocked=False,
         )
@@ -76,6 +81,14 @@ class MotionController:
             update_rate=self.configuration.encoder_update_rate,
         )
 
+        self.output_filter_distance = slope_limit_gen(
+            self.configuration.max_wheel_acceleration, self.configuration.encoder_update_rate
+        )
+        self.output_filter_angle = slope_limit_gen(
+            self.configuration.max_angular_acceleration, self.configuration.encoder_update_rate
+        )
+
+
     def trigger_update(self) -> None:
         """
         Allows update of the motion controller.
@@ -83,16 +96,20 @@ class MotionController:
         self.position_update_event.set()
 
     def check_arrived(self, dist_remaining: Millimeter,
-                      angle_remaining: Radian) -> bool:
+                      angle_remaining: Radian,
+                      dist_speed: MillimeterPerSec,
+                      angle_speed: RadianPerSec) -> bool:
         """
         Checks whether the robot is at the targets.
         @return: ^
         """
         tol_dist = self.configuration.tolerance_distance
         tol_angle = self.configuration.tolerance_angle
+        update_rate = self.configuration.encoder_update_rate
 
-        distance_ok = abs(dist_remaining) <= tol_dist
-        angle_ok = abs(angle_remaining) <= tol_angle
+        distance_ok = abs(dist_remaining) <= tol_dist and abs(dist_speed)/update_rate <= tol_dist
+        angle_ok = abs(angle_remaining) <= tol_angle and abs(angle_speed)/update_rate <= tol_angle
+        # LOGGER.get().info('check_arrived', dist=dist_remaining, speed=dist_speed, angle_remaining=angle_remaining, angle_speed=angle_speed)
 
         return distance_ok and angle_ok
 
@@ -140,46 +157,52 @@ class MotionController:
         target_dist = self.status.target_dist
         target_angle = self.status.target_angle
 
+        speed_dist = self.position_controller.speed
+        speed_angle = self.position_controller.angular_velocity
         update_rate = self.configuration.encoder_update_rate
         half_track = self.configuration.distance_between_wheels / 2.0
 
-        if self.check_arrived(distance_remaining, angle_remaining):
+        if self.check_arrived(distance_remaining, angle_remaining, speed_dist, speed_angle):
             # Stop condition
             self.status.is_arrived = True
             self.status.is_blocked = False
+            await self._set_target_wheel_speeds(0,0)
 
         else:
             # Motion control algorithm update
             # Blocking detection
 
             # Update trapezoids
-            ramp_dist = self.trapezoid_distance.send(target_dist)
-            ramp_angle = self.trapezoid_angle.send(target_angle)
+            self.status.ramp_dist, speed_ramp_dist = self.trapezoid_distance.send(target_dist)
+            self.status.ramp_angle, speed_ramp_angle = self.trapezoid_angle.send(target_angle)
 
             # Update PID
-            # The PIDs take the error between the current position and the optimal target given
+            # The PIDs take the error between the current speed and the optimal speed given
             # by the ramp functions, and output a correction component that is used here as a
-            # small correction command to the motors.
-            step_pid_dist = self.pid_distance.send((ramp_dist, current_dist))
-            step_pid_angle = self.pid_angle.send((ramp_angle, current_angle))
+            # small correction speed command to the motor board.
+            correction_pid_dist = self.pid_distance.send((self.status.ramp_dist, current_dist))
+            correction_pid_angle = self.pid_angle.send((self.status.ramp_angle, current_angle))
             
-            target_dist = ramp_dist + step_pid_dist
-            target_angle = (ramp_angle + step_pid_angle) * half_track
-            delta_target_dist = target_dist - self.old_target_dist
-            self.old_target_dist = target_dist
+            speed_target_dist = speed_ramp_dist +correction_pid_dist
+            speed_target_angle = (speed_ramp_angle + correction_pid_angle) * half_track
+
             # Update wheel targets
-            command_left = target_dist - target_angle
-            command_right = target_dist + target_angle
+            speed_target_left = speed_target_dist - speed_target_angle
+            speed_target_right = speed_target_dist + speed_target_angle
+
+            self.position_controller.probe.emit("encoder_left", self.status.ramp_dist - self.position_controller.distance_travelled)
+            self.position_controller.probe.emit("encoder_right", speed_target_dist)
 
             # Set wheel targets
-            await self._set_target_wheel_positions(command_left, command_right)
+            await self._set_target_wheel_speeds(speed_target_left, speed_target_right)
 
             LOGGER.get().info('motion_controller_dist',
-                              f_delta_dist=delta_target_dist,
                               a_dist_remain=distance_remaining, b_dist_curr=current_dist,
-                              c_dist_ramp=ramp_dist,
-                              d_dist_pid=step_pid_dist,
-                              e_dist_target=target_dist,
+                              c_dist_ramp=self.status.ramp_dist,
+                              d_dist_pid=correction_pid_dist,
+                              e_dist_target=speed_target_dist,
+                              f_speed_ramp_dist=speed_ramp_dist,
+                              f_speed=speed_dist,
                               )
             # LOGGER.get().info('motion_controller_wheels',
             #                   left_target=command_left, right_target=command_right,
@@ -188,7 +211,7 @@ class MotionController:
             #                   )
             # LOGGER.get().debug('motion_controller_angle',
             #                   angle_remain=angle_remaining, angle_curr=current_angle,
-            #                   angle_ramp=ramp_angle,
+            #                   angle_ramp=self.status.ramp_angle,
             #                   angle_pid=step_pid_angle,
             #                   angle_target=target_angle,
             #                   )

@@ -65,6 +65,8 @@ def configuration_test():
         pid_constants_angle=PIDConstants(1.0, 0.0, 0.0),
         pid_constants_position_left=PIDConstants(0.0, 0.0, 0.0),
         pid_constants_position_right=PIDConstants(0.0, 0.0, 0.0),
+        pid_constants_speed_left=PIDConstants(0.0, 0.0, 0.0),
+        pid_constants_speed_right=PIDConstants(0.0, 0.0, 0.0),
         pid_limits_distance=PIDLimits(100.0, 0.0, 0.0),
         pid_limits_angle=PIDLimits(100.0, 0.0, 0.0),
     )

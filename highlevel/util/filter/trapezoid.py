@@ -28,27 +28,32 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
 
         target = received
         distance = target - output
-        if abs(distance) <= tolerance:
-            # If close enough, stop
-            output_first_order = 0.0
-            output = target
-            # Return that target is reached, and wait next input
-            received = yield target
+
+        stop_distance = anticipation * (output_first_order**2) / (2 * max_second_order)
+        direction = -1 if distance < 0 else 1
+
+        if abs(distance) <= stop_distance:
+            output_first_order = abs(output_first_order) - max_second_order / update_rate
+            # LOGGER.get().info('ramp_brake', dist=distance, stop=stop_distance)
         else:
-            stop_distance = anticipation * (output_first_order**
-                                            2) / (2 * max_second_order)
-            direction = -1 if distance < 0 else 1
+            output_first_order = abs(output_first_order) + max_second_order / update_rate
+            if abs(output_first_order) > max_first_order:
+                output_first_order = max_first_order
+            # if direction*output_first_order > max_first_order:
+            #     LOGGER.get().info('ramp_keep', dist=distance, stop=stop_distance)
+            # else:
+            #     LOGGER.get().info('ramp_accel', dist=distance, stop=stop_distance)
 
-            if direction * distance < stop_distance:
-                output_first_order -= direction * max_second_order / update_rate
-            else:
-                output_first_order += direction * max_second_order / update_rate
-                if direction * output_first_order > max_first_order:
-                    output_first_order = direction * max_first_order
+        if abs(distance) > tolerance/10:
+            output += direction * output_first_order/update_rate
+            # LOGGER.get().info('ramp_output', output=output, first_order=output_first_order)
+        else:
+            output = target
+            output_first_order = 0
+            # LOGGER.get().info('ramp_stop', dist=distance, stop=stop_distance)
 
-            output += output_first_order / update_rate
-            # Return result and wait next input
-            received = yield output
+        # Return result and wait next input
+        received = yield output, direction*output_first_order
 
 
 def trapezoid_gen(initial_value: float, tolerance: float,

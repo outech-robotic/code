@@ -44,12 +44,12 @@ class Probe:
         The probe will always report the latest value associated with a certain name.
         """
         t_current = self._clock.time()
-        if name == 'encoder_left':
-            self.count_left += 1
-            t_current = self.count_left * self.count_period
-        if name == 'encoder_right':
-            self.count_right += 1
-            t_current = self.count_right * self.count_period
+        # if name == 'encoder_left':
+        #     self.count_left += 1
+        #     t_current = self.count_left * self.count_period
+        # if name == 'encoder_right':
+        #     self.count_right += 1
+        #     t_current = self.count_right * self.count_period
 
         self._event_log.append(
             DebugEvent(time=t_current, key=name, value=value))
