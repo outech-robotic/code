@@ -46,12 +46,12 @@ int main() {
     pinMode(PIN_LED, PinDirection::OUTPUT);
     setPin(PIN_LED);
 
-    mcs.set_control_mode(false, true);
+    mcs.set_control_mode(true, false);
 
     serial.init(CONST_USART_BAUDRATE);
 
     canpb.send_log("Starting Motor Board");
-
+    mcs.set_speed_targets(0,0);
     speed_watchdog.reset();
 
     while (true) {
@@ -160,9 +160,10 @@ int main() {
         //Periodic Heartbeat
         if (heartbeat_timer.check()) {
             if (canpb.is_tx_available()) {
-                togglePin(PIN_LED);
                 if (!canpb.send_msg(msg_heartbeat) != Can_PB::CAN_PB_RET_OK) {
                     serial.print("ERROR: SENDING HEARTBEAT\r\n");
+                } else {
+                    togglePin(PIN_LED);
                 }
             }
         }

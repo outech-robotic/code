@@ -12,6 +12,7 @@
 #include "utility/PIDFP.h"
 #include "peripheral/tim.h"
 #include "utility/Average.hpp"
+#include "config.h"
 
 class MotionController {
 
@@ -50,8 +51,8 @@ class MotionController {
     volatile int32_t cod_right_overflows;
     volatile int32_t cod_right_raw_last;
 
-    Average<volatile int32_t, 8> cod_left_speed_avg;
-    Average<volatile int32_t, 8> cod_right_speed_avg;
+    Average<volatile int32_t, CONST_MOTION_CONTROLLER_SPEED_AVERAGE_SIZE> cod_left_speed_avg;
+    Average<volatile int32_t, CONST_MOTION_CONTROLLER_SPEED_AVERAGE_SIZE> cod_right_speed_avg;
 
     int32_t get_data_from_pid(PID_FP &pid, uint8_t requested_data);
 

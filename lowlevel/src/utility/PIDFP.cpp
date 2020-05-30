@@ -7,6 +7,7 @@
 
 #include "PIDFP.h"
 #include "utility/timing.h"
+#include "macros.h"
 
 #define COEFF_SHIFT       (16)
 #define COEFF_SIZE        (32)
@@ -21,6 +22,10 @@ void PID_FP::reset() {
     last_setpoint = 0;
     last_error = 0;
     comp_integral = 0;
+}
+
+void PID_FP::set_integral_tolerance(uint16_t tolerance){
+    integral_tolerance = tolerance;
 }
 
 void PID_FP::set_coefficients(double new_kp, double new_ki, double new_kd, uint32_t new_freq) {
@@ -81,7 +86,9 @@ int16_t PID_FP::compute(int32_t input, int32_t setpoint) {
         comp_integral = integral_max;
     else if (comp_integral < integral_min)
         comp_integral = integral_min;
-
+    if (ABS(error) < integral_tolerance){
+        comp_integral = 0;
+    }
     //Derivative component
     comp_derivative = (int64_t) kd * (int64_t) derivative_error;
     if (comp_derivative > derivative_max)

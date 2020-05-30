@@ -15,24 +15,28 @@ void MotionController::init() {
 
     pid_speed_left.set_coefficients(0.275, 0.24, 0.0002, MOTION_CONTROL_FREQ);
     pid_speed_left.set_output_limit(CONST_PWM_MAX);
-    pid_speed_left.set_anti_windup(CONST_PWM_MAX/4);
-    pid_speed_left.set_derivative_limit(CONST_PWM_MAX/4);
+    pid_speed_left.set_anti_windup(CONST_PWM_MAX);
+    pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
+    pid_speed_left.set_integral_tolerance(CONST_TOLERANCE_TICKS_INIT);
 
     pid_speed_right.set_coefficients(0.27, 0.22, 0.0002, MOTION_CONTROL_FREQ);
     pid_speed_right.set_output_limit(CONST_PWM_MAX);
-    pid_speed_right.set_anti_windup(CONST_PWM_MAX/4);
-    pid_speed_right.set_derivative_limit(CONST_PWM_MAX/4);
+    pid_speed_right.set_anti_windup(CONST_PWM_MAX);
+    pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
+    pid_speed_right.set_integral_tolerance(CONST_TOLERANCE_TICKS_INIT);
+
 
     pid_position_left.set_coefficients(4.0, 0.1, 0.4, MOTION_CONTROL_FREQ);
     pid_position_left.set_output_limit(CONST_PWM_MAX);
     pid_position_left.set_anti_windup(CONST_PWM_MAX/4);
     pid_position_left.set_derivative_limit(CONST_PWM_MAX/4);
+    pid_position_left.set_integral_tolerance(CONST_TOLERANCE_TICKS_INIT);
 
     pid_position_right.set_coefficients(4.0, 0.1, 0.4, MOTION_CONTROL_FREQ);
     pid_position_right.set_output_limit(CONST_PWM_MAX);
     pid_position_right.set_anti_windup(CONST_PWM_MAX/4);
     pid_position_right.set_derivative_limit(CONST_PWM_MAX/4);
-
+    pid_position_right.set_integral_tolerance(CONST_TOLERANCE_TICKS_INIT);
 
     motor_left.init();
     motor_right.init();
@@ -72,7 +76,6 @@ void MotionController::update_position() {
 
     cod_left_speed_avg.add(cod_left.speed_current);
     cod_right_speed_avg.add(cod_right.speed_current);
-
     cod_left.speed_average = cod_left_speed_avg.value();
     cod_right.speed_average = cod_right_speed_avg.value();
 }
@@ -95,15 +98,8 @@ void MotionController::control_motion() {
             }
         } else if (robot_status.controlled_speed) {
             // Speed only control of the wheels
-            cod_left.speed_target_current = cod_left.speed_target;
-            cod_right.speed_target_current = cod_right.speed_target;
-
-            // Update last wheel targets
-            cod_left.speed_target_last = cod_left.speed_target_current;
-            cod_right.speed_target_last = cod_right.speed_target_current;
-
-            left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_target_current);
-            right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_target_current);
+            left_pwm = pid_speed_left.compute(cod_left.speed_average, cod_left.speed_target);
+            right_pwm = pid_speed_right.compute(cod_right.speed_average, cod_right.speed_target);
         }
 
         // Update the PWM used by the Timers
