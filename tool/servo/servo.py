@@ -4,9 +4,8 @@ from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 import binascii
 from time import sleep
 
-SERVOS_PORT_BASE = 32000  # base port
+SERVOS_PORT_BASE = 14000+0x10  # base port + servo id offset
 SERVOS_ID_BASE = 0x010  # base CAN ID
-TX_ID_OFFSET = 0x400  # Offset to board ID for TX ID (most significant bit at 1)
 
 MSG_SERVO = BusMessage(servo=ServoMsg())
 MSG_PUMP = BusMessage(pumpAndValve=PumpAndValveMsg())
@@ -26,6 +25,12 @@ SERVO_ANGLES_MID_HIGH = [120, 120, 120, 120, 120]  # left r right
 SERVO_ANGLES_OPEN = [180, 180, 180, 180, 180]
 SERVO_ANGLES_CLOSE = [20, 20, 20, 20, 20]
 
+
+def get_rx_id(id):
+    return id*2+1
+
+def get_tx_id(id):
+    return id*2
 
 def send_order(sock, msg_type, msg_id, value):
     if msg_type == ORDER_SERVO:
@@ -64,16 +69,13 @@ def main():
 
     for i, sock in enumerate(boards):
         port = SERVOS_PORT_BASE + i
-        can_rx = SERVOS_ID_BASE + i
-        can_tx = can_rx | TX_ID_OFFSET
+        can_rx = get_rx_id(SERVOS_ID_BASE + i)
+        can_tx = get_tx_id(SERVOS_ID_BASE + i)
         can_rx = format(can_rx, 'x')
         can_tx = format(can_tx, 'x')
         print("CAN IDs:", can_rx, can_tx)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        print("Starting isotpserver : port/rx/tx:", port, can_rx, can_tx)
-        system("isotpserver -l " + str(port) + " -s " + can_tx + " -d " + can_rx + " can0 &")
-        sleep(0.1)
         print("Trying to connect to localhost:", port)
         sock.connect(("localhost", port))
 
@@ -108,9 +110,6 @@ def main():
         print("Stopping, close socket")
         for b in boards:
             b.close()
-        system("killall isotpserver")
-
-
 
 if __name__ == "__main__":
     main()
