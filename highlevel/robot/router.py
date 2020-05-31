@@ -52,6 +52,7 @@ class ProtobufRouter:
                 "moveWheelAtSpeed", "wheelPositionTarget", "pidConfig",
                 "wheelTolerances", "wheelPWM", "wheelControlMode"
         ]:
+            # messages that are read back are ignored
             pass
         else:
             LOGGER.get().error("unhandled_protobuf_message",
