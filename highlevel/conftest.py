@@ -192,6 +192,7 @@ def motor_gateway_mock():
     future.set_result(None)
 
     mock.set_target_positions = MagicMock(return_value=future)
+    mock.set_target_speeds = MagicMock(return_value=future)
 
     return mock
 

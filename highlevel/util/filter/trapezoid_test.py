@@ -49,9 +49,10 @@ def do_trapezoid_test(trapezoid: Generator, speed_profile: List[int],
         current_pos += speed
         positions.append(current_pos)
     target = positions[-1]
-    for position in positions:
-        output = trapezoid.send(target)
+    for position, target_speed in zip(positions, speed_profile):
+        output, output_speed = trapezoid.send(target)
         assert output == position
+        assert target_speed == output_speed
 
 
 class TestTrapezoidPosition:
@@ -66,8 +67,9 @@ class TestTrapezoidPosition:
         for target in range(-20, 20):
             trapezoid = trapezoid_gen(target, 1.0, 1.0, 1.0, 1, 1.0)
             for _ in range(5):
-                output = trapezoid.send(target)
+                output, speed = trapezoid.send(target)
                 assert output == target
+                assert speed == 0
 
     @staticmethod
     def test_positive_constant(trapezoid, configuration):
@@ -106,7 +108,10 @@ class TestTrapezoidPosition:
         speeds = [i + 1 for i in range(round(configuration.max_wheel_speed))]
         speeds.append(speeds[-1])
         speeds += speeds[::-1]
+        speeds.append(0)
         end_pos = sum(speeds)
         do_trapezoid_test(trapezoid, speeds, 0.0)
         speeds = [-i for i in speeds][::-1]  # reversed order and sign
+        speeds = speeds[1:]
+        speeds.append(0)
         do_trapezoid_test(trapezoid, speeds, end_pos)

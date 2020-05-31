@@ -35,7 +35,6 @@ class TestSlopeLimitSpeed:
     """
     Tests the slope limit function for output speed filtering.
     """
-
     @staticmethod
     def test_init_output_zero(slope_limit):
         """
@@ -48,7 +47,7 @@ class TestSlopeLimitSpeed:
                 assert value == result
 
     @staticmethod
-    def test_constant_input(slope_limit, configuration):
+    def test_constant_input(slope_limit):
         """
         Tests that the filter works with successive constant inputs.
         """

@@ -15,6 +15,7 @@ from highlevel.util.filter.slope_limit import slope_limit_gen
 from highlevel.util.filter.trapezoid import trapezoid_gen
 
 
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class MotionStatus:
     """
@@ -35,6 +36,7 @@ class MotionController:
     Motion controller.
     """
 
+    # pylint: disable=too-many-locals
     # pylint: disable=too-many-instance-attributes
     def __init__(self, position_controller: PositionController,
                  motor_gateway: MotorGateway, configuration: Configuration):
@@ -82,12 +84,11 @@ class MotionController:
         )
 
         self.output_filter_distance = slope_limit_gen(
-            self.configuration.max_wheel_acceleration, self.configuration.encoder_update_rate
-        )
+            self.configuration.max_wheel_acceleration,
+            self.configuration.encoder_update_rate)
         self.output_filter_angle = slope_limit_gen(
-            self.configuration.max_angular_acceleration, self.configuration.encoder_update_rate
-        )
-
+            self.configuration.max_angular_acceleration,
+            self.configuration.encoder_update_rate)
 
     def trigger_update(self) -> None:
         """
@@ -96,8 +97,7 @@ class MotionController:
         self.position_update_event.set()
 
     def check_arrived(self, dist_remaining: Millimeter,
-                      angle_remaining: Radian,
-                      dist_speed: MillimeterPerSec,
+                      angle_remaining: Radian, dist_speed: MillimeterPerSec,
                       angle_speed: RadianPerSec) -> bool:
         """
         Checks whether the robot is at the targets.
@@ -107,20 +107,15 @@ class MotionController:
         tol_angle = self.configuration.tolerance_angle
         update_rate = self.configuration.encoder_update_rate
 
-        distance_ok = abs(dist_remaining) <= tol_dist and abs(dist_speed)/update_rate <= tol_dist
-        angle_ok = abs(angle_remaining) <= tol_angle and abs(angle_speed)/update_rate <= tol_angle
-        # LOGGER.get().info('check_arrived', dist=dist_remaining, speed=dist_speed, angle_remaining=angle_remaining, angle_speed=angle_speed)
+        distance_ok = abs(dist_remaining) <= tol_dist and abs(
+            dist_speed) / update_rate <= tol_dist
+        angle_ok = abs(angle_remaining) <= tol_angle and abs(
+            angle_speed) / update_rate <= tol_angle
 
         return distance_ok and angle_ok
 
-    async def _set_target_wheel_pwms(self, ratio_left: float,
-                                     ratio_right: float) -> None:
-        """
-        Sends raw duty cycles for each wheel's PWM output. Between -1.0 and 1.0.
-        """
-        await self.motor_gateway.set_pwms(ratio_left, ratio_right)
-
-    async def _set_target_wheel_speeds(self, target_left, target_right):
+    async def _set_target_wheel_speeds(self, target_left: MillimeterPerSec,
+                                       target_right: MillimeterPerSec) -> None:
         """
         Converts wheel speeds to ticks/sec and sends them to the motor control board
         """
@@ -147,7 +142,6 @@ class MotionController:
         """
         Waits for a position update event, then updates the filters and outputs to motor board.
         """
-
         current_dist = self.position_controller.distance_travelled
         current_angle = self.position_controller.angle
 
@@ -159,68 +153,50 @@ class MotionController:
 
         speed_dist = self.position_controller.speed
         speed_angle = self.position_controller.angular_velocity
-        update_rate = self.configuration.encoder_update_rate
-        half_track = self.configuration.distance_between_wheels / 2.0
 
-        if self.check_arrived(distance_remaining, angle_remaining, speed_dist, speed_angle):
+        if self.check_arrived(distance_remaining, angle_remaining, speed_dist,
+                              speed_angle):
             # Stop condition
             self.status.is_arrived = True
             self.status.is_blocked = False
-            await self._set_target_wheel_speeds(0,0)
+            await self._set_target_wheel_speeds(0, 0)
 
         else:
             # Motion control algorithm update
             # Blocking detection
 
             # Update trapezoids
-            self.status.ramp_dist, speed_ramp_dist = self.trapezoid_distance.send(target_dist)
-            self.status.ramp_angle, speed_ramp_angle = self.trapezoid_angle.send(target_angle)
+            self.status.ramp_dist, speed_ramp_dist = self.trapezoid_distance.send(
+                target_dist)
+            self.status.ramp_angle, speed_ramp_angle = self.trapezoid_angle.send(
+                target_angle)
 
             # Update PID
             # The PIDs take the error between the current speed and the optimal speed given
             # by the ramp functions, and output a correction component that is used here as a
             # small correction speed command to the motor board.
-            correction_pid_dist = self.pid_distance.send((self.status.ramp_dist, current_dist))
-            correction_pid_angle = self.pid_angle.send((self.status.ramp_angle, current_angle))
+            correction_pid_dist = self.pid_distance.send(
+                (self.status.ramp_dist, current_dist))
+            correction_pid_angle = self.pid_angle.send(
+                (self.status.ramp_angle, current_angle))
 
-            correction_pid_dist = self.output_filter_distance.send(correction_pid_dist)
-            correction_pid_angle = self.output_filter_angle.send(correction_pid_angle)
+            correction_pid_dist = self.output_filter_distance.send(
+                correction_pid_dist)
+            correction_pid_angle = self.output_filter_angle.send(
+                correction_pid_angle)
 
-
-            speed_target_dist = speed_ramp_dist +correction_pid_dist
-            speed_target_angle = (speed_ramp_angle + correction_pid_angle) * half_track
+            # Add correction to speed targets, and convert angle to wheel movement
+            speed_target_dist = speed_ramp_dist + correction_pid_dist
+            speed_target_angle = (speed_ramp_angle + correction_pid_angle) \
+                                 * self.configuration.distance_between_wheels / 2.0
 
             # Update wheel targets
             speed_target_left = speed_target_dist - speed_target_angle
             speed_target_right = speed_target_dist + speed_target_angle
 
-            self.position_controller.probe.emit("encoder_left", correction_pid_dist)
-            self.position_controller.probe.emit("encoder_right", self.status.ramp_dist - self.position_controller.distance_travelled)
-
             # Set wheel targets
-            await self._set_target_wheel_speeds(speed_target_left, speed_target_right)
-
-            LOGGER.get().info('motion_controller_dist',
-                              a_dist_remain=distance_remaining, b_dist_curr=current_dist,
-                              c_dist_ramp=self.status.ramp_dist,
-                              d_dist_pid=correction_pid_dist,
-                              e_dist_target=speed_target_dist,
-                              f_speed_ramp_dist=speed_ramp_dist,
-                              f_speed=speed_dist,
-                              )
-            # LOGGER.get().info('motion_controller_wheels',
-            #                   left_target=command_left, right_target=command_right,
-            #                   left_pos=self.position_controller.position_left,
-            #                   right_pos=self.position_controller.position_right
-            #                   )
-            LOGGER.get().info('motion_controller_angle',
-                              a_angle_remain=angle_remaining, b_angle_curr=current_angle,
-                              c_angle_ramp=self.status.ramp_angle,
-                              d_angle_pid=correction_pid_angle,
-                              e_angle_target=target_angle,
-                              f_angle_speed_ramp=speed_ramp_angle,
-                              f_angle_speed=speed_angle,
-                              )
+            await self._set_target_wheel_speeds(speed_target_left,
+                                                speed_target_right)
 
             # Wait for a new position update event
             self.position_update_event.clear()

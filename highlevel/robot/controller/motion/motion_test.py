@@ -79,10 +79,11 @@ class TestMotionController:
         Robot translates 0 mm to verify that it doesn't do anything on short enough distances
         """
         result = await motion_controller.translate(0.0)
-        motor_gateway_mock.set_target_positions.assert_not_called()
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
+        motor_gateway_mock.set_target_speeds.reset_mock()
         result = await motion_controller.rotate(0.0)
-        motor_gateway_mock.set_target_positions.assert_not_called()
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(0, 0)
         assert result == MotionResult.OK
 
     @staticmethod
@@ -135,17 +136,17 @@ class TestMotionController:
 
         await asyncio.sleep(0)
         # Yield once to let the controller run, check that it started the movement
-        motor_gateway_mock.set_target_positions.assert_called_once_with(1, 1)
-        motor_gateway_mock.set_target_positions.reset_mock()
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(1, 1)
+        motor_gateway_mock.set_target_speeds.reset_mock()
 
         await asyncio.sleep(0)
         # yield again and check that the controller correctly waits for a trigger
-        motor_gateway_mock.set_target_positions.assert_not_called()
+        motor_gateway_mock.set_target_speeds.assert_not_called()
 
         motion_controller.trigger_update()
         await asyncio.sleep(0)
         # check that the movement continues
-        motor_gateway_mock.set_target_positions.assert_called_once_with(3, 3)
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(2, 2)
         task.cancel()
 
     @staticmethod
@@ -154,18 +155,18 @@ class TestMotionController:
                                                     position_controller_mock,
                                                     motor_gateway_mock):
         """
-        Robot translates a given negative distance. Check that the maximum speed is used.
+        Robot translates a given negative distance. Check that the maximum acceleration is used.
         """
         position_controller_mock.distance_travelled = 0
         task = asyncio.create_task(motion_controller.translate(-100))
 
         await asyncio.sleep(0)
-        motor_gateway_mock.set_target_positions.assert_called_once_with(-1, -1)
-        motor_gateway_mock.set_target_positions.reset_mock()
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(-1, -1)
+        motor_gateway_mock.set_target_speeds.reset_mock()
         motion_controller.trigger_update()
 
         await asyncio.sleep(0)
-        motor_gateway_mock.set_target_positions.assert_called_once_with(-3, -3)
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(-2, -2)
         task.cancel()
 
     @staticmethod
@@ -180,20 +181,21 @@ class TestMotionController:
         position_controller_mock.position_left = 0
         position_controller_mock.position_right = 0
 
-        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
-        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
-
-        task = asyncio.create_task(motion_controller.translate(positions[-1]))
-
-        expected_positions = positions[1:] + [positions[-1]]
-        for position, expected in zip(positions, expected_positions):
-            position_controller_mock.position_left = position
-            position_controller_mock.position_right = position
-            position_controller_mock.distance_travelled = position
+        # Speeds are just increased and decreased with a constant acceleration.
+        speeds = [1, 2, 3, 4, 5, 4, 3, 2, 1, 0]
+        target_position = sum(speeds)
+        task = asyncio.create_task(
+            motion_controller.translate(target_position))
+        current = 0
+        for speed in speeds:
+            position_controller_mock.position_left = current
+            position_controller_mock.position_right = current
+            position_controller_mock.distance_travelled = current
             motion_controller.trigger_update()
             await asyncio.sleep(0)
-            motor_gateway_mock.set_target_positions.assert_called_with(
-                expected, expected)
+            motor_gateway_mock.set_target_speeds.assert_called_with(
+                speed, speed)
+            current += speed
 
         result = await task
 
@@ -211,21 +213,23 @@ class TestMotionController:
         position_controller_mock.position_left = 0
         position_controller_mock.position_right = 0
 
-        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
-        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
-        positions = [-p for p in positions]
+        # Speeds are just increased and decreased with a constant acceleration.
+        speeds = [1, 2, 3, 4, 5, 4, 3, 2, 1, 0]
+        speeds = [-s for s in speeds]
 
-        task = asyncio.create_task(motion_controller.translate(positions[-1]))
-
-        expected_positions = positions[1:] + [positions[-1]]
-        for position, expected in zip(positions, expected_positions):
-            position_controller_mock.position_left = position
-            position_controller_mock.position_right = position
-            position_controller_mock.distance_travelled = position
+        target_position = sum(speeds)
+        task = asyncio.create_task(
+            motion_controller.translate(target_position))
+        current = 0
+        for speed in speeds:
+            position_controller_mock.position_left = current
+            position_controller_mock.position_right = current
+            position_controller_mock.distance_travelled = current
             motion_controller.trigger_update()
             await asyncio.sleep(0)
-            motor_gateway_mock.set_target_positions.assert_called_with(
-                expected, expected)
+            motor_gateway_mock.set_target_speeds.assert_called_with(
+                speed, speed)
+            current += speed
 
         result = await task
 
@@ -237,23 +241,23 @@ class TestMotionController:
                                         position_controller_mock,
                                         motor_gateway_mock):
         """
-        Robot rotates for a given relative angle. Check that the maximum speed is used.
+        Robot rotates for a given relative angle. Check that the maximum acceleration is used.
         """
         position_controller_mock.angle = 0
         task = asyncio.create_task(motion_controller.rotate(math.pi / 2))
 
         await asyncio.sleep(0)
         # a positive relative angle means the left wheel goes backwards, right forwards
-        motor_gateway_mock.set_target_positions.assert_called_once_with(-1, 1)
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(-1, 1)
 
-        motor_gateway_mock.set_target_positions.reset_mock()
+        motor_gateway_mock.set_target_speeds.reset_mock()
         await asyncio.sleep(0)
-        motor_gateway_mock.set_target_positions.assert_not_called()
+        motor_gateway_mock.set_target_speeds.assert_not_called()
 
-        motor_gateway_mock.set_target_positions.reset_mock()
+        motor_gateway_mock.set_target_speeds.reset_mock()
         motion_controller.trigger_update()
         await asyncio.sleep(0)
-        motor_gateway_mock.set_target_positions.assert_called_once_with(-3, 3)
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(-2, 2)
         task.cancel()
 
     @staticmethod
@@ -270,18 +274,18 @@ class TestMotionController:
 
         await asyncio.sleep(0)
         # a positive relative angle means the left wheel goes backwards, right forwards
-        motor_gateway_mock.set_target_positions.assert_called_once_with(1, -1)
-        motor_gateway_mock.set_target_positions.reset_mock()
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(1, -1)
+        motor_gateway_mock.set_target_speeds.reset_mock()
         motion_controller.trigger_update()
         await asyncio.sleep(0)
-        motor_gateway_mock.set_target_positions.assert_called_once_with(3, -3)
+        motor_gateway_mock.set_target_speeds.assert_called_once_with(2, -2)
         task.cancel()
 
     @staticmethod
     @pytest.mark.asyncio
     async def test_rotate_stops_at_target(motion_controller,
                                           position_controller_mock,
-                                          motor_gateway_mock, configuration):
+                                          motor_gateway_mock):
         """
         Robot rotates for a given relative angle. Check that the controller stops at target.
         """
@@ -289,22 +293,21 @@ class TestMotionController:
         position_controller_mock.position_left = 0
         position_controller_mock.position_right = 0
 
-        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
-        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
+        # Speeds are just increased and decreased with a constant acceleration.
+        speeds = [1, 2, 3, 4, 5, 4, 3, 2, 1, 0]
 
-        task = asyncio.create_task(
-            motion_controller.rotate(2 * positions[-1] /
-                                     configuration.distance_between_wheels))
-
-        expected_positions = positions[1:] + [positions[-1]]
-        for position, expected in zip(positions, expected_positions):
-            position_controller_mock.position_left = -position
-            position_controller_mock.position_right = position
-            position_controller_mock.angle = 2 * position / configuration.distance_between_wheels
+        target_position = sum(speeds)
+        task = asyncio.create_task(motion_controller.rotate(target_position))
+        current = 0
+        for speed in speeds:
+            position_controller_mock.position_left = current
+            position_controller_mock.position_right = current
+            position_controller_mock.angle = current
             motion_controller.trigger_update()
             await asyncio.sleep(0)
-            motor_gateway_mock.set_target_positions.assert_called_with(
-                -expected, expected)
+            motor_gateway_mock.set_target_speeds.assert_called_with(
+                -speed, speed)
+            current += speed
 
         result = await task
 
@@ -314,8 +317,7 @@ class TestMotionController:
     @pytest.mark.asyncio
     async def test_rotate_stops_at_target_negative(motion_controller,
                                                    position_controller_mock,
-                                                   motor_gateway_mock,
-                                                   configuration):
+                                                   motor_gateway_mock):
         """
         Robot rotates for a given negative relative angle. Check for a stop at target.
         """
@@ -323,21 +325,23 @@ class TestMotionController:
         position_controller_mock.position_left = 0
         position_controller_mock.position_right = 0
 
-        # Result positions are integrated speeds, which is just a sum if update_rate = 1Hz
-        positions = [0, 1, 3, 6, 10, 15, 19, 22, 24, 25]
-        positions = [-p for p in positions]
+        # Speeds are just increased and decreased with a constant acceleration.
+        speeds = [1, 2, 3, 4, 5, 4, 3, 2, 1, 0]
+        speeds = [-s for s in speeds]
 
-        task = asyncio.create_task(motion_controller.rotate(positions[-1]))
-
-        expected_positions = positions[1:] + [positions[-1]]
-        for position, expected in zip(positions, expected_positions):
-            position_controller_mock.position_left = -position
-            position_controller_mock.position_right = position
-            position_controller_mock.angle = 2 * position / configuration.distance_between_wheels
+        target_position = sum(speeds)
+        task = asyncio.create_task(motion_controller.rotate(target_position))
+        current = 0
+        for speed in speeds:
+            position_controller_mock.position_left = current
+            position_controller_mock.position_right = current
+            position_controller_mock.angle = current
             motion_controller.trigger_update()
             await asyncio.sleep(0)
-            motor_gateway_mock.set_target_positions.assert_called_with(
-                -expected, expected)
+            motor_gateway_mock.set_target_speeds.assert_called_with(
+                -speed, speed)
+            current += speed
 
         result = await task
+
         assert result == MotionResult.OK

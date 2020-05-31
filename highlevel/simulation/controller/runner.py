@@ -45,7 +45,7 @@ class SimulationRunner:
         self.tick = 0
         self.running = True
 
-        self.position_noise = 0.00
+        self.position_noise = 0  # percentage of noise, used as a scale for gaussian noise
         self.position_delay = 50  # ticks before a position target is achieved
 
         self.state.position_queue_left = deque(
@@ -57,6 +57,8 @@ class SimulationRunner:
         """
         Run the simulation.
         """
+        rate_encoder = self.simulation_configuration.encoder_position_rate
+        rate_tick = self.simulation_configuration.tickrate
         while self.running:
             current_tick = self.tick
             events = self.event_queue.pop()
@@ -69,20 +71,22 @@ class SimulationRunner:
             last_right = self.state.position_queue_right[-1]
 
             self.state.position_queue_left.append(
-                last_left*numpy.random.normal(1, self.position_noise))
+                last_left * numpy.random.normal(1, self.position_noise) /
+                100.0)
             self.state.position_queue_left.popleft()
 
             self.state.position_queue_right.append(
-                last_right*numpy.random.normal(1, self.position_noise))
+                last_right *
+                numpy.random.normal(1, self.position_noise / 100.0))
             self.state.position_queue_right.popleft()
 
             # Send the encoder positions periodically.
-            interval = 1 / self.simulation_configuration.encoder_position_rate * 1000
+            interval = 1 / rate_encoder * 1000
             if self.state.time - self.state.last_position_update > interval:
                 self.state.left_tick += round(
-                    mean(self.state.position_queue_left)/self.simulation_configuration.encoder_position_rate)
+                    mean(self.state.position_queue_left) / rate_encoder)
                 self.state.right_tick += round(
-                    mean(self.state.position_queue_right)/self.simulation_configuration.encoder_position_rate)
+                    mean(self.state.position_queue_right) / rate_encoder)
 
                 self.state.last_position_update = self.state.time
                 await self.simulation_gateway.encoder_position(
@@ -95,10 +99,9 @@ class SimulationRunner:
                 await self.simulation_gateway.push_lidar_readings()
 
             self.tick = current_tick + 1
-            self.state.time = int(
-                self.tick / self.simulation_configuration.tickrate * 1000)
+            self.state.time = int(self.tick / rate_tick * 1000)
             self.clock.fake_time = self.state.time / 1000
-            await asyncio.sleep(1 / self.simulation_configuration.tickrate /
+            await asyncio.sleep(1 / rate_tick /
                                 self.simulation_configuration.speed_factor)
 
         LOGGER.get().info("simulation_runner_quit", time=self.state.time)

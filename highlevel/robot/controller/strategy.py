@@ -50,10 +50,18 @@ PATH = [
     (Vector2(300, 1450), True),
 ]
 
+PATH_MIRRORED = [(Vector2(pos.x, 2000 - pos.y), reverse)
+                 for pos, reverse in PATH]
+
 
 class ControlMode(Enum):
-    POSITION='POSITION',
-    SPEED='SPEED',
+    """
+    Used to describe control modes of the motor board.
+    POSITION: Motor board tries to move the wheels at each wheel's target position.
+    SPEED: Motor board tries to move the wheels at each wheel's target speed.
+    """
+    POSITION = 'POSITION'
+    SPEED = 'SPEED'
 
 
 class StrategyController:
@@ -65,7 +73,10 @@ class StrategyController:
         self.configuration = configuration
         self.trajectory_controller = trajectory_controller
 
-    async def set_mode(self, mode: ControlMode):
+    async def set_mode(self, mode: ControlMode) -> None:
+        """
+        Sets the control mode of the motor board.
+        """
         if mode == ControlMode.SPEED:
             await self.trajectory_controller.motion_controller.motor_gateway.set_pid_speed(
                 self.configuration.pid_constants_speed_left.k_p,
@@ -95,48 +106,15 @@ class StrategyController:
         """
         await self.set_mode(ControlMode.SPEED)
 
-        # speed_max = 400
-        # speeds_percent = [i/10.0 for i in range(0, 500, 5)]
-
-        # for s in speeds_percent:
-        #     speed = s*speed_max/100.0
-        #     await self.trajectory_controller.motion_controller.motor_gateway.set_target_speeds(speed, speed)
-        #     await asyncio.sleep(4/len(speeds_percent))
-
-        start_pos = self.configuration.initial_position
-        start_angle = self.configuration.initial_angle
-        
+        # Infinite translations to test motion
         try:
             while True:
                 await asyncio.sleep(1.0)
-                await self.trajectory_controller.motion_controller.translate(-500)
+                await self.trajectory_controller.motion_controller.translate(
+                    -500)
                 await asyncio.sleep(1.0)
-                await self.trajectory_controller.motion_controller.translate(500)
-            
-           # await asyncio.sleep(10000)
+                await self.trajectory_controller.motion_controller.translate(
+                    500)
 
-           # await self.trajectory_controller.move_to(start_pos + Vector2(300, 0), False)
-           # await asyncio.sleep(1.0)
-           # await self.trajectory_controller.move_to(start_pos + Vector2(300, 200), True)
-           # await asyncio.sleep(1.0)
-           # await self.trajectory_controller.move_to(start_pos + Vector2(0, 200), True)
-           # await asyncio.sleep(1.0)
-           # await self.trajectory_controller.move_to(start_pos + Vector2(-5, 0), True)
-           # await asyncio.sleep(1.0)
-           # await self.trajectory_controller.move_to(start_pos + Vector2(0, 0), False)
-           # await asyncio.sleep(1.0)
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol
-        # while True:
-        #    await asyncio.sleep(1000)
-        # await self.trajectory_controller.motion_controller.translate(500)
-        # await self.trajectory_controller.motion_controller.rotate(-0.05)
-        # await self.trajectory_controller.motion_controller.translate(-500)
-        # await self.trajectory_controller.motion_controller.rotate(-1.5)
-
-
-        # for vec, reverse in PATH:
-        #     LOGGER.get().info("move robot", destination=vec)
-        #     await self.trajectory_controller.move_to(
-        #         Vector2(vec.x, 2000 - vec.y), reverse)
-

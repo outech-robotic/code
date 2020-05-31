@@ -1,11 +1,7 @@
 """
 Trapezoid functions
 """
-import math
 from typing import Generator
-
-
-# pylint: disable=too-many-arguments
 
 
 def _slope_limit_gen(max_derivative: float, update_rate: int) -> Generator:
@@ -17,27 +13,26 @@ def _slope_limit_gen(max_derivative: float, update_rate: int) -> Generator:
 
     # First call
     received = yield
-    while True:
 
+    while True:
         # Save received data
-        input = received
+        input_value = received
 
         if input_last is not None:
-            derivative = (input - input_last) * update_rate
-        else:
-            derivative = 0
+            derivative = (input_value - input_last) * update_rate
+            direction = -1 if derivative < 0 else 1
 
-        direction = -1 if derivative < 0 else 1
-
-        # Limit
-        if abs(derivative) > max_derivative:
-            output = input_last + direction * max_derivative/update_rate
+            # Limit
+            if abs(derivative) > max_derivative:
+                output_value = input_last + direction * max_derivative / update_rate
+            else:
+                output_value = input_value
         else:
-            output = input
-        input_last = output
+            input_last = input_value
+            output_value = input_value
 
         # Return result and wait next input
-        received = yield output
+        received = yield output_value
 
 
 def slope_limit_gen(max_derivative: float, update_rate: int) -> Generator:
