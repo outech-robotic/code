@@ -34,9 +34,6 @@ class TrajectoryController:
                           target=pos_target,
                           reverse=reverse)
 
-        if (pos_current - pos_target).euclidean_norm() < 1:
-            return
-
         direction = pos_target - pos_current
         distance = direction.euclidean_norm()
 
