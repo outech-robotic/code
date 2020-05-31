@@ -17,6 +17,5 @@ class SimulationConfiguration:
     # Speed factor, 1 is normal speed, 2 will run the simulation twice as fast, INF is fastest.
     speed_factor: float
     tickrate: int  # FPS.
-    encoder_position_rate: Hz  # Frequency to send the encoder wheel positions.
     replay_fps: Hz  # Downsample the replay file at this rate.
     lidar_position_rate: Hz  # Frequency to send the LIDAR positions.

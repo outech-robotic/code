@@ -5,10 +5,10 @@ import asyncio
 from dataclasses import dataclass
 
 from highlevel.logger import LOGGER
-from highlevel.robot.controller.motion.position import PositionController, mm_to_tick
+from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.type import Millimeter, MotionResult, Radian, MillimeterPerSec, \
-    RadianPerSec
+    RadianPerSec, mm_to_tick
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.filter.pid import pid_gen
 from highlevel.util.filter.slope_limit import slope_limit_gen

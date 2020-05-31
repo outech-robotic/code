@@ -108,13 +108,9 @@ class StrategyController:
 
         # Infinite translations to test motion
         try:
-            while True:
-                await asyncio.sleep(1.0)
-                await self.trajectory_controller.motion_controller.translate(
-                    -500)
-                await asyncio.sleep(1.0)
-                await self.trajectory_controller.motion_controller.translate(
-                    500)
+            for _ in range(3):
+                await self.trajectory_controller.motion_controller.translate(500)
+                await self.trajectory_controller.motion_controller.translate(-500)
 
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol

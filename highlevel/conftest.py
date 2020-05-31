@@ -87,7 +87,6 @@ def simulation_configuration_test():
         speed_factor=10000,
         tickrate=200,
         replay_fps=60,
-        encoder_position_rate=100,
         lidar_position_rate=11,
     )
 

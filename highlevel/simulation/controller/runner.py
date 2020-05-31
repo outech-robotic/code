@@ -8,6 +8,7 @@ from statistics import mean
 import numpy
 
 from highlevel.logger import LOGGER
+from highlevel.robot.entity.configuration import Configuration
 from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.entity.event import EventType, EventOrder
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
@@ -30,11 +31,13 @@ class SimulationRunner:
                  simulation_gateway: SimulationGateway,
                  replay_saver: ReplaySaver,
                  simulation_configuration: SimulationConfiguration,
+                 configuration: Configuration,
                  simulation_state: SimulationState, probe: Probe,
                  clock: FakeClock):
 
         self.clock = clock
         self.event_queue = event_queue
+        self.configuration = configuration
         self.simulation_gateway = simulation_gateway
         self.replay_saver = replay_saver
         self.simulation_configuration = simulation_configuration
@@ -46,7 +49,7 @@ class SimulationRunner:
         self.running = True
 
         self.position_noise = 0  # percentage of noise, used as a scale for gaussian noise
-        self.position_delay = 50  # ticks before a position target is achieved
+        self.position_delay = 20  # ticks before a position target is achieved
 
         self.state.position_queue_left = deque(
             [0 for _ in range(self.position_delay)])
@@ -57,7 +60,7 @@ class SimulationRunner:
         """
         Run the simulation.
         """
-        rate_encoder = self.simulation_configuration.encoder_position_rate
+        rate_encoder = self.configuration.encoder_update_rate
         rate_tick = self.simulation_configuration.tickrate
         while self.running:
             current_tick = self.tick
@@ -71,13 +74,11 @@ class SimulationRunner:
             last_right = self.state.position_queue_right[-1]
 
             self.state.position_queue_left.append(
-                last_left * numpy.random.normal(1, self.position_noise) /
-                100.0)
+                last_left * numpy.random.normal(1, self.position_noise / 100.0))
             self.state.position_queue_left.popleft()
 
             self.state.position_queue_right.append(
-                last_right *
-                numpy.random.normal(1, self.position_noise / 100.0))
+                last_right * numpy.random.normal(1, self.position_noise / 100.0))
             self.state.position_queue_right.popleft()
 
             # Send the encoder positions periodically.

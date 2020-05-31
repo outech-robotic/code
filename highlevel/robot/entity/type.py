@@ -1,6 +1,7 @@
 """
 Types.
 """
+import math
 from enum import Enum
 
 Millisecond = float
@@ -46,3 +47,21 @@ class MotionResult(Enum):
     BLOCKED = 'BLOCKED'
     # If the robot is already moving
     BUSY = 'BUSY'
+
+
+def tick_to_mm(tick: Tick, ticks_per_revolution: Tick,
+               wheel_radius: Millimeter) -> Millimeter:
+    """
+    Converts ticks to millimeters using robot parameters.
+    """
+    perimeter = 2 * math.pi * wheel_radius
+    return perimeter * tick / ticks_per_revolution
+
+
+def mm_to_tick(distance: Millimeter, ticks_per_revolution: Tick,
+               wheel_radius: Millimeter) -> Tick:
+    """
+    Converts millimeters to ticks using robot parameters.
+    """
+    perimeter = 2 * math.pi * wheel_radius
+    return round(ticks_per_revolution * distance / perimeter)

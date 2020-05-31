@@ -70,7 +70,7 @@ CONFIG = Configuration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
-        refresh_rate=1000,
+        refresh_rate=100,
     ),
     pid_constants_distance=PIDConstants(8, 5.0, 0.3),
     pid_constants_angle=PIDConstants(5, 2.0, 0.1),
@@ -85,8 +85,7 @@ CONFIG = Configuration(
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
     tickrate=1000,
-    encoder_position_rate=CONFIG.encoder_update_rate,
-    replay_fps=100,
+    replay_fps=60,
     lidar_position_rate=11,
     obstacles=[
         Segment(start=Vector2(0, 0), end=Vector2(0, CONFIG.field_shape[1])),
@@ -142,8 +141,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             right_tick=0,
                             left_speed=0,
                             right_speed=0,
-                            position_queue_left=deque([0 for _ in range(20)]),
-                            position_queue_right=deque([0 for _ in range(20)]),
+                            position_queue_left=deque(),
+                            position_queue_right=deque(),
                             last_position_update=0,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)
@@ -163,7 +162,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     if simulation or stub_socket_can:
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
     else:
-        reader, writer = await tcp.get_reader_writer('192.168.1.120', 14000)
+        reader, writer = await tcp.get_reader_writer('localhost', 32000)
         i.provide('motor_board_adapter',
                   TCPSocketAdapter,
                   reader=reader,

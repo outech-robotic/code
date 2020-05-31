@@ -22,7 +22,7 @@ def event_queue_setup():
 # pylint: disable=too-many-arguments
 @fixture(name='simulation_runner')
 def simulation_runner_factory(event_queue, simulation_gateway_mock,
-                              simulation_configuration_test, replay_saver_mock,
+                              simulation_configuration_test, configuration_test, replay_saver_mock,
                               simulation_state_mock, probe_mock, clock_mock):
     """
     Simulation runner.
@@ -31,6 +31,7 @@ def simulation_runner_factory(event_queue, simulation_gateway_mock,
         event_queue=event_queue,
         simulation_gateway=simulation_gateway_mock,
         simulation_configuration=simulation_configuration_test,
+        configuration=configuration_test,
         replay_saver=replay_saver_mock,
         simulation_state=simulation_state_mock,
         probe=probe_mock,

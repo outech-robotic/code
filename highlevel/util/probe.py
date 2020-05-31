@@ -33,9 +33,6 @@ class Probe:
     def __init__(self, clock: Clock):
         self._clock = clock
         self._event_log: List[DebugEvent] = []
-        self.count_left = 0
-        self.count_right = 0
-        self.count_period = 0.01
 
     def emit(self, name: str, value: Any) -> None:
         """
@@ -43,16 +40,8 @@ class Probe:
 
         The probe will always report the latest value associated with a certain name.
         """
-        t_current = self._clock.time()
-        # if name == 'encoder_left':
-        #     self.count_left += 1
-        #     t_current = self.count_left * self.count_period
-        # if name == 'encoder_right':
-        #     self.count_right += 1
-        #     t_current = self.count_right * self.count_period
-
         self._event_log.append(
-            DebugEvent(time=t_current, key=name, value=value))
+            DebugEvent(time=self._clock.time(), key=name, value=value))
 
     def poll(self,
              rate: float = None,

@@ -5,27 +5,11 @@ import math
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Millimeter, Radian, Tick, MillimeterPerSec
+from highlevel.robot.entity.type import Millimeter, Radian, MillimeterPerSec, RadianPerSec, \
+    tick_to_mm
 from highlevel.util.filter.odometry import OdometryFunc
+from highlevel.util.geometry.vector import Vector2
 from highlevel.util.probe import Probe
-
-
-def tick_to_mm(tick: Tick, ticks_per_revolution: Tick,
-               wheel_radius: Millimeter) -> Millimeter:
-    """
-    Converts ticks to millimeters using robot parameters.
-    """
-    perimeter = 2 * math.pi * wheel_radius
-    return perimeter * tick / ticks_per_revolution
-
-
-def mm_to_tick(distance: Millimeter, ticks_per_revolution: Tick,
-               wheel_radius: Millimeter) -> Tick:
-    """
-    Converts millimeters to ticks using robot parameters.
-    """
-    perimeter = 2 * math.pi * wheel_radius
-    return round(ticks_per_revolution * distance / perimeter)
 
 
 # Attributes could be merged, but it is clearer this way
@@ -34,6 +18,7 @@ class PositionController:
     """
     Keeps track of the robot's position & angle and gives access to it.
     """
+
     def __init__(self, odometry_function: OdometryFunc,
                  configuration: Configuration, probe: Probe):
         self.odometry = odometry_function
@@ -42,13 +27,13 @@ class PositionController:
 
         self.distance_travelled: Millimeter = 0.0
         self.speed: MillimeterPerSec = 0.0
-        self.angular_velocity: Radian = 0.0
-        self.position = configuration.initial_position
+        self.angular_velocity: RadianPerSec = 0.0
+        self.position: Vector2 = configuration.initial_position
         self.angle: Radian = configuration.initial_angle
-        self.position_left_last = 0.0
-        self.position_right_last = 0.0
-        self.position_left = 0.0
-        self.position_right = 0.0
+        self.position_left_last: Millimeter = 0.0
+        self.position_right_last: Millimeter = 0.0
+        self.position_left: Millimeter = 0.0
+        self.position_right: Millimeter = 0.0
         self.initialized = False
 
     def update_odometry(self, tick_left: int, tick_right: int) -> None:
@@ -64,8 +49,8 @@ class PositionController:
             tick_right, self.configuration.encoder_ticks_per_revolution,
             self.configuration.wheel_radius)
 
-        # self.probe.emit("encoder_left", self.position_left)
-        # self.probe.emit("encoder_right", self.position_right)
+        self.probe.emit("encoder_left", self.position_left)
+        self.probe.emit("encoder_right", self.position_right)
 
         if not self.initialized:
             self.position_left_last = self.position_left
@@ -95,7 +80,7 @@ class PositionController:
         self.speed = \
             (self.distance_travelled - distance_old) * self.configuration.encoder_update_rate
         self.angular_velocity = (
-            self.angle - angle_old) * self.configuration.encoder_update_rate
+                                        self.angle - angle_old) * self.configuration.encoder_update_rate
 
         self.probe.emit("position", self.position)
         self.probe.emit("angle", self.angle)
