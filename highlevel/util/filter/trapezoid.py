@@ -3,11 +3,13 @@ Trapezoid functions
 """
 from typing import Generator
 
-
 # pylint: disable=too-many-arguments
+from highlevel.robot.entity.type import Hz
+
+
 def _trapezoid_gen(initial_value: float, tolerance: float,
                    max_first_order: float, max_second_order: float,
-                   update_rate: int, anticipation: float) -> Generator:
+                   update_rate: Hz, anticipation: float) -> Generator:
     """
     Trapezoid filter implementation with a generator.
     Call with .send(target_position), returns the optimal position and derivative.
@@ -52,7 +54,7 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
 
 def trapezoid_gen(initial_value: float, tolerance: float,
                   max_first_order: float, max_second_order: float,
-                  update_rate: int, anticipation: float) -> Generator:
+                  update_rate: Hz, anticipation: float) -> Generator:
     """
     Applies a trapezoid shape to variable's first order derivative, computes the variable's target
     to get this trapezoid.

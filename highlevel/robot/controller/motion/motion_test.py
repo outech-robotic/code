@@ -8,9 +8,9 @@ import math
 import pytest
 from pytest import fixture
 
-from highlevel.robot.controller.motion.motion import MotionController
+from highlevel.robot.controller.motion.motion import MotionController, MotionResult
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import MotionResult, MillimeterPerSec, mm_to_tick
+from highlevel.robot.entity.type import MillimeterPerSec, mm_to_tick
 from highlevel.util.filter.pid import PIDConstants
 from highlevel.util.geometry.vector import Vector2
 

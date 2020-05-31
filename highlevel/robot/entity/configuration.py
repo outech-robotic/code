@@ -6,7 +6,7 @@ from typing import Tuple
 
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.type import Radian, Millimeter, MillimeterPerSec, MillimeterPerSec2, \
-    RadianPerSec, RadianPerSec2
+    RadianPerSec, RadianPerSec2, Hz
 from highlevel.util.filter.pid import PIDLimits, PIDConstants
 from highlevel.util.geometry.vector import Vector2
 
@@ -43,8 +43,8 @@ class Configuration:
     wheel_radius: Millimeter
     encoder_ticks_per_revolution: int
     distance_between_wheels: Millimeter
-    encoder_update_rate: int
-    motor_update_rate: int
+    encoder_update_rate: Hz
+    motor_update_rate: Hz
 
     # #  Motion control parameters
     pid_scale_factor: int

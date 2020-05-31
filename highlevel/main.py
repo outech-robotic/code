@@ -141,8 +141,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                             right_tick=0,
                             left_speed=0,
                             right_speed=0,
-                            position_queue_left=deque(),
-                            position_queue_right=deque(),
+                            queue_speed_left=deque(),
+                            queue_speed_right=deque(),
                             last_position_update=0,
                             last_lidar_update=0))
         i.provide('simulation_gateway', SimulationGateway)

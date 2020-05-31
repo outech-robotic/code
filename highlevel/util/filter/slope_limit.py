@@ -3,8 +3,10 @@ Trapezoid functions
 """
 from typing import Generator
 
+from highlevel.robot.entity.type import Hz
 
-def _slope_limit_gen(max_derivative: float, update_rate: int) -> Generator:
+
+def _slope_limit_gen(max_derivative: float, update_rate: Hz) -> Generator:
     """
     Limits the slope of an input signal.
     On the first .send(input), returns the raw input signal.
@@ -35,7 +37,7 @@ def _slope_limit_gen(max_derivative: float, update_rate: int) -> Generator:
         received = yield output_value
 
 
-def slope_limit_gen(max_derivative: float, update_rate: int) -> Generator:
+def slope_limit_gen(max_derivative: float, update_rate: Hz) -> Generator:
     """
     Limits the slope of an input signal. On the first .send(input), returns the raw input signal.
     Is updated with .send(signal_to_filter), outputs the resulting value.

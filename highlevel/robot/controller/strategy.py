@@ -1,12 +1,11 @@
 """
 Strategy module
 """
-import asyncio
-from enum import Enum
 
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.gateway.motor import MotorControlMode
 from highlevel.util.geometry.vector import Vector2
 
 PATH = [
@@ -54,16 +53,6 @@ PATH_MIRRORED = [(Vector2(pos.x, 2000 - pos.y), reverse)
                  for pos, reverse in PATH]
 
 
-class ControlMode(Enum):
-    """
-    Used to describe control modes of the motor board.
-    POSITION: Motor board tries to move the wheels at each wheel's target position.
-    SPEED: Motor board tries to move the wheels at each wheel's target speed.
-    """
-    POSITION = 'POSITION'
-    SPEED = 'SPEED'
-
-
 class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
@@ -73,44 +62,20 @@ class StrategyController:
         self.configuration = configuration
         self.trajectory_controller = trajectory_controller
 
-    async def set_mode(self, mode: ControlMode) -> None:
-        """
-        Sets the control mode of the motor board.
-        """
-        if mode == ControlMode.SPEED:
-            await self.trajectory_controller.motion_controller.motor_gateway.set_pid_speed(
-                self.configuration.pid_constants_speed_left.k_p,
-                self.configuration.pid_constants_speed_left.k_i,
-                self.configuration.pid_constants_speed_left.k_d,
-                self.configuration.pid_constants_speed_right.k_p,
-                self.configuration.pid_constants_speed_right.k_i,
-                self.configuration.pid_constants_speed_right.k_d,
-            )
-            await self.trajectory_controller.motion_controller.motor_gateway.set_control_mode(
-                True, False)
-        elif mode == ControlMode.POSITION:
-            await self.trajectory_controller.motion_controller.motor_gateway.set_pid_position(
-                self.configuration.pid_constants_position_left.k_p,
-                self.configuration.pid_constants_position_left.k_i,
-                self.configuration.pid_constants_position_left.k_d,
-                self.configuration.pid_constants_position_right.k_p,
-                self.configuration.pid_constants_position_right.k_i,
-                self.configuration.pid_constants_position_right.k_d,
-            )
-            await self.trajectory_controller.motion_controller.motor_gateway.set_control_mode(
-                False, True)
-
     async def run(self) -> None:
         """
         Run the strategy.
         """
-        await self.set_mode(ControlMode.SPEED)
+        await self.trajectory_controller.motion_controller.motor_gateway.set_mode(
+            MotorControlMode.SPEED)
 
         # Infinite translations to test motion
         try:
             for _ in range(3):
-                await self.trajectory_controller.motion_controller.translate(500)
-                await self.trajectory_controller.motion_controller.translate(-500)
+                await self.trajectory_controller.motion_controller.translate(
+                    500)
+                await self.trajectory_controller.motion_controller.translate(
+                    -500)
 
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol

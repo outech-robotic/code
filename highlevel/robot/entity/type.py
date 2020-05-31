@@ -38,17 +38,6 @@ class Direction(Enum):
     RIGHT = 'RIGHT'
 
 
-class MotionResult(Enum):
-    """
-    Give information about the status of the MotionController
-    """
-    OK = 'OK'
-    # If the robot cannot physically move to the target
-    BLOCKED = 'BLOCKED'
-    # If the robot is already moving
-    BUSY = 'BUSY'
-
-
 def tick_to_mm(tick: Tick, ticks_per_revolution: Tick,
                wheel_radius: Millimeter) -> Millimeter:
     """

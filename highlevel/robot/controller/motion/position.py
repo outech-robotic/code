@@ -18,7 +18,6 @@ class PositionController:
     """
     Keeps track of the robot's position & angle and gives access to it.
     """
-
     def __init__(self, odometry_function: OdometryFunc,
                  configuration: Configuration, probe: Probe):
         self.odometry = odometry_function
@@ -80,7 +79,7 @@ class PositionController:
         self.speed = \
             (self.distance_travelled - distance_old) * self.configuration.encoder_update_rate
         self.angular_velocity = (
-                                        self.angle - angle_old) * self.configuration.encoder_update_rate
+            self.angle - angle_old) * self.configuration.encoder_update_rate
 
         self.probe.emit("position", self.position)
         self.probe.emit("angle", self.angle)

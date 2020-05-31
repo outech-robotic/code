@@ -3,16 +3,28 @@ Motion controller module.
 """
 import asyncio
 from dataclasses import dataclass
+from enum import Enum
 
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Millimeter, MotionResult, Radian, MillimeterPerSec, \
+from highlevel.robot.entity.type import Millimeter, Radian, MillimeterPerSec, \
     RadianPerSec, mm_to_tick
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.filter.pid import pid_gen
 from highlevel.util.filter.slope_limit import slope_limit_gen
 from highlevel.util.filter.trapezoid import trapezoid_gen
+
+
+class MotionResult(Enum):
+    """
+    Give information about the status of the MotionController
+    """
+    OK = 'OK'
+    # If the robot cannot physically move to the target
+    BLOCKED = 'BLOCKED'
+    # If the robot is already moving
+    BUSY = 'BUSY'
 
 
 # pylint: disable=too-many-instance-attributes

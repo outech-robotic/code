@@ -51,10 +51,8 @@ class SimulationRunner:
         self.position_noise = 0  # percentage of noise, used as a scale for gaussian noise
         self.position_delay = 20  # ticks before a position target is achieved
 
-        self.state.position_queue_left = deque(
-            [0 for _ in range(self.position_delay)])
-        self.state.position_queue_right = deque(
-            [0 for _ in range(self.position_delay)])
+        self.state.queue_speed_left = deque([0] * self.position_delay)
+        self.state.queue_speed_right = deque([0] * self.position_delay)
 
     async def run(self) -> None:
         """
@@ -70,24 +68,26 @@ class SimulationRunner:
             for event in events:
                 await self._process_event(event)
 
-            last_left = self.state.position_queue_left[-1]
-            last_right = self.state.position_queue_right[-1]
+            last_left = self.state.queue_speed_left[-1]
+            last_right = self.state.queue_speed_right[-1]
 
-            self.state.position_queue_left.append(
-                last_left * numpy.random.normal(1, self.position_noise / 100.0))
-            self.state.position_queue_left.popleft()
+            self.state.queue_speed_left.append(
+                last_left *
+                numpy.random.normal(1, self.position_noise / 100.0))
+            self.state.queue_speed_left.popleft()
 
-            self.state.position_queue_right.append(
-                last_right * numpy.random.normal(1, self.position_noise / 100.0))
-            self.state.position_queue_right.popleft()
+            self.state.queue_speed_right.append(
+                last_right *
+                numpy.random.normal(1, self.position_noise / 100.0))
+            self.state.queue_speed_right.popleft()
 
             # Send the encoder positions periodically.
             interval = 1 / rate_encoder * 1000
             if self.state.time - self.state.last_position_update > interval:
                 self.state.left_tick += round(
-                    mean(self.state.position_queue_left) / rate_encoder)
+                    mean(self.state.queue_speed_left) / rate_encoder)
                 self.state.right_tick += round(
-                    mean(self.state.position_queue_right) / rate_encoder)
+                    mean(self.state.queue_speed_right) / rate_encoder)
 
                 self.state.last_position_update = self.state.time
                 await self.simulation_gateway.encoder_position(

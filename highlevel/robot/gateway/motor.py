@@ -1,6 +1,7 @@
 """
 Motor gateway module.
 """
+from enum import Enum
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
@@ -11,6 +12,16 @@ from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoef
     PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg, WheelPWMMsg
 
 
+class MotorControlMode(Enum):
+    """
+    Used to describe control modes of the motor board.
+    POSITION: Motor board tries to move the wheels at each wheel's target position.
+    SPEED: Motor board tries to move the wheels at each wheel's target speed.
+    """
+    POSITION = 'POSITION'
+    SPEED = 'SPEED'
+
+
 class MotorGateway:
     """
     Motor gateway.
@@ -19,10 +30,6 @@ class MotorGateway:
                  configuration: Configuration):
         self.configuration = configuration
         self.motor_board_adapter = motor_board_adapter
-        self.pid_speed_left = PIDConstants(0, 0, 0)
-        self.pid_speed_right = PIDConstants(0, 0, 0)
-        self.pid_position_left = PIDConstants(0, 0, 0)
-        self.pid_position_right = PIDConstants(0, 0, 0)
 
     async def _send_message(self, message: BusMessage) -> None:
         """
@@ -53,17 +60,18 @@ class MotorGateway:
             kd=pid_constants.k_d,
         )
 
-    async def _send_pid_configs(self) -> None:
+    async def _send_pid_configs(self, speed_left: PIDConstants,
+                                speed_right: PIDConstants,
+                                pos_left: PIDConstants,
+                                pos_right: PIDConstants) -> None:
         """
         Sends last updated PID configurations.
         """
         message = BusMessage(pidConfig=PIDConfigMsg(
-            pid_speed_left=self._pid_constants_to_proto(self.pid_speed_left),
-            pid_speed_right=self._pid_constants_to_proto(self.pid_speed_right),
-            pid_position_left=self._pid_constants_to_proto(
-                self.pid_position_left),
-            pid_position_right=self._pid_constants_to_proto(
-                self.pid_position_right),
+            pid_speed_left=self._pid_constants_to_proto(speed_left),
+            pid_speed_right=self._pid_constants_to_proto(speed_right),
+            pid_position_left=self._pid_constants_to_proto(pos_left),
+            pid_position_right=self._pid_constants_to_proto(pos_right),
         ))
         await self._send_message(message)
 
@@ -78,17 +86,16 @@ class MotorGateway:
                                                   ratio_right=ratio_right))
         await self._send_message(message)
 
-    async def set_target_speeds(self, tick_left: TickPerSec,
-                                tick_right: TickPerSec) -> None:
+    async def set_target_speeds(self, left: TickPerSec,
+                                right: TickPerSec) -> None:
         """
         Sets each wheel's speed target.
         """
         LOGGER.get().debug('motor_gateway_set_target_speeds',
-                           left_speed=tick_left,
-                           right_speed=tick_right)
+                           left_speed=left,
+                           right_speed=right)
         message = BusMessage(moveWheelAtSpeed=MoveWheelAtSpeedMsg(
-            left_tick_per_sec=round(tick_left),
-            right_tick_per_sec=round(tick_right)))
+            left_tick_per_sec=round(left), right_tick_per_sec=round(right)))
         await self._send_message(message)
 
     async def set_target_positions(self, tick_left: Tick,
@@ -110,13 +117,15 @@ class MotorGateway:
         """
         Sends the position PID configurations for both wheels.
         """
-        self.pid_position_left = PIDConstants(left_kp, left_ki, left_kd)
-        self.pid_position_right = PIDConstants(right_kp, right_ki, right_kd)
+        pid_null = PIDConstants(0, 0, 0)
+        pid_position_left = PIDConstants(left_kp, left_ki, left_kd)
+        pid_position_right = PIDConstants(right_kp, right_ki, right_kd)
 
         LOGGER.get().info('motor_gateway_set_position_pids',
-                          pid_left=self.pid_position_left,
-                          pid_right=self.pid_position_right)
-        await self._send_pid_configs()
+                          pid_left=pid_position_left,
+                          pid_right=pid_position_right)
+        await self._send_pid_configs(pid_null, pid_null, pid_position_left,
+                                     pid_position_right)
 
     # pylint:disable=too-many-arguments
     async def set_pid_speed(self, left_kp: float, left_ki: float,
@@ -125,12 +134,14 @@ class MotorGateway:
         """
         Sends the speed PID configurations for both wheels.
         """
-        self.pid_speed_left = PIDConstants(left_kp, left_ki, left_kd)
-        self.pid_speed_right = PIDConstants(right_kp, right_ki, right_kd)
+        pid_null = PIDConstants(0, 0, 0)
+        pid_speed_left = PIDConstants(left_kp, left_ki, left_kd)
+        pid_speed_right = PIDConstants(right_kp, right_ki, right_kd)
         LOGGER.get().debug('motor_gateway_set_speed_pids',
-                           pid_left=self.pid_speed_left,
-                           pid_right=self.pid_speed_right)
-        await self._send_pid_configs()
+                           pid_left=pid_speed_left,
+                           pid_right=pid_speed_right)
+        await self._send_pid_configs(pid_speed_left, pid_speed_right, pid_null,
+                                     pid_null)
 
     async def set_control_mode(self, speed: bool, position: bool) -> None:
         """
@@ -154,3 +165,28 @@ class MotorGateway:
         message = BusMessage(wheelTolerances=WheelTolerancesMsg(
             ticks_left=ticks_left, ticks_right=ticks_right))
         await self._send_message(message)
+
+    async def set_mode(self, mode: MotorControlMode) -> None:
+        """
+        Sets the control mode of the motor board.
+        """
+        if mode == MotorControlMode.SPEED:
+            await self.set_pid_speed(
+                self.configuration.pid_constants_speed_left.k_p,
+                self.configuration.pid_constants_speed_left.k_i,
+                self.configuration.pid_constants_speed_left.k_d,
+                self.configuration.pid_constants_speed_right.k_p,
+                self.configuration.pid_constants_speed_right.k_i,
+                self.configuration.pid_constants_speed_right.k_d,
+            )
+            await self.set_control_mode(True, False)
+        elif mode == MotorControlMode.POSITION:
+            await self.set_pid_position(
+                self.configuration.pid_constants_position_left.k_p,
+                self.configuration.pid_constants_position_left.k_i,
+                self.configuration.pid_constants_position_left.k_d,
+                self.configuration.pid_constants_position_right.k_p,
+                self.configuration.pid_constants_position_right.k_i,
+                self.configuration.pid_constants_position_right.k_d,
+            )
+            await self.set_control_mode(False, True)

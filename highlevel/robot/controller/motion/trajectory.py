@@ -1,13 +1,12 @@
 """
 Trajectory controller module.
 """
-import math
 
 from highlevel.logger import LOGGER
-from highlevel.robot.controller.motion.motion import MotionController
+from highlevel.robot.controller.motion.motion import MotionController, MotionResult
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.controller.obstacle import ObstacleController
-from highlevel.robot.entity.type import MotionResult
+from highlevel.util.geometry.trigonometry import normalize_angle
 from highlevel.util.geometry.vector import Vector2
 
 
@@ -52,6 +51,3 @@ class TrajectoryController:
         result = await self.motion_controller.translate(distance)
         if result != MotionResult.OK:
             raise RuntimeError("Move to point failed during translation")
-
-
-

@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Deque
 
-from highlevel.robot.entity.type import Millisecond
+from highlevel.robot.entity.type import Millisecond, TickPerSec
 from highlevel.util.geometry.vector import Vector2
 
 
@@ -28,8 +28,8 @@ class SimulationState:
     cups: List[Cup]
     left_tick: int
     right_tick: int
-    position_queue_left: Deque[int]
-    position_queue_right: Deque[int]
+    queue_speed_left: Deque[TickPerSec]
+    queue_speed_right: Deque[TickPerSec]
     left_speed: int
     right_speed: int
     last_position_update: float
