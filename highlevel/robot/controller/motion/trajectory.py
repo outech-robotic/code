@@ -54,15 +54,4 @@ class TrajectoryController:
             raise RuntimeError("Move to point failed during translation")
 
 
-def normalize_angle(angle: float) -> float:
-    """
-    Takes an arbitrary angle (expressed in radians) and normalize it into an angle that is in
-    ]-pi, pi].
-    """
-    while angle <= -math.pi:
-        angle += 2 * math.pi
 
-    while angle > math.pi:
-        angle -= 2 * math.pi
-
-    return angle
