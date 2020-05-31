@@ -81,7 +81,6 @@ export default function ActionsView({actionURL}) {
         async function fetchActions(url) {
             const result = await fetch(url)
             const data = await result.json();
-            console.log(data)
             setActions(data.functions)
         }
 
@@ -93,7 +92,7 @@ export default function ActionsView({actionURL}) {
     if (!actionURL) {
         return <div>
             <p>Set the action link in the URL to be able to perform actions.</p>
-            <p>Example: http://localhost:3000/code/actions?live=ws://localhost:8080<strong>&action=http://localhost:9090</strong></p>
+            <p>Example: http://localhost:3000/code/actions?live=ws://localhost:8080<strong>&action=http://localhost:9090/action</strong></p>
         </div>
     }
 

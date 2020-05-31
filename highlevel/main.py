@@ -57,7 +57,7 @@ CONFIG = Configuration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
-        refresh_rate=30,
+        refresh_rate=4,
     ),
 )
 

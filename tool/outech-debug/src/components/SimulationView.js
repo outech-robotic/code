@@ -1,13 +1,14 @@
-import React, {useEffect} from "react";
+import React from "react";
 import './SimulationView.css'
 import plateauImg from '../plateau.svg'
 import robotImg from '../robot.svg'
 import {getValue} from "../event";
+import useInterval from "../hooks/usePeriodicInterval";
 
 
-//
 const WIDTH = 3000;
 const HEIGHT = 2000;
+const FPS = 60;
 //
 //
 // let robot_width = 0;
@@ -193,7 +194,7 @@ export default function SimulationView({robotPositionEvent, robotAngleEvent, con
     const robotPosition = getValue(robotPositionEvent)
     const robotAngle = getValue(robotAngleEvent)
 
-    useEffect(() => {
+    useInterval(() => {
         const canvas = document.getElementById('robotField');
         if (!canvas.getContext) {
             return;
@@ -209,10 +210,10 @@ export default function SimulationView({robotPositionEvent, robotAngleEvent, con
             drawRobot(ctx, robotPosition, robotAngle, configuration.robot_length, configuration.robot_width, robotImageRef.current)
         }
         ctx.restore();
-    }, [robotPosition, robotAngle, configuration]);
+    }, 1000 / FPS);
 
     return <div>
-        Robot position: {JSON.stringify(robotPosition)}
+        Robot position: {JSON.stringify(robotPositionEvent)}
         Robot angle: {robotAngle}
         <canvas id="robotField" width="3000" height="2000">
             This page does not work, get a better (newer) browser.

@@ -1,59 +1,61 @@
-import React from "react";
-import {Scatter} from "react-chartjs-2";
-// noinspection ES6UnusedImports
-import 'chartjs-plugin-zoom'
+import React, {useRef, useState} from "react";
 
-const options = {
-    pan: {
-        enabled: true,
-        mode: 'xy'
-    },
-    zoom: {
-        enabled: true,
-        mode: 'xy'
-    },
-    maintainAspectRatio: false,
-    animation: {
-        duration: 0 // general animation time
-    },
-    hover: {
-        animationDuration: 0 // duration of animations when hovering an item
-    },
-    responsiveAnimationDuration: 0, // animation duration after a resize
-    elements: {
-        line: {
-            tension: 0 // disables bezier curves
-        }
+import CanvasJSReact from '../canvasjs.react';
+import usePeriodicInterval from "../hooks/usePeriodicInterval";
+// var CanvasJS = CanvasJSReact.CanvasJS;
+var CanvasJSChart = CanvasJSReact.CanvasJSChart;
+
+const MAX_POINT_COUNT_ON_GRAPH = 1000
+const RENDER_FPS = 10
+
+
+function getOptions(series, title, color) {
+    return {
+        zoomEnabled: true,
+        animationEnabled: false,
+        backgroundColor: "transparent",
+        title: {
+            text: title,
+        },
+        axisY: {
+            includeZero: false,
+            lineThickness: 1
+        },
+        data: [
+            {
+                type: "line",
+                markerSize: 0,
+                lineColor: color,
+                lineDashType: "solid",
+                dataPoints: series,
+            },
+        ],
     }
 }
 
 
 export default function Graph({value, seriesName, color}) {
-    const graphRef = React.useRef();
-    const data = {
-        datasets: [
-            {
-                label: seriesName,
-                fill: false,
-                pointStyle: 'cross',
-                borderColor: color,
-                pointBorderColor: color,
-                pointHoverRadius: 20,
-                pointHoverBorderWidth: 2,
-                pointRadius: 2,
-                pointHitRadius: 10,
-                showLine: true,
-                borderWidth: 1,
-                data: value.slice(-500),
-            }
-        ]
-    };
+    const chartRef = useRef(null)
+    const [graphOptions, setGraphOptions] = useState(getOptions([], seriesName, color))
 
-    const onClick = () => graphRef.current.chartInstance.resetZoom()
+    usePeriodicInterval(() => {
+        setGraphOptions((options) => {
+            return {
+                ...options,
+                data: [{
+                    ...options.data[0],
+                    dataPoints: value.slice(-MAX_POINT_COUNT_ON_GRAPH),
+                }]
+            }
+        })
+        chartRef.current.render()
+    }, 1000 / RENDER_FPS)
+
 
     return <div style={{height: "100%"}}>
-        <button type="button" onClick={onClick}>reset zoom</button>
-        Number of points: {data.datasets[0].data.length}
-        <Scatter ref={graphRef} data={data} options={options} color='blue'/>
+        Number of points: {graphOptions.data[0].dataPoints.length}
+        <CanvasJSChart options={graphOptions}
+                       onRef={ref => chartRef.current = ref}
+        />
     </div>
 }
