@@ -35,7 +35,7 @@ run-simulation:
 run:
 	PYTHONPATH=${CURDIR}/.. OUTECH_SIMULATION=false python -m highlevel.main
 
-.PHONY: run-stub
+.PHONY: run-lidarless
 run-stub:
 	PYTHONPATH=${CURDIR}/.. STUB_LIDAR=true OUTECH_SIMULATION=false python -m highlevel.main
 
