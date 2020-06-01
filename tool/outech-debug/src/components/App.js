@@ -6,27 +6,27 @@ import ActionsView from "./ActionsView";
 import "./App.css"
 import SimulationView from "./SimulationView";
 import useFilterEvent from "../hooks/useFilterEvent";
-import {getValue, mapEventToPoint} from "../event";
-import useDerivative from "../hooks/useDerivative";
+import {getLast, getValue, mapEventsToPoint} from "../event";
 import useAggregatedGraph from "../hooks/useAggregatedGraph";
-import useDecimate from "../hooks/useDecimate";
+import useLast from "../hooks/useLast";
 
 const useDataSeries = (event$, name) => {
-    const event = useFilterEvent(event$, name);
-    const xy = useMemo(() => mapEventToPoint(event), [event])
-    const speedXY = useDerivative(xy);
-    return [useAggregatedGraph(xy), useAggregatedGraph(speedXY)]
+    const events = useFilterEvent(event$, name);
+    const xy = useMemo(() => mapEventsToPoint(events), [events])
+    return useAggregatedGraph(xy);
 }
 
 function DebugInterface({event$, actionURL}) {
-    const configurationEvent = useFilterEvent(event$, "configuration")
-    const configuration = getValue(configurationEvent)
+    const configurationEvents = useFilterEvent(event$, "configuration")
+    const configuration = getValue(useLast(configurationEvents))
 
-    const [encoderLeft, speedLeft] = useDataSeries(event$, "encoder_left")
-    const [encoderRight, speedRight] = useDataSeries(event$, "encoder_right")
+    const encoderLeft = useDataSeries(event$, "encoder_left")
+    const speedLeft = useDataSeries(event$, "speed_left")
+    const encoderRight = useDataSeries(event$, "encoder_right")
+    const speedRight = useDataSeries(event$, "speed_right")
 
-    const robotPositionEvent = useFilterEvent(event$, "position")
-    const robotAngleEvent = useFilterEvent(event$, "angle")
+    const robotPositionEvent = useLast(useFilterEvent(event$, "position"))
+    const robotAngleEvent = useLast(useFilterEvent(event$, "angle"))
 
     return (
         <HashRouter>

@@ -69,7 +69,7 @@ CONFIG = Configuration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
-        refresh_rate=100,
+        refresh_rate=4,
     ),
     pid_constants_distance=PIDConstants(8, 5.0, 0.3),
     pid_constants_angle=PIDConstants(5, 2.0, 0.1),
