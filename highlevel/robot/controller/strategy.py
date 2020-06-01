@@ -67,15 +67,16 @@ class StrategyController:
         Run the strategy.
         """
         await self.trajectory_controller.motion_controller.motor_gateway.set_mode(
-            MotorControlMode.SPEED)
+            MotorControlMode.SPEED
+        )
 
         # Infinite translations to test motion
         try:
-            for _ in range(3):
-                await self.trajectory_controller.motion_controller.translate(
-                    500)
-                await self.trajectory_controller.motion_controller.translate(
-                    -500)
-
+            for vec, reverse in PATH_MIRRORED:
+                LOGGER.get().info("strategy_controller_follow_path", destination=vec)
+                await self.trajectory_controller.move_to(
+                    Vector2(vec.x, 2000 - vec.y),
+                    reverse
+                )
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol
