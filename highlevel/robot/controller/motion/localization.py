@@ -8,7 +8,7 @@ from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Direction, Radian, Millimeter
+from highlevel.util.type import Direction, Radian, Millimeter
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.geometry.direction import right, backward, left, forward
 from highlevel.util.geometry.vector import Vector2

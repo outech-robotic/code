@@ -4,9 +4,9 @@ SimulationState of a simulation at a given moment.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List
+from typing import List, Deque
 
-from highlevel.robot.entity.type import Millisecond
+from highlevel.util.type import Millisecond, TickPerSec
 from highlevel.util.geometry.vector import Vector2
 
 
@@ -17,13 +17,8 @@ class Cup:
     """
     position: Vector2
 
-    def clone(self) -> Cup:
-        """
-        Clone this entity.
-        """
-        return Cup(position=self.position)
 
-
+# pylint: disable=too-many-instance-attributes
 @dataclass
 class SimulationState:
     """
@@ -33,17 +28,9 @@ class SimulationState:
     cups: List[Cup]
     left_tick: int
     right_tick: int
+    queue_speed_left: Deque[TickPerSec]
+    queue_speed_right: Deque[TickPerSec]
+    left_speed: int
+    right_speed: int
     last_position_update: float
     last_lidar_update: float = 0
-
-    def clone(self) -> SimulationState:
-        """
-        Clone this entity.
-        """
-        return SimulationState(
-            time=self.time,
-            cups=[cup.clone() for cup in self.cups],
-            left_tick=self.left_tick,
-            right_tick=self.right_tick,
-            last_position_update=self.last_position_update,
-        )

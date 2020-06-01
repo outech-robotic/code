@@ -14,12 +14,14 @@
 // TIMER PWM
 #define CONST_PWM_PRESCALER  2
 #define CONST_PWM_AUTORELOAD 1000
-#define CONST_PWM_REPETITION 2
+#define CONST_PWM_REPETITION 1
 #define CONST_PWM_MAX        CONST_PWM_AUTORELOAD
 
 // ASSERVISSEMENT
-#define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
 
+#define MOTION_CONTROL_FREQ ((int32_t)(1000)) // Hz
+#define CONST_TOLERANCE_TICKS_INIT ((int32_t)3)
+#define CONST_MOTION_CONTROLLER_SPEED_AVERAGE_SIZE ((uint32_t) 32)
 
 /*
  * COMMUNICATIONS
@@ -42,8 +44,8 @@
 
 
 //BUFFER SIZE USED IN ISR
-#define CONST_CAN_BUFFER_SIZE ((uint16_t)16)
-#define CONST_ISOTP_BUFF_SIZE ((size_t)40)
+#define CONST_CAN_BUFFER_SIZE ((uint16_t)8)
+#define CONST_ISOTP_BUFF_SIZE ((size_t)sizeof(BusMessage))
 #define CONST_PB_BUFF_SIZE    ((size_t)8)
 #define CONST_LOG_SIZE        (64)
 #define CONST_LOG_POOL_SIZE   (8)

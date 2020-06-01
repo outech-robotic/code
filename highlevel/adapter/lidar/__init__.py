@@ -4,7 +4,7 @@ LIDAR Adapter module.
 from abc import ABC, abstractmethod
 from typing import Callable, Tuple
 
-from highlevel.robot.entity.type import Radian, Millimeter
+from highlevel.util.type import Radian, Millimeter
 
 Callback = Callable[[Tuple[Tuple[Radian, Millimeter], ...]], None]
 

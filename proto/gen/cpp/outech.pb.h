@@ -48,9 +48,9 @@ typedef struct _MovementEndedMsg {
 } MovementEndedMsg;
 
 typedef struct _PIDCoefficients {
-    uint32_t kp;
-    uint32_t ki;
-    uint32_t kd;
+    float kp;
+    float ki;
+    float kd;
 } PIDCoefficients;
 
 typedef struct _PressureSensorMsg {
@@ -75,21 +75,39 @@ typedef struct _ServoMsg {
     int32_t angle;
 } ServoMsg;
 
-typedef struct _SetMotionControlModeMsg {
-    bool speed;
-    bool translation;
-    bool rotation;
-} SetMotionControlModeMsg;
-
 typedef struct _TranslateMsg {
     int32_t ticks;
 } TranslateMsg;
+
+typedef struct _WheelControlModeMsg {
+    bool speed;
+    bool position;
+} WheelControlModeMsg;
+
+typedef struct _WheelPWMMsg {
+    float ratio_left;
+    float ratio_right;
+} WheelPWMMsg;
+
+typedef struct _WheelPositionTargetMsg {
+    int32_t tick_left;
+    int32_t tick_right;
+} WheelPositionTargetMsg;
+
+typedef struct _WheelTolerancesMsg {
+    uint32_t ticks_left;
+    uint32_t ticks_right;
+} WheelTolerancesMsg;
 
 typedef struct _PIDConfigMsg {
     bool has_pid_speed_left;
     PIDCoefficients pid_speed_left;
     bool has_pid_speed_right;
     PIDCoefficients pid_speed_right;
+    bool has_pid_position_left;
+    PIDCoefficients pid_position_left;
+    bool has_pid_position_right;
+    PIDCoefficients pid_position_right;
 } PIDConfigMsg;
 
 typedef struct _BusMessage {
@@ -100,7 +118,8 @@ typedef struct _BusMessage {
         MovementEndedMsg movementEnded;
         EncoderPositionMsg encoderPosition;
         PIDConfigMsg pidConfig;
-        SetMotionControlModeMsg setMotionControlMode;
+        WheelControlModeMsg wheelControlMode;
+        WheelPositionTargetMsg wheelPositionTarget;
         MoveWheelAtSpeedMsg moveWheelAtSpeed;
         TranslateMsg translate;
         RotateMsg rotate;
@@ -109,6 +128,8 @@ typedef struct _BusMessage {
         LaserSensorMsg laserSensor;
         PressureSensorMsg pressureSensor;
         DebugLog debugLog;
+        WheelTolerancesMsg wheelTolerances;
+        WheelPWMMsg wheelPWM;
     } message_content;
 } BusMessage;
 
@@ -119,9 +140,12 @@ typedef struct _BusMessage {
 #define MovementEndedMsg_init_default            {0}
 #define EncoderPositionMsg_init_default          {0, 0}
 #define PIDCoefficients_init_default             {0, 0, 0}
-#define PIDConfigMsg_init_default                {false, PIDCoefficients_init_default, false, PIDCoefficients_init_default}
-#define SetMotionControlModeMsg_init_default     {0, 0, 0}
+#define PIDConfigMsg_init_default                {false, PIDCoefficients_init_default, false, PIDCoefficients_init_default, false, PIDCoefficients_init_default, false, PIDCoefficients_init_default}
+#define WheelControlModeMsg_init_default         {0, 0}
+#define WheelTolerancesMsg_init_default          {0, 0}
 #define MoveWheelAtSpeedMsg_init_default         {0, 0}
+#define WheelPositionTargetMsg_init_default      {0, 0}
+#define WheelPWMMsg_init_default                 {0, 0}
 #define TranslateMsg_init_default                {0}
 #define RotateMsg_init_default                   {0}
 #define ServoMsg_init_default                    {0, 0}
@@ -135,9 +159,12 @@ typedef struct _BusMessage {
 #define MovementEndedMsg_init_zero               {0}
 #define EncoderPositionMsg_init_zero             {0, 0}
 #define PIDCoefficients_init_zero                {0, 0, 0}
-#define PIDConfigMsg_init_zero                   {false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero}
-#define SetMotionControlModeMsg_init_zero        {0, 0, 0}
+#define PIDConfigMsg_init_zero                   {false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero, false, PIDCoefficients_init_zero}
+#define WheelControlModeMsg_init_zero            {0, 0}
+#define WheelTolerancesMsg_init_zero             {0, 0}
 #define MoveWheelAtSpeedMsg_init_zero            {0, 0}
+#define WheelPositionTargetMsg_init_zero         {0, 0}
+#define WheelPWMMsg_init_zero                    {0, 0}
 #define TranslateMsg_init_zero                   {0}
 #define RotateMsg_init_zero                      {0}
 #define ServoMsg_init_zero                       {0, 0}
@@ -171,18 +198,26 @@ typedef struct _BusMessage {
 #define RotateMsg_ticks_tag                      1
 #define ServoMsg_id_tag                          1
 #define ServoMsg_angle_tag                       2
-#define SetMotionControlModeMsg_speed_tag        1
-#define SetMotionControlModeMsg_translation_tag  2
-#define SetMotionControlModeMsg_rotation_tag     3
 #define TranslateMsg_ticks_tag                   1
+#define WheelControlModeMsg_speed_tag            1
+#define WheelControlModeMsg_position_tag         2
+#define WheelPWMMsg_ratio_left_tag               1
+#define WheelPWMMsg_ratio_right_tag              2
+#define WheelPositionTargetMsg_tick_left_tag     1
+#define WheelPositionTargetMsg_tick_right_tag    2
+#define WheelTolerancesMsg_ticks_left_tag        1
+#define WheelTolerancesMsg_ticks_right_tag       2
 #define PIDConfigMsg_pid_speed_left_tag          1
 #define PIDConfigMsg_pid_speed_right_tag         2
+#define PIDConfigMsg_pid_position_left_tag       3
+#define PIDConfigMsg_pid_position_right_tag      4
 #define BusMessage_heartbeat_tag                 1
 #define BusMessage_stopMoving_tag                2
 #define BusMessage_movementEnded_tag             3
 #define BusMessage_encoderPosition_tag           4
 #define BusMessage_pidConfig_tag                 5
-#define BusMessage_setMotionControlMode_tag      7
+#define BusMessage_wheelControlMode_tag          6
+#define BusMessage_wheelPositionTarget_tag       7
 #define BusMessage_moveWheelAtSpeed_tag          8
 #define BusMessage_translate_tag                 9
 #define BusMessage_rotate_tag                    10
@@ -191,6 +226,8 @@ typedef struct _BusMessage {
 #define BusMessage_laserSensor_tag               13
 #define BusMessage_pressureSensor_tag            14
 #define BusMessage_debugLog_tag                  15
+#define BusMessage_wheelTolerances_tag           16
+#define BusMessage_wheelPWM_tag                  17
 
 /* Struct field encoding specification for nanopb */
 #define HeartbeatMsg_FIELDLIST(X, a) \
@@ -215,32 +252,53 @@ X(a, STATIC,   SINGULAR, SINT32,   right_tick,        2)
 #define EncoderPositionMsg_DEFAULT NULL
 
 #define PIDCoefficients_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   kp,                1) \
-X(a, STATIC,   SINGULAR, UINT32,   ki,                2) \
-X(a, STATIC,   SINGULAR, UINT32,   kd,                3)
+X(a, STATIC,   SINGULAR, FLOAT,    kp,                1) \
+X(a, STATIC,   SINGULAR, FLOAT,    ki,                2) \
+X(a, STATIC,   SINGULAR, FLOAT,    kd,                3)
 #define PIDCoefficients_CALLBACK NULL
 #define PIDCoefficients_DEFAULT NULL
 
 #define PIDConfigMsg_FIELDLIST(X, a) \
 X(a, STATIC,   OPTIONAL, MESSAGE,  pid_speed_left,    1) \
-X(a, STATIC,   OPTIONAL, MESSAGE,  pid_speed_right,   2)
+X(a, STATIC,   OPTIONAL, MESSAGE,  pid_speed_right,   2) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  pid_position_left,   3) \
+X(a, STATIC,   OPTIONAL, MESSAGE,  pid_position_right,   4)
 #define PIDConfigMsg_CALLBACK NULL
 #define PIDConfigMsg_DEFAULT NULL
 #define PIDConfigMsg_pid_speed_left_MSGTYPE PIDCoefficients
 #define PIDConfigMsg_pid_speed_right_MSGTYPE PIDCoefficients
+#define PIDConfigMsg_pid_position_left_MSGTYPE PIDCoefficients
+#define PIDConfigMsg_pid_position_right_MSGTYPE PIDCoefficients
 
-#define SetMotionControlModeMsg_FIELDLIST(X, a) \
+#define WheelControlModeMsg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, BOOL,     speed,             1) \
-X(a, STATIC,   SINGULAR, BOOL,     translation,       2) \
-X(a, STATIC,   SINGULAR, BOOL,     rotation,          3)
-#define SetMotionControlModeMsg_CALLBACK NULL
-#define SetMotionControlModeMsg_DEFAULT NULL
+X(a, STATIC,   SINGULAR, BOOL,     position,          2)
+#define WheelControlModeMsg_CALLBACK NULL
+#define WheelControlModeMsg_DEFAULT NULL
+
+#define WheelTolerancesMsg_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT32,   ticks_left,        1) \
+X(a, STATIC,   SINGULAR, UINT32,   ticks_right,       2)
+#define WheelTolerancesMsg_CALLBACK NULL
+#define WheelTolerancesMsg_DEFAULT NULL
 
 #define MoveWheelAtSpeedMsg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, SINT32,   left_tick_per_sec,   1) \
 X(a, STATIC,   SINGULAR, SINT32,   right_tick_per_sec,   2)
 #define MoveWheelAtSpeedMsg_CALLBACK NULL
 #define MoveWheelAtSpeedMsg_DEFAULT NULL
+
+#define WheelPositionTargetMsg_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, SINT32,   tick_left,         1) \
+X(a, STATIC,   SINGULAR, SINT32,   tick_right,        2)
+#define WheelPositionTargetMsg_CALLBACK NULL
+#define WheelPositionTargetMsg_DEFAULT NULL
+
+#define WheelPWMMsg_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, FLOAT,    ratio_left,        1) \
+X(a, STATIC,   SINGULAR, FLOAT,    ratio_right,       2)
+#define WheelPWMMsg_CALLBACK NULL
+#define WheelPWMMsg_DEFAULT NULL
 
 #define TranslateMsg_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, SINT32,   ticks,             1)
@@ -292,7 +350,8 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,stopMoving,message_content.s
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,movementEnded,message_content.movementEnded),   3) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,encoderPosition,message_content.encoderPosition),   4) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,pidConfig,message_content.pidConfig),   5) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,setMotionControlMode,message_content.setMotionControlMode),   7) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,wheelControlMode,message_content.wheelControlMode),   6) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,wheelPositionTarget,message_content.wheelPositionTarget),   7) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,moveWheelAtSpeed,message_content.moveWheelAtSpeed),   8) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,translate,message_content.translate),   9) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,rotate,message_content.rotate),  10) \
@@ -300,7 +359,9 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,servo,message_content.servo)
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,pumpAndValve,message_content.pumpAndValve),  12) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,laserSensor,message_content.laserSensor),  13) \
 X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,pressureSensor,message_content.pressureSensor),  14) \
-X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.debugLog),  15)
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.debugLog),  15) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,wheelTolerances,message_content.wheelTolerances),  16) \
+X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,wheelPWM,message_content.wheelPWM),  17)
 #define BusMessage_CALLBACK NULL
 #define BusMessage_DEFAULT NULL
 #define BusMessage_message_content_heartbeat_MSGTYPE HeartbeatMsg
@@ -308,7 +369,8 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.deb
 #define BusMessage_message_content_movementEnded_MSGTYPE MovementEndedMsg
 #define BusMessage_message_content_encoderPosition_MSGTYPE EncoderPositionMsg
 #define BusMessage_message_content_pidConfig_MSGTYPE PIDConfigMsg
-#define BusMessage_message_content_setMotionControlMode_MSGTYPE SetMotionControlModeMsg
+#define BusMessage_message_content_wheelControlMode_MSGTYPE WheelControlModeMsg
+#define BusMessage_message_content_wheelPositionTarget_MSGTYPE WheelPositionTargetMsg
 #define BusMessage_message_content_moveWheelAtSpeed_MSGTYPE MoveWheelAtSpeedMsg
 #define BusMessage_message_content_translate_MSGTYPE TranslateMsg
 #define BusMessage_message_content_rotate_MSGTYPE RotateMsg
@@ -317,6 +379,8 @@ X(a, STATIC,   ONEOF,    MESSAGE,  (message_content,debugLog,message_content.deb
 #define BusMessage_message_content_laserSensor_MSGTYPE LaserSensorMsg
 #define BusMessage_message_content_pressureSensor_MSGTYPE PressureSensorMsg
 #define BusMessage_message_content_debugLog_MSGTYPE DebugLog
+#define BusMessage_message_content_wheelTolerances_MSGTYPE WheelTolerancesMsg
+#define BusMessage_message_content_wheelPWM_MSGTYPE WheelPWMMsg
 
 extern const pb_msgdesc_t HeartbeatMsg_msg;
 extern const pb_msgdesc_t StopMovingMsg_msg;
@@ -324,8 +388,11 @@ extern const pb_msgdesc_t MovementEndedMsg_msg;
 extern const pb_msgdesc_t EncoderPositionMsg_msg;
 extern const pb_msgdesc_t PIDCoefficients_msg;
 extern const pb_msgdesc_t PIDConfigMsg_msg;
-extern const pb_msgdesc_t SetMotionControlModeMsg_msg;
+extern const pb_msgdesc_t WheelControlModeMsg_msg;
+extern const pb_msgdesc_t WheelTolerancesMsg_msg;
 extern const pb_msgdesc_t MoveWheelAtSpeedMsg_msg;
+extern const pb_msgdesc_t WheelPositionTargetMsg_msg;
+extern const pb_msgdesc_t WheelPWMMsg_msg;
 extern const pb_msgdesc_t TranslateMsg_msg;
 extern const pb_msgdesc_t RotateMsg_msg;
 extern const pb_msgdesc_t ServoMsg_msg;
@@ -342,8 +409,11 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define EncoderPositionMsg_fields &EncoderPositionMsg_msg
 #define PIDCoefficients_fields &PIDCoefficients_msg
 #define PIDConfigMsg_fields &PIDConfigMsg_msg
-#define SetMotionControlModeMsg_fields &SetMotionControlModeMsg_msg
+#define WheelControlModeMsg_fields &WheelControlModeMsg_msg
+#define WheelTolerancesMsg_fields &WheelTolerancesMsg_msg
 #define MoveWheelAtSpeedMsg_fields &MoveWheelAtSpeedMsg_msg
+#define WheelPositionTargetMsg_fields &WheelPositionTargetMsg_msg
+#define WheelPWMMsg_fields &WheelPWMMsg_msg
 #define TranslateMsg_fields &TranslateMsg_msg
 #define RotateMsg_fields &RotateMsg_msg
 #define ServoMsg_fields &ServoMsg_msg
@@ -358,10 +428,13 @@ extern const pb_msgdesc_t BusMessage_msg;
 #define StopMovingMsg_size                       0
 #define MovementEndedMsg_size                    2
 #define EncoderPositionMsg_size                  12
-#define PIDCoefficients_size                     18
-#define PIDConfigMsg_size                        40
-#define SetMotionControlModeMsg_size             6
+#define PIDCoefficients_size                     15
+#define PIDConfigMsg_size                        68
+#define WheelControlModeMsg_size                 4
+#define WheelTolerancesMsg_size                  12
 #define MoveWheelAtSpeedMsg_size                 12
+#define WheelPositionTargetMsg_size              12
+#define WheelPWMMsg_size                         10
 #define TranslateMsg_size                        6
 #define RotateMsg_size                           6
 #define ServoMsg_size                            12

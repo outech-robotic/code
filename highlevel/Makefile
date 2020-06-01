@@ -34,3 +34,8 @@ run-simulation:
 .PHONY: run
 run:
 	PYTHONPATH=${CURDIR}/.. OUTECH_SIMULATION=false python -m highlevel.main
+
+.PHONY: run-lidarless
+run-lidarless:
+	PYTHONPATH=${CURDIR}/.. STUB_LIDAR=true OUTECH_SIMULATION=false python -m highlevel.main
+

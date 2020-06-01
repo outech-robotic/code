@@ -3,7 +3,9 @@ Strategy module
 """
 
 from highlevel.logger import LOGGER
-from highlevel.robot.controller.motion.motion import MotionController
+from highlevel.robot.controller.motion.trajectory import TrajectoryController
+from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.gateway.motor import MotorControlMode
 from highlevel.util.geometry.vector import Vector2
 
 PATH = [
@@ -47,21 +49,32 @@ PATH = [
     (Vector2(300, 1450), True),
 ]
 
+PATH_MIRRORED = [(Vector2(pos.x, 2000 - pos.y), reverse)
+                 for pos, reverse in PATH]
+
 
 class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
     """
-    def __init__(self, motion_controller: MotionController):
-        self.motion_controller = motion_controller
+    def __init__(self, trajectory_controller: TrajectoryController,
+                 configuration: Configuration):
+        self.configuration = configuration
+        self.trajectory_controller = trajectory_controller
 
     async def run(self) -> None:
         """
         Run the strategy.
         """
-        for vec, reverse in PATH:
-            LOGGER.get().info("move robot", destination=vec)
-            await self.motion_controller.move_to(Vector2(vec.x, 2000 - vec.y),
-                                                 reverse)
+        await self.trajectory_controller.motion_controller.motor_gateway.set_mode(
+            MotorControlMode.SPEED)
 
-        LOGGER.get().info("Strategy algorithm finished running")  # lol
+        # Infinite translations to test motion
+        try:
+            for vec, reverse in PATH_MIRRORED:
+                LOGGER.get().info("strategy_controller_follow_path",
+                                  destination=vec)
+                await self.trajectory_controller.move_to(
+                    Vector2(vec.x, 2000 - vec.y), reverse)
+        finally:
+            LOGGER.get().info("Strategy algorithm finished running")  # lol

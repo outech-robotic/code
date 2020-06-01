@@ -8,7 +8,7 @@ from pytest import fixture
 
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.util.geometry.vector import Vector2
-from highlevel.util.odometry import odometry_arc
+from highlevel.util.filter.odometry import odometry_arc
 
 DISTANCE_BETWEEN_WHEELS = 200
 

@@ -19,11 +19,11 @@ if((fn_call) != (expected)) {      \
 #define MAX(x, y) (((x)>(y))?(x):(y))
 #define ABS(x) (((x) > 0) ? (x) : -(x))
 
-constexpr bool is_powerof2(const unsigned int v) {
+constexpr uint32_t is_powerof2(const uint32_t v) {
   return v && ((v & (v - 1)) == 0);
 }
 
-constexpr uint8_t ceil_log2(uint8_t n) {
+constexpr uint32_t ceil_log2(uint8_t n) {
   return n < 2 ? 0 : 1 + ceil_log2(n >> 1);
 }
 
