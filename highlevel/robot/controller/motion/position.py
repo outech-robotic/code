@@ -5,7 +5,7 @@ import math
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Millimeter, Radian, MillimeterPerSec, RadianPerSec, \
+from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, RadianPerSec, \
     tick_to_mm
 from highlevel.util.filter.odometry import OdometryFunc
 from highlevel.util.geometry.vector import Vector2

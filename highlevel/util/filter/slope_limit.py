@@ -3,7 +3,7 @@ Trapezoid functions
 """
 from typing import Generator
 
-from highlevel.robot.entity.type import Hz
+from highlevel.util.type import Hz
 
 
 def _slope_limit_gen(max_derivative: float, update_rate: Hz) -> Generator:

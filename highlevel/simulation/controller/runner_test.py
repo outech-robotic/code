@@ -71,12 +71,13 @@ async def test_stop(simulation_runner):
 
 @pytest.mark.asyncio
 async def test_fill_speed_buffers(simulation_runner, simulation_state_mock,
-                                  configuration):
+                                  configuration, simulation_configuration):
     """
     Test that if the speed buffers are filled with the same value,
     the wheels are moved correctly at that speed.
     """
     update_rate = configuration.encoder_update_rate
+    tickrate = simulation_configuration.tickrate
     task = asyncio.create_task(simulation_runner.run())
     for _ in range(len(simulation_state_mock.queue_speed_left)):
         simulation_state_mock.queue_speed_left.append(1000)
@@ -85,7 +86,11 @@ async def test_fill_speed_buffers(simulation_runner, simulation_state_mock,
         simulation_state_mock.queue_speed_right.append(2000)
         simulation_state_mock.queue_speed_right.popleft()
 
-    await asyncio.sleep(1.5 / update_rate)
+    # Wait until just before the update
+    await asyncio.sleep(1 / update_rate)
+
+    # this iteration should make the update
+    await asyncio.sleep(2 / tickrate)
 
     assert simulation_state_mock.left_tick == 1000 / update_rate
     assert simulation_state_mock.right_tick == 2000 / update_rate

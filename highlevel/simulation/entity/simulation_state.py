@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Deque
 
-from highlevel.robot.entity.type import Millisecond, TickPerSec
+from highlevel.util.type import Millisecond, TickPerSec
 from highlevel.util.geometry.vector import Vector2
 
 

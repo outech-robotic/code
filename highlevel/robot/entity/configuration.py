@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Tuple
 
 from highlevel.robot.entity.color import Color
-from highlevel.robot.entity.type import Radian, Millimeter, MillimeterPerSec, MillimeterPerSec2, \
+from highlevel.util.type import Radian, Millimeter, MillimeterPerSec, MillimeterPerSec2, \
     RadianPerSec, RadianPerSec2, Hz
 from highlevel.util.filter.pid import PIDLimits, PIDConstants
 from highlevel.util.geometry.vector import Vector2

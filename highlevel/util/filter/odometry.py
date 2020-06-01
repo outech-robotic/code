@@ -7,7 +7,7 @@ import math
 from typing import Tuple, Callable
 
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Radian, Millimeter
+from highlevel.util.type import Radian, Millimeter
 from highlevel.util.geometry.vector import Vector2
 
 OdometryFunc = Callable[

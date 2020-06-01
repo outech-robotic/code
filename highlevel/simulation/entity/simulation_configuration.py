@@ -4,7 +4,7 @@ Simulation configuration module.
 from dataclasses import dataclass
 from typing import List
 
-from highlevel.robot.entity.type import Hz
+from highlevel.util.type import Hz
 from highlevel.util.geometry.segment import Segment
 
 

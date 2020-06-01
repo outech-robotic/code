@@ -8,7 +8,7 @@ from enum import Enum
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Millimeter, Radian, MillimeterPerSec, \
+from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, \
     RadianPerSec, mm_to_tick
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.util.filter.pid import pid_gen

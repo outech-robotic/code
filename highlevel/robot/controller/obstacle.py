@@ -4,7 +4,7 @@ Obstacle controller module.
 from math import cos, sin
 from typing import Tuple
 
-from highlevel.robot.entity.type import Millimeter, Radian
+from highlevel.util.type import Millimeter, Radian
 from highlevel.util.probe import Probe
 from highlevel.util.geometry.vector import Vector2
 

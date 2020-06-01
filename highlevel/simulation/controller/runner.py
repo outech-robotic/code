@@ -74,7 +74,7 @@ class SimulationRunner:
 
             # Send the encoder positions periodically.
             interval = 1 / rate_encoder * 1000
-            if self.state.time - self.state.last_position_update > interval:
+            if self.state.time - self.state.last_position_update >= interval:
                 self.state.left_tick += round(
                     mean(self.state.queue_speed_left) / rate_encoder)
                 self.state.right_tick += round(
@@ -86,7 +86,7 @@ class SimulationRunner:
 
             # Send the LIDAR positions periodically.
             interval = 1 / self.simulation_configuration.lidar_position_rate * 1000
-            if self.state.time - self.state.last_lidar_update > interval:
+            if self.state.time - self.state.last_lidar_update >= interval:
                 self.state.last_lidar_update = self.state.time
                 await self.simulation_gateway.push_lidar_readings()
 

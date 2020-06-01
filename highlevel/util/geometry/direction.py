@@ -4,7 +4,7 @@ Geometry module.
 
 import math
 
-from highlevel.robot.entity.type import Radian
+from highlevel.util.type import Radian
 from highlevel.util.geometry.vector import Vector2
 
 

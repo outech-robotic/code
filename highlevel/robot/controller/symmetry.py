@@ -6,7 +6,7 @@ from math import pi
 
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import Radian
+from highlevel.util.type import Radian
 from highlevel.util.geometry.vector import Vector2
 
 

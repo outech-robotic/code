@@ -6,7 +6,7 @@ from enum import Enum
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.entity.type import TickPerSec, Tick
+from highlevel.util.type import TickPerSec, Tick
 from highlevel.util.filter.pid import PIDConstants
 from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
     PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg, WheelPWMMsg

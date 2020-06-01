@@ -4,7 +4,7 @@ Trapezoid functions
 from typing import Generator
 
 # pylint: disable=too-many-arguments
-from highlevel.robot.entity.type import Hz
+from highlevel.util.type import Hz
 
 
 def _trapezoid_gen(initial_value: float, tolerance: float,
