@@ -2,34 +2,61 @@ import argparse
 import asyncio
 import json
 import sys
+import time
 
 from google.protobuf import json_format
+from google.protobuf.message import DecodeError
 
-from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter
-from highlevel.util import tcp
-from proto.gen.python.outech_pb2 import BusMessage
+from highlevel.adapter.socket.socket_adapter import ISOTPSocketAdapter, ISOTPAddress
+from proto.gen.python.outech_pb2 import BusMessage, EncoderPositionMsg
 
+t_last = time.time()
 
 async def main():
+    global t_last
     parser = argparse.ArgumentParser(description='Read packets on the CAN bus.')
-    parser.add_argument('tcp_port', metavar='tcp_port', type=int,
-                        help='isotpserver TCP port number')
+
+    parser.add_argument('device', metavar='device', type=str,
+                        help='CAN device to use. Can be virtual or physical.')
+
+    parser.add_argument('id_rx', metavar='id_rx', type=int,
+                        help='CAN address to accept when receiving. Should be in [0, 1023]')
+    parser.add_argument('id_tx', metavar='id_tx', type=int,
+                        help='CAN address to transmit to. Should be in [0, 1023]')
 
     args = parser.parse_args()
 
-    reader, writer = await tcp.get_reader_writer('localhost', args.tcp_port)
-    adapter = TCPSocketAdapter(reader, writer, 'ug_le_bg')
+    t_last = time.time()
 
-    async def callback(bytes, _):
+    assert args.id_rx != args.id_tx
+    assert len(args.device) > 0
+
+    isotp = ISOTPSocketAdapter(
+        address=ISOTPAddress(args.device, args.id_rx, args.id_tx),
+        adapter_name="receiver"
+    )
+
+    async def callback(bytes, name):
+        global t_last
+        t = time.time()
         bus_message = BusMessage()
-        bus_message.ParseFromString(bytes)
-        printable_data = json_format.MessageToDict(bus_message, including_default_value_fields=True)
-        json_data = json.dumps(printable_data)
-        sys.stdout.write(json_data + '\n')
-        sys.stdout.flush()
+        try:
+            bus_message.ParseFromString(bytes)
+            printable_data = json_format.MessageToDict(bus_message, including_default_value_fields=True)
+            json_data = json.dumps(printable_data)
+            sys.stdout.write(f'{(t - t_last) * 1000:10.3f} ms:"{name}" ' + json_data + '\n')
+            sys.stdout.flush()
+        except DecodeError:
+            print("Protobuf couldn't decode this:", bytes)
+        t_last = t
 
-    adapter.register_callback(callback)
-    await adapter.run()
+
+    isotp.register_callback(callback)
+
+    try:
+        await isotp.run(),
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt")
 
 
 if __name__ == '__main__':

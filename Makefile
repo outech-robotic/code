@@ -32,7 +32,7 @@ clean:
 
 .PHONY: candump
 candump:
-	@pipenv run python -m tool.script.read_bus $(port)
+	@pipenv run python -m tool.script.read_bus $(dev) $(id_rx) $(id_tx)
 
 # HIGH LEVEL ###################################################################################################################################
 
