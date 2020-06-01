@@ -176,8 +176,7 @@ class DebugController:
 
         LOGGER.get().debug("sending_live_events_to_debug_client")
         while websocket.state in (State.CONNECTING, State.OPEN):
-            data, cursor = self._probe.poll(
-                cursor=cursor, rate=self._configuration.debug.refresh_rate)
+            data, cursor = self._probe.poll(cursor=cursor)
             json_data = json.dumps(data, cls=RobotJSONEncoder)
             await websocket.send(json_data)
             await asyncio.sleep(1 / self._configuration.debug.refresh_rate)

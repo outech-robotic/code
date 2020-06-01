@@ -1,5 +1,11 @@
 import {useEffect, useState} from "react";
 
+// Every 1/REPLAY_RATE second, it will send all the new events (batched) to the client
+// for displaying.
+const REPLAY_RATE = 30
+
+// NOTE: Live is limited by the backend.
+
 export default function useEventStream(url, live) {
     const [event$, setEvent$] = useState()
     useEffect(() => {
@@ -24,10 +30,7 @@ function fetchLive(setEvent$, url) {
     }
 
     socket.onmessage = function (msg) {
-        const eventList = JSON.parse(msg.data);
-        for (let event of eventList) {
-            setEvent$(event)
-        }
+        setEvent$(JSON.parse(msg.data));
     };
 }
 
@@ -39,14 +42,18 @@ async function fetchReplay(setEvent$, url) {
     const events = data.events;
     console.log("Fetched remote replay!")
 
-    const streamTimeOffset = events[0].time
+    let i = 0;
+    let j = 0;
     const startTime = new Date();
-    for (const event of data.events) {
-        const event_time = event.time - streamTimeOffset;
-        const cur_time = (new Date() - startTime) / 1000;
-        const time_to_wait = event_time - cur_time;
-        await new Promise(resolve => setTimeout(resolve, time_to_wait * 1000));
-        setEvent$(event)
+    const streamTimeOffset = events[0].time
+    while (j < events.length) {
+        const now = new Date();
+        while (j < events.length && events[j].time - streamTimeOffset < (now - startTime) / 1000 + 1 / REPLAY_RATE) {
+            j++
+        }
+        setEvent$(events.slice(i, j));
+        i = j;
+        await new Promise(resolve => setTimeout(resolve, 1000 / REPLAY_RATE));
     }
 }
 
