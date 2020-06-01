@@ -11,7 +11,7 @@ from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.localization import LocalizationController
-from highlevel.robot.controller.motion.motion import MotionController
+from highlevel.robot.controller.motion.motion import MotionController, MotionResult
 from highlevel.robot.controller.motion.odometry import OdometryController
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.controller.symmetry import SymmetryController
@@ -260,4 +260,8 @@ def motion_controller_mock():
     """
     mock = MagicMock(spec=MotionController)
     mock.trigger_update = MagicMock(return_value=None)
+    future = asyncio.Future()
+    future.set_result(MotionResult.OK)
+    mock.translate = MagicMock(return_value=future)
+    mock.rotate = MagicMock(return_value=future)
     return mock
