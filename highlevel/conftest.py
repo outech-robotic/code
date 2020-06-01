@@ -18,7 +18,6 @@ from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration, DebugConfiguration
 from highlevel.robot.gateway.motor import MotorGateway
-from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
@@ -156,16 +155,6 @@ def replay_saver_mock():
     Replay saver.
     """
     return MagicMock(spec=ReplaySaver)
-
-
-@fixture
-def event_queue_mock():
-    """
-    Event queue.
-    """
-    mock = MagicMock(spec=EventQueue)
-    mock.emit = MagicMock()
-    return mock
 
 
 @fixture

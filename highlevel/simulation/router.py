@@ -1,22 +1,12 @@
 """
 Simulation router module.
 """
-from typing import Iterator, Tuple
-
-import numpy
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from proto.gen.python.outech_pb2 import BusMessage
-
-
-def _spread_delta_on_ticks(delta: int,
-                           ticks: int) -> Iterator[Tuple[int, int]]:
-    return enumerate(
-        map(int, numpy.diff(numpy.round(numpy.linspace(0, delta, num=ticks)))))
 
 
 class SimulationRouter:
@@ -24,11 +14,10 @@ class SimulationRouter:
     Listen to all the "real-world" orders from the robot (i.e. move forward) and convert them into 
     actions inside the simulation. This is the entry point of the simulation.
     """
-    def __init__(self, configuration: Configuration, event_queue: EventQueue,
+    def __init__(self, configuration: Configuration,
                  simulation_state: SimulationState,
                  simulation_configuration: SimulationConfiguration):
         self.configuration = configuration
-        self.event_queue = event_queue
         self.simulation_state = simulation_state
         self.simulation_configuration = simulation_configuration
 

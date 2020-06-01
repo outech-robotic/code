@@ -29,7 +29,6 @@ from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
-from highlevel.simulation.controller.event_queue import EventQueue
 from highlevel.simulation.controller.runner import SimulationRunner
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
@@ -128,7 +127,6 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i.provide('replay_saver', ReplaySaver)
 
     if simulation:
-        i.provide('event_queue', EventQueue())
         i.provide('simulation_configuration', SIMULATION_CONFIG)
         i.provide('simulation_router', SimulationRouter)
         i.provide('simulation_runner', SimulationRunner)

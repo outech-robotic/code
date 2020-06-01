@@ -8,15 +8,13 @@ from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg
 
 
 @pytest.fixture(name='simulation_router')
-def simulation_router_setup(configuration_test, event_queue_mock,
-                            simulation_state_mock,
+def simulation_router_setup(configuration_test, simulation_state_mock,
                             simulation_configuration_test):
     """
     Simulation router.
     """
     return SimulationRouter(
         configuration=configuration_test,
-        event_queue=event_queue_mock,
         simulation_state=simulation_state_mock,
         simulation_configuration=simulation_configuration_test,
     )

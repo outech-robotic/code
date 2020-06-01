@@ -21,7 +21,8 @@ class TestMotorGateway:
         """
         Test that the motor gateway encodes a wheel target speed message.
         """
-        motor_gateway = MotorGateway(socket_adapter_mock, configuration_test)
+        motor_gateway = MotorGateway(motor_board_adapter=socket_adapter_mock,
+                                     configuration=configuration_test)
         await motor_gateway.set_target_speeds(10, 20)
         packet, _ = socket_adapter_mock.send.call_args
         message = BusMessage()

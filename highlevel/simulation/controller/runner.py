@@ -9,8 +9,6 @@ import numpy
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.simulation.controller.event_queue import EventQueue
-from highlevel.simulation.entity.event import EventType, EventOrder
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
@@ -27,8 +25,7 @@ class SimulationRunner:
 
     # Constructor with multiple dependencies:
     # pylint: disable=too-many-arguments,too-many-instance-attributes
-    def __init__(self, event_queue: EventQueue,
-                 simulation_gateway: SimulationGateway,
+    def __init__(self, simulation_gateway: SimulationGateway,
                  replay_saver: ReplaySaver,
                  simulation_configuration: SimulationConfiguration,
                  configuration: Configuration,
@@ -36,7 +33,6 @@ class SimulationRunner:
                  clock: FakeClock):
 
         self.clock = clock
-        self.event_queue = event_queue
         self.configuration = configuration
         self.simulation_gateway = simulation_gateway
         self.replay_saver = replay_saver
@@ -62,11 +58,6 @@ class SimulationRunner:
         rate_tick = self.simulation_configuration.tickrate
         while self.running:
             current_tick = self.tick
-            events = self.event_queue.pop()
-
-            # Process all the events.
-            for event in events:
-                await self._process_event(event)
 
             last_left = self.state.queue_speed_left[-1]
             last_right = self.state.queue_speed_right[-1]
@@ -112,18 +103,3 @@ class SimulationRunner:
         Stop the simulation from running.
         """
         self.running = False
-
-    async def _process_event(self, event: EventOrder) -> None:
-        """
-        Process an event.
-        """
-
-        if event.type == EventType.MOVE_WHEEL:
-            self.state.left_tick += event.payload['left']
-            self.state.right_tick += event.payload['right']
-
-        elif event.type == EventType.MOVEMENT_DONE:
-            await self.simulation_gateway.movement_done()
-
-        else:
-            raise RuntimeError(f"cannot handle event {event}")

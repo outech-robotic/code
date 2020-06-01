@@ -2,55 +2,57 @@
 Test for simulation runner.
 """
 import asyncio
+import dataclasses
 
 import pytest
 from pytest import fixture
 
-from highlevel.simulation.controller.event_queue import EventQueue
+from highlevel.robot.entity.configuration import Configuration
 from highlevel.simulation.controller.runner import SimulationRunner
-from highlevel.simulation.entity.event import EventOrder
+from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 
 
-@fixture(name='event_queue')
-def event_queue_setup():
+@fixture(name='configuration')
+def configuration_stub(configuration_test: Configuration) -> Configuration:
     """
-    Event queue.
+    Configuration for tests.
     """
-    return EventQueue()
+    return dataclasses.replace(
+        configuration_test,
+        encoder_update_rate=200,
+    )
+
+
+@fixture(name='simulation_configuration')
+def simulation_configuration_stub(
+    simulation_configuration_test: SimulationConfiguration
+) -> SimulationConfiguration:
+    """
+    Configuration for tests.
+    """
+    return dataclasses.replace(simulation_configuration_test,
+                               speed_factor=1,
+                               tickrate=1000)
 
 
 # pylint: disable=too-many-arguments
 @fixture(name='simulation_runner')
-def simulation_runner_factory(event_queue, simulation_gateway_mock,
-                              simulation_configuration_test,
-                              configuration_test, replay_saver_mock,
-                              simulation_state_mock, probe_mock, clock_mock):
+def simulation_runner_factory(simulation_gateway_mock,
+                              simulation_configuration, configuration,
+                              replay_saver_mock, simulation_state_mock,
+                              probe_mock, clock_mock):
     """
     Simulation runner.
     """
     return SimulationRunner(
-        event_queue=event_queue,
         simulation_gateway=simulation_gateway_mock,
-        simulation_configuration=simulation_configuration_test,
-        configuration=configuration_test,
+        simulation_configuration=simulation_configuration,
+        configuration=configuration,
         replay_saver=replay_saver_mock,
         simulation_state=simulation_state_mock,
         probe=probe_mock,
         clock=clock_mock,
     )
-
-
-@pytest.mark.asyncio
-async def test_run_incorrect_event_type(simulation_runner, event_queue):
-    """
-    An unknown event should raise an exception.
-    """
-    # Pass an incorrect event type on purpose.
-    event_queue.push(event_order=EventOrder(type='unkown'),
-                     tick_offset=0)  # type: ignore
-
-    with pytest.raises(Exception):
-        await asyncio.wait_for(simulation_runner.run(), timeout=1)
 
 
 @pytest.mark.asyncio
@@ -65,3 +67,26 @@ async def test_stop(simulation_runner):
     simulation_runner.stop()
     await asyncio.sleep(0.05)
     assert task.done() is True
+
+
+@pytest.mark.asyncio
+async def test_fill_speed_buffers(simulation_runner, simulation_state_mock,
+                                  configuration):
+    """
+    Test that if the speed buffers are filled with the same value,
+    the wheels are moved correctly at that speed.
+    """
+    update_rate = configuration.encoder_update_rate
+    task = asyncio.create_task(simulation_runner.run())
+    for _ in range(len(simulation_state_mock.queue_speed_left)):
+        simulation_state_mock.queue_speed_left.append(1000)
+        simulation_state_mock.queue_speed_left.popleft()
+    for _ in range(len(simulation_state_mock.queue_speed_right)):
+        simulation_state_mock.queue_speed_right.append(2000)
+        simulation_state_mock.queue_speed_right.popleft()
+
+    await asyncio.sleep(1.5 / update_rate)
+
+    assert simulation_state_mock.left_tick == 1000 / update_rate
+    assert simulation_state_mock.right_tick == 2000 / update_rate
+    task.cancel()
