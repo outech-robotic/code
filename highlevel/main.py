@@ -83,7 +83,7 @@ CONFIG = Configuration(
 
 SIMULATION_CONFIG = SimulationConfiguration(
     speed_factor=1e100,  # Run the simulation as fast as possible.
-    tickrate=1000,
+    tickrate=100,
     replay_fps=60,
     lidar_position_rate=11,
     obstacles=[
