@@ -50,9 +50,11 @@ class MotorGateway:
         if pid_constants.k_i * scale_factor / update_rate >= max_value_on_motor_board:
             LOGGER.get().error('pid_to_proto_ki_too_large',
                                k_i=pid_constants.k_i)
+            raise RuntimeError("PID settings do not fit in motor board structures")
         if pid_constants.k_d * scale_factor * update_rate >= max_value_on_motor_board:
             LOGGER.get().error('pid_to_proto_kd_too_large',
                                k_d=pid_constants.k_d)
+            raise RuntimeError("PID settings do not fit in motor board structures")
 
         return PIDCoefficients(
             kp=pid_constants.k_p,
