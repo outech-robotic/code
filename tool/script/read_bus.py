@@ -7,7 +7,7 @@ import time
 from google.protobuf import json_format
 from google.protobuf.message import DecodeError
 
-from highlevel.adapter.socket.socket_adapter import ISOTPSocketAdapter, ISOTPAddress
+from highlevel.adapter.socket.isotp import ISOTPSocketAdapter, ISOTPAddress
 from proto.gen.python.outech_pb2 import BusMessage
 
 t_last = time.time()
