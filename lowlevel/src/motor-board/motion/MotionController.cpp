@@ -17,13 +17,13 @@ void MotionController::init() {
     pid_speed_left.set_output_limit(CONST_PWM_MAX);
     pid_speed_left.set_anti_windup(CONST_PWM_MAX);
     pid_speed_left.set_derivative_limit(CONST_PWM_MAX);
-    pid_speed_left.set_integral_tolerance(CONST_TOLERANCE_TICKS_INIT);
+    pid_speed_left.set_integral_tolerance(0);
 
     pid_speed_right.set_coefficients(0.27, 0.22, 0.0002, MOTION_CONTROL_FREQ);
     pid_speed_right.set_output_limit(CONST_PWM_MAX);
     pid_speed_right.set_anti_windup(CONST_PWM_MAX);
     pid_speed_right.set_derivative_limit(CONST_PWM_MAX);
-    pid_speed_right.set_integral_tolerance(CONST_TOLERANCE_TICKS_INIT);
+    pid_speed_right.set_integral_tolerance(0);
 
 
     pid_position_left.set_coefficients(4.0, 0.1, 0.4, MOTION_CONTROL_FREQ);

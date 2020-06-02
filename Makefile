@@ -28,7 +28,7 @@ protoc: proto/gen/cpp/proto/outech.pb.c proto/gen/python/outech_pb2.py
 .PHONY: clean
 clean:
 	make -C highlevel clean
-	cmake --build lowlevel/cmake-build-debug --target clean
+	rm -rf lowlevel/cmake-build-debug
 
 .PHONY: candump
 candump:
@@ -38,8 +38,11 @@ candump:
 
 
 # LOW LEVEL ###################################################################################################################################
+ll_cmake_setup:
+	cmake -B lowlevel/cmake-build-debug lowlevel
+
 .PHONY: ll_build_all
-ll_build_all:
+ll_build_all: ll_cmake_setup
 	cmake --build lowlevel/cmake-build-debug --target build_motor build_motor_g4 build_servo build_servo_nucleo -j$(NPROCS) $(CMAKE_FLAGS)
 
 .PHONY: ll_flash
