@@ -8,9 +8,10 @@ from google.protobuf import json_format
 from google.protobuf.message import DecodeError
 
 from highlevel.adapter.socket.socket_adapter import ISOTPSocketAdapter, ISOTPAddress
-from proto.gen.python.outech_pb2 import BusMessage, EncoderPositionMsg
+from proto.gen.python.outech_pb2 import BusMessage
 
 t_last = time.time()
+
 
 async def main():
     global t_last
@@ -18,7 +19,6 @@ async def main():
 
     parser.add_argument('device', metavar='device', type=str,
                         help='CAN device to use. Can be virtual or physical.')
-
     parser.add_argument('id_rx', metavar='id_rx', type=int,
                         help='CAN address to accept when receiving. Should be in [0, 1023]')
     parser.add_argument('id_tx', metavar='id_tx', type=int,
@@ -42,14 +42,14 @@ async def main():
         bus_message = BusMessage()
         try:
             bus_message.ParseFromString(bytes)
-            printable_data = json_format.MessageToDict(bus_message, including_default_value_fields=True)
+            printable_data = json_format.MessageToDict(bus_message,
+                                                       including_default_value_fields=True)
             json_data = json.dumps(printable_data)
             sys.stdout.write(f'{(t - t_last) * 1000:10.3f} ms:"{name}" ' + json_data + '\n')
             sys.stdout.flush()
         except DecodeError:
             print("Protobuf couldn't decode this:", bytes)
         t_last = t
-
 
     isotp.register_callback(callback)
 
