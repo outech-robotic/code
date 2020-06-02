@@ -52,11 +52,12 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
             self.transport = transport  # type: ignore
             self.protocol = protocol  # type: ignore
             while True:
-                await asyncio.sleep(1)
+                await asyncio.sleep(1000)
 
         except ConnectionRefusedError:
-            raise RuntimeError("Error on datagram endpoint creation:" +
+            LOGGER.get().error("Error on datagram endpoint creation:" +
                                str(self.socket))
+            raise
 
     def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
         LOGGER.get().debug('isotp_socket_adapter_received',
