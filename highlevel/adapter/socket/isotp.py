@@ -6,7 +6,7 @@ import socket
 from asyncio.protocols import DatagramProtocol
 from asyncio.transports import DatagramTransport, BaseTransport
 from dataclasses import dataclass
-from typing import List, Optional, Any
+from typing import List, Optional, Tuple
 
 from highlevel.adapter.socket import SocketAdapter, CallbackFunc
 from highlevel.logger import LOGGER
@@ -58,7 +58,7 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
             raise RuntimeError("Error on datagram endpoint creation:" +
                                str(self.socket))
 
-    def datagram_received(self, data: bytes, addr) -> None:
+    def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
         LOGGER.get().debug('isotp_socket_adapter_received',
                            payload=data,
                            name=self.adapter_name,
