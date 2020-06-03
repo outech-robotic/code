@@ -14,7 +14,8 @@ from highlevel.adapter.lidar import LIDARAdapter
 from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
 from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
-from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter, LoopbackSocketAdapter
+from highlevel.adapter.socket.isotp import ISOTPAddress, ISOTPSocketAdapter
+from highlevel.adapter.socket.loopback import LoopbackSocketAdapter
 from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
@@ -34,7 +35,6 @@ from highlevel.simulation.entity.simulation_configuration import SimulationConfi
 from highlevel.simulation.entity.simulation_state import SimulationState
 from highlevel.simulation.gateway.simulation import SimulationGateway
 from highlevel.simulation.router import SimulationRouter
-from highlevel.util import tcp
 from highlevel.util.clock import RealClock, FakeClock
 from highlevel.util.dependency_container import DependencyContainer
 from highlevel.util.filter.odometry import odometry_arc
@@ -159,11 +159,11 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     if simulation or stub_socket_can:
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
     else:
-        reader, writer = await tcp.get_reader_writer('localhost', 32000)
         i.provide('motor_board_adapter',
-                  TCPSocketAdapter,
-                  reader=reader,
-                  writer=writer,
+                  ISOTPSocketAdapter,
+                  address=ISOTPAddress(device="can0",
+                                       id_reception=1,
+                                       id_transmission=0),
                   adapter_name='motor_board')
 
     return i

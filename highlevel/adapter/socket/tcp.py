@@ -1,21 +1,21 @@
 """
-Isotp socket can adapter module.
+TCP socket adapter module.
 """
-import asyncio
+
 import binascii
-from asyncio import StreamWriter, StreamReader
+from asyncio import StreamReader, StreamWriter
 from typing import List
 
-from highlevel.logger import LOGGER
 from highlevel.adapter.socket import SocketAdapter, CallbackFunc
+from highlevel.logger import LOGGER
 
 
 class TCPSocketAdapter(SocketAdapter):
     """
     Sends and receive messages from a TCP/IP socket, with the messages being encoded in ASCII:
-    <ABCD>
-    
-    ABCD is the the hexadecimal representation of the data surrounded by < and >.
+    <ABCD>\n
+
+    ABCD is the the hexadecimal representation of the data surrounded by < and >\n.
     """
     def __init__(self, reader: StreamReader, writer: StreamWriter,
                  adapter_name: str):
@@ -55,25 +55,6 @@ class TCPSocketAdapter(SocketAdapter):
         )
         self.writer.write(b'<' + hex_payload + b'>\n')
         await self.writer.drain()
-
-    def register_callback(self, callback: CallbackFunc) -> None:
-        self.callbacks.append(callback)
-
-
-class LoopbackSocketAdapter(SocketAdapter):
-    """
-    No-op adapter.
-    """
-    def __init__(self):
-        self.callbacks: List[CallbackFunc] = []
-
-    async def run(self) -> None:
-        while True:
-            await asyncio.sleep(100)
-
-    async def send(self, data: bytes) -> None:
-        for callback in self.callbacks:
-            await callback(data, "loopback")
 
     def register_callback(self, callback: CallbackFunc) -> None:
         self.callbacks.append(callback)

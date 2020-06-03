@@ -1,5 +1,5 @@
 """
-Test for SocketAdapter module.
+Test for TCP Socket adapter module.
 """
 import asyncio
 from asyncio import StreamReader, StreamWriter
@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from highlevel.adapter.socket.socket_adapter import TCPSocketAdapter
+from highlevel.adapter.socket.tcp import TCPSocketAdapter
 
 
 @asynccontextmanager
