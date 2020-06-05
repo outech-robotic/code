@@ -11,6 +11,11 @@ class SocketAdapter(ABC):
     """
     Socket adapter is an interface for sending and receiving messages from a socket.
     """
+
+    @abstractmethod
+    async def init(self):
+        """Optional async initialization function."""
+
     @abstractmethod
     async def run(self) -> None:
         """Run the message processing."""

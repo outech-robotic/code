@@ -161,7 +161,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     else:
         i.provide('motor_board_adapter',
                   ISOTPSocketAdapter,
-                  address=ISOTPAddress(device="can0",
+                  address=ISOTPAddress(device="vcan0",
                                        id_reception=1,
                                        id_transmission=0),
                   adapter_name='motor_board')
@@ -190,8 +190,8 @@ async def main() -> None:
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
+    await motor_board_adapter.init()
     motor_board_adapter.register_callback(protobuf_router.decode_message)
-
     if is_simulation:
         simulation_router: SimulationRouter = i.get('simulation_router')
         motor_board_adapter.register_callback(

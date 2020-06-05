@@ -27,6 +27,7 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
     Implements an ISO-TP compatible adapter using the can-isotp driver.
     Sets up a datagram endpoint with asyncio.
     """
+
     def __init__(self, address: ISOTPAddress, adapter_name: str):
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_DGRAM,
                                     socket.CAN_ISOTP)
@@ -37,10 +38,9 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
         self.transport: Optional[DatagramTransport] = None
         self.protocol: Optional[DatagramProtocol] = None
 
-    async def run(self) -> None:
+    async def init(self) -> None:
         """
         Binds the internal UDP socket and Starts the receiver task.
-        Does not block after it is done.
         """
         try:
             self.socket.bind(self.address)
@@ -51,37 +51,46 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
             # DatagramTransports, that have methods we need here. So we ignore the mypy errors.
             self.transport = transport  # type: ignore
             self.protocol = protocol  # type: ignore
-            while True:
-                await asyncio.sleep(1000)
-
         except ConnectionRefusedError:
             LOGGER.get().error("Error on datagram endpoint creation:" +
                                str(self.socket))
             raise
 
+    async def run(self) -> None:
+        """
+        Waits indefinitely, functions are enforced by datagram_received and send methods.
+        """
+        if self.transport is None:
+            raise RuntimeError("isotp socket adapter transport layer not setup correctly.")
+
+        while True:
+            await asyncio.sleep(1000)
+
     def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
-        LOGGER.get().debug('isotp_socket_adapter_received',
-                           payload=data,
-                           name=self.adapter_name,
-                           address=addr)
         for callback in self.callbacks:
             asyncio.get_event_loop().create_task(
                 callback(data, self.adapter_name))
 
+        LOGGER.get().debug('isotp_socket_adapter_received',
+                           payload=data,
+                           name=self.adapter_name,
+                           address=addr)
+
     def connection_made(self, transport: BaseTransport) -> None:
         self.transport = transport  # type: ignore
+
         LOGGER.get().debug('isotp_socket_adapter_connection_made',
                            transport=transport,
                            name=self.adapter_name)
 
     async def send(self, data: bytes) -> None:
         """Send a message."""
-        if self.transport is not None:
-            LOGGER.get().debug('isotp_socket_can_adapter_send',
-                               payload=data,
-                               name=self.adapter_name,
-                               addresss=self.address)
-            self.transport.sendto(data, self.address)  # type: ignore
+        self.transport.sendto(data, self.address)  # type: ignore
+
+        LOGGER.get().debug('isotp_socket_can_adapter_send',
+                           payload=data,
+                           name=self.adapter_name,
+                           addresss=self.address)
 
     def register_callback(self, callback: CallbackFunc) -> None:
         """Register a callback."""
