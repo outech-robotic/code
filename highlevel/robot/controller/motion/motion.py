@@ -8,12 +8,13 @@ from enum import Enum
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, \
-    RadianPerSec, mm_to_tick
-from highlevel.robot.gateway.motor import MotorGateway
+from highlevel.robot.gateway.motor import MotorGateway, MotorControlMode
+
 from highlevel.util.filter.pid import pid_gen
 from highlevel.util.filter.slope_limit import slope_limit_gen
 from highlevel.util.filter.trapezoid import trapezoid_gen
+from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, \
+    RadianPerSec, mm_to_tick
 
 
 class MotionResult(Enum):
@@ -41,6 +42,7 @@ class MotionStatus:
     ramp_angle: Radian
     is_arrived: bool
     is_blocked: bool
+    is_enabled: bool
 
 
 class MotionController:
@@ -65,6 +67,7 @@ class MotionController:
             ramp_angle=0.0,
             is_arrived=True,
             is_blocked=False,
+            is_enabled=True,
         )
 
         self.trapezoid_distance = trapezoid_gen(
@@ -95,14 +98,10 @@ class MotionController:
             update_rate=self.configuration.encoder_update_rate,
         )
 
-        self.output_filter_distance = slope_limit_gen(
-            2*self.configuration.max_wheel_acceleration,
-            self.configuration.encoder_update_rate)
-        self.output_filter_angle = slope_limit_gen(
-            2*self.configuration.max_angular_acceleration,
-            self.configuration.encoder_update_rate)
-
-    def _reset_ramps(self):
+    def _reset_ramps(self) -> None:
+        """
+        Resets the ramps used for distance/angle control. Initializes to current position.
+        """
         self.trapezoid_distance = trapezoid_gen(
             self.position_controller.distance_travelled,
             self.configuration.tolerance_distance,
@@ -119,6 +118,12 @@ class MotionController:
             self.configuration.encoder_update_rate,
             self.configuration.trapezoid_anticipation,
         )
+
+    def set_enabled(self, status: bool) -> None:
+        """
+        Enables or disables the motion control loop.
+        """
+        self.status.is_enabled = status
 
     def trigger_update(self) -> None:
         """
@@ -190,7 +195,6 @@ class MotionController:
             self.status.is_arrived = True
             self.status.is_blocked = False
             await self._set_target_wheel_speeds(0, 0)
-
         else:
             # Motion control algorithm update
             # Blocking detection
@@ -198,8 +202,8 @@ class MotionController:
             # Update trapezoids
             self.status.ramp_dist, speed_ramp_dist = self.trapezoid_distance.send(
                 target_dist)
-            self.status.ramp_angle, speed_ramp_angle = 0,0#self.trapezoid_angle.send(
-                #target_angle)
+            self.status.ramp_angle, speed_ramp_angle = self.trapezoid_angle.send(
+                target_angle)
 
             # Update PID
             # The PIDs take the error between the current speed and the optimal speed given
@@ -210,11 +214,6 @@ class MotionController:
             correction_pid_angle = self.pid_angle.send(
                 (self.status.ramp_angle, current_angle))
 
-            correction_pid_dist = self.output_filter_distance.send(
-                correction_pid_dist)
-            correction_pid_angle = self.output_filter_angle.send(
-                correction_pid_angle)
-
             # Add correction to speed targets, and convert angle to wheel movement
             speed_target_dist = speed_ramp_dist + correction_pid_dist
             speed_target_angle = (speed_ramp_angle + correction_pid_angle) \
@@ -224,17 +223,20 @@ class MotionController:
             speed_target_left = speed_target_dist - speed_target_angle
             speed_target_right = speed_target_dist + speed_target_angle
 
-            self.position_controller.probe.emit('encoder_left', speed_ramp_dist)
-            self.position_controller.probe.emit('encoder_right', speed_dist)
+            # self.position_controller.probe.emit('encoder_left', correction_pid_dist)
+            # self.position_controller.probe.emit('encoder_right', speed_target_dist)
+            self.position_controller.probe.emit('speed_left', distance_remaining)
+            self.position_controller.probe.emit('speed_right', speed_target_dist)
 
-            LOGGER.get().info('update', dist=distance_remaining, dist_speed_target=speed_target_dist,
+            LOGGER.get().info('update', dist=distance_remaining,
+                              dist_speed_target=speed_target_dist,
                               dist_pid=correction_pid_dist,
-                              dist_ramp=self.status.ramp_dist, pos=current_dist, dist_ramp_speed=speed_ramp_dist)
+                              dist_ramp=self.status.ramp_dist, pos=current_dist,
+                              dist_ramp_speed=speed_ramp_dist)
 
             # Set wheel targets
             await self._set_target_wheel_speeds(speed_target_left,
                                                 speed_target_right)
-
             # Wait for a new position update event
             self.position_update_event.clear()
             await self.position_update_event.wait()
@@ -250,7 +252,8 @@ class MotionController:
             'motion_controller_translate',
             distance=dist_relative,
             position=self.position_controller.position,
-            distance_current=self.position_controller.distance_travelled)
+            distance_current=self.position_controller.distance_travelled,
+            arrived=self.status.is_arrived)
 
         # Manage requests while still moving: ignore them
         if not self.status.is_arrived:
@@ -266,10 +269,19 @@ class MotionController:
         # Request to stay at the same angle
         self.status.target_angle = self.position_controller.angle
 
+        await self.motor_gateway.set_mode(MotorControlMode.SPEED)
         # Wait until movement is done, or there is a physical problem
         while not (self.status.is_arrived or self.status.is_blocked):
             await self._update()
+
         LOGGER.get().info("motion_controller_translate_done")
+
+        # Lock wheels at the current position
+        await self._set_target_wheel_positions(
+            self.position_controller.position_left,
+            self.position_controller.position_right
+        )
+        await self.motor_gateway.set_mode(MotorControlMode.POSITION)
         return MotionResult.BLOCKED if self.status.is_blocked else MotionResult.OK
 
     async def rotate(self, angle_relative: Radian) -> MotionResult:
@@ -298,8 +310,16 @@ class MotionController:
         # Request to stay at the same angle
         self.status.target_angle = self.position_controller.angle + angle_relative
 
+        await self.motor_gateway.set_mode(MotorControlMode.SPEED)
         # Wait until movement is done, or there is a physical problem
         while not (self.status.is_arrived or self.status.is_blocked):
             await self._update()
         LOGGER.get().info("motion_controller_rotate_done")
+
+        # Lock wheels at the current position
+        await self._set_target_wheel_positions(
+            self.position_controller.position_left,
+            self.position_controller.position_right
+        )
+        await self.motor_gateway.set_mode(MotorControlMode.POSITION)
         return MotionResult.BLOCKED if self.status.is_blocked else MotionResult.OK

@@ -67,8 +67,6 @@ class StrategyController:
         """
         Run the strategy.
         """
-        await self.trajectory_controller.motion_controller.motor_gateway.set_mode(
-            MotorControlMode.SPEED)
 
         while True:
             await asyncio.sleep(1000)
