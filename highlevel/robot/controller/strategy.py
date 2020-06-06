@@ -2,6 +2,7 @@
 Strategy module
 """
 
+import asyncio
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.entity.configuration import Configuration
@@ -69,6 +70,8 @@ class StrategyController:
         await self.trajectory_controller.motion_controller.motor_gateway.set_mode(
             MotorControlMode.SPEED)
 
+        while True:
+            await asyncio.sleep(1000)
         # Infinite translations to test motion
         try:
             for vec, reverse in PATH_MIRRORED:

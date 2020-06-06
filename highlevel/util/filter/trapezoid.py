@@ -5,6 +5,7 @@ from typing import Generator
 
 # pylint: disable=too-many-arguments
 from highlevel.util.type import Hz
+from highlevel.logger import LOGGER
 
 
 def _trapezoid_gen(initial_value: float, tolerance: float,
@@ -23,6 +24,8 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
     output = initial_value
     output_first_order = 0.0
 
+    LOGGER.get().info('ramp_start', output=output)
+
     # First call
     received = yield
     while True:
@@ -34,21 +37,32 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
                                         2) / (2 * max_second_order)
         direction = -1 if distance < 0 else 1
 
+        LOGGER.get().info('ramp_input', dist=distance, target=target, output=output,
+                          output_speed=output_first_order, direction=direction)
         if abs(distance) <= stop_distance:
             output_first_order = abs(
                 output_first_order) - max_second_order / update_rate
+            LOGGER.get().info('ramp_brake')
         else:
             output_first_order = abs(
                 output_first_order) + max_second_order / update_rate
             if abs(output_first_order) > max_first_order:
                 output_first_order = max_first_order
+                LOGGER.get().info('ramp_max')
+            else:
+                LOGGER.get().info('ramp_accel')
 
-        if abs(distance) > tolerance / 10:
+        if abs(distance) > tolerance:
+            LOGGER.get().info('ramp_move')
             output += direction * output_first_order / update_rate
         else:
             output = target
             output_first_order = 0
+            LOGGER.get().info('ramp_stop')
+
         # Return result and wait next input
+        LOGGER.get().info('ramp_output', dist=distance, target=target, output=output,
+                          output_speed=direction*output_first_order, direction=direction)
         received = yield output, direction * output_first_order
 
 

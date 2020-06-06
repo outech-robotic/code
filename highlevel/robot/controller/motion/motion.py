@@ -96,11 +96,29 @@ class MotionController:
         )
 
         self.output_filter_distance = slope_limit_gen(
-            self.configuration.max_wheel_acceleration,
+            2*self.configuration.max_wheel_acceleration,
             self.configuration.encoder_update_rate)
         self.output_filter_angle = slope_limit_gen(
-            self.configuration.max_angular_acceleration,
+            2*self.configuration.max_angular_acceleration,
             self.configuration.encoder_update_rate)
+
+    def _reset_ramps(self):
+        self.trapezoid_distance = trapezoid_gen(
+            self.position_controller.distance_travelled,
+            self.configuration.tolerance_distance,
+            self.configuration.max_wheel_speed,
+            self.configuration.max_wheel_acceleration,
+            self.configuration.encoder_update_rate,
+            self.configuration.trapezoid_anticipation,
+        )
+        self.trapezoid_angle = trapezoid_gen(
+            self.position_controller.angle,
+            self.configuration.tolerance_angle,
+            self.configuration.max_angular_velocity,
+            self.configuration.max_angular_acceleration,
+            self.configuration.encoder_update_rate,
+            self.configuration.trapezoid_anticipation,
+        )
 
     def trigger_update(self) -> None:
         """
@@ -180,8 +198,8 @@ class MotionController:
             # Update trapezoids
             self.status.ramp_dist, speed_ramp_dist = self.trapezoid_distance.send(
                 target_dist)
-            self.status.ramp_angle, speed_ramp_angle = self.trapezoid_angle.send(
-                target_angle)
+            self.status.ramp_angle, speed_ramp_angle = 0,0#self.trapezoid_angle.send(
+                #target_angle)
 
             # Update PID
             # The PIDs take the error between the current speed and the optimal speed given
@@ -205,6 +223,13 @@ class MotionController:
             # Update wheel targets
             speed_target_left = speed_target_dist - speed_target_angle
             speed_target_right = speed_target_dist + speed_target_angle
+
+            self.position_controller.probe.emit('encoder_left', speed_ramp_dist)
+            self.position_controller.probe.emit('encoder_right', speed_dist)
+
+            LOGGER.get().info('update', dist=distance_remaining, dist_speed_target=speed_target_dist,
+                              dist_pid=correction_pid_dist,
+                              dist_ramp=self.status.ramp_dist, pos=current_dist, dist_ramp_speed=speed_ramp_dist)
 
             # Set wheel targets
             await self._set_target_wheel_speeds(speed_target_left,
@@ -234,6 +259,8 @@ class MotionController:
         self.status.is_arrived = False
         self.status.is_blocked = False
 
+        # reset ramps so they start at the current position
+        self._reset_ramps()
         # Add the requested distance to the current distance travelled
         self.status.target_dist = self.position_controller.distance_travelled + dist_relative
         # Request to stay at the same angle
@@ -262,6 +289,9 @@ class MotionController:
 
         self.status.is_arrived = False
         self.status.is_blocked = False
+
+        # reset ramps so they start at the current position
+        self._reset_ramps()
 
         # Add the requested distance to the current distance travelled
         self.status.target_dist = self.position_controller.distance_travelled
