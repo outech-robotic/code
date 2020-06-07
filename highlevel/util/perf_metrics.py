@@ -8,7 +8,7 @@ import psutil
 
 from highlevel.logger import LOGGER
 
-INTERVAL = 1
+INTERVAL = 10
 
 
 async def print_performance_metrics() -> None:

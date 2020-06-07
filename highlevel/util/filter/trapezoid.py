@@ -15,7 +15,6 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
     Trapezoid filter implementation with a generator.
     Call with .send(target_position), returns the optimal position and derivative.
     @param initial_value: start value of the output, used for first order derivative computation.
-    @param tolerance: At what distance is it okay to stop?
     @param max_first_order: Maximum value of the first order derivative.
     @param max_second_order: Maximum value of the second order derivative.
     @param update_rate: Update rate of the filter, used to integrate derivatives.
@@ -23,9 +22,9 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
     """
     output = initial_value
     output_first_order = 0.0
+    step_second_order = max_second_order / update_rate
 
-    LOGGER.get().info('ramp_start', output=output)
-
+    LOGGER.get().info('ramp_start', tol=tolerance, start=initial_value, max_speed=max_first_order, max_acc=max_second_order)
     # First call
     received = yield
     while True:
@@ -41,24 +40,21 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
         #                   output_speed=output_first_order, direction=direction)
         if abs(distance) <= stop_distance:
             output_first_order = abs(
-                output_first_order) - max_second_order / update_rate
+                output_first_order) - step_second_order
             # LOGGER.get().info('ramp_brake')
         else:
             output_first_order = abs(
-                output_first_order) + max_second_order / update_rate
+                output_first_order) + step_second_order
             if abs(output_first_order) > max_first_order:
                 output_first_order = max_first_order
                 # LOGGER.get().info('ramp_max')
             # else:
-                # LOGGER.get().info('ramp_accel')
+            #     LOGGER.get().info('ramp_accel')
 
-        if abs(distance) > tolerance:
-            # LOGGER.get().info('ramp_move')
-            output += direction * output_first_order / update_rate
-        else:
-            output = target
+        # If the sign of the distance to target changes, stop
+        if abs(distance) < tolerance:
             output_first_order = 0
-            # LOGGER.get().info('ramp_stop')
+        output += direction * output_first_order / update_rate
 
         # Return result and wait next input
         # LOGGER.get().info('ramp_output', dist=distance, target=target, output=output,

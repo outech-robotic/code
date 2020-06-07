@@ -225,14 +225,18 @@ class MotionController:
 
             # self.position_controller.probe.emit('encoder_left', correction_pid_dist)
             # self.position_controller.probe.emit('encoder_right', speed_target_dist)
-            self.position_controller.probe.emit('speed_left', distance_remaining)
-            self.position_controller.probe.emit('speed_right', speed_target_dist)
+            self.position_controller.probe.emit('speed_left', speed_target_dist)
+            self.position_controller.probe.emit('speed_right', distance_remaining)
 
-            LOGGER.get().info('update', dist=distance_remaining,
-                              dist_speed_target=speed_target_dist,
+            LOGGER.get().info('update', delta_dist=distance_remaining,
+                              delta_angle=angle_remaining,
                               dist_pid=correction_pid_dist,
-                              dist_ramp=self.status.ramp_dist, pos=current_dist,
-                              dist_ramp_speed=speed_ramp_dist)
+                              dist_ramp=self.status.ramp_dist,
+                              angle_ramp=self.status.ramp_angle,
+                              angle_pid=correction_pid_angle,
+                              dist_speed_target=speed_target_dist,
+                              angle_speed_target=speed_target_angle,
+                              )
 
             # Set wheel targets
             await self._set_target_wheel_speeds(speed_target_left,
