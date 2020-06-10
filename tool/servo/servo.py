@@ -1,8 +1,10 @@
+import asyncio
 import socket
 from os import system
 from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 import binascii
 from time import sleep
+from highlevel.adapter.socket.isotp import ISOTPAddress, ISOTPSocketAdapter
 
 SERVOS_PORT_BASE = 14000+0x10  # base port + servo id offset
 SERVOS_ID_BASE = 0x010  # base CAN ID
@@ -32,7 +34,7 @@ def get_rx_id(id):
 def get_tx_id(id):
     return id*2
 
-def send_order(sock, msg_type, msg_id, value):
+async def send_order(sock, msg_type, msg_id, value):
     if msg_type == ORDER_SERVO:
         print("Servo order : ", msg_id, value)
         msg = MSG_SERVO
@@ -55,61 +57,53 @@ def send_order(sock, msg_type, msg_id, value):
         print("Error : type of order should be ORDER_SERVO or ORDER_PUMP")
         return
     data = msg.SerializeToString()
-    data_sent = b'<' + binascii.hexlify(data) + b'>\n'
-    sock.send(data_sent)
+    await sock.send(data)
 
 
-def send_orders_servos(sockets, servo_id, angles):
+async def send_orders_servos(sockets, servo_id, angles):
     for i in range(len(sockets)):
-        send_order(sockets[i], ORDER_SERVO, servo_id, angles[i])
+        await send_order(sockets[i], ORDER_SERVO, servo_id, angles[i])
 
 
-def main():
-    boards = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for _ in range(5)]
-
-    for i, sock in enumerate(boards):
-        port = SERVOS_PORT_BASE + i
-        can_rx = get_rx_id(SERVOS_ID_BASE + i)
-        can_tx = get_tx_id(SERVOS_ID_BASE + i)
-        can_rx = format(can_rx, 'x')
-        can_tx = format(can_tx, 'x')
-        print("CAN IDs:", can_rx, can_tx)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        print("Trying to connect to localhost:", port)
-        sock.connect(("localhost", port))
-
-    print("Sockets ready")
+async def main():
+    boards = [ISOTPSocketAdapter(ISOTPAddress("can0", get_rx_id(SERVOS_ID_BASE+i), get_tx_id(SERVOS_ID_BASE+i)), "servo"+str(i)) for i in range(5)]
+    for b in boards:
+        print(b, "ready")
+    print("Adapters ready")
 
     help_str = "Orders: \n\tO= open grabbers, T = take cups, R = reset position, ? = this message"
     print(help_str)
-
     try:
-        while True:
-            order = input()
-            if order == "?":
-                print(help_str)
-            else:
-                if order == "O":
-                    send_orders_servos(boards, 0, SERVO_ANGLES_OPEN)
-                elif order == "T":
-                    send_orders_servos(boards, 2, SERVO_ANGLES_BIG_LOW)
+        async def main_loop():
+            while True:
+                await asyncio.sleep(0.1)
+                order = input()
+                if order == "?":
+                    print(help_str)
+                else:
+                    if order == "O":
+                        await send_orders_servos(boards, 0, SERVO_ANGLES_OPEN)
+                    elif order == "T":
+                        await send_orders_servos(boards, 2, SERVO_ANGLES_BIG_LOW)
 
-                    sleep(1)
+                        await asyncio.sleep(1)
 
-                    send_orders_servos(boards, 1, SERVO_ANGLES_MID_LOW)
+                        await send_orders_servos(boards, 1, SERVO_ANGLES_MID_LOW)
 
-                    sleep(1)
-                    send_orders_servos(boards, 0, SERVO_ANGLES_CLOSE)
+                        await asyncio.sleep(1)
+                        await send_orders_servos(boards, 0, SERVO_ANGLES_CLOSE)
 
-                elif order == "R":
-                    send_orders_servos(boards, 1, SERVO_ANGLES_MID_HIGH)
-                    send_orders_servos(boards, 2, SERVO_ANGLES_BIG_HIGH)
-
+                    elif order == "R":
+                        await send_orders_servos(boards, 1, SERVO_ANGLES_MID_HIGH)
+                        await send_orders_servos(boards, 2, SERVO_ANGLES_BIG_HIGH)
+        task = asyncio.get_event_loop().create_task(main_loop())    
     except KeyboardInterrupt:
         print("Stopping, close socket")
         for b in boards:
-            b.close()
-
+           del b 
+    tasks = []
+    for b in boards:
+        tasks.append(asyncio.get_event_loop().create_task(b.run()))
+    await asyncio.sleep(10000)
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
