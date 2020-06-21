@@ -69,24 +69,6 @@ class StrategyController:
         """
         Run the strategy.
         """
-        await asyncio.sleep(3)
-
-        pos_init = self.configuration.initial_position
-        while True:
-            await asyncio.sleep(2)
-            await self.trajectory_controller.move_to(pos_init + Vector2(500, 0), False)
-            await self.trajectory_controller.move_to(pos_init + Vector2(500, 250), False)
-            await self.trajectory_controller.move_to(pos_init + Vector2(0, 250), False)
-            await self.trajectory_controller.move_to(pos_init + Vector2(0, 0), False)
-            await asyncio.sleep(1)
-            await self.trajectory_controller.motion_controller.rotate(-3*math.pi/2)
-
-            # await self.trajectory_controller.motion_controller.rotate(math.pi/2)
-            # await asyncio.sleep(1)
-            # await self.trajectory_controller.motion_controller.rotate(-math.pi/2)
-            # await asyncio.sleep(1)
-            # await self.trajectory_controller.motion_controller.rotate(-math.pi/2)
-
         # Infinite translations to test motion
         try:
             for vec, reverse in PATH_MIRRORED:
