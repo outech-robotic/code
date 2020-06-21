@@ -2,7 +2,7 @@
 Trapezoid functions
 """
 from typing import Generator
-from highlevel.logger import LOGGER
+
 from highlevel.util.type import Hz
 
 
@@ -32,7 +32,7 @@ def _slope_limit_gen(max_derivative: float, update_rate: Hz) -> Generator:
         else:
             output_value = input_value
         output_last = output_value
-        
+
         # Return result and wait next input
         received = yield output_value
 

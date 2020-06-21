@@ -9,9 +9,7 @@ from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.gateway.motor import MotorGateway, MotorControlMode
-
 from highlevel.util.filter.pid import pid_gen
-from highlevel.util.filter.slope_limit import slope_limit_gen
 from highlevel.util.filter.trapezoid import trapezoid_gen
 from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, \
     RadianPerSec, mm_to_tick
@@ -223,21 +221,6 @@ class MotionController:
             speed_target_left = speed_target_dist - speed_target_angle
             speed_target_right = speed_target_dist + speed_target_angle
 
-            # self.position_controller.probe.emit('encoder_left', correction_pid_dist)
-            # self.position_controller.probe.emit('encoder_right', speed_target_dist)
-            self.position_controller.probe.emit('speed_left', speed_target_dist)
-            self.position_controller.probe.emit('speed_right', distance_remaining)
-
-            LOGGER.get().info('update', delta_dist=distance_remaining,
-                              delta_angle=angle_remaining,
-                              dist_pid=correction_pid_dist,
-                              dist_ramp=self.status.ramp_dist,
-                              angle_ramp=self.status.ramp_angle,
-                              angle_pid=correction_pid_angle,
-                              dist_speed_target=speed_target_dist,
-                              angle_speed_target=speed_target_angle,
-                              )
-
             # Set wheel targets
             await self._set_target_wheel_speeds(speed_target_left,
                                                 speed_target_right)
@@ -283,8 +266,7 @@ class MotionController:
         # Lock wheels at the current position
         await self._set_target_wheel_positions(
             self.position_controller.position_left,
-            self.position_controller.position_right
-        )
+            self.position_controller.position_right)
         await self.motor_gateway.set_mode(MotorControlMode.POSITION)
         return MotionResult.BLOCKED if self.status.is_blocked else MotionResult.OK
 
@@ -323,7 +305,6 @@ class MotionController:
         # Lock wheels at the current position
         await self._set_target_wheel_positions(
             self.position_controller.position_left,
-            self.position_controller.position_right
-        )
+            self.position_controller.position_right)
         await self.motor_gateway.set_mode(MotorControlMode.POSITION)
         return MotionResult.BLOCKED if self.status.is_blocked else MotionResult.OK

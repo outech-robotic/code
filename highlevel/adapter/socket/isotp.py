@@ -27,7 +27,6 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
     Implements an ISO-TP compatible adapter using the can-isotp driver.
     Sets up a datagram endpoint with asyncio.
     """
-
     def __init__(self, address: ISOTPAddress, adapter_name: str):
         self.socket = socket.socket(socket.AF_CAN, socket.SOCK_DGRAM,
                                     socket.CAN_ISOTP)
@@ -61,7 +60,8 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
         Waits indefinitely, functions are enforced by datagram_received and send methods.
         """
         if self.transport is None:
-            raise RuntimeError("isotp socket adapter transport layer not setup correctly.")
+            raise RuntimeError(
+                "isotp socket adapter transport layer not setup correctly.")
 
         while True:
             await asyncio.sleep(1000)

@@ -15,6 +15,9 @@ class LoopbackSocketAdapter(SocketAdapter):
     def __init__(self):
         self.callbacks: List[CallbackFunc] = []
 
+    async def init(self) -> None:
+        pass
+
     async def run(self) -> None:
         while True:
             await asyncio.sleep(100)
