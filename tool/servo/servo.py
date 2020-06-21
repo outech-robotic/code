@@ -30,7 +30,7 @@ servo_2_put = 60
 # Big servo for high/low positions
 OFFSET_2_UP  = [18, 15, 18, 0, 0]
 OFFSET_2_TAKE= [0, -5, -5, -20, -16]
-OFFSET_2_PUT = [0, 0, 0, 0, 0]
+OFFSET_2_PUT = [0, -5, -5, -20, -16]
 
 # Middle knee servo for high/lower position
 OFFSET_1_UP   = [0, 0, 0, 0, 0]
@@ -101,7 +101,6 @@ async def main():
     async def main_test_angles():
         while True:
             await asyncio.sleep(0.1)
-            print("Heyyah")
             servo = int(input("Entrer un id de servo: 0/1/2\n"))
             val = int(input("Entrer un angle: 0...180\n"))
             print(servo, val)
@@ -115,9 +114,13 @@ async def main():
     async def main_loop():
         # while True:
         #     await loop_angles(boards, 90, 91)
+        i = 0
+        seq = ["r", "o", "t", "r", "p"]
         while True:
-            await asyncio.sleep(0.1)
-            order = input("Entrer ordre: r/o/t/p/?\n")
+            await asyncio.sleep(1)
+            #order = input("Entrer ordre: r/o/t/p/?\n")
+            order = seq[i]
+            i = (i + 1) % len(seq)
             if order == "?":
                 print(help_str)
             else:
