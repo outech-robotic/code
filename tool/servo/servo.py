@@ -112,8 +112,6 @@ async def main():
             else:
                 print("Wrong value")
     async def main_loop():
-        # while True:
-        #     await loop_angles(boards, 90, 91)
         i = 0
         seq = ["r", "o", "t", "r", "p"]
         while True:
