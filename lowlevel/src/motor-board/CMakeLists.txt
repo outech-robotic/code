@@ -36,6 +36,7 @@ add_definitions(-DHSE_VALUE=8000000)
 add_definitions(-DHSI_VALUE=8000000)
 add_definitions(-DF_CPU=48000000)
 add_definitions(-DSTM32F042x6)
+add_definitions(-DNUCLEO)
 
 
 # INCLUDE DIRECTORIES

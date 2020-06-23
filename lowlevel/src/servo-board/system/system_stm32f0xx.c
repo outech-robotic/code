@@ -146,7 +146,7 @@ void SystemClock_Config(void) {
 
   }
   LL_SetSystemCoreClock(48000000);
-  LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK1);
+  LL_SYSTICK_SetClkSource(LL_SYSTICK_CLKSOURCE_HCLK);
 #endif
 }
 
@@ -170,7 +170,7 @@ void SystemInit(void) {
 
   /* Configure the system clock */
   SystemClock_Config();
-  LL_Init1msTick(48000000);
+//  LL_Init1msTick(48000000);
   Timing_init();
 }
 

@@ -1,8 +1,10 @@
+import asyncio
 import socket
 from os import system
 from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 import binascii
 from time import sleep
+from highlevel.adapter.socket.isotp import ISOTPAddress, ISOTPSocketAdapter
 
 SERVOS_PORT_BASE = 14000+0x10  # base port + servo id offset
 SERVOS_ID_BASE = 0x010  # base CAN ID
@@ -13,17 +15,30 @@ MSG_PUMP = BusMessage(pumpAndValve=PumpAndValveMsg())
 ORDER_SERVO = 0
 ORDER_PUMP = 1
 
+servo_0_open = 180
+servo_0_close = 50
+
+servo_1_up = 75
+servo_1_down = 180
+
+servo_2_up = 120
+servo_2_take = 55
+servo_2_put = 60
+
+# OFFSETS PER SERVO
+# Right of robot to left
 # Big servo for high/low positions
-SERVO_ANGLES_BIG_LOW = [40, 10, 30, 30, 30]  # left r right
-SERVO_ANGLES_BIG_HIGH = [180, 150, 160, 160, 160]  # left r right
+OFFSET_2_UP  = [18, 15, 18, 0, 0]
+OFFSET_2_TAKE= [0, -5, -5, -20, -16]
+OFFSET_2_PUT = [0, -5, -5, -20, -16]
 
 # Middle knee servo for high/lower position
-SERVO_ANGLES_MID_LOW = [0, 0, 0, 0, 0]  # left r right
-SERVO_ANGLES_MID_HIGH = [120, 120, 120, 120, 120]  # left r right
+OFFSET_1_UP   = [0, 0, 0, 0, 0]
+OFFSET_1_DOWN = [0, 0, 0, 0, 0]
 
 # Gripper open/close
-SERVO_ANGLES_OPEN = [180, 180, 180, 180, 180]
-SERVO_ANGLES_CLOSE = [20, 20, 20, 20, 20]
+OFFSET_0_OPEN  = [0, 0, 0, 0, 0]
+OFFSET_0_CLOSE = [0, 0, 0, 0, 0]
 
 
 def get_rx_id(id):
@@ -32,7 +47,7 @@ def get_rx_id(id):
 def get_tx_id(id):
     return id*2
 
-def send_order(sock, msg_type, msg_id, value):
+async def send_order(sock, msg_type, msg_id, value):
     if msg_type == ORDER_SERVO:
         print("Servo order : ", msg_id, value)
         msg = MSG_SERVO
@@ -54,62 +69,93 @@ def send_order(sock, msg_type, msg_id, value):
     else:
         print("Error : type of order should be ORDER_SERVO or ORDER_PUMP")
         return
+    print(sock, msg_type, msg_id, value, msg)
     data = msg.SerializeToString()
-    data_sent = b'<' + binascii.hexlify(data) + b'>\n'
-    sock.send(data_sent)
+    await sock.send(data)
 
 
-def send_orders_servos(sockets, servo_id, angles):
+async def send_orders_servos(sockets, servo_id, angle, offsets):
     for i in range(len(sockets)):
-        send_order(sockets[i], ORDER_SERVO, servo_id, angles[i])
+        await send_order(sockets[i], ORDER_SERVO, servo_id, angle+offsets[i])
 
+async def loop_angles(boards, start, end):
+    msg = MSG_SERVO 
+    for i in range(start, end):
+        msg.servo.angle = i
+        for b in boards:
+            for id in range(3):
+                msg.servo.id = id
+                payload = msg.SerializeToString()
+                await b.send(payload)
+        await asyncio.sleep(0.1)
 
-def main():
-    boards = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for _ in range(5)]
+async def main():
+    boards = [ISOTPSocketAdapter(ISOTPAddress("can0", get_rx_id(SERVOS_ID_BASE+i), get_tx_id(SERVOS_ID_BASE+i)), "servo"+str(i)) for i in range(5)]
+    for b in boards:
+        print(b, "ready")
+    print("Adapters ready")
 
-    for i, sock in enumerate(boards):
-        port = SERVOS_PORT_BASE + i
-        can_rx = get_rx_id(SERVOS_ID_BASE + i)
-        can_tx = get_tx_id(SERVOS_ID_BASE + i)
-        can_rx = format(can_rx, 'x')
-        can_tx = format(can_tx, 'x')
-        print("CAN IDs:", can_rx, can_tx)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-        print("Trying to connect to localhost:", port)
-        sock.connect(("localhost", port))
-
-    print("Sockets ready")
-
-    help_str = "Orders: \n\tO= open grabbers, T = take cups, R = reset position, ? = this message"
+    help_str = "Orders: \n\to= open grabbers, t = take cups, p = put cups, r = reset position (up), ? = this message"
     print(help_str)
 
-    try:
+    async def main_test_angles():
         while True:
-            order = input()
+            await asyncio.sleep(0.1)
+            servo = int(input("Entrer un id de servo: 0/1/2\n"))
+            val = int(input("Entrer un angle: 0...180\n"))
+            print(servo, val)
+            if 0 <= val <= 180:
+                print(val)
+                vals = [val for _ in boards]
+                print(vals)
+                await send_orders_servos(boards, servo, vals)
+            else:
+                print("Wrong value")
+    async def main_loop():
+        # while True:
+        #     await loop_angles(boards, 90, 91)
+        i = 0
+        seq = ["r", "o", "t", "r", "p"]
+        while True:
+            await asyncio.sleep(1)
+            #order = input("Entrer ordre: r/o/t/p/?\n")
+            order = seq[i]
+            i = (i + 1) % len(seq)
             if order == "?":
                 print(help_str)
             else:
-                if order == "O":
-                    send_orders_servos(boards, 0, SERVO_ANGLES_OPEN)
-                elif order == "T":
-                    send_orders_servos(boards, 2, SERVO_ANGLES_BIG_LOW)
+                if order == "o":
+                    await send_orders_servos(boards, 0, servo_0_open, OFFSET_0_OPEN)
+                elif order == "t":
+                    await send_orders_servos(boards, 2, servo_2_take, OFFSET_2_TAKE)
 
-                    sleep(1)
+                    await asyncio.sleep(1)
 
-                    send_orders_servos(boards, 1, SERVO_ANGLES_MID_LOW)
+                    await send_orders_servos(boards, 1, servo_1_down, OFFSET_1_DOWN)
 
-                    sleep(1)
-                    send_orders_servos(boards, 0, SERVO_ANGLES_CLOSE)
+                    await asyncio.sleep(1)
+                    await send_orders_servos(boards, 0, servo_0_close, OFFSET_0_CLOSE)
+                elif order == "p":
+                    await send_orders_servos(boards, 2, servo_2_put, OFFSET_2_PUT)
 
-                elif order == "R":
-                    send_orders_servos(boards, 1, SERVO_ANGLES_MID_HIGH)
-                    send_orders_servos(boards, 2, SERVO_ANGLES_BIG_HIGH)
+                    await asyncio.sleep(1)
 
-    except KeyboardInterrupt:
-        print("Stopping, close socket")
-        for b in boards:
-            b.close()
+                    await send_orders_servos(boards, 1, servo_1_down, OFFSET_1_DOWN)
 
+                    await asyncio.sleep(1)
+
+                    await send_orders_servos(boards, 0, servo_0_open, OFFSET_0_OPEN)
+
+                    await asyncio.sleep(1)
+
+                    await send_orders_servos(boards, 2, servo_2_up, OFFSET_2_UP)
+                elif order == "r":
+                    await send_orders_servos(boards, 1, servo_1_up, OFFSET_1_UP)
+                    await send_orders_servos(boards, 2, servo_2_up, OFFSET_2_UP)
+    main_task = asyncio.get_event_loop().create_task(main_loop())    
+    tasks = []
+    for b in boards:
+        tasks.append(asyncio.get_event_loop().create_task(b.run()))
+    await asyncio.sleep(10000)
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
