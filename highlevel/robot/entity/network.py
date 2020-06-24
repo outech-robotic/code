@@ -8,10 +8,16 @@ from highlevel.adapter.socket.isotp import ISOTPAddress
 
 
 def net_get_tx_id(start_id: int, index: int) -> int:
+    """
+    Returns the transmission id of a board, given its type's start_id and its index.
+    """
     return 2 * (start_id + index)
 
 
 def net_get_rx_id(tx_id: int) -> int:
+    """
+    Returns the reception id of a board given its transmission id.
+    """
     return tx_id + 1
 
 
@@ -20,12 +26,13 @@ NB_SERVO_BOARDS = 7
 
 # ISOTP ADDRESS OBJECTS FOR BOARDS
 NET_MOTOR_BOARD = ISOTPAddress(CAN_DEVICE, 1, 0)
-NET_SERVO_BOARDS = [ISOTPAddress(CAN_DEVICE,
-                                 net_get_rx_id(net_get_tx_id(0x10, i)),
-                                 net_get_tx_id(0x10, i)
-                                 ) for i in range(0, NB_SERVO_BOARDS)]
+NET_SERVO_BOARDS = [
+    ISOTPAddress(CAN_DEVICE, net_get_rx_id(net_get_tx_id(0x10, i)),
+                 net_get_tx_id(0x10, i)) for i in range(0, NB_SERVO_BOARDS)
+]
 
-class BOARD_IDS(Enum):
+
+class BoardID(Enum):
     """
     Board transmission IDs, used as they ID in this program.
     To get the reception id, add 1.
