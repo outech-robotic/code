@@ -40,7 +40,6 @@ class MotionStatus:
     ramp_angle: Radian
     is_arrived: bool
     is_blocked: bool
-    is_enabled: bool
 
 
 class MotionController:
@@ -65,7 +64,6 @@ class MotionController:
             ramp_angle=0.0,
             is_arrived=True,
             is_blocked=False,
-            is_enabled=True,
         )
 
         self.trapezoid_distance = trapezoid_gen(
@@ -116,12 +114,6 @@ class MotionController:
             self.configuration.encoder_update_rate,
             self.configuration.trapezoid_anticipation,
         )
-
-    def set_enabled(self, status: bool) -> None:
-        """
-        Enables or disables the motion control loop.
-        """
-        self.status.is_enabled = status
 
     def trigger_update(self) -> None:
         """
