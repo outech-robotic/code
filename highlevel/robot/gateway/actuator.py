@@ -16,8 +16,8 @@ class ActuatorGateway:
     def __init__(self, servo_adapters_list: List[SocketAdapter]):
         """
         Initializes the gateway with a given number of adapters.
-        @param servo_adapters_list: list of Socket Adapters. It is assumed they're ready to transmit.
-        There should be at least one.
+        @param servo_adapters_list: list of Socket Adapters.
+        It is assumed they're ready to transmit. There should be at least one.
         """
         self._servo_board_adapters = servo_adapters_list
         if len(servo_adapters_list) == 0:

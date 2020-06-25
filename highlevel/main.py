@@ -15,7 +15,7 @@ from highlevel.adapter.lidar import LIDARAdapter
 from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
 from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
-from highlevel.adapter.socket.isotp import ISOTPAddress, ISOTPSocketAdapter
+from highlevel.adapter.socket.isotp import ISOTPSocketAdapter
 from highlevel.adapter.socket.loopback import LoopbackSocketAdapter
 from highlevel.adapter.web_browser import WebBrowserClient
 from highlevel.robot.controller.debug import DebugController
@@ -59,7 +59,7 @@ CONFIG = Configuration(
     distance_between_wheels=364.26,  # old: 357
     encoder_update_rate=100,
     motor_update_rate=1000,
-    pid_scale_factor=2**16,
+    pid_scale_factor=2 ** 16,
     max_wheel_speed=600,
     max_wheel_acceleration=1000,
     max_angular_velocity=1.0 * math.pi,
@@ -171,7 +171,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         for index in range(NB_SERVO_BOARDS):
             servo_adapter_list.append(ISOTPSocketAdapter(
                 address=NET_ADDRESSES_SERVO[index],
-                adapter_name="servo_board_"+str(index)
+                adapter_name="servo_board_" + str(index)
             ))
     i.provide('servo_adapters_list', servo_adapter_list)
     return i
