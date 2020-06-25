@@ -75,6 +75,6 @@ class StrategyController:
                 LOGGER.get().info("strategy_controller_follow_path",
                                   destination=vec)
                 await self.trajectory_controller.move_to(
-                    Vector2(vec.x, 2000 - vec.y), reverse)
+                    Vector2(vec.x, vec.y), reverse)
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol
