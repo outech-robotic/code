@@ -4,6 +4,7 @@ Servo gateway module.
 from typing import List
 
 from highlevel.adapter.socket import SocketAdapter
+from highlevel.logger import LOGGER
 from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 
 
@@ -52,6 +53,10 @@ class ActuatorGateway:
         msg.servo.id = servo_id
         msg.servo.angle = angle
         await self._send_message(board_id, msg)
+        LOGGER.get().info('actuator_gw_move_servo',
+                           board_id=board_id,
+                           servo_id=servo_id,
+                           angle=angle)
 
     async def control_pump(self, board_id: int, pin: int,
                            status: bool) -> None:
@@ -67,3 +72,7 @@ class ActuatorGateway:
         msg.pumpAndValve.id = pin
         msg.pumpAndValve.on = status
         await self._send_message(board_id, msg)
+        LOGGER.get().debug('actuator_gw_control_pump',
+                           board_id=board_id,
+                           pin=pin,
+                           status=status)

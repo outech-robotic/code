@@ -3,6 +3,7 @@ Strategy module
 """
 
 from highlevel.logger import LOGGER
+from highlevel.robot.controller.actuator import ActuatorController
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.util.geometry.vector import Vector2
@@ -56,17 +57,23 @@ class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
     """
-    def __init__(self, trajectory_controller: TrajectoryController,
+    def __init__(self,
+                 trajectory_controller: TrajectoryController,
+                 actuator_controller: ActuatorController,
                  configuration: Configuration):
         self.configuration = configuration
         self.trajectory_controller = trajectory_controller
+        self.actuator_controller = actuator_controller
 
     async def run(self) -> None:
         """
         Run the strategy.
         """
-        # Infinite translations to test motion
         try:
+            for i in range(5):
+                await self.actuator_controller.arm_front_reinitialize(i)
+                await self.actuator_controller.arm_front_close(i)
+
             for vec, reverse in PATH_MIRRORED:
                 LOGGER.get().info("strategy_controller_follow_path",
                                   destination=vec)

@@ -18,6 +18,7 @@ from highlevel.adapter.socket import SocketAdapter
 from highlevel.adapter.socket.isotp import ISOTPSocketAdapter
 from highlevel.adapter.socket.loopback import LoopbackSocketAdapter
 from highlevel.adapter.web_browser import WebBrowserClient
+from highlevel.robot.controller.actuator import ActuatorController
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.motion import MotionController
@@ -30,6 +31,7 @@ from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
 from highlevel.robot.entity.network import NB_SERVO_BOARDS, NET_ADDRESSES_SERVO, NET_ADDRESS_MOTOR
+from highlevel.robot.gateway.actuator import ActuatorGateway
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
 from highlevel.simulation.controller.runner import SimulationRunner
@@ -174,6 +176,8 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                 adapter_name="servo_board_" + str(index)
             ))
     i.provide('servo_adapters_list', servo_adapter_list)
+    i.provide('actuator_gateway', ActuatorGateway)
+    i.provide('actuator_controller', ActuatorController)
     return i
 
 
