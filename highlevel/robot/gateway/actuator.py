@@ -13,14 +13,14 @@ class ActuatorGateway:
     Actuator Gateway.
     Used to control Servo Boards, which may be connected to pumps and valves too.
     """
-    def __init__(self, adapter_list: List[SocketAdapter]):
+    def __init__(self, servo_adapters_list: List[SocketAdapter]):
         """
         Initializes the gateway with a given number of adapters.
-        @param adapter_list: list of Socket Adapters. It is assumed they're ready to transmit.
+        @param servo_adapters_list: list of Socket Adapters. It is assumed they're ready to transmit.
         There should be at least one.
         """
-        self._servo_board_adapters = adapter_list
-        if len(adapter_list) == 0:
+        self._servo_board_adapters = servo_adapters_list
+        if len(servo_adapters_list) == 0:
             raise RuntimeError(
                 "Adapter List given to Actuator Gateway is invalid.")
 
