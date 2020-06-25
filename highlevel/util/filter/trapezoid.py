@@ -14,7 +14,6 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
     Trapezoid filter implementation with a generator.
     Call with .send(target_position), returns the optimal position and derivative.
     @param initial_value: start value of the output, used for first order derivative computation.
-    @param tolerance: At what distance is it okay to stop?
     @param max_first_order: Maximum value of the first order derivative.
     @param max_second_order: Maximum value of the second order derivative.
     @param update_rate: Update rate of the filter, used to integrate derivatives.
@@ -22,6 +21,7 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
     """
     output = initial_value
     output_first_order = 0.0
+    step_second_order = max_second_order / update_rate
 
     # First call
     received = yield
@@ -35,19 +35,17 @@ def _trapezoid_gen(initial_value: float, tolerance: float,
         direction = -1 if distance < 0 else 1
 
         if abs(distance) <= stop_distance:
-            output_first_order = abs(
-                output_first_order) - max_second_order / update_rate
+            output_first_order = abs(output_first_order) - step_second_order
         else:
-            output_first_order = abs(
-                output_first_order) + max_second_order / update_rate
+            output_first_order = abs(output_first_order) + step_second_order
             if abs(output_first_order) > max_first_order:
                 output_first_order = max_first_order
 
-        if abs(distance) > tolerance / 10:
-            output += direction * output_first_order / update_rate
-        else:
-            output = target
+        # If the sign of the distance to target changes, stop
+        if abs(distance) < tolerance:
             output_first_order = 0
+        output += direction * output_first_order / update_rate
+
         # Return result and wait next input
         received = yield output, direction * output_first_order
 

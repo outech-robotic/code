@@ -5,11 +5,11 @@ import math
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, RadianPerSec, \
-    tick_to_mm
 from highlevel.util.filter.odometry import OdometryFunc
 from highlevel.util.geometry.vector import Vector2
 from highlevel.util.probe import Probe
+from highlevel.util.type import Millimeter, Radian, MillimeterPerSec, RadianPerSec, \
+    tick_to_mm
 
 
 # Attributes could be merged, but it is clearer this way
@@ -33,6 +33,7 @@ class PositionController:
         self.position_right_last: Millimeter = 0.0
         self.position_left: Millimeter = 0.0
         self.position_right: Millimeter = 0.0
+        self.distance_init: Millimeter = 0.0
         self.initialized = False
 
     def update_odometry(self, tick_left: int, tick_right: int) -> None:
@@ -54,6 +55,7 @@ class PositionController:
         if not self.initialized:
             self.position_left_last = self.position_left
             self.position_right_last = self.position_right
+            self.distance_init = (self.position_left + self.position_right) / 2
             self.initialized = True
             return
 
@@ -64,8 +66,8 @@ class PositionController:
             self.position_right - self.position_right_last, self.position,
             self.angle, self.configuration)
 
-        self.distance_travelled = (self.position_left +
-                                   self.position_right) / 2
+        self.distance_travelled = ((self.position_left + self.position_right) /
+                                   2) - self.distance_init
 
         LOGGER.get().debug('position_controller_update_odometry',
                            left_tick=tick_left,

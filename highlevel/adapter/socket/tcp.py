@@ -24,6 +24,9 @@ class TCPSocketAdapter(SocketAdapter):
         self.adapter_name = adapter_name
         self.callbacks: List[CallbackFunc] = []
 
+    async def init(self) -> None:
+        pass
+
     async def run(self) -> None:
         try:
             await self._run()

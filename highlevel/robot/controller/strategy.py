@@ -5,7 +5,6 @@ Strategy module
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.robot.gateway.motor import MotorControlMode
 from highlevel.util.geometry.vector import Vector2
 
 PATH = [
@@ -66,9 +65,6 @@ class StrategyController:
         """
         Run the strategy.
         """
-        await self.trajectory_controller.motion_controller.motor_gateway.set_mode(
-            MotorControlMode.SPEED)
-
         # Infinite translations to test motion
         try:
             for vec, reverse in PATH_MIRRORED:
