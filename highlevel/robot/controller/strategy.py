@@ -6,6 +6,7 @@ from highlevel.logger import LOGGER
 from highlevel.robot.controller.actuator import ActuatorController
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.entity.configuration import Configuration
+from highlevel.robot.entity.network import BoardIDs
 from highlevel.util.geometry.vector import Vector2
 
 PATH = [
@@ -57,6 +58,7 @@ class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
     """
+
     def __init__(self,
                  trajectory_controller: TrajectoryController,
                  actuator_controller: ActuatorController,
@@ -70,14 +72,17 @@ class StrategyController:
         Run the strategy.
         """
         try:
-            for i in range(5):
-                await self.actuator_controller.arm_front_reinitialize(i)
-                await self.actuator_controller.arm_front_close(i)
+            arms = [BoardIDs.ARM_RIGHT,
+                    BoardIDs.ARM_CENTER_RIGHT,
+                    BoardIDs.ARM_CENTER,
+                    BoardIDs.ARM_CENTER_LEFT,
+                    BoardIDs.ARM_LEFT]
+            await self.actuator_controller.arms_front_close(arms)
+            await self.actuator_controller.arms_front_reinitialize(arms)
 
             for vec, reverse in PATH_MIRRORED:
                 LOGGER.get().info("strategy_controller_follow_path",
                                   destination=vec)
-                await self.trajectory_controller.move_to(
-                    Vector2(vec.x, vec.y), reverse)
+                await self.trajectory_controller.move_to(Vector2(vec.x, vec.y), reverse)
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol

@@ -2,7 +2,9 @@
 Actuator controller module.
 """
 import asyncio
+from typing import List
 
+from highlevel.robot.entity.network import BoardIDs, ID_OFFSET_SERVO
 from highlevel.robot.gateway.actuator import ActuatorGateway
 from highlevel.util.type import Millisecond
 
@@ -36,46 +38,70 @@ class ActuatorController:
     """
     Actuator controller class. Allows *high level* control of actuators (arms, pumps, doors...).
     => any moving part of the robot that is not related to the robot's locomotion or sensing.
+    The various board_ids can be found in the BoardIDs enum in the network configuration.
     """
 
     def __init__(self, actuator_gateway: ActuatorGateway):
         self.actuator_gateway = actuator_gateway
 
-    async def arm_front_reinitialize(self, index: int) -> None:
+    def _get_board_index_from_ids(self, board_ids: List[BoardIDs]) -> List[int]:
+        """
+        Removes the servo board offset from the input list.
+        """
+        return [board_id - ID_OFFSET_SERVO for board_id in board_ids]
+
+    async def arms_front_reinitialize(self, board_ids: List[BoardIDs]) -> None:
         """
         Puts the requested front arm to an initial "up" position, retracted.
         """
-        await self.actuator_gateway.move_servo(index, 1, _servo_1_up + _OFFSET_1_UP[index])
-        await self.actuator_gateway.move_servo(index, 2, _servo_2_up + _OFFSET_2_UP[index])
+        indices = self._get_board_index_from_ids(board_ids)
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 1, _servo_1_up + _OFFSET_1_UP[index])
+            await self.actuator_gateway.move_servo(index, 2, _servo_2_up + _OFFSET_2_UP[index])
 
-    async def arm_front_open(self, index: int) -> None:
+    async def arms_front_open(self, board_ids: List[BoardIDs]) -> None:
         """
         Opens a given front arm's gripper.
         """
-        await self.actuator_gateway.move_servo(index, 0, _servo_0_open + _OFFSET_0_OPEN[index])
+        indices = self._get_board_index_from_ids(board_ids)
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 0, _servo_0_open + _OFFSET_0_OPEN[index])
 
-    async def arm_front_close(self, index: int) -> None:
+    async def arms_front_close(self, board_ids: List[BoardIDs]) -> None:
         """
         Closes a given front arm's gripper.
         """
-        await self.actuator_gateway.move_servo(index, 0, _servo_0_close + _OFFSET_0_CLOSE[index])
+        indices = self._get_board_index_from_ids(board_ids)
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 0,
+                                                   _servo_0_close + _OFFSET_0_CLOSE[index])
 
-    async def arm_front_lower_take(self, index: int, delay: Millisecond) -> None:
+    async def arms_front_lower_take(self, board_ids: List[BoardIDs], delay: Millisecond) -> None:
         """
         Lowers a front arm in two steps with a delay in between. First the main servo moves, then
         the smaller one.
         The "take" position is a bit lower than the "put" one.
         """
-        await self.actuator_gateway.move_servo(index, 2, _servo_2_take + _OFFSET_2_TAKE[index])
-        await asyncio.sleep(delay / 1000)
-        await self.actuator_gateway.move_servo(index, 1, _servo_1_down + _OFFSET_1_DOWN[index])
+        indices = self._get_board_index_from_ids(board_ids)
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 2, _servo_2_take + _OFFSET_2_TAKE[index])
 
-    async def arm_front_lower_put(self, index: int, delay: Millisecond) -> None:
+        await asyncio.sleep(delay / 1000)
+
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 1, _servo_1_down + _OFFSET_1_DOWN[index])
+
+    async def arms_front_lower_put(self, board_ids: List[BoardIDs], delay: Millisecond) -> None:
         """
         Lowers a front arm in two steps with a delay in between. First the main servo moves, then
         the smaller one.
         The "take" position is a bit lower than the "put" one.
         """
-        await self.actuator_gateway.move_servo(index, 2, _servo_2_put + _OFFSET_2_PUT[index])
+        indices = self._get_board_index_from_ids(board_ids)
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 2, _servo_2_put + _OFFSET_2_PUT[index])
+
         await asyncio.sleep(delay / 1000)
-        await self.actuator_gateway.move_servo(index, 1, _servo_1_down + _OFFSET_1_DOWN[index])
+
+        for index in indices:
+            await self.actuator_gateway.move_servo(index, 1, _servo_1_down + _OFFSET_1_DOWN[index])
