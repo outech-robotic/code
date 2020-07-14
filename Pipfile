@@ -30,6 +30,7 @@ python-can = "*"
 colorama = "*"
 psutil = "*"
 aiohttp = "*"
+pathfinding = "*"
 
 [requires]
 python_version = "3.7"
