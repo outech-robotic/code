@@ -205,6 +205,7 @@ async def main() -> None:
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
+    await motor_board_adapter.init()
     motor_board_adapter.register_callback(protobuf_router.decode_message)
     if is_simulation:
         simulation_router: SimulationRouter = i.get('simulation_router')
