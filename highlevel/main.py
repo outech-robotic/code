@@ -54,31 +54,31 @@ CONFIG = Configuration(
     color=Color.BLUE,
     wheel_radius=73.8 / 2,
     encoder_ticks_per_revolution=2400,
-    distance_between_wheels=357,
+    distance_between_wheels=364.26,  # old: 357
     encoder_update_rate=100,
     motor_update_rate=1000,
     pid_scale_factor=2**16,
     max_wheel_speed=600,
     max_wheel_acceleration=1000,
     max_angular_velocity=1.0 * math.pi,
-    max_angular_acceleration=1.6 * math.pi,
+    max_angular_acceleration=1.4 * math.pi,
     tolerance_distance=1,
     tolerance_angle=0.01,
-    trapezoid_anticipation=1.00,
+    trapezoid_anticipation=1.1,
     debug=DebugConfiguration(
         websocket_port=8080,
         http_port=9090,
         host='0.0.0.0',
         refresh_rate=4,
     ),
-    pid_constants_distance=PIDConstants(8, 5.0, 0.3),
-    pid_constants_angle=PIDConstants(5, 2.0, 0.1),
-    pid_constants_position_left=PIDConstants(2.5, 0.0, 0.2),
-    pid_constants_position_right=PIDConstants(2.5, 0.0, 0.2),
-    pid_constants_speed_left=PIDConstants(0.41, 0.6, 0.0018),
-    pid_constants_speed_right=PIDConstants(0.41, 0.6, 0.0018),
-    pid_limits_distance=PIDLimits(1e2, 1e3, 0.0),
-    pid_limits_angle=PIDLimits(4.0, 2, 0.000),
+    pid_constants_distance=PIDConstants(10, 0, 0),
+    pid_constants_angle=PIDConstants(10, 0, 0),
+    pid_constants_position_left=PIDConstants(2, 0.0, 1.5),
+    pid_constants_position_right=PIDConstants(2, 0.0, 1.5),
+    pid_constants_speed_left=PIDConstants(0.39, 2.0, 0.0018),
+    pid_constants_speed_right=PIDConstants(0.39, 2.0, 0.0018),
+    pid_limits_distance=PIDLimits(1e2, 1e2, 0.0),
+    pid_limits_angle=PIDLimits(4.0, 4.0, 0.000),
 )
 
 SIMULATION_CONFIG = SimulationConfiguration(
@@ -190,8 +190,8 @@ async def main() -> None:
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
+    await motor_board_adapter.init()
     motor_board_adapter.register_callback(protobuf_router.decode_message)
-
     if is_simulation:
         simulation_router: SimulationRouter = i.get('simulation_router')
         motor_board_adapter.register_callback(
