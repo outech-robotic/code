@@ -58,9 +58,7 @@ class StrategyController:
     """
     The strategy controller holds the high level algorithm executed by the robot.
     """
-
-    def __init__(self,
-                 trajectory_controller: TrajectoryController,
+    def __init__(self, trajectory_controller: TrajectoryController,
                  actuator_controller: ActuatorController,
                  configuration: Configuration):
         self.configuration = configuration
@@ -72,17 +70,18 @@ class StrategyController:
         Run the strategy.
         """
         try:
-            arms = [BoardIDs.ARM_RIGHT,
-                    BoardIDs.ARM_CENTER_RIGHT,
-                    BoardIDs.ARM_CENTER,
-                    BoardIDs.ARM_CENTER_LEFT,
-                    BoardIDs.ARM_LEFT]
+            arms = [
+                BoardIDs.ARM_RIGHT, BoardIDs.ARM_CENTER_RIGHT,
+                BoardIDs.ARM_CENTER, BoardIDs.ARM_CENTER_LEFT,
+                BoardIDs.ARM_LEFT
+            ]
             await self.actuator_controller.arms_front_close(arms)
             await self.actuator_controller.arms_front_reinitialize(arms)
 
             for vec, reverse in PATH_MIRRORED:
                 LOGGER.get().info("strategy_controller_follow_path",
                                   destination=vec)
-                await self.trajectory_controller.move_to(Vector2(vec.x, vec.y), reverse)
+                await self.trajectory_controller.move_to(
+                    Vector2(vec.x, vec.y), reverse)
         finally:
             LOGGER.get().info("Strategy algorithm finished running")  # lol

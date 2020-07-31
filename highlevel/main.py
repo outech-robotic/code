@@ -61,7 +61,7 @@ CONFIG = Configuration(
     distance_between_wheels=364.26,  # old: 357
     encoder_update_rate=100,
     motor_update_rate=1000,
-    pid_scale_factor=2 ** 16,
+    pid_scale_factor=2**16,
     max_wheel_speed=600,
     max_wheel_acceleration=1000,
     max_angular_velocity=1.0 * math.pi,
@@ -171,10 +171,9 @@ async def _get_container(simulation: bool, stub_lidar: bool,
                   address=NET_ADDRESS_MOTOR,
                   adapter_name='motor_board')
         for index in range(NB_SERVO_BOARDS):
-            servo_adapter_list.append(ISOTPSocketAdapter(
-                address=NET_ADDRESSES_SERVO[index],
-                adapter_name="servo_board_" + str(index)
-            ))
+            servo_adapter_list.append(
+                ISOTPSocketAdapter(address=NET_ADDRESSES_SERVO[index],
+                                   adapter_name="servo_board_" + str(index)))
     i.provide('servo_adapters_list', servo_adapter_list)
     i.provide('actuator_gateway', ActuatorGateway)
     i.provide('actuator_controller', ActuatorController)

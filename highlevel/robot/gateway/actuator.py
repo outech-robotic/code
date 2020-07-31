@@ -5,7 +5,6 @@ from typing import List
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
-from highlevel.robot.entity.network import ID_OFFSET_SERVO, BoardIDs
 from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 
 
