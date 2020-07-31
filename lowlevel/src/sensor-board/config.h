@@ -29,12 +29,12 @@
 
 // IDs used by board on CAN interface
 
-#ifndef SERVO_BOARD_ID
-#error "ERROR : SERVO_BOARD_ID is not defined. Please define it."
-#define SERVO_BOARD_ID 0
+#ifndef SENSOR_BOARD_ID
+#error "ERROR : SENSOR_BOARD_ID is not defined. Please define it."
+#define SENSOR_BOARD_ID 0
 #endif
 
-#define CONST_CAN_BOARD_ID    ((uint16_t)0x010 + SERVO_BOARD_ID)          // 10 bits unique board ID
+#define CONST_CAN_BOARD_ID    ((uint16_t)0x050 + SENSOR_BOARD_ID)          // 10 bits unique board ID
 #define CONST_CAN_RX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 0u) // 11 bits ID, LSb is a 0 for (Master) ->  (This)  transfers
 #define CONST_CAN_TX_ID       ((uint16_t)(CONST_CAN_BOARD_ID << 1u) | 1u) // 11 bits ID, LSb is a 1 for  (This)  -> (Master) transfers, with a lower priority
 #define CONST_CAN_STD_SHIFT   (5)
@@ -71,11 +71,10 @@
 #define PIN_USART_AF LL_GPIO_AF_1
 #endif
 
-// PA6 - TIM3_CH1
-// PA7 - TIM3_CH2
-// PB0 - TIM3_CH3
-#define PIN_PWM_1 PA6
-#define PIN_PWM_2 PA7
-#define PIN_PWM_3 PB0
+#define PIN_LED0 PB7
+#define PIN_LED1 PB6
+#define PIN_LED2 PB5
+#define PIN_LED3 PB4
+#define PIN_LED4 PB3
 
 #endif /* UTILITY_CONFIG_H_ */
