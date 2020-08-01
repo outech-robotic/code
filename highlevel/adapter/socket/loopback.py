@@ -12,7 +12,7 @@ class LoopbackSocketAdapter(SocketAdapter):
     """
     No-op adapter.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         self.callbacks: List[CallbackFunc] = []
 
     async def init(self) -> None:

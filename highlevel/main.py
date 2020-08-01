@@ -5,6 +5,7 @@ import asyncio
 import math
 import os
 from collections import deque
+from typing import List
 
 import rplidar
 from serial.tools import list_ports
@@ -14,9 +15,10 @@ from highlevel.adapter.lidar import LIDARAdapter
 from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
 from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
-from highlevel.adapter.socket.isotp import ISOTPAddress, ISOTPSocketAdapter
+from highlevel.adapter.socket.isotp import ISOTPSocketAdapter
 from highlevel.adapter.socket.loopback import LoopbackSocketAdapter
 from highlevel.adapter.web_browser import WebBrowserClient
+from highlevel.robot.controller.actuator import ActuatorController
 from highlevel.robot.controller.debug import DebugController
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.motion import MotionController
@@ -28,6 +30,8 @@ from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
+from highlevel.robot.entity.network import NB_SERVO_BOARDS, NET_ADDRESSES_SERVO, NET_ADDRESS_MOTOR
+from highlevel.robot.gateway.actuator import ActuatorGateway
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
 from highlevel.simulation.controller.runner import SimulationRunner
@@ -156,16 +160,23 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         i.provide('rplidar_object', rplidar_obj)
         i.provide('lidar_adapter', RPLIDARAdapter)
 
+    servo_adapter_list: List[SocketAdapter] = []
     if simulation or stub_socket_can:
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
+        for _ in range(NB_SERVO_BOARDS):
+            servo_adapter_list.append(LoopbackSocketAdapter())
     else:
         i.provide('motor_board_adapter',
                   ISOTPSocketAdapter,
-                  address=ISOTPAddress(device="can0",
-                                       id_reception=1,
-                                       id_transmission=0),
+                  address=NET_ADDRESS_MOTOR,
                   adapter_name='motor_board')
-
+        for index in range(NB_SERVO_BOARDS):
+            servo_adapter_list.append(
+                ISOTPSocketAdapter(address=NET_ADDRESSES_SERVO[index],
+                                   adapter_name="servo_board_" + str(index)))
+    i.provide('servo_adapters_list', servo_adapter_list)
+    i.provide('actuator_gateway', ActuatorGateway)
+    i.provide('actuator_controller', ActuatorController)
     return i
 
 
@@ -182,11 +193,15 @@ async def main() -> None:
                                      'false').lower() == 'true'
     i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
+    # Setup adapters
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     obstacle_controller: ObstacleController = i.get('obstacle_controller')
     lidar_adapter.register_callback(obstacle_controller.set_detection)
-
     motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
+    servo_board_adapters: List[SocketAdapter] = i.get('servo_adapters_list')
+    await motor_board_adapter.init()
+    for adapter in servo_board_adapters:
+        await adapter.init()
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
