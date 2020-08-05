@@ -50,9 +50,9 @@ ll_flash:
 ifndef BOARD_NAME
 	$(error BOARD_NAME is undefined. Should be either motor, motor_g4, servo or servo_nucleo.)
 endif
-ifeq ($(BOARD_NAME), $(filter $(BOARD_NAME),servo servo_nucleo))
+ifeq ($(BOARD_NAME), $(filter $(BOARD_NAME),servo servo_nucleo sensor))
 ifndef BOARD_ID
-	$(error BOARD_ID is undefined. BOARD_NAME servo/servo_nucleo require it.)
+	$(error BOARD_ID is undefined. BOARD_NAME servo/servo_nucleo/sensor require it.)
 endif
 	@echo Trying to upload to board $(BOARD_NAME) with id $(BOARD_ID)...
 	cmake -B lowlevel/cmake-build-debug lowlevel -DBOARD_ID=$(BOARD_ID)

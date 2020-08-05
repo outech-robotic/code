@@ -23,7 +23,7 @@ set(LINKER_SCRIPT "${CMAKE_CURRENT_SOURCE_DIR}/STM32F042C6TX_FLASH.ld")
 set(OPENOCD_CFG "board/st_nucleo_f0.cfg")
 
 # Optimizations
-set(OPTIM_FLAGS "-Os -g3")
+set(OPTIM_FLAGS "-O1 -g3")
 
 # MCU
 set(CPU "cortex-m0")
@@ -61,14 +61,15 @@ include_directories(./)
 
 # ALLOW COMPILATION OF THE ASM FILE
 set_property(SOURCE ${STARTUP_FILE} PROPERTY LANGUAGE C)
+message(WARNING ${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB_RECURSE SRC_SENSOR_BOARD
         "${SRC_DIR}/com/*.c"
         "${SRC_DIR}/com/*.cpp"
         "${SRC_DIR}/utility/*.c"
         "${SRC_DIR}/utility/*.cpp"
-        "*.c"
-        "*.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
         )
 
 # The binary that will be uploaded

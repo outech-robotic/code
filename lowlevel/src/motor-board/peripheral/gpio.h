@@ -14,13 +14,13 @@ typedef enum {
   INPUT = LL_GPIO_MODE_INPUT,
   INPUT_PULLUP = 4,
   INPUT_PULLDOWN = 5,
-} PinDirection;
+} PinMode;
 
 void gpio_port_enable_clock(GPIO_TypeDef *port);
 
-void pinMode(GPIO_TypeDef *port, uint32_t pins, PinDirection dir);
+void gpio_init(GPIO_TypeDef *port, uint32_t pins, PinMode dir);
 
-void pinMode(GPIO_Pin &pin, PinDirection dir);
+void gpio_init(GPIO_Pin &pin, PinMode dir);
 
 void digitalWrite(GPIO_TypeDef *port, uint32_t pins, PinLevel state);
 

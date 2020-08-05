@@ -38,7 +38,7 @@ void gpio_port_enable_clock(GPIO_TypeDef *port) {
 #endif
 }
 
-void pinMode(GPIO_TypeDef *port, uint32_t pins, PinDirection dir) {
+void gpio_init(GPIO_TypeDef *port, uint32_t pins, PinMode dir) {
   gpio_port_enable_clock(port);
   LL_GPIO_InitTypeDef gpio_init;
   LL_GPIO_StructInit(&gpio_init);
@@ -65,8 +65,8 @@ void pinMode(GPIO_TypeDef *port, uint32_t pins, PinDirection dir) {
   LL_GPIO_Init(port, &gpio_init);
 }
 
-void pinMode(GPIO_Pin &pin, PinDirection dir) {
-  pinMode(pin.port, pin.pin, dir);
+void gpio_init(GPIO_Pin &pin, PinMode dir) {
+  gpio_init(pin.port, pin.pin, dir);
 }
 
 void digitalWrite(GPIO_TypeDef *port, uint32_t pins, PinLevel state) {

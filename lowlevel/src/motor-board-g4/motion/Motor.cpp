@@ -16,11 +16,11 @@ Motor::Motor(const Side new_side) : side(new_side),
 
 void Motor::init() {
   if (side == Side::LEFT) {
-    pinMode(PIN_DIR_L1, OUTPUT);
-    pinMode(PIN_DIR_L2, OUTPUT);
+    gpio_init(PIN_DIR_L1, OUTPUT);
+    gpio_init(PIN_DIR_L2, OUTPUT);
   } else {
-    pinMode(PIN_DIR_R1, OUTPUT);
-    pinMode(PIN_DIR_R2, OUTPUT);
+    gpio_init(PIN_DIR_R1, OUTPUT);
+    gpio_init(PIN_DIR_R2, OUTPUT);
   }
   set_direction(dir);
 }

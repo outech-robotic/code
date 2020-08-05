@@ -77,4 +77,17 @@
 #define PIN_LED3 PB4
 #define PIN_LED4 PB3
 
+#define PIN_FSR0 PA0
+#define PIN_FSR1 PA1
+#define PIN_FSR2 PA2
+#define PIN_FSR3 PA3
+#define PIN_FSR4 PA4
+
+#define PIN_SICK0 PA5
+#define PIN_SICK1 PA6
+#define PIN_SICK2 PA7
+#define PIN_SICK3 PB0
+
+#define C_NB_ADC_CHANNELS 9
+
 #endif /* UTILITY_CONFIG_H_ */

@@ -40,7 +40,7 @@ int main() {
 
   mcs.init();
 
-  pinMode(PIN_LED, PinDirection::OUTPUT);
+  gpio_init(PIN_LED, PinMode::OUTPUT);
   setPin(PIN_LED);
 
   PWM_write(PA10, 0);
