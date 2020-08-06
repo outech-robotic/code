@@ -1,5 +1,5 @@
 #include "can.h"
-#include "gpio.h"
+#include "peripheral/stm32f0/gpio.h"
 #include "utility/Queue.hpp"
 #include "config.h"
 
@@ -46,10 +46,16 @@ int CAN_receive_packet(can_msg *msg) {
     return res;
 }
 
+int CAN_send_packet(uint16_t std_id, const uint8_t *data, uint8_t size) {
+    can_msg msg;
+    msg.size = size;
+    msg.id = std_id;
+    std::copy(&data[0], &data[size], msg.data.u8);
+
+    return CAN_send_packet(&msg);
+}
+
 int CAN_poll_TX() {
-    if(messages_tx.get_size() > 2){
-        asm volatile("nop");
-    }
     if (HAL_CAN_GetTxMailboxesFreeLevel(&hcan) > 0) { // Free buffers in hardware, send
         if (!messages_tx.is_empty()) {
             uint32_t mailbox;
@@ -72,7 +78,7 @@ int CAN_poll_TX() {
 int CAN_send_packet(can_msg *msg) {
     int res = CAN_ERROR_STATUS::CAN_PKT_OK;
 
-    volatile CAN_TxHeaderTypeDef header;
+    CAN_TxHeaderTypeDef header;
     header.DLC = msg->size;
     header.StdId = msg->id;
     header.IDE = CAN_ID_STD;
@@ -92,15 +98,6 @@ int CAN_send_packet(can_msg *msg) {
         res = CAN_ERROR_STATUS::CAN_PKT_OK;
     }
     return res;
-}
-
-int CAN_send_packet(uint16_t std_id, const uint8_t *data, uint8_t size) {
-    can_msg msg;
-    msg.size = size;
-    msg.id = std_id;
-    std::copy(&data[0], &data[size], msg.data.u8);
-
-    return CAN_send_packet(&msg);
 }
 
 /* CAN init function */

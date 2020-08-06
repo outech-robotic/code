@@ -4,6 +4,9 @@ set(FLASH_TARGET "flash_${BOARD_NAME}")
 set(BUILD_TARGET "build_${BOARD_NAME}")
 set(BUILD_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${BUILD_TARGET}")
 
+# PERIPHERALS : change depending on board type
+set(SRC_PERIPHERAL "${SRC_PERIPHERAL_F0}")
+
 # STARTUP FILE SELECTION
 set(STARTUP_NAME "startup_stm32f042k6tx")
 set(STARTUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/system/${STARTUP_NAME}.s")
@@ -55,7 +58,6 @@ include_directories(${PROTO_DIR}/)
 
 include_directories(.)
 
-
 # ALLOW COMPILATION OF THE ASM FILE
 set_property(SOURCE ${STARTUP_FILE} PROPERTY LANGUAGE C)
 
@@ -70,9 +72,9 @@ file(GLOB_RECURSE SRC_MOTOR_BOARD
         "*.cpp"
         )
 
-
 # The binary that will be uploaded
 add_executable(${BUILD_TARGET}
+        ${SRC_PERIPHERAL}
         ${SRC_MOTOR_BOARD}
         ${SRC_DRIVERS_ST_F0}
         ${SRC_NANOPB}

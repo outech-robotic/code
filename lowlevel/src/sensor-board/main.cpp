@@ -1,5 +1,4 @@
-#include "peripheral/tim.h"
-#include "peripheral/adc.h"
+#include "sensor-board/peripheral/adc.h"
 
 #include "com/can_pb.h"
 #include "com/serial.hpp"
@@ -34,7 +33,6 @@ void write_leds(uint8_t value){
 
 
 int main() {
-    uint8_t cnt = 0;
     bool converting = false;
     for(GPIO_Pin& pin : led_pins){
         gpio_init(pin, PinMode::OUTPUT);

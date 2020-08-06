@@ -6,7 +6,7 @@
 #include "outech.pb.h"
 #include "nanopb/pb_encode.h"
 #include "nanopb/pb_decode.h"
-#include "peripheral/can.h"
+#include "peripheral/stm32f0/can.h"
 #include "com/isotp/isotp.h"
 #include "utility/Queue.hpp"
 #include "utility/BufferPool.hpp"

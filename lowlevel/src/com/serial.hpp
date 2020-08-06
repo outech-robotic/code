@@ -21,7 +21,7 @@
 #include "utility/Queue.hpp"
 #include "utility/timing.h"
 #include "utility/macros.h"
-#include "peripheral/gpio.h"
+#include "peripheral/stm32f0/gpio.h"
 #include "config.h"
 
 #include <cstdarg>

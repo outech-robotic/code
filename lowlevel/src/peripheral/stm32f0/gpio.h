@@ -2,7 +2,7 @@
 #define GPIO_GPIO_C_
 
 #include <stm32f0xx_ll_bus.h>
-#include "peripheral/gpio_pins.h"
+#include "gpio_pins.h"
 
 typedef enum {
   GPIO_HIGH = 1,
@@ -14,13 +14,14 @@ typedef enum {
   INPUT = LL_GPIO_MODE_INPUT,
   INPUT_PULLUP = 4,
   INPUT_PULLDOWN = 5,
-} PinMode;
+  INPUT_ANALOG = 6
+}PinMode;
 
 void gpio_port_enable_clock(GPIO_TypeDef *port);
 
-void gpio_init(GPIO_TypeDef *port, uint32_t pins, PinMode dir);
+void gpio_init(GPIO_TypeDef *port, uint32_t pins, PinMode mode);
 
-void gpio_init(GPIO_Pin &pin, PinMode dir);
+void gpio_init(GPIO_Pin &pin, PinMode mode);
 
 void digitalWrite(GPIO_TypeDef *port, uint32_t pins, PinLevel state);
 

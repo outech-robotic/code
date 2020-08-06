@@ -5,7 +5,7 @@
  *      Author: ticta
  */
 
-#include "peripheral/gpio.h"
+#include "peripheral/stm32f0/gpio.h"
 #include "peripheral/tim.h"
 #include "Motor.h"
 #include "utility/macros.h"

@@ -1,20 +1,12 @@
-/*
- * gpio_pins.h
- *
- *  Created on: 30 nov. 2019
- *      Author: Tic-Tac
- */
-
 #ifndef LL_GPIO_GPIO_PINS_H_
 #define LL_GPIO_GPIO_PINS_H_
 
-#include "stm32f0xx_ll_bus.h"
 #include "stm32f0xx_ll_gpio.h"
 
 typedef struct {
   GPIO_TypeDef *port;
   uint32_t pin;
-  char name[4];
+  char name[3];
 } GPIO_Pin;
 
 #define GPIO_Pin_Extern_Def(port, number) extern GPIO_Pin P##port##number

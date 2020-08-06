@@ -1,5 +1,5 @@
 #include "stm32f0xx_ll_tim.h"
-#include "peripheral/gpio.h"
+#include "peripheral/stm32f0/gpio.h"
 #include "peripheral/tim.h"
 #include "config.h"
 

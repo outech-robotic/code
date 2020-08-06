@@ -2,7 +2,7 @@
 // Created by tic-tac on 03/08/2020.
 //
 #include "adc.h"
-#include "peripheral/gpio.h"
+#include "peripheral/stm32f0/gpio.h"
 #include <stm32f0xx_ll_bus.h>
 #include "config.h"
 

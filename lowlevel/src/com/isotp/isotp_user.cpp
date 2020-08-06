@@ -15,7 +15,7 @@
 #include "stm32g431xx.h"
 #endif
 
-#include "peripheral/can.h"
+#include "peripheral/stm32f0/can.h"
 #include "utility/timing.h"
 
 #ifdef __cplusplus

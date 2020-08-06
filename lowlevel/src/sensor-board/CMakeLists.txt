@@ -11,6 +11,9 @@ set(FLASH_TARGET "flash_${BOARD_NAME}")
 set(BUILD_TARGET "build_${BOARD_NAME}")
 set(BUILD_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${BUILD_TARGET}")
 
+# PERIPHERALS : change depending on board type
+set(SRC_PERIPHERAL "${SRC_PERIPHERAL_F0}")
+
 # STARTUP FILE SELECTION
 set(STARTUP_NAME "startup_stm32f042c6tx")
 set(STARTUP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/system/${STARTUP_NAME}.s")
@@ -74,6 +77,7 @@ file(GLOB_RECURSE SRC_SENSOR_BOARD
 
 # The binary that will be uploaded
 add_executable(${BUILD_TARGET}
+        ${SRC_PERIPHERAL}
         ${SRC_SENSOR_BOARD}
         ${SRC_DRIVERS_ST_F0}
         ${SRC_NANOPB}
