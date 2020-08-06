@@ -18,6 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
+  create_key=_descriptor._internal_create_key,
   serialized_pb=b'\n\x0coutech.proto\"\x0e\n\x0cHeartbeatMsg\"\x0f\n\rStopMovingMsg\"#\n\x10MovementEndedMsg\x12\x0f\n\x07\x62locked\x18\x01 \x01(\x08\";\n\x12\x45ncoderPositionMsg\x12\x11\n\tleft_tick\x18\x01 \x01(\x11\x12\x12\n\nright_tick\x18\x02 \x01(\x11\"5\n\x0fPIDCoefficients\x12\n\n\x02kp\x18\x01 \x01(\x02\x12\n\n\x02ki\x18\x02 \x01(\x02\x12\n\n\x02kd\x18\x03 \x01(\x02\"\xbe\x01\n\x0cPIDConfigMsg\x12(\n\x0epid_speed_left\x18\x01 \x01(\x0b\x32\x10.PIDCoefficients\x12)\n\x0fpid_speed_right\x18\x02 \x01(\x0b\x32\x10.PIDCoefficients\x12+\n\x11pid_position_left\x18\x03 \x01(\x0b\x32\x10.PIDCoefficients\x12,\n\x12pid_position_right\x18\x04 \x01(\x0b\x32\x10.PIDCoefficients\"6\n\x13WheelControlModeMsg\x12\r\n\x05speed\x18\x01 \x01(\x08\x12\x10\n\x08position\x18\x02 \x01(\x08\"=\n\x12WheelTolerancesMsg\x12\x12\n\nticks_left\x18\x01 \x01(\r\x12\x13\n\x0bticks_right\x18\x02 \x01(\r\"L\n\x13MoveWheelAtSpeedMsg\x12\x19\n\x11left_tick_per_sec\x18\x01 \x01(\x11\x12\x1a\n\x12right_tick_per_sec\x18\x02 \x01(\x11\"?\n\x16WheelPositionTargetMsg\x12\x11\n\ttick_left\x18\x01 \x01(\x11\x12\x12\n\ntick_right\x18\x02 \x01(\x11\"6\n\x0bWheelPWMMsg\x12\x12\n\nratio_left\x18\x01 \x01(\x02\x12\x13\n\x0bratio_right\x18\x02 \x01(\x02\"\x1d\n\x0cTranslateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"\x1a\n\tRotateMsg\x12\r\n\x05ticks\x18\x01 \x01(\x11\"%\n\x08ServoMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05\x61ngle\x18\x02 \x01(\x11\")\n\x0fPumpAndValveMsg\x12\n\n\x02id\x18\x01 \x01(\r\x12\n\n\x02on\x18\x02 \x01(\x08\"\x84\x01\n\x0eLaserSensorMsg\x12\x1b\n\x13\x64istance_front_left\x18\x01 \x01(\r\x12\x1c\n\x14\x64istance_front_right\x18\x02 \x01(\r\x12\x1a\n\x12\x64istance_back_left\x18\x03 \x01(\r\x12\x1b\n\x13\x64istance_back_right\x18\x04 \x01(\r\"z\n\x11PressureSensorMsg\x12\x0f\n\x07on_left\x18\x01 \x01(\x08\x12\x16\n\x0eon_center_left\x18\x02 \x01(\x08\x12\x11\n\ton_center\x18\x03 \x01(\x08\x12\x17\n\x0fon_center_right\x18\x04 \x01(\x08\x12\x10\n\x08on_right\x18\x05 \x01(\x08\"\x1b\n\x08\x44\x65\x62ugLog\x12\x0f\n\x07\x63ontent\x18\x01 \x01(\t\"\xd4\x05\n\nBusMessage\x12\"\n\theartbeat\x18\x01 \x01(\x0b\x32\r.HeartbeatMsgH\x00\x12$\n\nstopMoving\x18\x02 \x01(\x0b\x32\x0e.StopMovingMsgH\x00\x12*\n\rmovementEnded\x18\x03 \x01(\x0b\x32\x11.MovementEndedMsgH\x00\x12.\n\x0f\x65ncoderPosition\x18\x04 \x01(\x0b\x32\x13.EncoderPositionMsgH\x00\x12\"\n\tpidConfig\x18\x05 \x01(\x0b\x32\r.PIDConfigMsgH\x00\x12\x30\n\x10wheelControlMode\x18\x06 \x01(\x0b\x32\x14.WheelControlModeMsgH\x00\x12\x36\n\x13wheelPositionTarget\x18\x07 \x01(\x0b\x32\x17.WheelPositionTargetMsgH\x00\x12\x30\n\x10moveWheelAtSpeed\x18\x08 \x01(\x0b\x32\x14.MoveWheelAtSpeedMsgH\x00\x12\"\n\ttranslate\x18\t \x01(\x0b\x32\r.TranslateMsgH\x00\x12\x1c\n\x06rotate\x18\n \x01(\x0b\x32\n.RotateMsgH\x00\x12\x1a\n\x05servo\x18\x0b \x01(\x0b\x32\t.ServoMsgH\x00\x12(\n\x0cpumpAndValve\x18\x0c \x01(\x0b\x32\x10.PumpAndValveMsgH\x00\x12&\n\x0blaserSensor\x18\r \x01(\x0b\x32\x0f.LaserSensorMsgH\x00\x12,\n\x0epressureSensor\x18\x0e \x01(\x0b\x32\x12.PressureSensorMsgH\x00\x12\x1d\n\x08\x64\x65\x62ugLog\x18\x0f \x01(\x0b\x32\t.DebugLogH\x00\x12.\n\x0fwheelTolerances\x18\x10 \x01(\x0b\x32\x13.WheelTolerancesMsgH\x00\x12 \n\x08wheelPWM\x18\x11 \x01(\x0b\x32\x0c.WheelPWMMsgH\x00\x42\x11\n\x0fmessage_contentb\x06proto3'
 )
 
@@ -30,6 +31,7 @@ _HEARTBEATMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
   ],
   extensions=[
@@ -54,6 +56,7 @@ _STOPMOVINGMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
   ],
   extensions=[
@@ -78,6 +81,7 @@ _MOVEMENTENDEDMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='blocked', full_name='MovementEndedMsg.blocked', index=0,
@@ -85,7 +89,7 @@ _MOVEMENTENDEDMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -109,6 +113,7 @@ _ENCODERPOSITIONMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='left_tick', full_name='EncoderPositionMsg.left_tick', index=0,
@@ -116,14 +121,14 @@ _ENCODERPOSITIONMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='right_tick', full_name='EncoderPositionMsg.right_tick', index=1,
       number=2, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -147,6 +152,7 @@ _PIDCOEFFICIENTS = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='kp', full_name='PIDCoefficients.kp', index=0,
@@ -154,21 +160,21 @@ _PIDCOEFFICIENTS = _descriptor.Descriptor(
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='ki', full_name='PIDCoefficients.ki', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='kd', full_name='PIDCoefficients.kd', index=2,
       number=3, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -192,6 +198,7 @@ _PIDCONFIGMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='pid_speed_left', full_name='PIDConfigMsg.pid_speed_left', index=0,
@@ -199,28 +206,28 @@ _PIDCONFIGMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='pid_speed_right', full_name='PIDConfigMsg.pid_speed_right', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='pid_position_left', full_name='PIDConfigMsg.pid_position_left', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='pid_position_right', full_name='PIDConfigMsg.pid_position_right', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -244,6 +251,7 @@ _WHEELCONTROLMODEMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='speed', full_name='WheelControlModeMsg.speed', index=0,
@@ -251,14 +259,14 @@ _WHEELCONTROLMODEMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='position', full_name='WheelControlModeMsg.position', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -282,6 +290,7 @@ _WHEELTOLERANCESMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='ticks_left', full_name='WheelTolerancesMsg.ticks_left', index=0,
@@ -289,14 +298,14 @@ _WHEELTOLERANCESMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='ticks_right', full_name='WheelTolerancesMsg.ticks_right', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -320,6 +329,7 @@ _MOVEWHEELATSPEEDMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='left_tick_per_sec', full_name='MoveWheelAtSpeedMsg.left_tick_per_sec', index=0,
@@ -327,14 +337,14 @@ _MOVEWHEELATSPEEDMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='right_tick_per_sec', full_name='MoveWheelAtSpeedMsg.right_tick_per_sec', index=1,
       number=2, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -358,6 +368,7 @@ _WHEELPOSITIONTARGETMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='tick_left', full_name='WheelPositionTargetMsg.tick_left', index=0,
@@ -365,14 +376,14 @@ _WHEELPOSITIONTARGETMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='tick_right', full_name='WheelPositionTargetMsg.tick_right', index=1,
       number=2, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -396,6 +407,7 @@ _WHEELPWMMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='ratio_left', full_name='WheelPWMMsg.ratio_left', index=0,
@@ -403,14 +415,14 @@ _WHEELPWMMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='ratio_right', full_name='WheelPWMMsg.ratio_right', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -434,6 +446,7 @@ _TRANSLATEMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='ticks', full_name='TranslateMsg.ticks', index=0,
@@ -441,7 +454,7 @@ _TRANSLATEMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -465,6 +478,7 @@ _ROTATEMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='ticks', full_name='RotateMsg.ticks', index=0,
@@ -472,7 +486,7 @@ _ROTATEMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -496,6 +510,7 @@ _SERVOMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='ServoMsg.id', index=0,
@@ -503,14 +518,14 @@ _SERVOMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='angle', full_name='ServoMsg.angle', index=1,
       number=2, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -534,6 +549,7 @@ _PUMPANDVALVEMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='PumpAndValveMsg.id', index=0,
@@ -541,14 +557,14 @@ _PUMPANDVALVEMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='on', full_name='PumpAndValveMsg.on', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -572,6 +588,7 @@ _LASERSENSORMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='distance_front_left', full_name='LaserSensorMsg.distance_front_left', index=0,
@@ -579,28 +596,28 @@ _LASERSENSORMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='distance_front_right', full_name='LaserSensorMsg.distance_front_right', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='distance_back_left', full_name='LaserSensorMsg.distance_back_left', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='distance_back_right', full_name='LaserSensorMsg.distance_back_right', index=3,
       number=4, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -624,6 +641,7 @@ _PRESSURESENSORMSG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='on_left', full_name='PressureSensorMsg.on_left', index=0,
@@ -631,35 +649,35 @@ _PRESSURESENSORMSG = _descriptor.Descriptor(
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='on_center_left', full_name='PressureSensorMsg.on_center_left', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='on_center', full_name='PressureSensorMsg.on_center', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='on_center_right', full_name='PressureSensorMsg.on_center_right', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='on_right', full_name='PressureSensorMsg.on_right', index=4,
       number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -683,6 +701,7 @@ _DEBUGLOG = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='content', full_name='DebugLog.content', index=0,
@@ -690,7 +709,7 @@ _DEBUGLOG = _descriptor.Descriptor(
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -714,6 +733,7 @@ _BUSMESSAGE = _descriptor.Descriptor(
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
+  create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
       name='heartbeat', full_name='BusMessage.heartbeat', index=0,
@@ -721,119 +741,119 @@ _BUSMESSAGE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='stopMoving', full_name='BusMessage.stopMoving', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='movementEnded', full_name='BusMessage.movementEnded', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='encoderPosition', full_name='BusMessage.encoderPosition', index=3,
       number=4, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='pidConfig', full_name='BusMessage.pidConfig', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='wheelControlMode', full_name='BusMessage.wheelControlMode', index=5,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='wheelPositionTarget', full_name='BusMessage.wheelPositionTarget', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='moveWheelAtSpeed', full_name='BusMessage.moveWheelAtSpeed', index=7,
       number=8, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='translate', full_name='BusMessage.translate', index=8,
       number=9, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='rotate', full_name='BusMessage.rotate', index=9,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='servo', full_name='BusMessage.servo', index=10,
       number=11, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='pumpAndValve', full_name='BusMessage.pumpAndValve', index=11,
       number=12, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='laserSensor', full_name='BusMessage.laserSensor', index=12,
       number=13, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='pressureSensor', full_name='BusMessage.pressureSensor', index=13,
       number=14, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='debugLog', full_name='BusMessage.debugLog', index=14,
       number=15, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='wheelTolerances', full_name='BusMessage.wheelTolerances', index=15,
       number=16, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='wheelPWM', full_name='BusMessage.wheelPWM', index=16,
       number=17, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -847,7 +867,9 @@ _BUSMESSAGE = _descriptor.Descriptor(
   oneofs=[
     _descriptor.OneofDescriptor(
       name='message_content', full_name='BusMessage.message_content',
-      index=0, containing_type=None, fields=[]),
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
   ],
   serialized_start=1143,
   serialized_end=1867,

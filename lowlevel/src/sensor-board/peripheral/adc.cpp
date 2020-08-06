@@ -2,11 +2,10 @@
 // Created by tic-tac on 03/08/2020.
 //
 #include "adc.h"
-#include "peripheral/stm32f0/gpio.h"
 #include <stm32f0xx_ll_bus.h>
 #include "config.h"
 
-const uint32_t adc_channels[C_NB_ADC_CHANNELS] = {
+const uint32_t adc_channels[CONST_NB_ADC_CHANNELS] = {
         LL_ADC_CHANNEL_0,
         LL_ADC_CHANNEL_1,
         LL_ADC_CHANNEL_2,
@@ -18,7 +17,7 @@ const uint32_t adc_channels[C_NB_ADC_CHANNELS] = {
         LL_ADC_CHANNEL_8,
 };
 
-uint16_t adc_data[C_NB_ADC_CHANNELS] = {0};
+uint16_t adc_data[CONST_NB_ADC_CHANNELS] = {0};
 uint8_t adc_current = 0;
 bool adc_active = false;
 
@@ -37,7 +36,7 @@ bool ADC_is_ready(){
 
 
 int16_t ADC_get_measurement(uint8_t index){
-    if(index<C_NB_ADC_CHANNELS) {
+    if(index<CONST_NB_ADC_CHANNELS) {
         return adc_data[index];
     }
     else{
@@ -86,7 +85,7 @@ int ADC_init() {
     NVIC_EnableIRQ(ADC1_IRQn);
     LL_ADC_Enable(ADC1);
 
-    for(uint8_t i = 0; i < C_NB_ADC_CHANNELS; i++){
+    for(uint8_t i = 0; i < CONST_NB_ADC_CHANNELS; i++){
         adc_data[i] = 0;
     }
     adc_current = 0;
@@ -107,7 +106,6 @@ void ADC1_IRQHandler(void) {
         adc_current++;
         if(LL_ADC_IsActiveFlag_EOS(ADC1)){
             // End of sampling sequence, all measurements are complete.
-            togglePin(PB7);
             LL_ADC_ClearFlag_EOS(ADC1);
             adc_current = 0;
             adc_active = false;

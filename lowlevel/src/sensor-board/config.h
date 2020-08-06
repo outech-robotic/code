@@ -88,6 +88,21 @@
 #define PIN_SICK2 PA7
 #define PIN_SICK3 PB0
 
-#define C_NB_ADC_CHANNELS 9
+#define CONST_NB_ADC_CHANNELS 9
+
+// Limit over/under which pressure sensors are sensed as ON or OFF
+#define CONST_PRESSURE_LIMIT 2048
+
+// Errors on transmissions
+#define DBG_BIT_FSR         0b00001
+#define DBG_BIT_SICK        0b00010
+#define DBG_BIT_HEARTBEAT   0b00100
+
+// Conversion status
+#define DBG_BIT_CONVERTING  0b01000
+#define DBG_BIT_SENDING     0b10000
+
+// Mask to keep errors and remove status
+#define DBG_MASK_ERROR      0b00111
 
 #endif /* UTILITY_CONFIG_H_ */
