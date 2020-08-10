@@ -30,7 +30,8 @@ from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.robot.entity.configuration import DebugConfiguration
-from highlevel.robot.entity.network import NB_SERVO_BOARDS, NET_ADDRESSES_SERVO, NET_ADDRESS_MOTOR
+from highlevel.robot.entity.network import NB_SERVO_BOARDS, NET_ADDRESSES_SERVO
+from highlevel.robot.entity.network import NET_ADDRESS_MOTOR, NET_ADDRESS_SENSOR
 from highlevel.robot.gateway.actuator import ActuatorGateway
 from highlevel.robot.gateway.motor import MotorGateway
 from highlevel.robot.router import ProtobufRouter
@@ -174,9 +175,16 @@ async def _get_container(simulation: bool, stub_lidar: bool,
             servo_adapter_list.append(
                 ISOTPSocketAdapter(address=NET_ADDRESSES_SERVO[index],
                                    adapter_name="servo_board_" + str(index)))
+    # Actuators
     i.provide('servo_adapters_list', servo_adapter_list)
     i.provide('actuator_gateway', ActuatorGateway)
     i.provide('actuator_controller', ActuatorController)
+
+    # Sensors
+    i.provide('sensor_board_adapter',
+              ISOTPSocketAdapter,
+              address=NET_ADDRESS_SENSOR,
+              adapter_name='sensor_board')
     return i
 
 
@@ -199,9 +207,11 @@ async def main() -> None:
     lidar_adapter.register_callback(obstacle_controller.set_detection)
     motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
     servo_board_adapters: List[SocketAdapter] = i.get('servo_adapters_list')
+    sensor_board_adapter : SocketAdapter = i.get('sensor_board_adapter')
     await motor_board_adapter.init()
     for adapter in servo_board_adapters:
         await adapter.init()
+    await sensor_board_adapter.init()
 
     # Register the CAN bus to call the router.
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
@@ -214,13 +224,16 @@ async def main() -> None:
 
     strategy_controller = i.get('strategy_controller')
     debug_controller = i.get('debug_controller')
-    coroutines_to_run = {
+    servo_coroutines = [adapter.run() for adapter in servo_board_adapters]
+    coroutines_to_run = [
         strategy_controller.run(),
         debug_controller.run(),
         motor_board_adapter.run(),
+        sensor_board_adapter.run(),
         print_performance_metrics(),
-    }
-
+    ]
+    coroutines_to_run = coroutines_to_run + servo_coroutines
+    print(coroutines_to_run)
     if is_simulation:
         simulation_runner = i.get('simulation_runner')
         coroutines_to_run.add(simulation_runner.run())
