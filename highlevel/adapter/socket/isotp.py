@@ -71,7 +71,7 @@ class ISOTPSocketAdapter(SocketAdapter, DatagramProtocol):
             asyncio.get_event_loop().create_task(
                 callback(data, self.adapter_name))
 
-        LOGGER.get().info('isotp_socket_adapter_received',
+        LOGGER.get().debug('isotp_socket_adapter_received',
                            payload=data,
                            name=self.adapter_name,
                            address=self.address)

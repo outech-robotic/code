@@ -2,14 +2,11 @@
 Main module.
 """
 import asyncio
-import math
 import os
 from collections import deque
-from typing import List
 
+import math
 import rplidar
-from serial.tools import list_ports
-
 from highlevel.adapter.http import HTTPClient
 from highlevel.adapter.lidar import LIDARAdapter
 from highlevel.adapter.lidar.rplidar import RPLIDARAdapter
@@ -25,6 +22,7 @@ from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.position import PositionController
 from highlevel.robot.controller.motion.trajectory import TrajectoryController
 from highlevel.robot.controller.obstacle import ObstacleController
+from highlevel.robot.controller.sensor import SensorController
 from highlevel.robot.controller.strategy import StrategyController
 from highlevel.robot.controller.symmetry import SymmetryController
 from highlevel.robot.entity.color import Color
@@ -49,6 +47,8 @@ from highlevel.util.geometry.vector import Vector2
 from highlevel.util.perf_metrics import print_performance_metrics
 from highlevel.util.probe import Probe
 from highlevel.util.replay_saver import ReplaySaver
+from serial.tools import list_ports
+from typing import List
 
 CONFIG = Configuration(
     initial_position=Vector2(200, 1200),
@@ -62,7 +62,7 @@ CONFIG = Configuration(
     distance_between_wheels=364.26,  # old: 357
     encoder_update_rate=100,
     motor_update_rate=1000,
-    pid_scale_factor=2**16,
+    pid_scale_factor=2 ** 16,
     max_wheel_speed=600,
     max_wheel_acceleration=1000,
     max_angular_velocity=1.0 * math.pi,
@@ -185,6 +185,7 @@ async def _get_container(simulation: bool, stub_lidar: bool,
               ISOTPSocketAdapter,
               address=NET_ADDRESS_SENSOR,
               adapter_name='sensor_board')
+    i.provide('sensor_controller', SensorController)
     return i
 
 
@@ -199,24 +200,30 @@ async def main() -> None:
     stub_lidar = os.environ.get('STUB_LIDAR', 'false').lower() == 'true'
     stub_socket_can = os.environ.get('STUB_SOCKET_CAN',
                                      'false').lower() == 'true'
+
+    # Get container
     i = await _get_container(is_simulation, stub_lidar, stub_socket_can)
 
-    # Setup adapters
+    # Get adapters
     lidar_adapter: LIDARAdapter = i.get('lidar_adapter')
     obstacle_controller: ObstacleController = i.get('obstacle_controller')
-    lidar_adapter.register_callback(obstacle_controller.set_detection)
     motor_board_adapter: SocketAdapter = i.get('motor_board_adapter')
     servo_board_adapters: List[SocketAdapter] = i.get('servo_adapters_list')
-    sensor_board_adapter : SocketAdapter = i.get('sensor_board_adapter')
+    sensor_board_adapter: SocketAdapter = i.get('sensor_board_adapter')
+
+    # Initialize asynchronous elements of adapters
     await motor_board_adapter.init()
     for adapter in servo_board_adapters:
         await adapter.init()
     await sensor_board_adapter.init()
 
-    # Register the CAN bus to call the router.
+    # Register handlers
     protobuf_router: ProtobufRouter = i.get('protobuf_router')
-    await motor_board_adapter.init()
+
+    lidar_adapter.register_callback(obstacle_controller.set_detection)
     motor_board_adapter.register_callback(protobuf_router.decode_message)
+    sensor_board_adapter.register_callback(protobuf_router.decode_message)
+
     if is_simulation:
         simulation_router: SimulationRouter = i.get('simulation_router')
         motor_board_adapter.register_callback(
@@ -233,7 +240,7 @@ async def main() -> None:
         print_performance_metrics(),
     ]
     coroutines_to_run = coroutines_to_run + servo_coroutines
-    print(coroutines_to_run)
+
     if is_simulation:
         simulation_runner = i.get('simulation_runner')
         coroutines_to_run.add(simulation_runner.run())

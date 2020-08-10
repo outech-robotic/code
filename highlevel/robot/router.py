@@ -5,6 +5,7 @@ from google.protobuf import json_format
 
 from highlevel.logger import LOGGER
 from highlevel.robot.controller.match_action import MatchActionController
+from highlevel.robot.controller.sensor import SensorController
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.position import PositionController
 from proto.gen.python.outech_pb2 import BusMessage
@@ -14,7 +15,9 @@ class ProtobufRouter:
     """ Protobuf router decodes raw bytes messages and dispatches them to controllers. """
     def __init__(self, match_action_controller: MatchActionController,
                  position_controller: PositionController,
-                 motion_controller: MotionController):
+                 motion_controller: MotionController,
+                 sensor_controller: SensorController):
+        self.sensor_controller = sensor_controller
         self.motion_controller = motion_controller
         self.position_controller = position_controller
         self.match_action = match_action_controller
@@ -41,9 +44,22 @@ class ProtobufRouter:
             self.motion_controller.trigger_update()
 
         elif type_msg == "laserSensor":
-            await self.match_action.set_laser_distances()
+            data = [
+                bus_message.laserSensor.distance_back_left,
+                bus_message.laserSensor.distance_front_left,
+                bus_message.laserSensor.distance_front_right,
+                bus_message.laserSensor.distance_back_right,
+            ]
+            self.sensor_controller.update_laser_sensors(data)
         elif type_msg == "pressureSensor":
-            await self.match_action.set_pressures()
+            states = [
+                bus_message.pressureSensor.on_left,
+                bus_message.pressureSensor.on_center_left,
+                bus_message.pressureSensor.on_center,
+                bus_message.pressureSensor.on_center_right,
+                bus_message.pressureSensor.on_right,
+            ]
+            self.sensor_controller.update_pressure_sensors(states)
         elif type_msg == "debugLog":
             LOGGER.get().info("low_level_log",
                               content=bus_message.debugLog.content,
