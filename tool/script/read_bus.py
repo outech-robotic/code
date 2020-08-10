@@ -30,7 +30,7 @@ async def main():
 
     assert args.id_rx != args.id_tx
     assert len(args.device) > 0
-
+    print("Addresses:", args.id_rx, args.id_tx)
     isotp = ISOTPSocketAdapter(
         address=ISOTPAddress(args.device, args.id_rx, args.id_tx),
         adapter_name="receiver"
@@ -50,7 +50,7 @@ async def main():
         except DecodeError:
             print("Protobuf couldn't decode this:", bytes)
         t_last = t
-
+    await isotp.init()
     isotp.register_callback(callback)
 
     try:
