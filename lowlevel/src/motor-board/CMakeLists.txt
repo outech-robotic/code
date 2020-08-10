@@ -85,5 +85,19 @@ add_executable(${BUILD_TARGET}
 add_custom_target(${FLASH_TARGET} COMMAND openocd -f ${PROJECT_SOURCE_DIR}/scripts/${OPENOCD_CFG} -c "program ${BUILD_OUTPUT} verify reset" -c shutdown)
 add_dependencies(${FLASH_TARGET} ${BUILD_TARGET})
 
+# The binary that will be uploaded
+add_executable(${BUILD_TARGET}_nucleo
+        ${SRC_PERIPHERAL}
+        ${SRC_MOTOR_BOARD}
+        ${SRC_DRIVERS_ST_F0}
+        ${SRC_NANOPB}
+        ${STARTUP_FILE}
+        )
+target_compile_definitions(${BUILD_TARGET}_nucleo PUBLIC NUCLEO)
+
+# # Uploads to stm32
+add_custom_target(${FLASH_TARGET}_nucleo COMMAND openocd -f ${PROJECT_SOURCE_DIR}/scripts/${OPENOCD_CFG} -c "program ${BUILD_OUTPUT}_nucleo verify reset" -c shutdown)
+add_dependencies(${FLASH_TARGET}_nucleo ${BUILD_TARGET}_nucleo)
+
 # # Displays size after each build
 add_custom_command(TARGET ${BUILD_TARGET} POST_BUILD COMMAND arm-none-eabi-size "${BUILD_TARGET}")

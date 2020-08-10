@@ -92,7 +92,7 @@ add_dependencies(${FLASH_TARGET} ${BUILD_TARGET})
 # The binary that will be uploaded
 add_executable(${BUILD_TARGET}_nucleo
         ${SRC_PERIPHERAL}
-        ${SRC_MOTOR_BOARD}
+        ${SRC_SERVO_BOARD}
         ${SRC_DRIVERS_ST_F0}
         ${SRC_NANOPB}
         ${STARTUP_FILE}
