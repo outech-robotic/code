@@ -39,7 +39,7 @@ void PendSV_Handler(void) {
 
 void SysTick_Handler(void) {
   milliseconds++;
-//  HAL_IncTick();
+  HAL_IncTick();
 }
 
 /******************************************************************************/

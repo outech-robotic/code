@@ -148,7 +148,11 @@ void CAN_init() {
     filterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
     filterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
 
+#ifdef CONST_CAN_MODE_LOOPBACK
+    filterConfig.FilterIdHigh = CONST_CAN_TX_ID << CONST_CAN_STD_SHIFT; // The 5 LSbs are not for the Standard ID
+#else
     filterConfig.FilterIdHigh = CONST_CAN_RX_ID << CONST_CAN_STD_SHIFT; // The 5 LSbs are not for the Standard ID
+#endif
     filterConfig.FilterIdLow = 0x0000;
     filterConfig.FilterMaskIdHigh = 0x7FF;
     filterConfig.FilterMaskIdLow = 0x0000;
