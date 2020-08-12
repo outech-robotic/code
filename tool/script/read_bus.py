@@ -52,7 +52,7 @@ async def main():
         t_last = t
 
     isotp.register_callback(callback)
-
+    await isotp.init()
     try:
         await isotp.run(),
     except KeyboardInterrupt:
