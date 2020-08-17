@@ -112,12 +112,6 @@ async def _get_container(simulation: bool, stub_lidar: bool,
     i.provide('configuration', CONFIG)
     i.provide('protobuf_router', ProtobufRouter)
 
-    i.provide('odometry_function', lambda: odometry_arc)
-    i.provide('position_controller', PositionController)
-    i.provide('motor_gateway', MotorGateway)
-    i.provide('motion_controller', MotionController)
-    i.provide('trajectory_controller', TrajectoryController)
-
     i.provide('strategy_controller', StrategyController)
     i.provide('symmetry_controller', SymmetryController)
     i.provide('obstacle_controller', ObstacleController)
@@ -161,30 +155,45 @@ async def _get_container(simulation: bool, stub_lidar: bool,
         i.provide('rplidar_object', rplidar_obj)
         i.provide('lidar_adapter', RPLIDARAdapter)
 
-    servo_adapter_list: List[SocketAdapter] = []
+    # Motor board
     if simulation or stub_socket_can:
         i.provide('motor_board_adapter', LoopbackSocketAdapter)
-        for _ in range(NB_SERVO_BOARDS):
-            servo_adapter_list.append(LoopbackSocketAdapter())
     else:
         i.provide('motor_board_adapter',
                   ISOTPSocketAdapter,
                   address=NET_ADDRESS_MOTOR,
                   adapter_name='motor_board')
+    i.provide('odometry_function', lambda: odometry_arc)
+    i.provide('position_controller', PositionController)
+    i.provide('motor_gateway', MotorGateway)
+    i.provide('motion_controller', MotionController)
+    i.provide('trajectory_controller', TrajectoryController)
+    
+    # Actuators
+    servo_adapter_list: List[SocketAdapter] = []
+    if simulation or stub_socket_can:
+        for _ in range(NB_SERVO_BOARDS):
+            servo_adapter_list.append(LoopbackSocketAdapter())
+    else:
         for index in range(NB_SERVO_BOARDS):
             servo_adapter_list.append(
-                ISOTPSocketAdapter(address=NET_ADDRESSES_SERVO[index],
-                                   adapter_name="servo_board_" + str(index)))
-    # Actuators
+                ISOTPSocketAdapter(
+                    address=NET_ADDRESSES_SERVO[index],
+                    adapter_name="servo_board_" + str(index)
+                )
+            )
     i.provide('servo_adapters_list', servo_adapter_list)
     i.provide('actuator_gateway', ActuatorGateway)
     i.provide('actuator_controller', ActuatorController)
 
     # Sensors
-    i.provide('sensor_board_adapter',
-              ISOTPSocketAdapter,
-              address=NET_ADDRESS_SENSOR,
-              adapter_name='sensor_board')
+    if simulation or stub_socket_can:
+        i.provide('sensor_board_adapter', SimulatedLIDARAdapter)
+    else:
+        i.provide('sensor_board_adapter',
+                  ISOTPSocketAdapter,
+                  address=NET_ADDRESS_SENSOR,
+                  adapter_name='sensor_board')
     i.provide('sensor_controller', SensorController)
     return i
 
