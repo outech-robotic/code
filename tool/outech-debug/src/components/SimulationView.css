@@ -9,3 +9,11 @@
     background-color: black;
 }
 
+.json-view {
+    float: left;
+}
+
+.table-view {
+    float: right;
+    width: 80%;
+}
