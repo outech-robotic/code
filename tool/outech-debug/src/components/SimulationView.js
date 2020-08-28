@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import './SimulationView.css'
 import plateauImg from '../plateau.svg'
 import robotImg from '../robot.svg'
@@ -83,6 +83,8 @@ export default function SimulationView({robotPositionEvent, robotAngleEvent, con
         angle: robotAngle
     }
 
+    const [filterGraph, setFilterGraph] = useState(false);
+
     useInterval(() => {
         const canvas = document.getElementById('robotField');
         if (!canvas.getContext) {
@@ -98,7 +100,7 @@ export default function SimulationView({robotPositionEvent, robotAngleEvent, con
         if (configuration !== undefined) {
             drawRobot(ctx, robotPosition, robotAngle, configuration.robot_length, configuration.robot_width, robotImageRef.current)
         }
-        if (graph !== undefined) {
+        if (graph !== undefined && !filterGraph) {
             drawGraph(ctx, graph.nodes);
         }
         ctx.restore();
@@ -107,6 +109,10 @@ export default function SimulationView({robotPositionEvent, robotAngleEvent, con
     return <div>
         <section className="json-view">
             <ReactJson src={robotState} displayDataTypes={false} displayObjectSize={false}/>
+            <label>
+                <input type="checkbox" checked={filterGraph} onChange={(e) => setFilterGraph(e.target.checked)}/>
+                Filter graph
+            </label>
         </section>
         <section className="table-view">
             <canvas id="robotField" width="3000" height="2000">
