@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+# not supposed to be public
+package-lock.json
 
 # testing
 /coverage
