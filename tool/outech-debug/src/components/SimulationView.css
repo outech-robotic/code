@@ -9,3 +9,23 @@
     background-color: black;
 }
 
+.column-left {
+    float: left;
+    width: 30%;
+    height: 90vh;
+}
+
+.json-panel {
+    height: 60%;
+    width: inherit;
+}
+
+.control-panel {
+    height: 40%;
+    width: inherit;
+}
+
+.main-view {
+    float: right;
+    padding: 20px;
+}

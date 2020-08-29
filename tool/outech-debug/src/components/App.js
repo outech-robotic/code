@@ -6,7 +6,7 @@ import ActionsView from "./ActionsView";
 import "./App.css"
 import SimulationView from "./SimulationView";
 import useFilterEvent from "../hooks/useFilterEvent";
-import {getLast, getValue, mapEventsToPoint} from "../event";
+import {getValue, mapEventsToPoint} from "../event";
 import useAggregatedGraph from "../hooks/useAggregatedGraph";
 import useLast from "../hooks/useLast";
 
@@ -19,6 +19,7 @@ const useDataSeries = (event$, name) => {
 function DebugInterface({event$, actionURL}) {
     const configurationEvents = useFilterEvent(event$, "configuration")
     const configuration = getValue(useLast(configurationEvents))
+    const graph = getValue(useLast(useFilterEvent(event$, "graph")))
 
     const encoderLeft = useDataSeries(event$, "encoder_left")
     const speedLeft = useDataSeries(event$, "speed_left")
@@ -51,6 +52,7 @@ function DebugInterface({event$, actionURL}) {
                             robotPositionEvent={robotPositionEvent}
                             robotAngleEvent={robotAngleEvent}
                             configuration={configuration}
+                            graph={graph}
                         />
                     </Route>
                     <Route path="/actions">
@@ -72,7 +74,6 @@ function DebugInterface({event$, actionURL}) {
         </HashRouter>
     );
 }
-
 
 export default function App() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -104,5 +105,3 @@ export default function App() {
         <DebugInterface event$={event$} actionURL={actionURL}/>
     )
 }
-
-
