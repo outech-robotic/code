@@ -107,14 +107,18 @@ export default function SimulationView({robotPositionEvent, robotAngleEvent, con
     }, 1000 / FPS);
 
     return <div>
-        <section className="json-view">
-            <ReactJson src={robotState} displayDataTypes={false} displayObjectSize={false}/>
-            <label>
-                <input type="checkbox" checked={filterGraph} onChange={(e) => setFilterGraph(e.target.checked)}/>
-                Filter graph
-            </label>
+        <section className="column-left">
+            <section className="json-panel">
+                <ReactJson src={robotState} displayDataTypes={false} displayObjectSize={false}/>
+            </section>
+            <section className="control-panel">
+                <label>
+                    <input type="checkbox" checked={filterGraph} onChange={(e) => setFilterGraph(e.target.checked)}/>
+                    Filter graph
+                </label>
+            </section>
         </section>
-        <section className="table-view">
+        <section className="main-view">
             <canvas id="robotField" width="3000" height="2000">
             This page does not work, get a better (newer) browser.
             </canvas>
