@@ -1,0 +1,119 @@
+namespace outech;
+
+table HeartbeatMsg {}
+
+table StopMovingMsg {}
+
+table MovementEndedMsg {
+  blocked:bool;
+}
+
+table EncoderPositionMsg {
+  left_tick:int32;
+  right_tick:int32;
+}
+
+struct PIDCoefficients {
+  kp:float32;
+  ki:float32;
+  kd:float32;
+}
+
+table PIDConfigMsg {
+  pid_speed_left:PIDCoefficients;
+  pid_speed_right:PIDCoefficients;
+  pid_position_left:PIDCoefficients;
+  pid_position_right:PIDCoefficients;
+}
+
+table WheelControlModeMsg {
+  speed:bool;
+  position:bool;
+}
+
+table WheelTolerancesMsg {
+  ticks_left:uint32;
+  ticks_right:uint32;
+}
+
+table MoveWheelAtSpeedMsg {
+  left_tick_per_sec:int32;
+  right_tick_per_sec:int32;
+}
+
+table WheelPositionTargetMsg {
+  tick_left:int32;
+  tick_right:int32;
+}
+
+table WheelPWMMsg {
+  ratio_left:float32;
+  ratio_right:float32;
+}
+
+table TranslateMsg {
+  ticks:int32;
+}
+
+table RotateMsg {
+  ticks:int32;
+}
+
+table ServoMsg {
+  id:uint32;
+  angle:int32;
+}
+
+table PumpAndValveMsg {
+  id:uint32;
+  on:bool;
+}
+
+table LaserSensorMsg {
+  distance_front_left:uint32;
+  distance_front_right:uint32;
+  distance_back_left:uint32;
+  distance_back_right:uint32;
+}
+
+table PressureSensorMsg {
+  on_left:bool;
+  on_center_left:bool;
+  on_center:bool;
+  on_center_right:bool;
+  on_right:bool;
+}
+
+
+table DebugLog {
+  content:string;
+}
+
+// BusMessageUnion represents all the messages types that we can send on the bus.
+// Note that because a union field is really two fields, it must always be part of a table, it cannot be the root of a FlatBuffer by itself.
+union BusMessageUnion {
+    heartbeat:HeartbeatMsg,
+    stopMoving:StopMovingMsg,
+    movementEnded:MovementEndedMsg,
+    encoderPosition:EncoderPositionMsg,
+    pidConfig:PIDConfigMsg,
+    wheelControlMode:WheelControlModeMsg,
+    wheelPositionTarget:WheelPositionTargetMsg,
+    moveWheelAtSpeed:MoveWheelAtSpeedMsg,
+    translate:TranslateMsg,
+    rotate:RotateMsg,
+    servo:ServoMsg,
+    pumpAndValve:PumpAndValveMsg,
+    laserSensor:LaserSensorMsg,
+    pressureSensor:PressureSensorMsg,
+    debugLog:DebugLog,
+    wheelTolerances:WheelTolerancesMsg,
+    wheelPWM:WheelPWMMsg,
+}
+
+// BusMessage is the main object;
+table BusMessage {
+    content:BusMessageUnion;
+}
+
+root_type BusMessage;

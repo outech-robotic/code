@@ -25,6 +25,17 @@ proto/gen/python/outech_pb2.py: proto/outech.proto
 .PHONY: protoc
 protoc: proto/gen/cpp/proto/outech.pb.c proto/gen/python/outech_pb2.py
 
+idl/gen/python: idl/outech.fbs
+	@which flatc >/dev/null || (echo '!!! Flatbuffers not installed, run `pacman -S flatbuffers` !!!'; exit 1)
+	flatc -o idl/gen/python --python idl/outech.fbs
+
+idl/gen/cpp: idl/outech.fbs
+	@which flatc >/dev/null || (echo '!!! Flatbuffers not installed, run `pacman -S flatbuffers` !!!'; exit 1)
+	flatc -o idl/gen/cpp --cpp idl/outech.fbs
+
+.PHONY: idl
+idl: idl/gen/python idl/gen/cpp
+
 .PHONY: clean
 clean:
 	make -C highlevel clean
