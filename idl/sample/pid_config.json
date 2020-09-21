@@ -1,0 +1,25 @@
+{
+  content_type: "pidConfig",
+  content: {
+    pid_speed_left: {
+      kp: 1.0,
+      ki: 3.0,
+      kd: 2.0
+    },
+    pid_speed_right: {
+      kp: 4.0,
+      ki: 5.0,
+      kd: 6.0
+    },
+    pid_position_left: {
+      kp: 7.0,
+      ki: 8.0,
+      kd: 9.0
+    },
+    pid_position_right: {
+      kp: 10.0,
+      ki: 11.0,
+      kd: 12.0
+    }
+  }
+}
