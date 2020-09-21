@@ -1,0 +1,6 @@
+{
+  content_type: "debugLog",
+  content: {
+    content: "hello, this is a test message"
+  }
+}

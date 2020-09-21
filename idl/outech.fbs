@@ -1,4 +1,4 @@
-namespace outech;
+namespace idl.gen.python;
 
 table HeartbeatMsg {}
 

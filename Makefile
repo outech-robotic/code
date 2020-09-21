@@ -27,7 +27,9 @@ protoc: proto/gen/cpp/proto/outech.pb.c proto/gen/python/outech_pb2.py
 
 idl/gen/python: idl/outech.fbs
 	@which flatc >/dev/null || (echo '!!! Flatbuffers not installed, run `pacman -S flatbuffers` !!!'; exit 1)
-	flatc -o idl/gen/python --python idl/outech.fbs
+	flatc --python idl/outech.fbs
+	rm idl/__init__.py
+	rm idl/gen/__init__.py
 
 idl/gen/cpp: idl/outech.fbs
 	@which flatc >/dev/null || (echo '!!! Flatbuffers not installed, run `pacman -S flatbuffers` !!!'; exit 1)
