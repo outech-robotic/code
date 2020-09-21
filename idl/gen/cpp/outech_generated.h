@@ -422,10 +422,10 @@ struct PIDConfigMsg FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<idl::gen::python::PIDCoefficients>(verifier, VT_PID_SPEED_LEFT) &&
-           VerifyField<idl::gen::python::PIDCoefficients>(verifier, VT_PID_SPEED_RIGHT) &&
-           VerifyField<idl::gen::python::PIDCoefficients>(verifier, VT_PID_POSITION_LEFT) &&
-           VerifyField<idl::gen::python::PIDCoefficients>(verifier, VT_PID_POSITION_RIGHT) &&
+           VerifyFieldRequired<idl::gen::python::PIDCoefficients>(verifier, VT_PID_SPEED_LEFT) &&
+           VerifyFieldRequired<idl::gen::python::PIDCoefficients>(verifier, VT_PID_SPEED_RIGHT) &&
+           VerifyFieldRequired<idl::gen::python::PIDCoefficients>(verifier, VT_PID_POSITION_LEFT) &&
+           VerifyFieldRequired<idl::gen::python::PIDCoefficients>(verifier, VT_PID_POSITION_RIGHT) &&
            verifier.EndTable();
   }
 };
@@ -454,6 +454,10 @@ struct PIDConfigMsgBuilder {
   flatbuffers::Offset<PIDConfigMsg> Finish() {
     const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<PIDConfigMsg>(end);
+    fbb_.Required(o, PIDConfigMsg::VT_PID_SPEED_LEFT);
+    fbb_.Required(o, PIDConfigMsg::VT_PID_SPEED_RIGHT);
+    fbb_.Required(o, PIDConfigMsg::VT_PID_POSITION_LEFT);
+    fbb_.Required(o, PIDConfigMsg::VT_PID_POSITION_RIGHT);
     return o;
   }
 };
@@ -1084,7 +1088,7 @@ struct DebugLog FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_CONTENT) &&
+           VerifyOffsetRequired(verifier, VT_CONTENT) &&
            verifier.VerifyString(content()) &&
            verifier.EndTable();
   }
@@ -1105,6 +1109,7 @@ struct DebugLogBuilder {
   flatbuffers::Offset<DebugLog> Finish() {
     const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<DebugLog>(end);
+    fbb_.Required(o, DebugLog::VT_CONTENT);
     return o;
   }
 };
@@ -1193,7 +1198,7 @@ struct BusMessage FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_CONTENT_TYPE) &&
-           VerifyOffset(verifier, VT_CONTENT) &&
+           VerifyOffsetRequired(verifier, VT_CONTENT) &&
            VerifyBusMessageUnion(verifier, content(), content_type()) &&
            verifier.EndTable();
   }
@@ -1285,6 +1290,7 @@ struct BusMessageBuilder {
   flatbuffers::Offset<BusMessage> Finish() {
     const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<BusMessage>(end);
+    fbb_.Required(o, BusMessage::VT_CONTENT);
     return o;
   }
 };

@@ -20,10 +20,10 @@ struct PIDCoefficients {
 }
 
 table PIDConfigMsg {
-  pid_speed_left:PIDCoefficients;
-  pid_speed_right:PIDCoefficients;
-  pid_position_left:PIDCoefficients;
-  pid_position_right:PIDCoefficients;
+  pid_speed_left:PIDCoefficients (required);
+  pid_speed_right:PIDCoefficients (required);
+  pid_position_left:PIDCoefficients (required);
+  pid_position_right:PIDCoefficients (required);
 }
 
 table WheelControlModeMsg {
@@ -86,7 +86,7 @@ table PressureSensorMsg {
 
 
 table DebugLog {
-  content:string;
+  content:string (required);
 }
 
 // BusMessageUnion represents all the messages types that we can send on the bus.
@@ -111,9 +111,9 @@ union BusMessageUnion {
     wheelPWM:WheelPWMMsg,
 }
 
-// BusMessage is the main object;
+// BusMessage is the main object (required);
 table BusMessage {
-    content:BusMessageUnion;
+    content:BusMessageUnion (required);
 }
 
 root_type BusMessage;
