@@ -1,4 +1,4 @@
-include ./proto/nanopb/extra/nanopb.mk
+include ./lib/proto/nanopb/extra/nanopb.mk
 
 # CMAKE FLAGS
 # VERBOSE_MAKEFILE=on to allow verbose mode for cmake makefiles 
@@ -16,14 +16,14 @@ NPROCS:=$(shell grep -c ^processor /proc/cpuinfo)
 jenkins:
 	make -C highlevel jenkins
 
-proto/gen/cpp/proto/outech.pb.c: proto/outech.proto
-	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=./proto/gen/cpp proto/outech.proto -I=./proto
+lib/proto/gen/cpp/proto/outech.pb.c: lib/proto/outech.proto
+	$(PROTOC) $(PROTOC_OPTS) --nanopb_out=./lib/proto/gen/cpp lib/proto/outech.proto -I=./lib/proto
 
-proto/gen/python/outech_pb2.py: proto/outech.proto
-	$(PROTOC) -I=./proto --python_out=./proto/gen/python proto/outech.proto
+lib/proto/gen/python/outech_pb2.py: lib/proto/outech.proto
+	$(PROTOC) -I=./lib/proto --python_out=./lib/proto/gen/python lib/proto/outech.proto
 
 .PHONY: protoc
-protoc: proto/gen/cpp/proto/outech.pb.c proto/gen/python/outech_pb2.py
+protoc: lib/proto/gen/cpp/proto/outech.pb.c lib/proto/gen/python/outech_pb2.py
 
 .PHONY: clean
 clean:

@@ -1,3 +1,6 @@
-[submodule "proto/nanopb"]
-	path = proto/nanopb
+[submodule "lib/proto/nanopb"]
+	path = lib/proto/nanopb
 	url = https://github.com/nanopb/nanopb.git
+[submodule "lib/isotpc"]
+	path = lib/isotpc
+	url = https://github.com/lishen2/isotp-c.git
