@@ -5,11 +5,11 @@ project(can_to_isotp)
 set(OUTECH_FULL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib")
 get_filename_component(OUTECH_LIB_DIR ${OUTECH_FULL_LIB_DIR} REALPATH)
 
+# Compile as C++11, supported in ROS Kinetic and newer
+# add_compile_options(-std=c++11)
+
 # Add the isotp-c cmake projet, it creates a library named "isotp"
 add_subdirectory(${OUTECH_LIB_DIR}/isotpc ${CMAKE_BINARY_DIR}/isotpc)
-
-# Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
