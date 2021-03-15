@@ -8,7 +8,7 @@ from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.util.type import TickPerSec, Tick
 from highlevel.util.filter.pid import PIDConstants
-from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
+from lib.proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
     PIDConfigMsg, WheelPositionTargetMsg, WheelControlModeMsg, WheelTolerancesMsg, WheelPWMMsg
 
 

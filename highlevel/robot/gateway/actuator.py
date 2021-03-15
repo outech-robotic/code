@@ -5,7 +5,7 @@ from typing import List
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.logger import LOGGER
-from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
+from lib.proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 
 
 class ActuatorGateway:

@@ -7,7 +7,7 @@ from highlevel.logger import LOGGER
 from highlevel.robot.controller.match_action import MatchActionController
 from highlevel.robot.controller.motion.motion import MotionController
 from highlevel.robot.controller.motion.position import PositionController
-from proto.gen.python.outech_pb2 import BusMessage
+from lib.proto.gen.python.outech_pb2 import BusMessage
 
 
 class ProtobufRouter:

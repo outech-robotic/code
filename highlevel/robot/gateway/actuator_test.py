@@ -9,7 +9,7 @@ import pytest
 
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.robot.gateway.actuator import ActuatorGateway
-from proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
+from lib.proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PumpAndValveMsg
 
 
 def get_mock_socket_adapters_list(nb_adapter: int) -> List:

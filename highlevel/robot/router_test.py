@@ -4,9 +4,9 @@ Test for protobuf router.
 import pytest
 
 from highlevel.robot.router import ProtobufRouter
-from proto.gen.python.outech_pb2 import (EncoderPositionMsg, BusMessage,
-                                         LaserSensorMsg, PressureSensorMsg,
-                                         DebugLog)
+from lib.proto.gen.python.outech_pb2 import (EncoderPositionMsg, BusMessage,
+                                             LaserSensorMsg, PressureSensorMsg,
+                                             DebugLog)
 
 
 @pytest.fixture(name='protobuf_router')

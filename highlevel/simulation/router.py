@@ -6,7 +6,7 @@ from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
 from highlevel.simulation.entity.simulation_state import SimulationState
-from proto.gen.python.outech_pb2 import BusMessage
+from lib.proto.gen.python.outech_pb2 import BusMessage
 
 
 class SimulationRouter:

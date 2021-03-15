@@ -4,7 +4,7 @@ Test for simulation router module.
 import pytest
 
 from highlevel.simulation.router import SimulationRouter
-from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg
+from lib.proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg
 
 
 @pytest.fixture(name='simulation_router')

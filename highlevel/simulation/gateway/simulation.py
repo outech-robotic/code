@@ -4,7 +4,7 @@ Simulation gateway module.
 from highlevel.adapter.lidar.simulated import SimulatedLIDARAdapter
 from highlevel.adapter.socket import SocketAdapter
 from highlevel.simulation.entity.simulation_configuration import SimulationConfiguration
-from proto.gen.python.outech_pb2 import MovementEndedMsg, BusMessage, EncoderPositionMsg
+from lib.proto.gen.python.outech_pb2 import MovementEndedMsg, BusMessage, EncoderPositionMsg
 
 
 class SimulationGateway:

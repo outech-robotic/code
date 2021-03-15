@@ -7,7 +7,7 @@ from math import pi
 import pytest
 
 from highlevel.robot.gateway.motor import MotorGateway
-from proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
+from lib.proto.gen.python.outech_pb2 import BusMessage, MoveWheelAtSpeedMsg, PIDCoefficients, \
     PIDConfigMsg, WheelPositionTargetMsg, WheelTolerancesMsg
 
 
