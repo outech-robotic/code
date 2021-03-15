@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(can_to_isotp)
 
+# Submodule libraries directory
+set(OUTECH_FULL_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../lib")
+get_filename_component(OUTECH_LIB_DIR ${OUTECH_FULL_LIB_DIR} REALPATH)
+
+# Add the isotp-c cmake projet, it creates a library named "isotp"
+add_subdirectory(${OUTECH_LIB_DIR}/isotpc ${CMAKE_BINARY_DIR}/isotpc)
+
 # Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
@@ -9,6 +16,7 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   std_msgs
+  can_msgs
   roscpp
   socketcan_bridge
 )
@@ -117,10 +125,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  ${OUTECH_LIB_DIR}/
   ${catkin_INCLUDE_DIRS}
 )
-
-message(eeffqefq:${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -135,7 +142,7 @@ message(eeffqefq:${catkin_INCLUDE_DIRS})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/can_to_isotp.cpp src/can_to_isotp_node.cpp)
+add_executable(${PROJECT_NAME}_node src/can_to_isotp.cpp src/can_to_isotp_node.cpp src/isotp_user.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -149,6 +156,7 @@ add_executable(${PROJECT_NAME}_node src/can_to_isotp.cpp src/can_to_isotp_node.c
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(${PROJECT_NAME}_node
+  isotp
   ${catkin_LIBRARIES}
 )
 

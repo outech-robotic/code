@@ -1,29 +1,28 @@
 #include "can_to_isotp/can_to_isotp.hpp"
-#include <cmath>
+#include "isotpc/isotp.h"
 
 namespace can_to_isotp
 {
-    CanToIsotp::CanToIsotp(ros::NodeHandle &nodeHandle) :
-        m_nodeHandle(&nodeHandle)
+    CanToIsotp::CanToIsotp(ros::NodeHandle &node_handle) :
+        m_node_handle(node_handle)
     {
-        std::string canTopicName = "received_messages";
-        if (!this->m_nodeHandle->getParam("can_topic_name", canTopicName));
-        {
-            ROS_ERROR("Load can_topic_name param fail!");
-            //return;
-        }
+        std::string topic_subscribed = "/received_messages";
+        std::string topic_published = "/sent_messages";
 
-        this->m_canSubscriber = this->m_nodeHandle->subscribe(canTopicName, 10, &CanToIsotp::isotpCallBack, this);
+        ROS_INFO("Subscribing to topic:%s", topic_subscribed.c_str());
+        ROS_INFO("Publishing to topic:%s", topic_published.c_str());
+
+        this->m_can_subscriber = this->m_node_handle.subscribe(topic_subscribed, 10, &CanToIsotp::isotpCallBack, this);
+        this->m_can_publisher = this->m_node_handle.advertise<can_msgs::Frame>(topic_published, 10);
     }
 
     CanToIsotp::~CanToIsotp()
     {
     }
 
-    void CanToIsotp::isotpCallBack(const std_msgs::String::ConstPtr& msg)
+    void CanToIsotp::isotpCallBack(const can_msgs::Frame &msg)
     {
-        /* CODE DE LA LIB ISO TP */
-
-        ROS_INFO_STREAM("Test!"/*Mettre la frame ISO TP reconstruite ici pour verif */);
+        /*print la frame ISO TP reconstruite ici pour verif */
+        ROS_INFO("Recu:\nid:0x%X\nbytes:%d ", msg.id, msg.dlc);
     }
 }

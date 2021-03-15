@@ -5,7 +5,4 @@ RUN apt-get update \
 
 ENV PYTHONPATH="/opt/ros/melodic/lib/python3/dist-packages/:$PYTHONPATH"
 
-CMD ["sh", "-c", "echo \"source /ros_entrypoint.sh && cd outech_ros/catkin_ws && catkin_make\" > /initfile"]
-CMD ["bash", "-c", "roscore & bash --init-file /initfile"]
-
-# source /ros_entrypoint.sh && cd outech_ros/catkin_ws && catkin_make
+CMD ["sh", "-c", "roscore & bash --init-file /outech/ros/initfile"]

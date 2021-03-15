@@ -1,0 +1,1 @@
+source /ros_entrypoint.sh && cd /outech/ros/catkin_ws && catkin_make && source devel/setup.sh

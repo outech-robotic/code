@@ -6,7 +6,7 @@ docker run \
   --name outech \
   --publish-all \
   -it \
-  -v "$(git rev-parse --show-toplevel)"/ros:/outech_ros \
+  -v "$(git rev-parse --show-toplevel)"/:/outech/ \
   --rm \
   --env="DISPLAY" \
   --env="QT_X11_NO_MITSHM=1" \
