@@ -1,0 +1,7 @@
+<launch>
+
+  <group ns="isotp_bridges">
+    <node pkg="isotp_bridge" name="isotp0" type="isotp_bridge"/>
+  </group>
+
+</launch>

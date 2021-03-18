@@ -1,7 +1,0 @@
-<launch>
-
-  <group ns="isotp_if">
-    <node pkg="can_to_isotp" name="isotp_if1" type="can_to_isotp_node"/>
-  </group>
-
-</launch>
