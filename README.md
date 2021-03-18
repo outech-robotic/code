@@ -116,20 +116,6 @@ In CLion:
 * In Advanced GDB Server options:
   * Working directory: Set it to the root directory of the project (code)
 
-If the project is already buit, press the ```Debug``` button next to configurations, while the new configuration is selected.
+If the project is already built, press the ```Debug``` button next to configurations, while the new configuration is selected.
 
 Automation of this setup is a WIP.
-
-
-### Dump the parsed CAN messages
-
-```sh 
-$ make candump port=14000
-```
-
-With `14000` being the TCP port of the `isotpserver`.
-
-Here is an example if you want to exclude some noisy messages and pretty print the result:
-```sh
-$ make candump port=14000 | grep -v --line-buffered encoder_position | jq .
-```
