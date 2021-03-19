@@ -43,14 +43,14 @@ ll_cmake_setup:
 
 .PHONY: ll_build_all
 ll_build_all: ll_cmake_setup
-	cmake --build lowlevel/cmake-build-debug --target build_motor build_motor_g4 build_servo build_servo_nucleo -j$(NPROCS) $(CMAKE_FLAGS)
+	cmake --build lowlevel/cmake-build-debug --target build_motor  build_servo build_sensor -j$(NPROCS) $(CMAKE_FLAGS)
 
 .PHONY: ll_flash
 ll_flash:
 ifndef BOARD_NAME
-	$(error BOARD_NAME is undefined. Should be either motor, motor_g4, servo or servo_nucleo.)
+	$(error BOARD_NAME is undefined. Should be either motor, servo or sensor.)
 endif
-ifeq ($(BOARD_NAME), $(filter $(BOARD_NAME),servo servo_nucleo sensor))
+ifeq ($(BOARD_NAME), $(filter $(BOARD_NAME),servo sensor))
 ifndef BOARD_ID
 	$(error BOARD_ID is undefined. BOARD_NAME servo/servo_nucleo/sensor require it.)
 endif

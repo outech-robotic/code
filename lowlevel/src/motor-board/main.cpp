@@ -20,6 +20,10 @@ MotionController mcs;
 Can_PB canpb(CONST_CAN_RX_ID, CONST_CAN_TX_ID);
 
 int main() {
+
+
+    gpio_init(PIN_LED, PinMode::OUTPUT);
+    setPin(PIN_LED);
     volatile uint32_t nb_packets_rx = 0;
 
     can_msg can_raw_msg;
