@@ -1,4 +1,5 @@
 #include "isotp_bridge/isotp_bridge.hpp"
+#include "isotpc/isotp_defines.h"
 #include <iostream>
 
 ros::Publisher *g_can_publisher;
@@ -15,9 +16,9 @@ namespace isotp_bridge
          * Initializes publishers and receivers
          */
         // CAN interface
-        this->m_can_subscriber = this->m_node_handle.subscribe("/received_messages", 10, &ISOTPBridge::can_interface_callback, this);
+        this->m_can_subscriber = this->m_node_handle.subscribe("/sent_messages", 10, &ISOTPBridge::can_interface_callback, this);
         this->m_can_publisher = this->m_node_handle.advertise<can_msgs::Frame>("/sent_messages", 10);
-        this->m_user_subscriber = this->m_node_handle.subscribe("messages_to_send", 10, &ISOTPBridge::user_interface_callback, this);
+        this->m_user_subscriber = this->m_node_handle.subscribe("sent_messages", 10, &ISOTPBridge::user_interface_callback, this);
         this->m_user_publisher = this->m_node_handle.advertise<std_msgs::UInt8MultiArray>("received_messages", 10);
         g_can_publisher = &this->m_can_publisher; // for ISOTP-C library use
 
@@ -73,10 +74,39 @@ namespace isotp_bridge
     {
         can_msgs::Frame msg_to_can;
         std::cout << "Received user buffer:";
-        for(auto &data : msg_to_send.data){
+        for(auto &data : msg_to_send.data)
+        {
                 std::cout << std::hex << std::setfill('0') << std::setw(2) << data;
         }
         std::cout<<std::endl;
+
+        ROS_INFO("Size:%d", msg_to_send.layout.dim[0].stride);
+        if (isotp_send(&m_isotp_link, msg_to_send.data.data(), msg_to_send.layout.dim[0].stride) != ISOTP_RET_OK)
+        {
+            ROS_WARN("Error: Failed to send ISOTP message");
+        }
+
     }
 
+    void ISOTPBridge::update_state()
+    {   
+        static bool was_sending = false;
+        isotp_poll(&m_isotp_link);
+        if (m_isotp_link.send_status == ISOTP_SEND_STATUS_INPROGRESS)
+        {   
+            was_sending = true;
+            ROS_INFO("ISOTP SEND IN PROGRESS");
+        }
+        else
+        {   
+            if (was_sending)
+            {
+                ROS_INFO("ISOTP SEND NOT IN PROGRESS");
+                if (m_isotp_link.send_status == ISOTP_SEND_STATUS_ERROR){
+                    ROS_WARN("ISOTP SEND ERROR");
+                }
+            }
+            was_sending = false;
+        }
+    }
 }

@@ -14,6 +14,8 @@ namespace isotp_bridge
             ISOTPBridge(ros::NodeHandle &node_handle);
             ~ISOTPBridge();
 
+            // Updates the ISOTP Link transmission state and reception timeouts
+            void update_state();
         private:
             ros::NodeHandle &m_node_handle;
             ros::Subscriber m_can_subscriber;
@@ -30,6 +32,7 @@ namespace isotp_bridge
             uint8_t m_isotp_rx_buffer[4096];
             uint8_t m_isotp_tx_buffer[4096];
 
+
             /*
              * Callbacks on subscribed topics
              */
@@ -37,5 +40,6 @@ namespace isotp_bridge
             void can_interface_callback(const can_msgs::Frame &msg);
             // Connected to anything that needs to send buffers through CAN
             void user_interface_callback(const std_msgs::UInt8MultiArray &msg);
+
     };
 }

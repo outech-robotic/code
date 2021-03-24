@@ -8,6 +8,12 @@ int main(int argc, char **argv)
 
     isotp_bridge::ISOTPBridge isotp_bridge_node(nodeHandle);
 
-    ros::spin();
+    ros::Rate loop_rate(1000);
+    while(ros::ok())
+    {
+        isotp_bridge_node.update_state();
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     return 0;
 }
