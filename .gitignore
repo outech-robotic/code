@@ -3,6 +3,9 @@ venv
 .idea
 .mypy_cache
 **/outech.log
-
+.vscode
+.cache
+.jetbrains
+**/.catkin_workspace
 # Low Level boards ignores
 lowlevel/cmake-build-debug/

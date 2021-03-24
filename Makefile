@@ -39,7 +39,7 @@ candump:
 
 # LOW LEVEL ###################################################################################################################################
 ll_cmake_setup:
-	cmake -B lowlevel/cmake-build-debug lowlevel
+	cmake -B lowlevel/cmake-build-debug lowlevel -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 
 .PHONY: ll_build_all
 ll_build_all: ll_cmake_setup

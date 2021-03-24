@@ -49,11 +49,6 @@ include_directories(${DRIVERS_DIR}/CMSIS/Device/ST/STM32F0xx/Include)
 include_directories(${DRIVERS_DIR}/CMSIS/Include)
 include_directories(${DRIVERS_DIR}/STM32F0xx_HAL_Driver/Inc/Legacy)
 
-# # PROTOBUF
-include_directories(${PROTO_DIR}/gen/cpp/)
-include_directories(${PROTO_DIR}/nanopb/)
-include_directories(${PROTO_DIR}/)
-
 # # PROJECT HEADER DIRECTORIES
 
 include_directories(.)
@@ -78,6 +73,7 @@ add_executable(${BUILD_TARGET}
         ${SRC_MOTOR_BOARD}
         ${SRC_DRIVERS_ST_F0}
         ${SRC_NANOPB}
+        ${SRC_ISOTPC}
         ${STARTUP_FILE}
         )
 

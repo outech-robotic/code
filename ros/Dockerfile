@@ -1,7 +1,7 @@
 FROM osrf/ros:noetic-desktop-full
 
 RUN apt-get update \
-  && apt-get install -y ros-noetic-socketcan-bridge
+  && apt-get install -y ros-noetic-socketcan-bridge git
 
 ENV PYTHONPATH="/opt/ros/melodic/lib/python3/dist-packages/:$PYTHONPATH"
 

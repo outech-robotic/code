@@ -80,6 +80,7 @@ add_executable(${BUILD_TARGET}
         ${SRC_SERVO_BOARD}
         ${SRC_DRIVERS_ST_F0}
         ${SRC_NANOPB}
+        ${SRC_ISOTPC}
         ${STARTUP_FILE}
         )
 

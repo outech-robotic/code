@@ -6,20 +6,30 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
 
 set(CMAKE_VERBOSE_MAKEFILE FALSE)
 
-#set(CMAKE_VERBOSE_MAKEFILE TRUE)
-set(CMAKE_CXX_STANDARD 14)
+# Submodule libraries directory
+execute_process(COMMAND bash "-c" "git rev-parse --show-toplevel" OUTPUT_VARIABLE GIT_PROJECT_ROOT_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+message("GIT ROOT DIR: ${GIT_PROJECT_ROOT_DIR}")
+set(OUTECH_FULL_LIB_DIR "${GIT_PROJECT_ROOT_DIR}/lib")
+get_filename_component(OUTECH_LIB_DIR ${OUTECH_FULL_LIB_DIR} REALPATH)
 
-set(PROTO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../lib/proto")
+#set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_CXX_STANDARD 11)
+
+set(PROTO_DIR "${OUTECH_LIB_DIR}/proto")
+set(NANOPB_DIR "${PROTO_DIR}/nanopb")
+set(PROTO_CPP_DIR "${PROTO_DIR}/gen/cpp")
+set(ISOTPC_DIR "${OUTECH_LIB_DIR}/isotpc")
+
 set(DRIVERS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Drivers")
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(PERIPHERAL_DIR "${SRC_DIR}/peripheral")
 
 # INCLUDES
 # # PROTOBUF
-include_directories(${PROTO_DIR}/gen/cpp/)
-include_directories(${PROTO_DIR}/nanopb/)
+include_directories(${PROTO_CPP_DIR}/)
+include_directories(${NANOPB_DIR}/)
 include_directories(${PROTO_DIR}/)
-
+include_directories(${OUTECH_LIB_DIR}/)
 
 # # COMMON
 include_directories(src/)
@@ -28,8 +38,12 @@ include_directories(src/com/)
 # COMMON SOURCES
 # # NANOPB
 file(GLOB SRC_NANOPB
-        "${PROTO_DIR}/nanopb/*.c"
-        "${PROTO_DIR}/gen/cpp/*.c"
+        "${NANOPB_DIR}/*.c"
+        "${PROTO_CPP_DIR}/*.c"
+        )
+# # ISOTP-C
+file(GLOB SRC_ISOTPC
+        "${ISOTPC_DIR}/*.c"
         )
 
 # # HAL Drivers
@@ -62,9 +76,8 @@ add_subdirectory(tests)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-set(CMAKE_C_COMPILER arm-none-eabi-gcc)
-
+set(CMAKE_CXX_COMPILER /usr/bin/arm-none-eabi-g++ CACHE INTERNAL "")
+set(CMAKE_C_COMPILER /usr/bin/arm-none-eabi-gcc CACHE INTERNAL "")
 
 # SUB PROJECTS
 add_subdirectory(src/motor-board)
