@@ -6,7 +6,7 @@
 extern ros::Publisher *g_can_publisher;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"{
 #endif
 
 /* user implemented, print debug message */
