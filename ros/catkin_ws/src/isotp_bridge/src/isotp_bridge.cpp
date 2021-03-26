@@ -1,6 +1,5 @@
-#include "isotp_bridge/isotp_bridge.hpp"
-#include "isotpc/isotp_defines.h"
 #include <iostream>
+#include "isotp_bridge/isotp_bridge.hpp"
 
 ros::Publisher *g_can_publisher;
 
@@ -26,21 +25,27 @@ namespace isotp_bridge
         /*
          * Get CAN IDs for SocketCAN from ROS Parameter Server
          */
-        int board_id;
-        if(m_node_handle.getParam("board_id", board_id)){
-            ROS_INFO("Initializing isotp_bridge for board ID: %u", board_id);
+
+        if(m_node_handle.getParam("can_rx_id", m_rx_addr)){
+            ROS_INFO("Bridge will accept messages with ID: 0x%0X", m_rx_addr);
         }
         else{
-            ROS_WARN("Initializing isotp_bridge for DEFAULT board ID: 0");
-            board_id = 0;
-        }
-
-        if(2*board_id+1 > 0x7FF){
-            ROS_ERROR("CAN Address needs to fit in 11bits");
+            ROS_ERROR("Parameter not found with name:'can_rx_id'");
             ros::shutdown();
         }
-        m_tx_addr = 2*board_id;
-        m_rx_addr = 2*board_id + 1;
+        if(m_node_handle.getParam("can_tx_id", m_tx_addr)){
+            ROS_INFO("Bridge will transmit messages with ID: 0x%0X", m_tx_addr);
+        }
+        else{
+            ROS_ERROR("Parameter not found with name:'can_tx_id'");
+            ros::shutdown();
+        }
+        
+
+        if(m_tx_addr > 0x7FF || m_rx_addr > 0x7FF){
+            ROS_ERROR("CAN IDs need to fit in 11bits: can_rx_id=%u can_tx_id=%u", m_rx_addr, m_tx_addr);
+            ros::shutdown();
+        }
 
         /*
          * Initializes the ISOTP-C library and gives it its buffers

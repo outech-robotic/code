@@ -27,8 +27,8 @@ namespace isotp_bridge
              * ISO-TP library related elements
              */ 
             IsoTpLink m_isotp_link;
-            uint16_t m_rx_addr = 0;
-            uint16_t m_tx_addr = 0;
+            int m_rx_addr = 0;
+            int m_tx_addr = 0;
             uint8_t m_isotp_rx_buffer[4096];
             uint8_t m_isotp_tx_buffer[4096];
 
