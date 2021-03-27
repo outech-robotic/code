@@ -27,14 +27,14 @@ namespace isotp_bridge
          */
 
         if(m_node_handle.getParam("can_rx_id", m_rx_addr)){
-            ROS_INFO("Bridge will accept messages with ID: 0x%0X", m_rx_addr);
+            ROS_INFO("Bridge will accept messages with ID: 0x%03X", m_rx_addr);
         }
         else{
             ROS_ERROR("Parameter not found with name:'can_rx_id'");
             ros::shutdown();
         }
         if(m_node_handle.getParam("can_tx_id", m_tx_addr)){
-            ROS_INFO("Bridge will transmit messages with ID: 0x%0X", m_tx_addr);
+            ROS_INFO("Bridge will transmit messages with ID: 0x%03X", m_tx_addr);
         }
         else{
             ROS_ERROR("Parameter not found with name:'can_tx_id'");
