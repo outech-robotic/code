@@ -104,7 +104,7 @@ namespace isotp_bridge
         }
         std::cout<<std::endl;
 
-        ROS_INFO("Size:%d", msg_to_send.layout.dim[0].stride);
+        ROS_INFO("Size:%d", msg_to_send.layout.dim[0].size);
         if(isotp_send(&m_isotp_link, msg_to_send.data.data(), msg_to_send.layout.dim[0].stride) != ISOTP_RET_OK){
             ROS_WARN("Error: Failed to send ISOTP message");
         }

@@ -7,7 +7,6 @@ RUN apt-get install -y ros-noetic-socketcan-bridge git software-properties-commo
 RUN add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get install -y python3.7 python3-pip
 RUN pip3 install protobuf 
-# RUN python3.7 -m ensurepip
 RUN adduser --disabled-password --gecos '' --uid $USER_ID user
 USER user
 
