@@ -9,7 +9,6 @@ project(outech_highlevel)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  isotp_bridge
   std_msgs
   message_generation
 )
