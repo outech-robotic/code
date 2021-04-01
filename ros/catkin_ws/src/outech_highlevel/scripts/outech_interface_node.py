@@ -2,7 +2,7 @@
 # license removed for brevity
 import rospy
 import std_msgs.msg as std_msgs
-from lib.proto.gen.python.outech_pb2 import BusMessage, ServoMsg
+from lib.proto.gen.python.outech_pb2 import BusMessage, ServoMsg, PressureSensorMsg
 from outech_highlevel.msg import Servo
 
 
@@ -26,6 +26,16 @@ def callback_servo(servomsg):
 
     servo_publishers[servomsg.board_id].publish(multiarray)
 
+def callback_sensor(sensormsg):
+    print(sensormsg)
+    bus_message = BusMessage()
+    bus_message.ParseFromString(sensormsg.data)
+    type_msg = bus_message.WhichOneof("message_content")
+    if type_msg == "pressureSensor":
+        rospy.loginfo("FSR 0 : %d", bus_message.pressureSensor.on_left)
+
+        
+    
 def outech_interface_node():
     rospy.init_node('outech_interface', anonymous=True)
     
@@ -35,6 +45,7 @@ def outech_interface_node():
     servo_publishers.append(rospy.Publisher('bridge_servo_2/sent_messages', std_msgs.UInt8MultiArray, queue_size=10))
 
     rospy.Subscriber("servo_msg", Servo, callback_servo)
+    rospy.Subscriber("bridge_sensor/received_messages", std_msgs.UInt8MultiArray, callback_sensor)
 
     rospy.spin()
 
