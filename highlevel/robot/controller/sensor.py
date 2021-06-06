@@ -11,24 +11,29 @@ from highlevel.util.geometry.vector import Vector2
 from highlevel.util.type import Radian, Millimeter
 
 """
-y = mesure_brute_moyennée(0 - 65535)
-x = distance_associée(mm)
-
+y = mesure_brute_moyennee [0 ; 2¹²-1]
+x = distance_associee(mm)
+On suppose que la mesure est lineaire (ce qui est suffisant sur la plage choisie)
 y = ax + b
 ->
 x = (y - b) / a
 
 Avec
-a = (ymax - ymin) / (xmax - xmin)
-b = ymin = valeur_brute_la_plus_courte_mesurée
-ymax = valeur_brute_la_plus_longue_mesurée
-xmax / xmin = distances_associees
+a = (ymax - ymin) / (xmax - xmin) = yrange / xrange
+b = ymin = valeur_brute_la_plus_courte_mesurable
+ymax = valeur_brute_la_plus_longue_mesurable
+xmax et xmin = distances_associees
 
 ->
-x = xmin + (y - ymin) / ((ymax - ymin) / (xmax - xmin))
+x = xmin + xrange * (y-ymin)/(yrange)
 """
-MIN = 734
-MAX = 4035
+# Range settings in 12 bit ADC samples.
+_MIN_LSB = [750, 734, 734, 734] # Smallest sample possible.
+_RANGE_LSB = [3285, 3301, 3301, 3301]
+
+# Range settings in millimeters.
+_MIN_MM = 100 # closest distance possible.
+_RANGE_MM = 500
 
 class SensorController:
     """
@@ -49,13 +54,14 @@ class SensorController:
         """
         self.pressure_state_list = state_list
         LOGGER.get().debug('sensor_controller_update_pressure',
-                          data=state_list)
+                           data=state_list)
 
-    def _convert_adc_sample_to_distance(self, sample: int) -> Millimeter:
+    def _convert_adc_sample_to_distance(self, id: int, sample: int) -> Millimeter:
         """
         Convert 12bit adc data to distances, using configuration data.
         """
-        return 100+500*(sample-MIN)/(MAX-MIN) if sample >= MIN else 0
+        return _MIN_MM + _RANGE_MM * (sample - _MIN_LSB[id]) / _RANGE_LSB[id] \
+            if sample >= _MIN_LSB[id] else 0
 
     def _update_moving_averages(self, raw_data_list: List[int]) -> None:
         """
@@ -77,21 +83,23 @@ class SensorController:
         t = time.time()
 
         if not self.laser_last_distances_list:
-            self.laser_moving_sums = [10*d for d in raw_data_list]
+            self.laser_moving_sums = [10 * d for d in raw_data_list]
             self.laser_last_distances_list = []
             for i, d in enumerate(raw_data_list):
                 self.laser_last_distances_list.append([d for _ in range(10)])
 
-            self.laser_distances_list = [self._convert_adc_sample_to_distance(s/10) for s in self.laser_moving_sums]
+            self.laser_distances_list = [self._convert_adc_sample_to_distance(i, s / 10) for i, s in
+                                         enumerate(self.laser_moving_sums)]
         else:
             self._update_moving_averages(raw_data_list)
-        LOGGER.get().info('sensor_controller_avg', avg=[s/10 for s in self.laser_moving_sums], data=raw_data_list)
+        LOGGER.get().info('sensor_controller_avg', avg=[s / 10 for s in self.laser_moving_sums],
+                          data=raw_data_list)
 
         for i in range(len(raw_data_list)):
             self.laser_distances_list[i] = self._convert_adc_sample_to_distance(
-                self.laser_moving_sums[i]/10
+                i,
+                self.laser_moving_sums[i] / 10
             )
         LOGGER.get().info('sensor_controller_converted', dists=self.laser_distances_list)
 
         t = time.time() - t
-        print(t, "sec")
