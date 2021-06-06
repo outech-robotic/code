@@ -1,14 +1,12 @@
 """
 Sensor Controller module
 """
-import math
 import time
-from typing import Tuple, List
+from typing import List
 
 from highlevel.logger import LOGGER
 from highlevel.robot.entity.configuration import Configuration
-from highlevel.util.geometry.vector import Vector2
-from highlevel.util.type import Radian, Millimeter
+from highlevel.util.type import Millimeter
 
 """
 y = mesure_brute_moyennee [0 ; 2¹²-1]
@@ -28,12 +26,13 @@ xmax et xmin = distances_associees
 x = xmin + xrange * (y-ymin)/(yrange)
 """
 # Range settings in 12 bit ADC samples.
-_MIN_LSB = [750, 734, 734, 734] # Smallest sample possible.
+_MIN_LSB = [750, 734, 734, 734]  # Smallest sample possible.
 _RANGE_LSB = [3285, 3301, 3301, 3301]
 
 # Range settings in millimeters.
-_MIN_MM = 100 # closest distance possible.
+_MIN_MM = 100  # closest distance possible.
 _RANGE_MM = 500
+_SAMPLE_SIZE = 10
 
 class SensorController:
     """
@@ -83,22 +82,23 @@ class SensorController:
         t = time.time()
 
         if not self.laser_last_distances_list:
-            self.laser_moving_sums = [10 * d for d in raw_data_list]
+            self.laser_moving_sums = [_SAMPLE_SIZE * d for d in raw_data_list]
             self.laser_last_distances_list = []
             for i, d in enumerate(raw_data_list):
-                self.laser_last_distances_list.append([d for _ in range(10)])
+                self.laser_last_distances_list.append([d for _ in range(_SAMPLE_SIZE)])
 
-            self.laser_distances_list = [self._convert_adc_sample_to_distance(i, s / 10) for i, s in
-                                         enumerate(self.laser_moving_sums)]
+            self.laser_distances_list = [self._convert_adc_sample_to_distance(i, s // _SAMPLE_SIZE)
+                                         for i, s in enumerate(self.laser_moving_sums)]
         else:
             self._update_moving_averages(raw_data_list)
-        LOGGER.get().info('sensor_controller_avg', avg=[s / 10 for s in self.laser_moving_sums],
+        LOGGER.get().info('sensor_controller_avg',
+                          avg=[s / _SAMPLE_SIZE for s in self.laser_moving_sums],
                           data=raw_data_list)
 
         for i in range(len(raw_data_list)):
             self.laser_distances_list[i] = self._convert_adc_sample_to_distance(
                 i,
-                self.laser_moving_sums[i] / 10
+                self.laser_moving_sums[i] // _SAMPLE_SIZE
             )
         LOGGER.get().info('sensor_controller_converted', dists=self.laser_distances_list)
 
