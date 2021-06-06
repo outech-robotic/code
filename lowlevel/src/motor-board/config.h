@@ -77,7 +77,7 @@
 #define PIN_DIR_L1 PB5
 #define PIN_DIR_L2 PB4
 #define PIN_PWM_R PA10
-#define PIN_DIR_R1 PB1
-#define PIN_DIR_R2 PB0
+#define PIN_DIR_R1 PB0
+#define PIN_DIR_R2 PB1
 
 #endif /* UTILITY_CONFIG_H_ */

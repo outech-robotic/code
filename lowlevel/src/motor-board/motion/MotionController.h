@@ -48,8 +48,8 @@ class MotionController {
     encoder_status cod_left;
     encoder_status cod_right;
 
-    volatile int32_t cod_right_overflows;
-    volatile int32_t cod_right_raw_last;
+    volatile int32_t cod_left_overflows;
+    volatile int32_t cod_left_raw_last;
 
     Average<volatile int32_t, CONST_MOTION_CONTROLLER_SPEED_AVERAGE_SIZE> cod_left_speed_avg;
     Average<volatile int32_t, CONST_MOTION_CONTROLLER_SPEED_AVERAGE_SIZE> cod_right_speed_avg;

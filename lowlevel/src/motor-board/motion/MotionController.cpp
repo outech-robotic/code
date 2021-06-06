@@ -49,24 +49,24 @@ void MotionController::init() {
     robot_status.raw_pwm_right = 0;
     cod_left = {};
     cod_right = {};
-    cod_right_raw_last = 0;
+    cod_left_raw_last = 0;
 
     IRQ_control_init();
 }
 
 
 void MotionController::update_position() {
-    int32_t cod_right_raw = COD_get_right();           // Right wheel is positive (trigo rotations)
-    cod_left.position_current = -COD_get_left();       // Left wheel is the opposite
+    int32_t cod_left_raw = -COD_get_left();           // Left wheel is positive (trigo rotations)
+    cod_right.position_current = COD_get_right();     // Right wheel is the opposite
 
     // Overflow management of 16 bit counter
-    if (cod_right_raw - cod_right_raw_last > 32767) {
-        cod_right_overflows--;
-    } else if (cod_right_raw_last - cod_right_raw > 32767) {
-        cod_right_overflows++;
+    if (cod_left_raw - cod_left_raw_last > 32767) {
+        cod_left_overflows--;
+    } else if (cod_left_raw_last - cod_left_raw > 32767) {
+        cod_left_overflows++;
     }
-    cod_right_raw_last = cod_right_raw;
-    cod_right.position_current = (cod_right_overflows * 65536 + cod_right_raw);
+    cod_left_raw_last = cod_left_raw;
+    cod_left.position_current = (cod_left_overflows * 65536 + cod_left_raw);
 
     cod_left.speed_current = (cod_left.position_current - cod_left.position_last) * MOTION_CONTROL_FREQ;
     cod_right.speed_current = (cod_right.position_current - cod_right.position_last) * MOTION_CONTROL_FREQ;
